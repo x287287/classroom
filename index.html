@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>教室小書櫃</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 方格簿 grid paper; a slim cover band, a toolbar (search + filters), then materials grouped by 單元 as index cards. */
+:root{
+  --paper:#F4F8F6;--grid:#D9E8E1;--ink:#1E3A34;--muted:#5C7770;--card:#FFFFFF;--line:#C9DBD3;
+  --accent:#E8622C;--accent-ink:#FFFFFF;--leaf:#2F8F5B;--sun:#F5B521;--sky:#3E86C8;--plum:#9A5BC4;
+  --display:"LXGW WenKai TC","Kaiti TC","DFKai-SB","BiauKai",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#14201D;--grid:#1D2E2A;--ink:#E6F0EC;--muted:#9DB6AE;--card:#1B2925;--line:#2C433C;
+  --accent:#FF8452;--accent-ink:#1A120E;--leaf:#5CC28A;--sun:#F7C94F;--sky:#79B4EA;--plum:#C597E6;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14201D;--grid:#1D2E2A;--ink:#E6F0EC;--muted:#9DB6AE;--card:#1B2925;--line:#2C433C;
+  --accent:#FF8452;--accent-ink:#1A120E;--leaf:#5CC28A;--sun:#F7C94F;--sky:#79B4EA;--plum:#C597E6;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.7}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px;display:grid;gap:28px}
+h1,h2,h3,h4{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.3}
+p{margin:0}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:6px}
+button,input,select{font:inherit;color:var(--ink)}
+
+.cover{background:var(--card);border:2px solid var(--ink);border-radius:18px;padding:22px 26px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;box-shadow:6px 6px 0 var(--leaf)}
+.cover h1{font-size:clamp(30px,5vw,46px)}
+.cover h1 .red{color:var(--accent)}
+.cover .sub{color:var(--muted);font-size:15px}
+.stats{display:flex;gap:20px;font-size:14px;color:var(--muted)}
+.stats b{display:block;font-family:var(--display);font-size:28px;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+
+.toolbar{display:grid;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{flex:1 1 240px;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 14px}
+.search:focus{border-color:var(--ink);outline:none}
+select.sel{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{font-size:16px;border:2px solid var(--ink);background:var(--card);padding:6px 16px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;min-height:44px}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.tab .n{font-size:12px;opacity:.75;font-variant-numeric:tabular-nums}
+
+.units{display:grid;gap:30px}
+.unit h2{font-size:24px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.unit h2 .g{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);border:1px solid var(--line);background:var(--card);border-radius:6px;padding:0 8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:12px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;min-width:0;color:inherit;text-decoration:none}
+a.card:hover{border-color:var(--ink)}
+.chip{justify-self:start;font-size:12px;font-weight:700;letter-spacing:.06em;padding:2px 10px;border-radius:999px;color:var(--accent-ink)}
+.chip.pdf{background:var(--accent)}.chip.slide{background:var(--sky)}.chip.video{background:var(--plum)}.chip.quiz{background:var(--leaf)}.chip.other{background:var(--muted)}
+.lesson{font-size:13px;color:var(--muted)}
+.card h3{font-size:19px;line-height:1.45;overflow-wrap:anywhere}
+.card p{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.go{font-size:15px;font-weight:700;color:var(--accent);border-top:1px dashed var(--line);padding-top:10px}
+.go.none{color:var(--muted);font-weight:400;font-size:13px}
+.empty{background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted);display:grid;gap:8px;justify-items:center}
+.empty b{font-family:var(--display);font-size:20px;color:var(--ink)}
+footer{color:var(--muted);font-size:13px;text-align:center}
+
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s ease,border-color .15s}a.card:hover{transform:translateY(-2px) rotate(-.3deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="cover">
+    <div>
+      <h1>我的<span class="red">教室小書櫃</span></h1>
+      <p class="sub">講義、簡報、影片、練習題，全部收在這一格一格裡。</p>
+    </div>
+    <div class="stats">
+      <span><b id="sTotal">0</b>份教材</span>
+      <span><b id="sUnits">0</b>個單元</span>
+    </div>
+  </header>
+
+  <section class="toolbar" aria-label="搜尋與篩選">
+    <div class="row">
+      <input class="search" id="q" type="search" placeholder="搜尋標題、單元或說明…" aria-label="搜尋">
+      <select class="sel" id="gradeSel" aria-label="年級">
+        <option value="all">全部年級</option>
+        <option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option>
+        <option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option>
+      </select>
+    </div>
+    <div class="tabs" role="group" aria-label="教材類型" id="tabs"></div>
+  </section>
+
+  <main class="units" id="units"></main>
+
+  <footer>教室小書櫃</footer>
+</div>
+
+<script>
+/* ============================================================
+   教材清單：新增教材時，照下面的格式複製一段再修改。
+   type：pdf 講義 / slide 簡報 / video 影片 / quiz 練習題 / other 其他
+   url ：lessons/ 資料夾裡的檔案，或完整的網址（https://…）
+   ============================================================ */
+const MATERIALS = [
+  {
+    title: "看不見的菸惡魔：二手菸與三手菸",
+    type: "slide", grade: 4,
+    unit: "康軒健康四上　第二單元",
+    lesson: "第 1 課 菸與煙的真相",
+    note: "8 幕動畫：主流煙與側流煙、二手菸對孩子的影響、三手菸、如何遠離菸害。點畫面播放／暫停，左右滑動換幕。",
+    url: "lessons/smoke-devil.html"
+  },
+  {
+    title: "菸品大解密：紙菸、電子煙、加熱菸",
+    type: "slide", grade: 4,
+    unit: "康軒健康四上　第二單元",
+    lesson: "第 1 課 菸與煙的真相・延伸",
+    note: "8 幕動畫：三種菸品的構造與危害比較，結尾帶出「不好奇、不嘗試、不接受」。",
+    url: "lessons/tobacco-types.html"
+  },
+  {
+    title: "檳榔大解密",
+    type: "slide", grade: 4,
+    unit: "康軒健康四上　第二單元",
+    lesson: "第 2 課 酒與檳榔・延伸",
+    note: "三站互動：檳榔鹼與成癮循環、剖開檳榔果實、森林與檳榔園的水土保持比較，最後有小測驗。",
+    url: "lessons/betel.html"
+  },
+  {
+    title: "酒精三個為什麼",
+    type: "slide", grade: 4,
+    unit: "康軒健康四上　第二單元",
+    lesson: "第 2 課 酒與檳榔・延伸",
+    note: "為什麼會臉紅、為什麼會喝醉、為什麼會上癮，各有互動模型，最後有 O／X 小挑戰。",
+    url: "lessons/alcohol.html"
+  }
+];
+
+const TYPES={all:"全部",pdf:"講義",slide:"簡報",video:"影片",quiz:"練習題",other:"其他"};
+const gradeName=g=>("一二三四五六"[g-1]||"")+"年級";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+let curType="all", curGrade="all", query="";
+
+function filtered(){
+  const q=query.trim().toLowerCase();
+  return MATERIALS.filter(i=>(curGrade==="all"||String(i.grade)===curGrade)&&(!q||[i.title,i.unit,i.lesson,i.note].join(" ").toLowerCase().includes(q)));
+}
+function render(){
+  const base=filtered();
+  $("tabs").innerHTML=Object.entries(TYPES).map(([k,v])=>{
+    const n=k==="all"?base.length:base.filter(i=>i.type===k).length;
+    if(k!=="all"&&!n&&!MATERIALS.some(i=>i.type===k)) return "";
+    return `<button class="tab" type="button" data-t="${k}" aria-pressed="${k===curType}">${v}<span class="n">${n}</span></button>`;
+  }).join("");
+  $("sTotal").textContent=MATERIALS.length;
+  $("sUnits").textContent=new Set(MATERIALS.map(i=>i.unit||"未分單元")).size;
+
+  const list=base.filter(i=>curType==="all"||i.type===curType);
+  if(!list.length){$("units").innerHTML=`<div class="empty"><b>找不到符合的教材</b><span>換個關鍵字、年級或類型看看。</span></div>`;return;}
+  const groups=new Map();
+  list.forEach(i=>{const k=(i.grade||0)+"|"+(i.unit||"未分單元");if(!groups.has(k))groups.set(k,[]);groups.get(k).push(i);});
+  $("units").innerHTML=[...groups.keys()].map(k=>{
+    const[g,u]=k.split("|");
+    return `<section class="unit"><h2>${esc(u)}${+g?`<span class="g">${gradeName(+g)}</span>`:""}</h2><div class="cards">${
+      groups.get(k).map(i=>{
+        const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.lesson?`<span class="lesson">${esc(i.lesson)}</span>`:"<span></span>"}<div><h3>${esc(i.title)}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>`;
+        return i.url
+          ? `<a class="card" href="${esc(i.url)}">${inner}<span class="go">${i.type==="video"?"觀看":"打開"} →</span></a>`
+          : `<article class="card">${inner}<span class="go none">連結待補</span></article>`;
+      }).join("")}</div></section>`;
+  }).join("");
+}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;curType=b.dataset.t;render();});
+$("gradeSel").addEventListener("change",e=>{curGrade=e.target.value;render();});
+$("q").addEventListener("input",e=>{query=e.target.value;render();});
+render();
+</script>
+</body>
+</html>

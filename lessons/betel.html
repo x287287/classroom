@@ -1,0 +1,552 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>檳榔大解密</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 大螢幕教學用，一條直向長頁；頂部三個大章節按鈕，章節間以色帶分隔，互動圖在左、說明在右，窄螢幕改為上下 */
+:root{
+  --leaf:#2f6b3a;        /* 檳榔青果綠 */
+  --leaf-soft:#e3efe2;
+  --husk:#c9a46a;        /* 中果皮纖維色 */
+  --husk-soft:#f5ecdc;
+  --betel:#b4282e;       /* 檳榔汁紅，只用於警示 */
+  --betel-soft:#f8e3e1;
+  --soil:#7a5536;        /* 山坡土色 */
+  --bg:#fbfaf6;
+  --surface:#ffffff;
+  --fg:#22281f;
+  --muted:#5b6356;
+  --line:#d9ddd2;
+  --sky:#e9f1f4;
+  --rain:#4f86a3;
+  --font-display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --leaf:#7fbf86;--leaf-soft:#1f2e21;--husk:#d8b67c;--husk-soft:#2e281d;--betel:#ef7b7f;--betel-soft:#3a2122;--soil:#c09370;
+  --bg:#141812;--surface:#1c211a;--fg:#e9ece4;--muted:#a9b1a2;--line:#343b30;--sky:#18242a;--rain:#86b9d4;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --leaf:#7fbf86;--leaf-soft:#1f2e21;--husk:#d8b67c;--husk-soft:#2e281d;--betel:#ef7b7f;--betel-soft:#3a2122;--soil:#c09370;
+  --bg:#141812;--surface:#1c211a;--fg:#e9ece4;--muted:#a9b1a2;--line:#343b30;--sky:#18242a;--rain:#86b9d4;color-scheme:dark}
+
+html{font-size:clamp(17px, 0.55vw + 13px, 24px)}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.75;font-size:1rem}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;text-wrap:balance;line-height:1.3;margin:0}
+p{margin:0}
+.muted{color:var(--muted)}
+
+/* Header */
+header{padding-block:2.2rem 1.6rem;border-bottom:1px solid var(--line)}
+.kicker{font-size:.85rem;letter-spacing:.08em;color:var(--leaf);font-weight:700}
+h1{font-size:clamp(2.2rem, 4vw + 1rem, 3.6rem);margin-top:.2rem}
+.lede{max-width:40em;margin-top:.6rem;font-size:1.05rem}
+.chapters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin-top:1.4rem}
+.chapters a{display:flex;flex-direction:column;gap:.15rem;padding:1rem 1.1rem;border-radius:var(--r);text-decoration:none;color:var(--fg);border:2px solid var(--line);background:var(--surface);min-height:4.5rem}
+.chapters a b{font-family:var(--font-display);font-weight:400;font-size:1.35rem}
+.chapters a span{font-size:.85rem;color:var(--muted)}
+.chapters a:hover,.chapters a:focus-visible{border-color:var(--leaf);outline:none}
+.chapters a .no{font-size:.8rem;color:var(--leaf);font-weight:700;letter-spacing:.06em}
+@media (max-width:640px){.chapters{grid-template-columns:1fr}}
+
+/* Sections */
+section{padding-block:2.6rem;border-bottom:1px solid var(--line);scroll-margin-top:1rem}
+section:nth-of-type(2){background:var(--husk-soft)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1rem;margin-bottom:1.2rem}
+.sec-head .no{font-family:var(--font-display);font-size:1.1rem;color:var(--surface);background:var(--leaf);border-radius:999px;padding:.05rem .8rem}
+h2{font-size:clamp(1.7rem, 2vw + 1rem, 2.4rem)}
+h3{font-size:1.3rem;margin-bottom:.4rem}
+.two{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1.6rem;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem 1.3rem}
+.stack{display:flex;flex-direction:column;gap:1rem}
+.big{font-size:1.15rem}
+strong.hi{color:var(--betel)}
+mark{background:var(--husk-soft);color:inherit;padding:0 .2em;border-radius:4px}
+
+/* Figures */
+figure{margin:0}
+svg text{font-family:var(--font-body)}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:.8rem}
+.fig svg{display:block;width:100%;height:auto}
+figcaption{font-size:.8rem;color:var(--muted);margin-top:.4rem;text-align:center}
+
+/* Addiction loop */
+.loop .node{cursor:pointer}
+.loop .node circle{fill:var(--surface);stroke:var(--line);stroke-width:3;transition:stroke .2s, fill .2s}
+.loop .node.on circle{stroke:var(--betel);fill:var(--betel-soft)}
+.loop .node:focus{outline:none}
+.loop .node:focus-visible circle{stroke:var(--leaf);stroke-width:5}
+.step-text{min-height:7.5rem}
+.step-text .tag{font-size:.8rem;font-weight:700;color:var(--betel);letter-spacing:.05em}
+.btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem}
+button{font:inherit;cursor:pointer}
+.btn{border:2px solid var(--leaf);background:var(--surface);color:var(--leaf);border-radius:999px;padding:.45rem 1.2rem;font-weight:700;min-height:2.8rem}
+.btn.fill{background:var(--leaf);color:var(--surface)}
+.btn:focus-visible{outline:3px solid var(--husk);outline-offset:2px}
+
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1rem;margin-top:1.4rem}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem}
+.fact h3{font-size:1.15rem}
+.fact.warn{border-color:var(--betel);background:var(--betel-soft)}
+
+/* Fruit */
+.fruit .part{cursor:pointer;transition:filter .2s, opacity .2s}
+.fruit.has-pick .part{opacity:.45}
+.fruit.has-pick .part.on{opacity:1}
+.fruit .part:focus{outline:none}
+.fruit .part:focus-visible{filter:drop-shadow(0 0 4px var(--leaf))}
+.partbtns{display:flex;flex-wrap:wrap;gap:.5rem}
+.partbtns button{border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:.35rem .95rem;min-height:2.6rem}
+.partbtns button.on{border-color:var(--leaf);background:var(--leaf);color:var(--surface)}
+.partinfo h3{color:var(--leaf)}
+.partinfo .en{font-size:.8rem;color:var(--muted);letter-spacing:.04em}
+.quid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:1rem;margin-top:1rem}
+.quid .item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem}
+.quid .item b{font-family:var(--font-display);font-weight:400;font-size:1.2rem;display:block}
+.plus{font-family:var(--font-display);color:var(--muted)}
+
+/* Env */
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.85rem;color:var(--muted);margin-top:.5rem;justify-content:center}
+.legend i{display:inline-block;width:.9em;height:.9em;border-radius:3px;vertical-align:-.1em;margin-right:.3em}
+.rank{display:flex;flex-direction:column;gap:.6rem;margin-top:.6rem}
+.rank .row{display:grid;grid-template-columns:5.5em minmax(0,1fr);align-items:center;gap:.8rem}
+.rank .bar{height:1.5rem;border-radius:6px;background:var(--soil)}
+.rank .lab{font-weight:700}
+
+/* Think & teacher */
+.think{margin-top:1.6rem;padding:1rem 1.2rem;border-radius:var(--r);background:var(--leaf-soft);border:1px dashed var(--leaf)}
+.think b{font-family:var(--font-display);font-weight:400;color:var(--leaf);font-size:1.15rem}
+details.teacher{margin-top:1rem;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+details.teacher summary{cursor:pointer;padding:.7rem 1.1rem;font-weight:700;color:var(--muted);font-size:.9rem}
+details.teacher .inner{padding:0 1.1rem 1rem;font-size:.9rem}
+details.teacher ul{margin:.3rem 0 0;padding-left:1.2em}
+
+/* Quiz */
+.quiz{display:grid;gap:1rem}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.2rem}
+.q p.qt{font-weight:700;margin-bottom:.6rem}
+.opts{display:flex;flex-wrap:wrap;gap:.5rem}
+.opts button{border:2px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:.45rem 1rem;min-height:2.8rem;text-align:left}
+.opts button.right{border-color:var(--leaf);background:var(--leaf-soft)}
+.opts button.wrong{border-color:var(--betel);background:var(--betel-soft)}
+.feedback{margin-top:.5rem;font-size:.9rem}
+.feedback.ok{color:var(--leaf)}
+.feedback.no{color:var(--betel)}
+
+footer{padding-block:2rem 3rem;font-size:.8rem;color:var(--muted)}
+footer ol{padding-left:1.2em;margin:.4rem 0 0}
+footer a{color:inherit}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="wrap">
+  <div class="kicker">健康與體育・拒菸拒酒拒檳榔 延伸學習</div>
+  <h1>檳榔大解密</h1>
+  <p class="lede">檳榔長在樹上，看起來像普通的果實，為什麼會讓人戒不掉？它的裡面長什麼樣子？種很多檳榔樹，對我們的山和土地又有什麼影響？一起來找答案。</p>
+  <nav class="chapters" aria-label="章節">
+    <a href="#addiction"><span class="no">第 1 站</span><b>為什麼會上癮</b><span>檳榔鹼和大腦的祕密</span></a>
+    <a href="#structure"><span class="no">第 2 站</span><b>檳榔的構造</b><span>點一點，剖開看看</span></a>
+    <a href="#environment"><span class="no">第 3 站</span><b>環境的傷害</b><span>山坡地和土石流</span></a>
+  </nav>
+</header>
+
+<!-- ============ 1 成癮 ============ -->
+<section id="addiction">
+ <div class="wrap">
+  <div class="sec-head"><span class="no">第 1 站</span><h2>為什麼吃檳榔會上癮？</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">檳榔籽裡有一種叫做<mark>檳榔鹼</mark>的物質，還有一種叫<mark>檳榔素</mark>。嚼檳榔的時候，這些物質會從嘴巴進到身體，再跑到大腦。</p>
+      <p>大腦裡有一個負責「好舒服、還想要」的地方。檳榔鹼會讓這裡送出<b>快樂的訊號</b>，所以嚼的人會覺得有精神、身體發熱、心跳變快。</p>
+      <p>問題是，大腦很快就會<b>習慣</b>它。藥效一退，人反而覺得想睡、煩躁、不舒服，於是又想再嚼一顆。就這樣一圈又一圈，變成很難停下來的<strong class="hi">成癮循環</strong>。</p>
+      <p class="muted">右邊的圓圈，點每一站看看發生了什麼事，或按「下一步」一步一步走。</p>
+    </div>
+    <figure class="stack">
+      <div class="fig loop">
+        <svg viewBox="0 0 440 400" role="group" aria-label="成癮循環圖">
+          <defs>
+            <marker id="arw" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/>
+            </marker>
+          </defs>
+          <circle cx="220" cy="200" r="132" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 8"/>
+          <!-- arrows between nodes (clockwise) -->
+          <path d="M268 78 A132 132 0 0 1 340 150" fill="none" stroke="var(--muted)" stroke-width="3" marker-end="url(#arw)"/>
+          <path d="M340 250 A132 132 0 0 1 268 322" fill="none" stroke="var(--muted)" stroke-width="3" marker-end="url(#arw)"/>
+          <path d="M172 322 A132 132 0 0 1 100 250" fill="none" stroke="var(--muted)" stroke-width="3" marker-end="url(#arw)"/>
+          <path d="M100 150 A132 132 0 0 1 172 78" fill="none" stroke="var(--muted)" stroke-width="3" marker-end="url(#arw)"/>
+          <text x="220" y="192" text-anchor="middle" font-size="22" fill="var(--betel)" font-weight="700">成癮循環</text>
+          <text x="220" y="220" text-anchor="middle" font-size="15" fill="var(--muted)">越嚼越難停</text>
+
+          <g class="node" data-step="0" tabindex="0" role="button" aria-label="第一步 嚼檳榔">
+            <circle cx="220" cy="68" r="52"/>
+            <text x="220" y="62" text-anchor="middle" font-size="28" fill="var(--leaf)" font-weight="700">1</text>
+            <text x="220" y="92" text-anchor="middle" font-size="17" fill="var(--fg)" font-weight="700">嚼檳榔</text>
+          </g>
+          <g class="node" data-step="1" tabindex="0" role="button" aria-label="第二步 檳榔鹼到大腦">
+            <circle cx="352" cy="200" r="52"/>
+            <text x="352" y="194" text-anchor="middle" font-size="28" fill="var(--leaf)" font-weight="700">2</text>
+            <text x="352" y="224" text-anchor="middle" font-size="16" fill="var(--fg)" font-weight="700">跑到大腦</text>
+          </g>
+          <g class="node" data-step="2" tabindex="0" role="button" aria-label="第三步 覺得有精神">
+            <circle cx="220" cy="332" r="52"/>
+            <text x="220" y="326" text-anchor="middle" font-size="28" fill="var(--leaf)" font-weight="700">3</text>
+            <text x="220" y="356" text-anchor="middle" font-size="16" fill="var(--fg)" font-weight="700">短暫有精神</text>
+          </g>
+          <g class="node" data-step="3" tabindex="0" role="button" aria-label="第四步 藥效退了不舒服">
+            <circle cx="88" cy="200" r="52"/>
+            <text x="88" y="194" text-anchor="middle" font-size="28" fill="var(--leaf)" font-weight="700">4</text>
+            <text x="88" y="224" text-anchor="middle" font-size="16" fill="var(--fg)" font-weight="700">退了不舒服</text>
+          </g>
+        </svg>
+      </div>
+      <div class="panel step-text" id="stepText" aria-live="polite"></div>
+      <div class="btnrow">
+        <button class="btn fill" id="nextStep" type="button">下一步 →</button>
+        <button class="btn" id="resetStep" type="button">從頭開始</button>
+      </div>
+    </figure>
+  </div>
+
+  <div class="facts">
+    <div class="fact"><h3>不只身體，也變成習慣</h3><p>每天在同樣的時間、和同樣的朋友一起嚼，嘴巴和手也會「記住」這個動作。身體的依賴加上生活習慣，所以更難戒。</p></div>
+    <div class="fact"><h3>戒掉時會怎樣？</h3><p>上癮的人突然不嚼，可能會覺得很累、心情焦躁、容易生氣、晚上睡不好。這些不舒服會讓人又想回頭去嚼。</p></div>
+    <div class="fact warn"><h3>成癮會一直傷害身體</h3><p>檳榔是<b>第一類致癌物</b>，就算不加任何配料也會致癌。嚼檳榔的人得口腔癌的機會，大約是一般人的 <b>28 倍</b>。</p></div>
+  </div>
+
+  <div class="think"><b>想一想</b><p>有人說「我只吃一顆，不會上癮啦！」你覺得這句話哪裡有問題？為什麼最好的方法是「一開始就不要嘗試」？</p></div>
+
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>檳榔鹼（arecoline）是檳榔籽中含量最高的生物鹼，會作用在神經系統的乙醯膽鹼受體上，造成提神、發熱、流汗、心跳加快等反應。</li>
+      <li>動物實驗發現，檳榔鹼會讓大腦獎賞區（腹側被蓋區）的多巴胺神經元放電明顯增加，被認為是檳榔依賴的可能機制之一。</li>
+      <li>研究文獻整理，嚼食者出現依賴的比例約在 20%–90% 之間（各研究差異大）；停用後可能出現倦怠、焦慮、易怒、失眠等戒斷症狀。</li>
+      <li>課本 p.45 提到「大量攝取會抑制大腦活動，導致行動遲緩」，可與本頁的「先興奮、後不適」對照說明。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<!-- ============ 2 構造 ============ -->
+<section id="structure">
+ <div class="wrap">
+  <div class="sec-head"><span class="no">第 2 站</span><h2>剖開一顆檳榔</h2></div>
+  <div class="two">
+    <figure>
+      <div class="fig">
+        <svg class="fruit" id="fruit" viewBox="0 0 360 450" role="group" aria-label="檳榔果實縱切面圖">
+          <defs>
+            <clipPath id="clipMeso"><ellipse cx="180" cy="245" rx="111" ry="163"/></clipPath>
+            <clipPath id="clipSeed"><ellipse cx="180" cy="285" rx="55" ry="66"/></clipPath>
+          </defs>
+          <!-- 外果皮 -->
+          <g class="part" data-part="exo" tabindex="0" role="button" aria-label="外果皮">
+            <ellipse cx="180" cy="245" rx="120" ry="172" fill="#3e8a45" stroke="#24592b" stroke-width="3"/>
+          </g>
+          <!-- 中果皮 纖維 -->
+          <g class="part" data-part="meso" tabindex="0" role="button" aria-label="中果皮">
+            <ellipse cx="180" cy="245" rx="111" ry="163" fill="#e2c999"/>
+            <g clip-path="url(#clipMeso)" fill="none" stroke="#b08a50" stroke-width="1.6" opacity=".85" id="fibers"></g>
+          </g>
+          <!-- 內果皮 -->
+          <g class="part" data-part="endo" tabindex="0" role="button" aria-label="內果皮">
+            <ellipse cx="180" cy="285" rx="64" ry="76" fill="#f3e6c8" stroke="#a88a5a" stroke-width="2.5"/>
+          </g>
+          <!-- 種子 胚乳 -->
+          <g class="part" data-part="seed" tabindex="0" role="button" aria-label="種子 檳榔籽">
+            <ellipse cx="180" cy="285" rx="55" ry="66" fill="#f4ead6" stroke="#6b3f22" stroke-width="4"/>
+            <g clip-path="url(#clipSeed)" fill="none" stroke="#8a5a34" stroke-width="2.2" stroke-linecap="round" id="marble"></g>
+          </g>
+          <!-- 胚 -->
+          <g class="part" data-part="embryo" tabindex="0" role="button" aria-label="胚">
+            <ellipse cx="180" cy="341" rx="9" ry="7" fill="#fff8e6" stroke="#6b3f22" stroke-width="2"/>
+          </g>
+          <!-- 果蒂 -->
+          <g class="part" data-part="cap" tabindex="0" role="button" aria-label="果蒂">
+            <path d="M180 18 L180 70" stroke="#5a4a2a" stroke-width="7" stroke-linecap="round"/>
+            <path d="M180 92 C150 92 128 82 122 66 C140 64 160 70 180 74 C200 70 220 64 238 66 C232 82 210 92 180 92 Z" fill="#8a7a3a" stroke="#5a4a2a" stroke-width="2"/>
+            <path d="M180 84 C165 70 160 58 168 50 C176 58 180 66 180 74 C180 66 184 58 192 50 C200 58 195 70 180 84 Z" fill="#a39448" stroke="#5a4a2a" stroke-width="2"/>
+          </g>
+          <!-- leader labels -->
+          <g font-size="14" fill="var(--muted)" pointer-events="none">
+            <line x1="296" y1="190" x2="340" y2="170" stroke="var(--muted)"/><text x="340" y="164" text-anchor="end">外果皮</text>
+            <line x1="270" y1="120" x2="330" y2="96" stroke="var(--muted)"/><text x="345" y="90" text-anchor="end">中果皮</text>
+            <line x1="120" y1="230" x2="32" y2="206" stroke="var(--muted)"/><text x="16" y="200">內果皮</text>
+            <line x1="150" y1="300" x2="40" y2="330" stroke="var(--muted)"/><text x="16" y="350">種子</text>
+            <line x1="190" y1="345" x2="300" y2="400" stroke="var(--muted)"/><text x="345" y="418" text-anchor="end">胚</text>
+            <line x1="122" y1="70" x2="52" y2="50" stroke="var(--muted)"/><text x="16" y="44">果蒂</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>檳榔果實縱切面示意圖（未依實際比例）・點圖上的部位或下方按鈕</figcaption>
+    </figure>
+
+    <div class="stack">
+      <div class="partbtns" id="partBtns">
+        <button type="button" data-part="cap">果蒂</button>
+        <button type="button" data-part="exo">外果皮</button>
+        <button type="button" data-part="meso">中果皮</button>
+        <button type="button" data-part="endo">內果皮</button>
+        <button type="button" data-part="seed">種子（檳榔籽）</button>
+        <button type="button" data-part="embryo">胚</button>
+      </div>
+      <div class="panel partinfo" id="partInfo" aria-live="polite"></div>
+      <div class="panel">
+        <h3>檳榔樹是什麼樣的植物？</h3>
+        <p>檳榔樹屬於<b>棕櫚科</b>，和椰子樹是親戚。它只有一根筆直的樹幹，不會分枝，頂端長著像羽毛一樣的大葉子（羽狀複葉）。果實一大串長在葉子下方，種下去大約五年才開始結果。它的根是一大把細細的<b>鬚根</b>，大多長在土壤淺層，這一點在第 3 站很重要。</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:2rem">我們在路邊看到的「一顆檳榔」，其實是好幾樣東西組合起來的</h3>
+  <div class="quid">
+    <div class="item"><b>菁仔（檳榔籽）</b><p>還沒成熟的綠色檳榔果實，整顆連著粗纖維一起嚼。含有檳榔鹼，本身就會致癌。</p></div>
+    <div class="item"><b><span class="plus">＋</span> 荖花、荖藤或荖葉</b><p>夾在檳榔中間或包在外面。裡面有黃樟素等成分，會傷害口腔細胞。</p></div>
+    <div class="item"><b><span class="plus">＋</span> 石灰（紅灰、白灰）</b><p>強鹼性的粉，會讓嘴巴裡變成很刺激的環境，加重口腔黏膜的破壞。</p></div>
+  </div>
+
+  <div class="think"><b>想一想</b><p>中果皮的粗纖維像菜瓜布。如果每天在嘴巴裡用菜瓜布刷來刷去，口腔會變成什麼樣子？</p></div>
+
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>檳榔果實屬核果類型：果皮由外而內分為外果皮、中果皮（纖維質，占果實大部分）、內果皮，包住一顆種子。</li>
+      <li>成熟種子縱切面可見大理石般的褐色花紋，這是種皮向內摺入胚乳形成的紋路（嚼食胚乳）。中藥「檳榔」即為乾燥的成熟種子。</li>
+      <li>台灣嚼食的「菁仔」是未成熟的青果，種子尚軟，所以會連同果皮纖維一起咀嚼；課本 p.45「資訊小站」說明粗纖維會磨損口腔造成潰瘍。</li>
+      <li>課本 p.44 檳榔的組成：檳榔籽＋荖花（或荖藤）／荖葉，可直接對照本站下方三張卡片。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<!-- ============ 3 環境 ============ -->
+<section id="environment">
+ <div class="wrap">
+  <div class="sec-head"><span class="no">第 3 站</span><h2>種太多檳榔，山會受傷</h2></div>
+  <div class="two">
+    <figure>
+      <div class="fig">
+        <svg viewBox="0 0 640 360" role="img" aria-label="森林與檳榔園遇到大雨的比較圖：森林有多層樹冠和深根，雨水被減緩，泥土抓得牢；檳榔園只有一層樹冠和淺根，雨滴直接打到地面，泥土被沖走">
+          <rect x="0" y="0" width="640" height="360" fill="var(--sky)"/>
+          <!-- rain -->
+          <g stroke="var(--rain)" stroke-width="2.5" stroke-linecap="round" id="rain"></g>
+          <!-- divider -->
+          <line x1="320" y1="0" x2="320" y2="360" stroke="var(--line)" stroke-width="3"/>
+          <!-- slopes -->
+          <path d="M0 210 L320 290 L320 360 L0 360 Z" fill="#8a6a45"/>
+          <path d="M320 210 L640 290 L640 360 L320 360 Z" fill="#8a6a45"/>
+          <!-- forest left: undergrowth -->
+          <path d="M0 210 L320 290 L320 300 L0 222 Z" fill="#4f8a3e"/>
+          <g fill="#2f6b2a">
+            <circle cx="60" cy="150" r="42"/><circle cx="150" cy="168" r="48"/><circle cx="250" cy="196" r="44"/>
+            <circle cx="105" cy="140" r="36"/><circle cx="200" cy="170" r="38"/>
+          </g>
+          <g fill="#5f9e4a"><circle cx="40" cy="198" r="16"/><circle cx="120" cy="218" r="18"/><circle cx="215" cy="240" r="16"/><circle cx="290" cy="262" r="14"/></g>
+          <g stroke="#5a3a22" stroke-width="7"><line x1="60" y1="190" x2="60" y2="228"/><line x1="150" y1="210" x2="150" y2="250"/><line x1="250" y1="236" x2="250" y2="276"/></g>
+          <!-- deep roots -->
+          <g stroke="#e8d4b0" stroke-width="2.5" fill="none" stroke-linecap="round">
+            <path d="M60 228 C55 260 70 290 58 330"/><path d="M60 228 C40 250 30 270 22 300"/><path d="M60 228 C80 250 95 275 100 310"/>
+            <path d="M150 250 C146 285 158 312 150 350"/><path d="M150 250 C130 270 118 295 112 330"/><path d="M150 250 C170 270 182 300 190 340"/>
+            <path d="M250 276 C246 300 256 330 250 356"/><path d="M250 276 C232 292 222 315 218 345"/><path d="M250 276 C268 292 280 318 286 348"/>
+          </g>
+          <!-- betel right: tall single trunks -->
+          <g id="palms"></g>
+          <!-- runoff -->
+          <path d="M560 300 C590 310 615 318 640 326" stroke="var(--rain)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g fill="#6b4a2c"><circle cx="600" cy="322" r="5"/><circle cx="620" cy="330" r="6"/><circle cx="584" cy="316" r="4"/></g>
+          <!-- labels -->
+          <rect x="12" y="12" width="120" height="34" rx="8" fill="var(--surface)"/>
+          <text x="72" y="35" text-anchor="middle" font-size="18" font-weight="700" fill="var(--fg)">森林</text>
+          <rect x="332" y="12" width="140" height="34" rx="8" fill="var(--surface)"/>
+          <text x="402" y="35" text-anchor="middle" font-size="18" font-weight="700" fill="var(--fg)">檳榔園</text>
+          <rect x="474" y="232" width="152" height="30" rx="8" fill="var(--surface)"/>
+          <text x="550" y="253" text-anchor="middle" font-size="15" fill="var(--betel)" font-weight="700">泥土被雨水沖走</text>
+        </svg>
+      </div>
+      <div class="legend"><span><i style="background:#e8d4b0"></i>樹根</span><span><i style="background:var(--rain)"></i>雨水</span><span><i style="background:#8a6a45"></i>山坡土壤</span></div>
+      <figcaption>大雨來時，森林和檳榔園的差別（示意圖）</figcaption>
+    </figure>
+
+    <div class="stack">
+      <div class="panel">
+        <h3>雨滴從高處直接打到地面</h3>
+        <p>森林有好幾層樹葉和小草，像一把把雨傘，雨水會慢慢落下。檳榔樹又高又直，只有頂端一層葉子，雨滴從很高的地方掉下來，<b>直接打在光禿禿的土上</b>，把泥土顆粒打散、沖走。順著樹幹流下來的水也很多。</p>
+      </div>
+      <div class="panel">
+        <h3>根太淺，抓不住泥土</h3>
+        <p>大樹的根又深又粗，像釘子一樣把泥土固定在山坡上。檳榔樹的鬚根大多在淺層，<b>抓不住深處的土</b>。山坡上種滿檳榔，下大雨時就容易發生土壤流失，甚至加重山崩和<strong class="hi">土石流</strong>。</p>
+      </div>
+      <div class="panel">
+        <h3>真的有人做實驗比較過</h3>
+        <p>研究人員在南投蓮華池的山坡地比較三種地，看下雨後被沖走的泥土誰最多：</p>
+        <div class="rank" aria-label="沖走泥土多寡排名">
+          <div class="row"><span class="lab">檳榔園</span><div class="bar" style="width:100%"></div></div>
+          <div class="row"><span class="lab">草地</span><div class="bar" style="width:60%;opacity:.75"></div></div>
+          <div class="row"><span class="lab">杉木林</span><div class="bar" style="width:25%;opacity:.55"></div></div>
+        </div>
+        <p class="muted" style="font-size:.8rem;margin-top:.4rem">長條只表示多寡排名，不是實際數字。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="facts">
+    <div class="fact"><h3>砍掉森林來種檳榔</h3><p>以前檳榔賣得好，有些人把山上的森林燒掉、砍掉改種檳榔，甚至種在不該開發的國有林地和保安林裡，動物和植物的家也一起不見了。</p></div>
+    <div class="fact"><h3>種植面積很大</h3><p>台灣的檳榔園面積曾經超過 <b>5 萬公頃</b>，大約是 2 個台北市那麼大，是台灣種得最多的作物之一。</p></div>
+    <div class="fact"><h3>紅色汁液和檳榔渣</h3><p>有人把檳榔汁隨地亂吐、把渣和包裝亂丟，讓馬路、人行道留下紅色汙漬，又髒又難清理，也不衛生。</p></div>
+  </div>
+
+  <div class="think"><b>想一想</b><p>政府鼓勵農民把山坡上的檳榔園改種森林或其他作物。如果你是住在山下的居民，你會支持嗎？為什麼？</p></div>
+
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>蓮華池坡地試驗（林壯沛等，2008）：檳榔區逕流沖蝕最大，草生地次之，杉木區最小。</li>
+      <li>依農委會 2006 年資料，檳榔栽種面積達 50,554 公頃，產值僅次於水稻。（台北市面積約 2.7 萬公頃）</li>
+      <li>行政院 1997 年《檳榔問題管理方案》列出檳榔三大問題：影響水土保持、危害健康、檳榔渣汙染環境。103–106 年「檳榔管理方案」以縮減種植面積、取締違規濫植、輔導廢園轉作（如油茶）為目標。</li>
+      <li>平衡觀點：任何作物在山坡地過度集約種植都可能造成水土流失（如高山茶、高冷蔬菜），屏東也有許多檳榔種在平地。可引導學生思考「土地怎麼使用」而不只是「哪一種作物不好」。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<!-- ============ 小測驗 ============ -->
+<section id="quiz">
+ <div class="wrap">
+  <div class="sec-head"><span class="no">挑戰</span><h2>檳榔小測驗</h2></div>
+  <div class="quiz" id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>衛生福利部國民健康署：檳榔防制相關新聞稿（檳榔為第一類致癌物、檳榔鹼與檳榔素可能成癮、荖花與石灰的危害）。</li>
+    <li>國小健康與體育四上課本 單元 2 第 2 課〈酒與檳榔〉。</li>
+    <li>Lan et al. (2022) Frontiers in Pharmacology；Li et al. (2025) Frontiers in Integrative Neuroscience（檳榔鹼與大腦獎賞系統）。</li>
+    <li>林壯沛、盧惠生、黃良鑫（2008）〈坡地檳榔園水土流失控制之探討〉，森林集水區經營研討會論文集。</li>
+    <li>行政院、農業部（原農委會）檳榔管理方案相關資料；香港中藥材標準〈檳榔 Arecae Semen〉。</li>
+  </ol>
+</footer>
+
+<script>
+/* ---------- 成癮循環 ---------- */
+const steps=[
+  {t:"第 1 步・嚼檳榔",d:"把檳榔放進嘴裡咀嚼，檳榔籽裡的檳榔鹼和檳榔素被釋放出來，經過口腔黏膜進入血液。"},
+  {t:"第 2 步・跑到大腦",d:"這些物質隨著血液跑到大腦，讓大腦中負責「好舒服、還想要」的地方送出快樂的訊號。"},
+  {t:"第 3 步・短暫有精神",d:"嚼的人覺得有精神、身體發熱、流汗、心跳加快。但這種感覺很短暫，大腦也會越來越習慣。"},
+  {t:"第 4 步・退了不舒服",d:"藥效退掉後，反而覺得疲倦、煩躁、心情不好。為了消除不舒服，又想再嚼一顆，於是回到第 1 步……"}
+];
+let cur=-1;
+const nodes=[...document.querySelectorAll('.loop .node')];
+const stepText=document.getElementById('stepText');
+function showStep(i){
+  cur=i;
+  nodes.forEach((n,k)=>n.classList.toggle('on',k===i));
+  if(i<0){stepText.innerHTML='<p class="muted">按「下一步」或點圓圈上的任一站，看看嚼檳榔時身體裡發生了什麼事。</p>';return}
+  stepText.innerHTML='<div class="tag">'+steps[i].t+'</div><p class="big">'+steps[i].d+'</p>';
+}
+nodes.forEach(n=>{
+  const go=()=>showStep(+n.dataset.step);
+  n.addEventListener('click',go);
+  n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+});
+document.getElementById('nextStep').addEventListener('click',()=>showStep((cur+1)%4));
+document.getElementById('resetStep').addEventListener('click',()=>showStep(-1));
+showStep(-1);
+
+/* ---------- 果實構造 ---------- */
+const fib=document.getElementById('fibers');
+for(let k=-5;k<=5;k++){
+  const rx=Math.abs(k)*20+4;
+  const e=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+  e.setAttribute('cx',180);e.setAttribute('cy',245);e.setAttribute('rx',rx);e.setAttribute('ry',170);
+  if(k%2)e.setAttribute('stroke-dasharray','14 6');
+  fib.appendChild(e);
+}
+const mar=document.getElementById('marble');
+for(let i=0;i<9;i++){
+  const y=228+i*14, a=6+((i*7)%5)*2;
+  let d='M118 '+y;
+  for(let x=118;x<=242;x+=16){d+=' Q'+(x+8)+' '+(y+((x/16+i)%2?a:-a))+' '+(x+16)+' '+y}
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',d);p.setAttribute('opacity',i%2?'.7':'.95');
+  mar.appendChild(p);
+}
+const parts={
+  cap:{n:"果蒂",en:"STALK & CALYX",d:"果實連接在果串上的地方，旁邊一圈像小帽子的是花朵留下來的花萼。檳榔一串可以結好幾百顆果實。"},
+  exo:{n:"外果皮",en:"EXOCARP",d:"最外面光滑的一層皮。沒成熟時是綠色，成熟後會變成橙紅色。台灣人嚼的「菁仔」就是還沒成熟的綠色果實。"},
+  meso:{n:"中果皮",en:"MESOCARP",d:"佔了果實的大部分，是一層厚厚的<b>粗纖維</b>，就像菜瓜布。嚼的時候這些纖維會一直磨傷口腔，造成破洞和潰瘍。"},
+  endo:{n:"內果皮",en:"ENDOCARP",d:"緊緊包住種子的一層薄膜，把種子和外面的纖維分開。"},
+  seed:{n:"種子（檳榔籽）",en:"SEED",d:"剖開會看到像大理石一樣的褐色花紋。這裡含有最多的<b>檳榔鹼</b>，是讓人上癮、也是讓人得癌症的主要部分。就算不加任何配料，檳榔籽本身就會致癌。"},
+  embryo:{n:"胚",en:"EMBRYO",d:"種子底部小小的一點。如果把成熟的檳榔種到土裡，就是從這裡發芽，長成一棵新的檳榔樹。"}
+};
+const fruit=document.getElementById('fruit');
+const partInfo=document.getElementById('partInfo');
+const btns=[...document.querySelectorAll('#partBtns button')];
+const gs=[...fruit.querySelectorAll('.part')];
+function pick(key){
+  fruit.classList.toggle('has-pick',!!key);
+  gs.forEach(g=>g.classList.toggle('on',g.dataset.part===key));
+  btns.forEach(b=>b.classList.toggle('on',b.dataset.part===key));
+  if(!key){partInfo.innerHTML='<h3>點一點，認識每一層</h3><p>檳榔的果實由外到內有好幾層：果皮分成三層，最裡面包著一顆種子。點左邊的圖或上方的按鈕看看。</p>';return}
+  const p=parts[key];
+  partInfo.innerHTML='<div class="en">'+p.en+'</div><h3>'+p.n+'</h3><p>'+p.d+'</p>';
+}
+gs.forEach(g=>{
+  const go=e=>{e.stopPropagation();pick(g.dataset.part)};
+  g.addEventListener('click',go);
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go(e)}});
+});
+btns.forEach(b=>b.addEventListener('click',()=>pick(b.dataset.part)));
+pick(null);
+
+/* ---------- 環境圖：雨與檳榔樹 ---------- */
+const rain=document.getElementById('rain');
+for(let i=0;i<46;i++){
+  const x=(i*37)%640+8, y=(i*53)%170+50;
+  const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',x);l.setAttribute('y1',y);l.setAttribute('x2',x-4);l.setAttribute('y2',y+14);
+  rain.appendChild(l);
+}
+const palms=document.getElementById('palms');
+[[370,222],[440,240],[510,257],[585,276]].forEach(([x,g])=>{
+  const top=60;
+  let s='<line x1="'+x+'" y1="'+g+'" x2="'+x+'" y2="'+top+'" stroke="#7b6a4a" stroke-width="7"/>';
+  for(let a=-75;a<=75;a+=30){
+    const r=a*Math.PI/180, ex=x+Math.sin(r)*46, ey=top+12-Math.cos(r)*22+Math.abs(a)*.35;
+    s+='<path d="M'+x+' '+top+' Q'+(x+Math.sin(r)*26)+' '+(top-18)+' '+ex.toFixed(1)+' '+ey.toFixed(1)+'" stroke="#2f7a34" stroke-width="5" fill="none" stroke-linecap="round"/>';
+  }
+  s+='<circle cx="'+(x-6)+'" cy="'+(top+16)+'" r="5" fill="#d0802e"/><circle cx="'+(x+5)+'" cy="'+(top+19)+'" r="5" fill="#d0802e"/>';
+  for(let k=-2;k<=2;k++){s+='<path d="M'+x+' '+g+' Q'+(x+k*10)+' '+(g+10)+' '+(x+k*18)+' '+(g+18)+'" stroke="#e8d4b0" stroke-width="2" fill="none"/>'}
+  s+='<path d="M'+(x+16)+' '+(g+4)+' l10 10 M'+(x-16)+' '+(g+2)+' l-6 12" stroke="var(--rain)" stroke-width="3" stroke-linecap="round"/>';
+  palms.insertAdjacentHTML('beforeend',s);
+});
+
+/* ---------- 小測驗 ---------- */
+const qs=[
+  {q:"讓人嚼檳榔會上癮的主要物質是什麼？",o:["檳榔鹼","維生素 C","糖分"],a:0,e:"檳榔鹼（還有檳榔素）會影響大腦，讓人越嚼越想嚼。"},
+  {q:"檳榔果實裡像菜瓜布一樣、會磨傷口腔的是哪一層？",o:["外果皮","中果皮","胚"],a:1,e:"中果皮是厚厚的粗纖維，嚼的時候會不斷磨損口腔。"},
+  {q:"同學說：「這顆檳榔沒加荖花和石灰，所以不會致癌。」這句話對嗎？",o:["對，只有配料會致癌","不對，檳榔籽本身就會致癌"],a:1,e:"檳榔是第一類致癌物，就算不加任何配料，檳榔籽本身也會致癌。"},
+  {q:"為什麼山坡上種滿檳榔樹，下大雨時泥土容易被沖走？",o:["檳榔樹的根很深","檳榔樹根淺，又只有一層樹葉擋雨","檳榔樹會吸光雨水"],a:1,e:"淺淺的鬚根抓不住泥土，高高的單層樹冠擋不住雨滴，泥土就容易流失。"}
+];
+const qb=document.getElementById('quizBox');
+qs.forEach((x,i)=>{
+  const d=document.createElement('div');d.className='q';
+  d.innerHTML='<p class="qt">'+(i+1)+'. '+x.q+'</p><div class="opts"></div><p class="feedback" aria-live="polite"></p>';
+  const opts=d.querySelector('.opts'), fb=d.querySelector('.feedback');
+  x.o.forEach((t,k)=>{
+    const b=document.createElement('button');b.type='button';b.textContent=t;b.id='q'+i+'o'+k;
+    b.addEventListener('click',()=>{
+      opts.querySelectorAll('button').forEach(z=>z.classList.remove('right','wrong'));
+      if(k===x.a){b.classList.add('right');fb.className='feedback ok';fb.textContent='答對了！'+x.e}
+      else{b.classList.add('wrong');fb.className='feedback no';fb.textContent='再想想看喔！'}
+    });
+    opts.appendChild(b);
+  });
+  qb.appendChild(d);
+});
+</script>
+
+</body></html>
