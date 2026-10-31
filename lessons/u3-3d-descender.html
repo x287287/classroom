@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>認識緩降機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 緩降機構造圖（可點零件）＋ 下降動畫 */
+.parts svg{display:block;width:100%;height:auto}
+.part{cursor:pointer}
+.part:focus{outline:none}
+.part .hl{fill:transparent;stroke:transparent;stroke-width:4}
+.part:hover .hl,.part:focus-visible .hl,.part.on .hl{stroke:var(--accent);stroke-dasharray:6 5}
+.down svg{display:block;width:100%;height:auto}
+.range{width:100%;height:46px;accent-color:var(--accent);cursor:pointer}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 3 課 火場應變・延伸學習</div>
+    <h1>認識緩降機</h1>
+    <p class="k-lede">緩降機是樓梯不能走的時候，最後的逃生工具。它為什麼不會讓人掉得太快？兩條安全帶是做什麼用的？先認識它的構造，再把「掛、丟、套、束、推」練熟。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#parts"><span class="no">第 1 站</span><b>緩降機的構造</b><span>點零件看說明</span></a>
+      <a href="#how"><span class="no">第 2 站</span><b>為什麼不會掉太快</b><span>調速器的祕密</span></a>
+      <a href="#steps"><span class="no">第 3 站</span><b>五步驟排排看</b><span>掛丟套束推</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="parts">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>緩降機長什麼樣子？</h2></div>
+  <div class="two">
+    <figure class="fig parts">
+      <svg viewBox="0 0 460 440" role="group" aria-label="緩降機構造圖">
+        <rect width="460" height="440" fill="var(--surface)"/>
+        <rect x="0" y="0" width="60" height="440" fill="#ECEFF1"/><rect x="60" y="0" width="6" height="440" fill="#B0BEC5"/>
+        <rect x="66" y="180" width="140" height="10" fill="#9E9E9E"/>
+        <g class="part" data-p="0" tabindex="0" role="button" aria-label="固定架"><path d="M66 60 H200 V80 H86 V300 H66 Z" fill="#78909C"/><path d="M190 80 l0 30" stroke="#78909C" stroke-width="8"/><rect class="hl" x="56" y="50" width="160" height="260" rx="10"/></g>
+        <g class="part" data-p="1" tabindex="0" role="button" aria-label="掛鉤"><path d="M190 110 q-14 0 -14 14 q0 14 14 14" stroke="#455A64" stroke-width="7" fill="none"/><circle class="hl" cx="188" cy="124" r="26"/></g>
+        <g class="part" data-p="2" tabindex="0" role="button" aria-label="調速器"><rect x="160" y="138" width="56" height="56" rx="14" fill="#E53935"/><circle cx="188" cy="166" r="12" fill="#FFCDD2"/><rect class="hl" x="150" y="128" width="76" height="76" rx="16"/></g>
+        <g class="part" data-p="3" tabindex="0" role="button" aria-label="繩索"><path d="M176 194 L140 420 M200 194 L300 300" stroke="#5D4037" stroke-width="4"/><path class="hl" d="M120 200 L330 200 L330 430 L120 430 Z" stroke-width="0"/></g>
+        <g class="part" data-p="4" tabindex="0" role="button" aria-label="安全帶"><ellipse cx="310" cy="316" rx="34" ry="20" fill="none" stroke="#FB8C00" stroke-width="8"/><circle cx="292" cy="300" r="6" fill="#455A64"/><ellipse class="hl" cx="310" cy="316" rx="50" ry="34"/></g>
+        <g class="part" data-p="5" tabindex="0" role="button" aria-label="捲繩輪盤"><circle cx="140" cy="404" r="26" fill="#90A4AE" stroke="#546E7A" stroke-width="3"/><circle cx="140" cy="404" r="8" fill="#546E7A"/><circle class="hl" cx="140" cy="404" r="38"/></g>
+        <g font-size="14" fill="var(--muted)"><text x="220" y="72">固定架</text><text x="220" y="124">掛鉤</text><text x="228" y="172">調速器</text><text x="236" y="236">繩索</text><text x="356" y="320">安全帶</text><text x="176" y="410">捲繩輪盤</text></g>
+      </svg>
+      <figcaption>緩降機構造示意圖・點一點每個零件</figcaption>
+    </figure>
+    <div class="stack">
+      <div class="say" id="partInfo" aria-live="polite"></div>
+      <div class="cards" style="margin-top:0">
+        <div class="card"><h3>放在哪裡？</h3><p>通常在公共場所、大樓的窗邊或陽臺，旁邊有「緩降機」的標示，裡面是收好的器材箱。</p></div>
+        <div class="card"><h3>什麼時候用？</h3><p>樓梯、安全梯已經被火或濃煙擋住，也沒有其他相對安全的避難空間時，才使用緩降機。</p></div>
+      </div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="how">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>為什麼不會越掉越快？</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">東西從高處掉下去，會越掉越快。緩降機最重要的零件是<mark>調速器</mark>，裡面有齒輪和煞車裝置，不管多重的人，都能讓繩子<b>用差不多固定的速度</b>慢慢放下去。</p>
+      <p>而且繩子兩端<b>各有一條安全帶</b>。第一個人往下降的時候，另一端的安全帶會被拉上來，下一個人就可以接著使用，像蹺蹺板一樣輪流。</p>
+      <p class="muted">拉拉看：比較「直接掉下去」和「用緩降機」。</p>
+      <div class="btnrow"><button class="btn" type="button" id="fall">沒有調速器</button><button class="btn fill" type="button" id="slow">用緩降機下降</button></div>
+      <div class="say" id="downMsg" aria-live="polite"><div class="t">比較看看</div><p>按上面的按鈕。</p></div>
+    </div>
+    <figure class="fig down"><svg viewBox="0 0 360 420" aria-hidden="true" id="downSvg"></svg><figcaption>示意動畫，非實際速度</figcaption></figure>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="steps">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>掛、丟、套、束、推</h2></div>
+  <p class="big" style="max-width:44em">固定架已經展開、緩降機也拿出來了。照順序點卡片，完成五個步驟。</p>
+  <div class="panel" id="orderBox" style="margin-top:1rem"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>課本 p.78：使用前先展開固定架、取出緩降機，再依「掛、丟、套、束、推」操作。</li>
+      <li>緩降機為往復式避難器具：調速器使下降速度維持穩定，繩索兩端各有一組安全帶，可供多人輪流使用，一次限一人。</li>
+      <li>建議帶學生在校園或社區實地觀察緩降機的位置與標示；實際操作演練應由消防人員指導，學生不可自行嘗試。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>緩降機測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 3 第 3 課〈緩降機使用方式〉。</li><li>內政部消防署避難器具宣導資料。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var parts=[
+  {n:'固定架',d:'裝在窗邊或陽臺的金屬架。使用前要先<b>展開</b>，讓緩降機可以掛在牆外面，下降時才不會撞到牆。'},
+  {n:'掛鉤',d:'把緩降機掛在固定架的鉤環上，<b>一定要鎖緊</b>，這是第一步「掛」。'},
+  {n:'調速器',d:'緩降機的心臟！裡面的齒輪和煞車讓繩子用<b>穩定的速度</b>放出去，人才不會掉太快。'},
+  {n:'繩索',d:'很堅固的繩子，兩端各接一條安全帶，一邊下去、另一邊就會上來。'},
+  {n:'安全帶',d:'從頭套進去、套在<b>腋下</b>，再把束環拉到胸口固定，這是「套」和「束」。'},
+  {n:'捲繩輪盤',d:'繩子捲在這裡。使用時要先往下<b>丟</b>，並確認下面沒有東西擋住。'}
+];
+function pickPart(i){document.querySelectorAll('.part').forEach(function(p){p.classList.toggle('on',+p.dataset.p===i)});var m=document.getElementById('partInfo');m.className='say';m.innerHTML='<div class="t">'+parts[i].n+'</div><p class="big">'+parts[i].d+'</p>'}
+document.querySelectorAll('.part').forEach(function(p){var go=function(){pickPart(+p.dataset.p)};p.addEventListener('click',go);p.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+document.getElementById('partInfo').innerHTML='<div class="t">點一點</div><p>點左邊圖上的零件，看看它的功用。</p>';
+
+var dsvg=document.getElementById('downSvg'),anim=null;
+function scene(y,rope){return '<rect width="360" height="420" fill="var(--surface)"/><rect x="0" y="0" width="120" height="420" fill="#ECEFF1"/>'+[60,160,260].map(function(yy){return '<rect x="20" y="'+yy+'" width="80" height="60" fill="#B3E5FC" stroke="#90A4AE"/>'}).join('')+'<rect x="0" y="400" width="360" height="20" fill="#A5D6A7"/><rect x="120" y="40" width="70" height="8" fill="#78909C"/><rect x="178" y="48" width="24" height="24" rx="6" fill="#E53935"/>'+(rope?'<line x1="190" y1="72" x2="190" y2="'+y+'" stroke="#5D4037" stroke-width="3"/>':'')+'<circle cx="190" cy="'+(y+10)+'" r="12" fill="#FFD54F" stroke="#8D6E63" stroke-width="2"/><rect x="178" y="'+(y+22)+'" width="24" height="34" rx="8" fill="#42A5F5"/>'+(rope?'<ellipse cx="190" cy="'+(y+30)+'" rx="16" ry="6" fill="none" stroke="#FB8C00" stroke-width="4"/>':'')}
+function play(slow){clearInterval(anim);var y=60,v=0,t=0;var m=document.getElementById('downMsg');
+  anim=setInterval(function(){t++;if(slow){y+=6}else{v+=1.6;y+=v}
+    if(y>=344){y=344;clearInterval(anim);m.className='say '+(slow?'good':'bad');m.innerHTML=slow?'<div class="t">平安落地</div><p>調速器讓人一直用差不多的速度慢慢往下，落地時不會受傷。</p>':'<div class="t">越掉越快！</div><p>沒有調速器，掉下去的速度會越來越快，落地時非常危險。</p>'}
+    dsvg.innerHTML=scene(y,slow);
+  },40);
+}
+document.getElementById('fall').addEventListener('click',function(){play(false)});
+document.getElementById('slow').addEventListener('click',function(){play(true)});
+dsvg.innerHTML=scene(60,true);
+
+KIT.order(document.getElementById('orderBox'),{
+  steps:[
+    {t:'掛',d:'把緩降機的掛鉤確實掛在固定架的鉤環上，並鎖緊。'},
+    {t:'丟',d:'把捲繩輪盤往下丟，確認下面沒有障礙物擋住。'},
+    {t:'套',d:'把安全帶從頭套進去，套在腋下。'},
+    {t:'束',d:'把束環拉到胸口，綁緊安全帶。'},
+    {t:'推',d:'身體面向牆壁往下，雙手輕推牆壁，避免擦傷。'}
+  ],
+  start:'固定架展開了，緩降機也拿出來了。第一步是？',
+  done:'完全正確！口訣：掛、丟、套、束、推。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'緩降機裡讓人不會越掉越快的零件是？',o:['掛鉤','調速器','輪盤'],a:1,e:'調速器讓繩子用穩定的速度放出去。'},
+  {q:'什麼時候才使用緩降機？',o:['想快點下樓的時候','樓梯被火或濃煙擋住，也沒有其他安全的地方時','好玩的時候'],a:1,e:'緩降機是最後的逃生工具。'},
+  {q:'安全帶要套在身體的哪裡？',o:['腰上','腋下，束環拉到胸口','脖子'],a:1,e:'套在腋下、束到胸口，才不會滑出來。'},
+  {q:'往下降的時候，身體應該？',o:['背對牆壁','面向牆壁，雙手輕推牆壁','抱住繩子不動'],a:1,e:'面向牆壁輕推，可以避免撞傷、擦傷。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

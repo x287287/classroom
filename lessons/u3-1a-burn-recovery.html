@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>疤痕的祕密</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 復原之路：一條橫向的旅程線，每一站是一個圓點；窄螢幕改成直向 */
+.road{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem .2rem 1rem;scroll-snap-type:x mandatory}
+.road button{appearance:none;flex:0 0 auto;scroll-snap-align:start;min-width:8.2rem;border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:.6rem .7rem;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;text-align:left}
+.road button .n{font-size:.75rem;color:var(--muted);font-weight:700}
+.road button b{font-family:var(--font-display);font-weight:400;font-size:1.08rem;line-height:1.3}
+.road button .when{font-size:.78rem;color:var(--accent)}
+.road button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.stage-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:1.2rem;align-items:center}
+@media (max-width:720px){.stage-card{grid-template-columns:minmax(0,1fr)}}
+.stage-card svg{width:100%;max-width:300px;justify-self:center}
+.stage-card h3{font-size:1.5rem;color:var(--accent)}
+.stage-card .feel{margin-top:.6rem;padding:.6rem .9rem;border-radius:12px;background:var(--sunk);font-size:.95rem}
+.stage-card .feel b{color:var(--accent)}
+
+.scar svg{display:block;width:100%;height:auto}
+.range{width:100%;height:46px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:-.4rem}
+.meter{display:grid;grid-template-columns:7.5em 1fr;gap:.6rem;align-items:center;font-size:.9rem;margin-top:.4rem}
+.track{height:16px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.fill{height:100%;border-radius:99px;transition:width .3s}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 1 課 小心灼燙傷・延伸學習</div>
+    <h1>疤痕的祕密</h1>
+    <p class="k-lede">小鈞手上的疤痕，是兩年前被熱湯燙到留下的。燙傷好了以後，為什麼還要一直穿壓力衣？疤痕會痛會癢嗎？我們可以怎麼和他相處？一起來了解燙傷之後的復原之路。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#journey"><span class="no">第 1 站</span><b>漫長的復原路</b><span>從受傷到回學校</span></a>
+      <a href="#garment"><span class="no">第 2 站</span><b>壓力衣的祕密</b><span>為什麼熱也不能脫</span></a>
+      <a href="#friend"><span class="no">第 3 站</span><b>當個好同學</b><span>哪些話會讓人難過</span></a>
+    </nav>
+  </div>
+</header>
+
+<!-- 1 復原之路 -->
+<section class="k-sec" id="journey">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>燙傷好了，還沒結束</h2></div>
+  <p class="big" style="max-width:44em">嚴重的燙傷，傷口癒合只是第一步。接下來的一兩年，身體還要對抗<b>會一直長大的疤痕</b>。點下面每一站，看看燙傷的人要經歷什麼。</p>
+  <div class="road" id="road" role="group" aria-label="復原的每一站"></div>
+  <div class="panel stage-card" id="stage" aria-live="polite"></div>
+  <div class="think"><b>想一想</b><p>如果你每天都要花一個多小時穿脫壓力衣、擦乳液，還不能跟大家一樣穿短袖，你的心情會怎麼樣？</p></div>
+ </div>
+</section>
+
+<!-- 2 壓力衣 -->
+<section class="k-sec alt" id="garment">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>壓力衣為什麼要一直穿？</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">燙傷癒合時，皮膚會拚命長出新的組織來補洞。有時候「補過頭」，疤痕就會<b>越長越厚、越來越硬</b>，還會又紅又癢，這叫做<mark>增生性疤痕</mark>。</p>
+      <p>壓力衣是很緊、有彈性的衣服，一直壓住疤痕，讓它長得比較<b>平、軟</b>。所以要<b>幾乎整天都穿著</b>，就算天氣熱也不能隨便脫掉。</p>
+      <div class="cards" style="margin-top:.4rem">
+        <div class="card"><h3>要穿多久？</h3><p>通常要穿 <b>2～3 年</b>。壓力衣會慢慢變鬆，大約每半年就要換新的，而且要有兩套輪流洗。</p></div>
+        <div class="card"><h3>為什麼特別怕熱？</h3><p>嚴重燙傷的地方，皮膚裡的<b>汗腺</b>被破壞了，不太會流汗散熱。再穿上緊緊的壓力衣，夏天會非常悶熱。</p></div>
+        <div class="card"><h3>為什麼一直抓癢？</h3><p>新長的疤痕又乾又癢，常常要擦乳液保持溼潤。忍不住抓的時候，其實他也很不舒服。</p></div>
+      </div>
+    </div>
+    <figure class="stack">
+      <div class="fig scar">
+        <svg viewBox="0 0 420 240" role="img" aria-label="疤痕切面示意圖，壓力越大疤痕越平">
+          <rect x="0" y="0" width="420" height="240" fill="var(--surface)"/>
+          <!-- garment band -->
+          <rect id="band" x="20" y="40" width="380" height="0" rx="6" fill="var(--cool)" opacity=".35"/>
+          <!-- skin -->
+          <path d="M20 150 H400 V220 H20 Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/>
+          <path d="M20 190 H400" stroke="var(--skin-line)" stroke-dasharray="6 6" opacity=".6"/>
+          <!-- scar bump -->
+          <path id="bump" d="" fill="#D97B7B" stroke="#A84E4E" stroke-width="2"/>
+          <!-- itch marks -->
+          <g id="itch" stroke="var(--bad)" stroke-width="3" stroke-linecap="round" fill="none"></g>
+          <!-- arrows -->
+          <g id="arrows" fill="var(--cool)"></g>
+          <text x="24" y="236" font-size="13" fill="var(--muted)">皮膚</text>
+          <text x="210" y="28" font-size="15" text-anchor="middle" fill="var(--fg)" id="lbl">沒有壓力：疤痕一直長高</text>
+        </svg>
+      </div>
+      <div>
+        <label for="press" class="muted" style="font-size:.9rem">拉拉看：壓力衣的壓力</label>
+        <input id="press" class="range" type="range" min="0" max="4" step="1" value="0">
+        <div class="ticks" aria-hidden="true"><span>沒穿</span><span>偶爾穿</span><span>常常穿</span><span>幾乎整天</span><span>持續 2 年</span></div>
+      </div>
+      <div class="meter"><span>疤痕高度</span><div class="track"><div class="fill" id="mH" style="background:#D97B7B"></div></div></div>
+      <div class="meter"><span>又紅又癢</span><div class="track"><div class="fill" id="mI" style="background:var(--bad)"></div></div></div>
+      <figcaption>示意圖，非實際比例</figcaption>
+    </figure>
+  </div>
+ </div>
+</section>
+
+<!-- 3 好同學 -->
+<section class="k-sec" id="friend">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>當同學身上有疤痕</h2></div>
+  <p class="big" style="max-width:44em">有燙傷疤痕的人最常遇到的困擾，不是痛，而是<b>別人的眼光</b>。有傷友說，剛出院時大家一直盯著他看，讓他忍不住想：「我很奇怪嗎？」下面這些反應，哪些讓人溫暖，哪些會讓人難過？</p>
+  <div id="sortBox" class="panel" style="margin-top:1rem"></div>
+  <div class="cards">
+    <div class="card good"><h3>臉部平權</h3><p>每個人的長相都不一樣，有疤痕、有胎記都一樣值得被尊重。不因為外表取笑或排擠別人，這就是「臉部平權」。</p></div>
+    <div class="card"><h3>想問的時候</h3><p>好奇是正常的。可以先打招呼、交朋友，等熟一點再禮貌地問：「可以跟我說說嗎？」對方不想說，也要尊重。</p></div>
+    <div class="card"><h3>可以怎麼幫忙</h3><p>天氣熱時體諒他不能脫壓力衣；體育課或戶外活動時，可以陪他到陰涼的地方休息。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>壓力衣需配合疤痕成熟期穿戴，台灣常見做法為平均穿戴 2～3 年、約每 6 個月更換，每人需 2 套輪替；一套可能包含手套、袖套、腿套及面罩等 4～8 件。</li>
+      <li>嚴重燒燙傷處汗腺受損、散熱差，穿著壓力衣更易悶熱；疤痕乾燥會脫屑發癢，需長期擦乳液保濕。</li>
+      <li>陽光社會福利基金會長期提供燒燙傷者復健、壓力衣製作與心理支持，並推動「臉部平權運動」。2015 年八仙樂園粉塵爆燃事件後，該會在 3 個月內為近 200 位傷友製作了 2,000 多件壓力衣。</li>
+      <li>可與課本 p.56「與灼燙傷患者相處」連結，引導學生用同理、尊重的態度相處。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>疤痕小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>報導者〈八仙塵爆傷友的復健之路〉（陽光基金會壓力衣、燒燙傷復健相關資料）。</li>
+    <li>花蓮慈濟醫院復健科〈壓力衣〉衛教資料。</li>
+    <li>國小健康與體育四上課本 單元 3 第 1 課〈小心灼燙傷〉。</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* ---------- 1 復原之路 ---------- */
+var stages=[
+  {t:"受傷了！",w:"第 1 天",d:"被熱湯燙到，皮膚馬上變紅、起水泡。先做「沖脫泡蓋送」，再送到醫院。",f:"好痛、好害怕。",pic:"hurt"},
+  {t:"住院治療",w:"幾天到幾個月",d:"醫生清理傷口、每天換藥。傷得很深的地方，可能要從身體其他地方取皮膚來「植皮」。",f:"換藥的時候很痛，也很想回家。",pic:"bed"},
+  {t:"傷口癒合",w:"約幾週後",d:"新皮膚長好了，可以出院。但是新皮膚很薄、很脆弱，也比較怕曬。",f:"終於可以回家了！",pic:"heal"},
+  {t:"疤痕開始長",w:"之後 1～2 年",d:"疤痕會變紅、變厚、變硬，又癢又緊。關節附近的疤痕會拉住皮膚，讓手腳不好彎。",f:"好癢，又不能用力抓。",pic:"scar"},
+  {t:"穿壓力衣",w:"約 2～3 年",d:"幾乎整天穿著緊緊的壓力衣，把疤痕壓平。每天穿脫、清洗、擦乳液要花一個多小時。",f:"夏天好熱，可是不能脫。",pic:"suit"},
+  {t:"復健運動",w:"每天",d:"做伸展和運動，避免疤痕把關節拉緊，讓手腳可以靈活活動。",f:"有點累，但是一天比一天進步。",pic:"move"},
+  {t:"回到學校",w:"重新出發",d:"回到教室和同學一起上課。這時候，大家友善的態度最重要。",f:"希望大家不要一直盯著我看。",pic:"school"}
+];
+function pic(k){
+  var face='<circle cx="120" cy="80" r="34" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><path d="M88 70 C92 40 150 40 154 70 C140 60 100 60 88 70Z" fill="#3a2a22"/><circle cx="108" cy="82" r="4" fill="#3a2a22"/><circle cx="132" cy="82" r="4" fill="#3a2a22"/>';
+  var smile='<path d="M108 98 Q120 106 132 98" stroke="#3a2a22" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  var sad='<path d="M108 102 Q120 94 132 102" stroke="#3a2a22" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  var body='<rect x="88" y="116" width="64" height="70" rx="22" fill="#6aa0d8"/>';
+  var arm='<rect x="150" y="122" width="56" height="18" rx="9" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/>';
+  var s={
+    hurt:face+sad+body+arm+'<ellipse cx="182" cy="131" rx="18" ry="8" fill="#e46a5e" opacity=".85"/><circle cx="186" cy="128" r="5" fill="#fff" opacity=".8"/><path d="M200 100 l10 -12 M188 96 l2 -14 M210 116 l14 -6" stroke="var(--bad)" stroke-width="3" stroke-linecap="round"/>',
+    bed:'<rect x="30" y="140" width="190" height="40" rx="8" fill="#cfd8dc"/><rect x="30" y="120" width="40" height="30" rx="8" fill="#fff" stroke="#b0bec5"/>'+'<circle cx="60" cy="118" r="22" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><path d="M40 112 C44 92 80 92 82 112 C70 104 52 104 40 112Z" fill="#3a2a22"/><rect x="80" y="122" width="130" height="24" rx="10" fill="#90caf9"/><rect x="160" y="110" width="40" height="14" rx="7" fill="#fff" stroke="#b0bec5"/><line x1="226" y1="60" x2="226" y2="180" stroke="#90a4ae" stroke-width="4"/><rect x="214" y="60" width="24" height="34" rx="6" fill="#e3f2fd" stroke="#90a4ae"/>',
+    heal:face+smile+body+arm+'<rect x="164" y="124" width="36" height="14" rx="7" fill="#f6b8b0"/>',
+    scar:face+sad+body+arm+'<path d="M164 126 q6 -6 12 0 t12 0 t12 0" stroke="#b35454" stroke-width="5" fill="none"/><path d="M200 96 l6 -10 M212 104 l10 -6" stroke="var(--warn)" stroke-width="3" stroke-linecap="round"/><text x="196" y="86" font-size="16" fill="var(--warn)">癢</text>',
+    suit:face+smile+'<rect x="88" y="116" width="64" height="70" rx="22" fill="#8d9fb8"/><rect x="150" y="122" width="56" height="18" rx="9" fill="#8d9fb8"/><path d="M96 130 h48 M96 145 h48 M96 160 h48 M156 131 h44" stroke="#6f8199" stroke-width="2"/><text x="170" y="104" font-size="15" fill="var(--warn)">熱…</text>',
+    move:face+smile+body+'<rect x="150" y="96" width="18" height="56" rx="9" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2" transform="rotate(-35 159 124)"/><rect x="72" y="96" width="18" height="56" rx="9" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2" transform="rotate(35 81 124)"/><path d="M200 70 q10 10 0 20 M40 70 q-10 10 0 20" stroke="var(--good)" stroke-width="3" fill="none"/>',
+    school:'<rect x="20" y="40" width="200" height="110" rx="8" fill="#2f5e4e"/><text x="120" y="100" text-anchor="middle" font-size="22" fill="#fff">歡迎回來</text>'+'<g transform="translate(-20,60) scale(.75)">'+face+smile+'<rect x="88" y="116" width="64" height="70" rx="22" fill="#8d9fb8"/></g><g transform="translate(110,60) scale(.75)">'+face+smile+body+'</g>'
+  };
+  return '<svg viewBox="0 0 240 200" aria-hidden="true">'+s[k]+'</svg>';
+}
+var road=document.getElementById('road'), stageEl=document.getElementById('stage');
+stages.forEach(function(s,i){
+  var b=document.createElement('button');b.type='button';
+  b.innerHTML='<span class="n">第 '+(i+1)+' 站</span><b>'+s.t+'</b><span class="when">'+s.w+'</span>';
+  b.addEventListener('click',function(){show(i)});
+  road.appendChild(b);
+});
+function show(i){
+  var s=stages[i];
+  road.querySelectorAll('button').forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false')});
+  stageEl.innerHTML=pic(s.pic)+'<div><div class="muted" style="font-size:.85rem">第 '+(i+1)+' 站・'+s.w+'</div><h3>'+s.t+'</h3><p class="big">'+s.d+'</p><p class="feel"><b>他可能的感受：</b>'+s.f+'</p>'+
+    '<div class="btnrow" style="margin-top:.8rem">'+(i>0?'<button class="btn" type="button" data-go="'+(i-1)+'">← 上一站</button>':'')+(i<stages.length-1?'<button class="btn fill" type="button" data-go="'+(i+1)+'">下一站 →</button>':'')+'</div></div>';
+  stageEl.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){show(+b.dataset.go)})});
+}
+show(0);
+
+/* ---------- 2 壓力衣滑桿 ---------- */
+var press=document.getElementById('press');
+var lbls=["沒有壓力：疤痕一直長高","偶爾穿：疤痕還是很厚","常常穿：疤痕慢慢變平","幾乎整天穿：疤痕變平、變軟","持續穿 2 年：疤痕平坦、顏色變淡"];
+function drawScar(v){
+  var hgt=[70,58,40,22,10][v], w=150;
+  document.getElementById('bump').setAttribute('d','M'+(210-w)+' 150 C'+(210-w*.55)+' 150 '+(210-w*.45)+' '+(150-hgt)+' 210 '+(150-hgt)+' C'+(210+w*.45)+' '+(150-hgt)+' '+(210+w*.55)+' 150 '+(210+w)+' 150 Z');
+  var band=document.getElementById('band'), bh=v===0?0:14;
+  band.setAttribute('height',bh); band.setAttribute('y',150-hgt-bh-2);
+  var ar=document.getElementById('arrows'); ar.innerHTML='';
+  if(v>0){for(var x=90;x<=330;x+=60){ar.insertAdjacentHTML('beforeend','<path d="M'+(x-8)+' '+(150-hgt-bh-30)+' h16 v12 h8 l-16 14 l-16 -14 h8z" opacity="'+(0.3+v*0.17)+'"/>')}}
+  var it=document.getElementById('itch'); it.innerHTML='';
+  var n=[5,4,3,1,0][v];
+  for(var k=0;k<n;k++){var x=150+k*28,y=150-hgt-14-(k%2)*10;it.insertAdjacentHTML('beforeend','<path d="M'+x+' '+y+' l6 -8 l6 8 l6 -8"/>')}
+  document.getElementById('lbl').textContent=lbls[v];
+  document.getElementById('mH').style.width=(hgt/70*100)+'%';
+  document.getElementById('mI').style.width=([95,80,55,30,10][v])+'%';
+}
+press.addEventListener('input',function(){drawScar(+press.value)});
+drawScar(0);
+
+/* ---------- 3 分類 ---------- */
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'warm',t:'讓人覺得溫暖',d:'友善、尊重'},{id:'hurt',t:'會讓人難過',d:'不禮貌、傷人'}],
+  items:[
+    {t:'一直盯著他的疤痕看',bin:'hurt',e:'被一直盯著看，會讓人覺得自己很奇怪。'},
+    {t:'像平常一樣跟他打招呼',bin:'warm',e:'自然的相處，就是最好的歡迎。'},
+    {t:'說「好噁心，不要碰我」',bin:'hurt',e:'這句話非常傷人。疤痕不會傳染，碰到也沒關係。'},
+    {t:'邀請他下課一起玩',bin:'warm',e:'一起玩，讓他知道自己是班上的一份子。'},
+    {t:'模仿他穿壓力衣的樣子開玩笑',bin:'hurt',e:'拿別人的外表開玩笑是取笑，不是好笑。'},
+    {t:'天氣熱時體諒他不能脫壓力衣',bin:'warm',e:'了解原因，就不會覺得他「怪怪的」。'},
+    {t:'跟別人說「不要跟他玩」',bin:'hurt',e:'排擠別人是霸凌行為。'},
+    {t:'熟了以後，禮貌地問他想不想聊聊',bin:'warm',e:'尊重對方的意願，他不想說也沒關係。'}
+  ],
+  done:'全部完成！記得：疤痕不會傳染，自然、尊重的態度最重要。'
+});
+
+/* ---------- 小測驗 ---------- */
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'燙傷癒合後，為什麼還要穿壓力衣？',o:['讓傷口不要碰到灰塵','把會長厚的疤痕壓平、壓軟','讓身體保暖'],a:1,e:'壓力衣持續施壓，可以讓增生的疤痕變平、變軟。'},
+  {q:'壓力衣通常要穿多久？',o:['大約一個星期','大約一個月','大約 2～3 年'],a:2,e:'疤痕會長很久，壓力衣通常要穿 2～3 年。'},
+  {q:'為什麼嚴重燙傷的人特別怕熱？',o:['皮膚裡的汗腺被破壞，不太會流汗散熱','他們比較怕冷','因為疤痕會發光發熱'],a:0,e:'汗腺受損就不容易散熱，再穿上緊緊的壓力衣會更悶熱。'},
+  {q:'新同學身上有燙傷疤痕，下面哪個做法最好？',o:['一直問他怎麼受傷的','像平常一樣跟他打招呼、一起玩','離他遠一點比較安全'],a:1,e:'疤痕不會傳染。自然、友善的相處最重要。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

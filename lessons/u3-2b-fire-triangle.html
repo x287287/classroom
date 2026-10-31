@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>火的三角形</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 燃燒三要素：三角形三個邊各是一個開關，火焰在中間 */
+.tri svg{display:block;width:100%;max-width:440px;margin:0 auto;height:auto}
+.side{cursor:pointer}
+.side text{font-family:var(--font-display);font-size:20px}
+.side:focus{outline:none}
+.side:focus-visible rect{stroke:var(--warn);stroke-width:4}
+.flame{transform-origin:220px 250px;transition:transform .4s,opacity .4s}
+@keyframes flick{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.95)}}
+.flame.on{animation:flick .5s ease-in-out infinite}
+.flame.off{transform:scale(.1);opacity:0}
+.pan svg{display:block;width:100%;height:auto}
+.method{display:flex;flex-wrap:wrap;gap:.6rem}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 2 課 防火安全檢查・延伸學習</div>
+    <h1>火的三角形</h1>
+    <p class="k-lede">火要燒起來，需要三個條件同時存在。只要拿掉其中一個，火就會熄滅。懂了這個祕密，你就知道為什麼油鍋起火要蓋鍋蓋、為什麼不能潑水。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#triangle"><span class="no">第 1 站</span><b>燃燒三要素</b><span>拿掉一個，火就熄</span></a>
+      <a href="#oil"><span class="no">第 2 站</span><b>油鍋起火實驗室</b><span>潑水會怎樣</span></a>
+      <a href="#habit"><span class="no">第 3 站</span><b>用火好習慣</b><span>安全還是危險</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="triangle">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>火需要三個好朋友</h2></div>
+  <div class="two">
+    <figure class="fig tri">
+      <svg viewBox="0 0 440 380" role="group" aria-label="燃燒三角形，點三個邊可以拿掉該要素">
+        <path d="M220 30 L410 340 L30 340 Z" fill="var(--sunk)" stroke="var(--line)" stroke-width="3"/>
+        <g class="flame on" id="flame">
+          <path d="M220 130 C250 175 280 195 280 245 A60 60 0 0 1 160 245 C160 215 180 205 190 180 C198 200 206 205 214 195 C208 170 210 150 220 130 Z" fill="#FF7043"/>
+          <path d="M220 190 C236 215 250 228 250 252 A30 30 0 0 1 190 252 C190 236 202 228 208 214 C212 224 218 226 222 220 Z" fill="#FFCA28"/>
+        </g>
+        <g class="side" data-k="fuel" tabindex="0" role="button" aria-label="可燃物">
+          <rect x="140" y="320" width="160" height="44" rx="22" fill="#8D6E63" stroke="transparent" stroke-width="4"/>
+          <text x="220" y="349" text-anchor="middle" fill="#fff">可燃物</text>
+        </g>
+        <g class="side" data-k="o2" tabindex="0" role="button" aria-label="氧氣">
+          <rect x="300" y="150" width="120" height="44" rx="22" fill="#42A5F5" stroke="transparent" stroke-width="4" transform="rotate(58 360 172)"/>
+          <text x="360" y="179" text-anchor="middle" fill="#fff" transform="rotate(58 360 172)">氧氣</text>
+        </g>
+        <g class="side" data-k="heat" tabindex="0" role="button" aria-label="溫度">
+          <rect x="20" y="150" width="120" height="44" rx="22" fill="#EF5350" stroke="transparent" stroke-width="4" transform="rotate(-58 80 172)"/>
+          <text x="80" y="179" text-anchor="middle" fill="#fff" transform="rotate(-58 80 172)">溫度</text>
+        </g>
+      </svg>
+      <figcaption>點三角形的一個邊，把它「拿掉」</figcaption>
+    </figure>
+    <div class="stack">
+      <div class="cards" style="margin-top:0">
+        <div class="card"><h3 style="color:#8D6E63">可燃物</h3><p>會燒的東西：木頭、紙、布、油、瓦斯、塑膠。</p></div>
+        <div class="card"><h3 style="color:#1E88E5">氧氣</h3><p>空氣裡就有，火要「呼吸」氧氣才能燒。</p></div>
+        <div class="card"><h3 style="color:#E53935">溫度</h3><p>要夠熱才會點著，例如火柴、爐火、電線過熱。</p></div>
+      </div>
+      <div class="say" id="triMsg" aria-live="polite"></div>
+      <button class="btn" type="button" id="triReset">把火點回來</button>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="oil">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>油鍋起火實驗室</h2></div>
+  <div class="two">
+    <figure class="fig pan">
+      <svg viewBox="0 0 440 320" aria-hidden="true">
+        <rect width="440" height="320" fill="var(--surface)"/>
+        <rect x="60" y="250" width="320" height="22" rx="6" fill="#555"/>
+        <g id="burner"><path d="M150 250 q8 -14 16 0 M200 250 q8 -14 16 0 M250 250 q8 -14 16 0" stroke="#42A5F5" stroke-width="4" fill="none"/></g>
+        <path d="M100 200 h240 l-20 50 h-200 z" fill="#78909C" stroke="#546E7A" stroke-width="3"/>
+        <rect x="340" y="206" width="80" height="12" rx="6" fill="#333"/>
+        <path d="M108 206 h224 l-6 14 h-212 z" fill="#FFC107" opacity=".85" id="oilLayer"/>
+        <g id="water"></g>
+        <g id="fire"></g>
+        <g id="lid"></g>
+        <g id="splash"></g>
+      </svg>
+    </figure>
+    <div class="stack">
+      <p class="big">炸東西的油溫度很高，太熱時油鍋會自己冒出火來。這時候你會選哪一個方法？</p>
+      <div class="method">
+        <button class="btn fill" type="button" data-m="lid">蓋上鍋蓋</button>
+        <button class="btn" type="button" data-m="water">潑一杯水</button>
+        <button class="btn" type="button" data-m="off">只關掉爐火</button>
+      </div>
+      <div class="say" id="oilMsg" aria-live="polite"><div class="t">油鍋起火了！</div><p>選一個方法試試看。</p></div>
+      <button class="btn" type="button" id="oilReset">重新開始</button>
+    </div>
+  </div>
+  <div class="card warn" style="margin-top:1rem"><h3>為什麼不能潑水？</h3><p>水比油重，潑進去會<b>沉到熱油底下</b>，一瞬間變成水蒸氣往上衝，把著火的油<b>噴得到處都是</b>，火反而燒得更大。</p></div>
+ </div>
+</section>
+
+<section class="k-sec" id="habit">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>用火好習慣，分分看</h2></div>
+  <p class="big" style="max-width:44em">消防署統計，<b>電氣因素</b>和<b>爐火烹調</b>是住宅火災最常見的兩大原因，接下來是沒熄滅的火種，例如菸蒂、蚊香、香和金紙。</p>
+  <div class="panel" id="sortBox" style="margin-top:1rem"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>燃燒三要素（火三角）：可燃物、助燃物（氧氣）、熱源（溫度）。滅火原理即移除其一：移除可燃物（關瓦斯）、隔絕氧氣（蓋鍋蓋、滅火毯）、降低溫度（灑水）。</li>
+      <li>課本 p.64：油比水輕，往油鍋倒水時油浮在水上，水受熱汽化使上方的油四散；油鍋起火應立刻蓋上鍋蓋。可補充：蓋鍋蓋後再關火，鍋子冷卻前不要掀開。</li>
+      <li>高雄市消防局資料（104～108 年）：住宅火災起火原因以爐火烹調、電氣因素、遺留火種為前三名；另據消防署 2022～2024 年統計，電氣因素占比最高（40.1%）。不同年份與統計方式排序略有不同。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>火的三角形測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>國小健康與體育四上課本 單元 3 第 2 課〈常見危險用火行為〉。</li>
+    <li>高雄市政府消防局住宅防火宣導資料；工商時報引述內政部消防署統計。</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var have={fuel:1,o2:1,heat:1};
+var why={
+  fuel:{t:'拿掉可燃物',d:'沒有東西可以燒，火就熄了。例如：<b>關掉瓦斯開關</b>、把東西移開。'},
+  o2:{t:'拿掉氧氣',d:'火沒辦法「呼吸」，就熄了。例如：<b>油鍋蓋上鍋蓋</b>、用滅火毯蓋住、身上著火時「躺下滾動」。'},
+  heat:{t:'拿掉溫度',d:'溫度降下來，火就燒不起來。例如：<b>用水澆熄</b>木頭和紙的火（但油和電器的火不能用水）。'}
+};
+function drawTri(last){
+  document.querySelectorAll('.side').forEach(function(g){g.style.opacity=have[g.dataset.k]?1:.25});
+  var lit=have.fuel&&have.o2&&have.heat;
+  var f=document.getElementById('flame');f.classList.toggle('on',!!lit);f.classList.toggle('off',!lit);
+  var m=document.getElementById('triMsg');
+  if(lit){m.className='say bad';m.innerHTML='<div class="t">三個條件都在：火燒起來了</div><p>點三角形的任何一個邊，把它拿掉看看。</p>'}
+  else{m.className='say good';m.innerHTML='<div class="t">火熄滅了！'+(last?'（'+why[last].t+'）':'')+'</div><p>'+(last?why[last].d:'')+'</p>'}
+}
+document.querySelectorAll('.side').forEach(function(g){var go=function(){var k=g.dataset.k;have[k]=have[k]?0:1;drawTri(have[k]?null:k)};g.addEventListener('click',go);g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+document.getElementById('triReset').addEventListener('click',function(){have={fuel:1,o2:1,heat:1};drawTri()});
+drawTri();
+
+/* 油鍋 */
+function flames(scale,spread){var s='';var n=spread?9:5;for(var i=0;i<n;i++){var x=spread?40+i*45:140+i*40,h=(50+((i*37)%30))*scale;s+='<path d="M'+(x-18)+' 206 C'+(x-14)+' '+(206-h*.6)+' '+(x-4)+' '+(206-h*.8)+' '+x+' '+(206-h)+' C'+(x+4)+' '+(206-h*.8)+' '+(x+14)+' '+(206-h*.6)+' '+(x+18)+' 206 Z" fill="'+(i%2?'#FF7043':'#FFA726')+'" opacity=".92"/>'}return s}
+function oilReset(){document.getElementById('fire').innerHTML=flames(1,false);document.getElementById('lid').innerHTML='';document.getElementById('water').innerHTML='';document.getElementById('splash').innerHTML='';document.getElementById('burner').style.display='';var m=document.getElementById('oilMsg');m.className='say';m.innerHTML='<div class="t">油鍋起火了！</div><p>選一個方法試試看。</p>'}
+document.querySelectorAll('[data-m]').forEach(function(b){b.addEventListener('click',function(){
+  oilReset();var m=document.getElementById('oilMsg'),k=b.dataset.m;
+  if(k==='lid'){document.getElementById('fire').innerHTML='';document.getElementById('lid').innerHTML='<path d="M96 200 Q220 150 344 200 Z" fill="#B0BEC5" stroke="#78909C" stroke-width="3"/><circle cx="220" cy="168" r="10" fill="#546E7A"/>';document.getElementById('burner').style.display='none';
+    m.className='say good';m.innerHTML='<div class="t">火熄了！</div><p>鍋蓋把<b>氧氣隔開</b>，火就熄滅了。接著關掉爐火，等鍋子冷了再打開。沒有鍋蓋時，可以用大的鐵盤或砧板蓋住。</p>'}
+  else if(k==='water'){document.getElementById('water').innerHTML='<ellipse cx="220" cy="216" rx="40" ry="5" fill="#42A5F5"/>';
+    setTimeout(function(){document.getElementById('fire').innerHTML=flames(2.2,true);var sp='';for(var i=0;i<16;i++){var a=i/16*Math.PI*2,r=120+((i*31)%60);sp+='<circle cx="'+(220+Math.cos(a)*r)+'" cy="'+(150+Math.sin(a)*r*.6)+'" r="'+(5+i%4)+'" fill="#FF9800"/>'}document.getElementById('splash').innerHTML=sp},250);
+    m.className='say bad';m.innerHTML='<div class="t">火燒得更大了！</div><p>水沉到熱油底下，瞬間變成水蒸氣，把著火的油噴得到處都是。<b>油鍋起火千萬不能潑水！</b></p>'}
+  else{document.getElementById('burner').style.display='none';document.getElementById('fire').innerHTML=flames(.9,false);
+    m.className='say';m.innerHTML='<div class="t">火還在燒</div><p>關火是對的（移走溫度來源），但鍋裡的油還是很燙、還有氧氣，火不會馬上熄。要<b>先蓋鍋蓋</b>，再關火。</p>'}
+})});
+document.getElementById('oilReset').addEventListener('click',oilReset);oilReset();
+
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'safe',t:'安全的好習慣'},{id:'risk',t:'危險的行為'}],
+  items:[
+    {t:'煮湯時離開廚房去看電視',bin:'risk',e:'湯滾出來會把火澆熄，瓦斯會外洩；或是鍋子燒乾起火。'},
+    {t:'離開廚房前先關火',bin:'safe',e:'人離開，火就要關。'},
+    {t:'蚊香放在窗簾旁邊',bin:'risk',e:'窗簾一飄過來就可能點著，蚊香要放在金屬架上、遠離布料。'},
+    {t:'金紙放在金爐裡燒，確定熄滅才離開',bin:'safe',e:'灰燼裡的火星可能復燃，要確定完全熄滅。'},
+    {t:'把沒熄的菸蒂丟進垃圾桶',bin:'risk',e:'菸蒂會點燃垃圾桶裡的紙，是常見的火災原因。'},
+    {t:'打火機收在小孩拿不到的地方',bin:'safe',e:'小孩玩火是很危險的事。'},
+    {t:'爐子旁邊放紙巾和塑膠袋',bin:'risk',e:'可燃物離火太近，很容易被點著。'},
+    {t:'用完瓦斯爐，把瓦斯開關也關好',bin:'safe',e:'雙重保險，避免瓦斯外洩。'}
+  ],
+  done:'全部分對了！回家和家人一起檢查用火習慣吧。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'燃燒需要哪三個條件？',o:['可燃物、氧氣、溫度','水、空氣、陽光','木頭、紙、布'],a:0,e:'這三個條件叫做「燃燒三要素」。'},
+  {q:'油鍋起火時蓋上鍋蓋，是拿掉了哪一個條件？',o:['可燃物','氧氣','溫度'],a:1,e:'鍋蓋把空氣隔開，火就沒有氧氣了。'},
+  {q:'油鍋起火為什麼不能潑水？',o:['水會把油變冷，太浪費','水沉到油底下變成水蒸氣，把著火的油噴出來','水太貴'],a:1,e:'油比水輕，水在下面瞬間汽化，會讓火燒得更大。'},
+  {q:'關掉瓦斯開關讓火熄滅，是拿掉了哪一個條件？',o:['可燃物','氧氣','溫度'],a:0,e:'瓦斯是可燃物，關掉就沒有東西可以燒了。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>119 報案模擬器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 手機通話畫面（左）＋ 報案小抄（右） */
+.call{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.4rem;align-items:start}
+@media (max-width:860px){.call{grid-template-columns:minmax(0,1fr)}}
+.phone{background:#1C2833;border-radius:34px;padding:18px 14px 20px;max-width:440px;width:100%;margin:0 auto;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.screen{background:#F4F6F8;border-radius:22px;min-height:520px;display:flex;flex-direction:column;overflow:hidden}
+.bar{background:#C0392B;color:#fff;padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display)}
+.bar small{opacity:.85;font-family:var(--font-body)}
+.log{flex:1;padding:.9rem;display:flex;flex-direction:column;gap:.55rem;overflow-y:auto;max-height:430px}
+.bub{max-width:86%;padding:.5rem .8rem;border-radius:16px;font-size:.98rem;line-height:1.55;color:#1F2A27}
+.bub.d{background:#fff;border:1px solid #DDE3E8;align-self:flex-start;border-bottom-left-radius:4px}
+.bub.me{background:#D8F3E6;align-self:flex-end;border-bottom-right-radius:4px}
+.bub.sys{align-self:center;background:transparent;color:#5A6762;font-size:.85rem}
+.choices{display:grid;gap:.5rem;padding:.8rem;background:#E9EDF0}
+.choices button{appearance:none;border:2px solid #C9D2D8;background:#fff;color:#1F2A27;border-radius:14px;padding:.55rem .8rem;text-align:left;min-height:3.1rem;cursor:pointer;font-size:.98rem}
+.choices button:active{transform:scale(.98)}
+.cheat ol{margin:.4rem 0 0;padding-left:1.3em}
+.cheat li{margin:.25rem 0}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:1rem}
+.num{font-family:var(--font-display);font-size:2.6rem;line-height:1;color:var(--accent)}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 3 課 火場應變・延伸學習</div>
+    <h1>119 報案模擬器</h1>
+    <p class="k-lede">課本說：先逃到安全的地方，再打 119。可是電話接通以後，要說什麼？說得越清楚，消防車就能越快到。現在你已經逃到樓下，拿起手機練習報案吧！</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#sim"><span class="no">第 1 站</span><b>打電話練習</b><span>回答消防員的問題</span></a>
+      <a href="#nums"><span class="no">第 2 站</span><b>119、110、112</b><span>哪個號碼做什麼</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="sim">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>電話接通了！</h2></div>
+  <div class="call">
+    <div class="phone">
+      <div class="screen">
+        <div class="bar"><span>119 通話中</span><small id="clock">00:00</small></div>
+        <div class="log" id="log" aria-live="polite"></div>
+        <div class="choices" id="choices"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel cheat">
+        <h3>報案小抄</h3>
+        <ol>
+          <li>是<b>火災</b>還是有人受傷（<b>救護</b>）？</li>
+          <li>在哪裡？<b>縣市、區、路名、巷弄、門牌、幾樓</b></li>
+          <li>什麼東西燒起來？火大不大？</li>
+          <li>還有沒有人<b>受困</b>在裡面？</li>
+          <li>你的<b>名字和電話</b></li>
+          <li>等對方說可以了，<b>才掛電話</b></li>
+        </ol>
+      </div>
+      <div class="say" id="score"><div class="t">練習目標</div><p>用最少的時間，把消防員需要的資訊說清楚。</p></div>
+      <button class="btn" type="button" id="restart">重新練習</button>
+      <div class="card"><h3>不知道地址怎麼辦？</h3><p>說出附近明顯的地標，例如「某某國小對面」、「便利商店旁邊」。平常就要記住自己家的完整地址。</p></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="nums">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>三個緊急電話，用法不一樣</h2></div>
+  <div class="nums">
+    <div class="card"><div class="num">119</div><h3>火災、救護</h3><p>失火了、有人受傷或突然昏倒。消防局會派消防車或救護車。</p></div>
+    <div class="card"><div class="num">110</div><h3>報警</h3><p>遇到壞人、車禍、有人打架或東西被偷。警察局會派警察。</p></div>
+    <div class="card"><div class="num">112</div><h3>手機的緊急號碼</h3><p>手機<b>沒有 SIM 卡</b>或收訊不好時可以撥。接通後聽語音：按 <b>0 找警察、按 9 找消防</b>。收訊正常時，直接打 119 或 110 比較快。</p></div>
+  </div>
+  <div class="card warn" style="margin-top:1rem"><h3>不可以亂打</h3><p>打電話惡作劇、報假案，會讓真正需要幫忙的人等不到救援，而且是違法的行為。</p></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>台灣事實查核中心：手機在急難時可撥 119、110 或 112；112 適用於無 SIM 卡或基地台收訊不佳時，有語音引導（按 0 轉警察、按 9 轉消防）。收訊良好時建議直撥 119、110，不需經過語音導引。</li>
+      <li>若完全沒有任何電信業者的訊號，112 和 119 都無法撥出。</li>
+      <li>課本 p.74：發現火災時先大聲示警、逃到安全的地方再撥 119，並依對方引導提供資訊。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>報案小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>台灣事實查核中心〈網傳「手機撥 119 無效、要撥 112」？〉。</li><li>國小健康與體育四上課本 單元 3 第 3 課〈發現火災時〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var script=[
+  {d:'119 您好，請問是火災還是救護？',opts:[
+    {t:'火災！我家失火了！',ok:1},
+    {t:'喂？喂？你是誰？',ok:0,f:'接通後不用問對方是誰，直接說發生什麼事。'},
+    {t:'我好害怕……（哭）',ok:0,f:'害怕是正常的，先深呼吸，然後說「火災」兩個字就好。'}]},
+  {d:'請問火災地點在哪裡？',opts:[
+    {t:'在我家。',ok:0,f:'消防員不知道你家在哪裡，要說完整的地址。'},
+    {t:'平安市幸福區快樂路 18 巷 5 號 3 樓。',ok:1},
+    {t:'在學校附近，很近啦！',ok:0,f:'「附近」太模糊了，要說縣市、路名、門牌，或明顯的地標。'}]},
+  {d:'好的，快樂路 18 巷 5 號 3 樓。是什麼東西燒起來？火大嗎？',opts:[
+    {t:'廚房的油鍋燒起來，火已經燒到天花板，煙很多。',ok:1},
+    {t:'我不知道，反正很恐怖。',ok:0,f:'說出你看到的就好，例如在哪個房間、火大不大、煙多不多。'},
+    {t:'你們快來就對了！',ok:0,f:'消防員要知道狀況，才能派對的車和裝備。'}]},
+  {d:'還有沒有人在裡面？',opts:[
+    {t:'阿公還在 3 樓，他走路不方便。',ok:1},
+    {t:'應該沒有吧？我也不確定。',ok:0,f:'先清點家人。不確定也要說「不確定，可能還有人」，消防員會進去找。'},
+    {t:'我的小狗還在裡面，我要回去救牠！',ok:0,f:'千萬不要回去！把寵物還在裡面的事告訴消防員就好。'}]},
+  {d:'了解，阿公在 3 樓。請問您的姓名和電話？',opts:[
+    {t:'我叫王小明，電話 0912-345-678。',ok:1},
+    {t:'這個不重要吧？',ok:0,f:'留下電話，消防員找不到路或需要更多資訊時才能聯絡你。'},
+    {t:'（直接掛掉電話）',ok:0,f:'要等對方說可以了才掛電話。'}]},
+  {d:'消防車已經出發了。請在樓下安全的地方等，不要再進去。我們先掛電話囉！',opts:[
+    {t:'好，謝謝！我會在樓下等，看到消防車會揮手。',ok:1},
+    {t:'我先上去拿書包。',ok:0,f:'絕對不要回去！火和煙擴散得很快。'}]}
+];
+var step=0,mistakes=0,sec=0,tick=null;
+var log=document.getElementById('log'),ch=document.getElementById('choices');
+function add(cls,t){var b=document.createElement('div');b.className='bub '+cls;b.textContent=t;log.appendChild(b);log.scrollTop=log.scrollHeight}
+function clock(){sec++;var m=Math.floor(sec/60),s=sec%60;document.getElementById('clock').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
+function ask(){
+  ch.innerHTML='';
+  if(step>=script.length){clearInterval(tick);add('sys','通話結束');var sc=document.getElementById('score');sc.className='say good';sc.innerHTML='<div class="t">報案完成！</div><p>你用了 '+sec+' 秒，'+(mistakes?'有 '+mistakes+' 個地方可以說得更好。再練一次會更快！':'每一題都答得又快又清楚，太棒了！')+'</p>';return}
+  var s=script[step];add('d',s.d);
+  KIT.shuffle(s.opts).forEach(function(o){var b=document.createElement('button');b.type='button';b.textContent=o.t;b.addEventListener('click',function(){
+    add('me',o.t);
+    if(o.ok){step++;setTimeout(ask,450)}
+    else{mistakes++;setTimeout(function(){add('sys','提示：'+o.f)},250);}
+  });ch.appendChild(b)});
+}
+function start(){log.innerHTML='';step=0;mistakes=0;sec=0;clearInterval(tick);tick=setInterval(clock,1000);document.getElementById('clock').textContent='00:00';add('sys','你已經逃到樓下的安全地方，撥打 119……');var sc=document.getElementById('score');sc.className='say';sc.innerHTML='<div class="t">練習目標</div><p>用最少的時間，把消防員需要的資訊說清楚。</p>';setTimeout(ask,500)}
+document.getElementById('restart').addEventListener('click',start);
+start();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'發現家裡失火，應該什麼時候打 119？',o:['一發現就站在火旁邊打','先大聲示警、逃到安全的地方再打','等火熄了再打'],a:1,e:'先保護自己，到安全的地方再報案。'},
+  {q:'報案時，地址應該怎麼說？',o:['在我家','縣市、區、路名、巷弄、門牌、幾樓','很近的地方'],a:1,e:'地址越完整，消防車越快找到。'},
+  {q:'手機沒有 SIM 卡，還可以撥哪個緊急號碼？',o:['112','123','999'],a:0,e:'112 是手機的國際緊急號碼，按 9 轉消防。'},
+  {q:'報案說完以後，什麼時候可以掛電話？',o:['說完地址就掛','等對方說可以了才掛','一接通就掛'],a:1,e:'消防員可能還有問題要問你。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>延長線吃得消嗎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 電器按鈕在上，延長線與電量表在下 */
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr));gap:.6rem}
+.app{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.6rem .7rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem;min-height:7rem}
+.app svg{width:44px;height:44px}
+.app b{font-family:var(--font-display);font-weight:400;font-size:1.05rem}
+.app span{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.app[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.app.big span{color:var(--bad);font-weight:700}
+.strip svg{display:block;width:100%;height:auto}
+.gauge{display:grid;gap:.4rem}
+.gauge .track{height:26px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden;position:relative}
+.gauge .fill{height:100%;width:0;border-radius:99px;transition:width .35s,background .35s;background:var(--good)}
+.gauge .limit{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--fg)}
+.watt{font-family:var(--font-display);font-size:2.2rem;line-height:1;font-variant-numeric:tabular-nums}
+.label-card{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:center}
+.label-card svg{width:150px}
+@media (max-width:560px){.label-card{grid-template-columns:minmax(0,1fr)}.label-card svg{justify-self:center}}
+.cordbtns{display:flex;flex-wrap:wrap;gap:.5rem}
+.cord svg{display:block;width:100%;height:auto}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 2 課 防火安全檢查・延伸學習</div>
+    <h1>延長線吃得消嗎？</h1>
+    <p class="k-lede">消防署統計，「電氣因素」是住宅火災最主要的原因之一。一條延長線最多能插多少電器？電線為什麼會熱到起火？當一次用電小偵探，就知道答案。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#sim"><span class="no">第 1 站</span><b>插插看</b><span>延長線的極限</span></a>
+      <a href="#hot"><span class="no">第 2 站</span><b>電線為什麼會熱</b><span>綑、壓、破、灰塵</span></a>
+      <a href="#label"><span class="no">第 3 站</span><b>選對延長線</b><span>看懂標示和標章</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="sim">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>一條延長線，能插多少電器？</h2></div>
+  <p class="big" style="max-width:46em">每個電器都有「吃電的胃口」，用<mark>瓦（W）</mark>來表示，數字越大吃越多電。家裡常見的延長線最多只能負擔 <b>1650 瓦</b>。點電器把它插上去，看看會發生什麼事。</p>
+  <div class="apps" id="apps" style="margin-top:1rem"></div>
+  <div class="two" style="margin-top:1.2rem">
+    <figure class="fig strip">
+      <svg viewBox="0 0 520 170" aria-hidden="true">
+        <path id="wire" d="M10 140 C60 140 60 90 110 90" stroke="#333" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <rect id="body" x="110" y="60" width="400" height="60" rx="16" fill="#F5F5F5" stroke="#9E9E9E" stroke-width="3"/>
+        <g id="sockets"></g>
+        <rect x="130" y="70" width="34" height="40" rx="6" fill="#E53935"/><text x="147" y="96" text-anchor="middle" font-size="11" fill="#fff">開關</text>
+        <g id="heatfx"></g>
+      </svg>
+      <figcaption>常見的四孔延長線：110 伏特、15 安培、1650 瓦</figcaption>
+    </figure>
+    <div class="stack">
+      <div class="gauge">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap"><span class="muted">目前用電</span><span class="watt" id="watt">0 W</span></div>
+        <div class="track"><div class="fill" id="fill"></div><div class="limit" id="limit"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)"><span>0</span><span>上限 1650 W</span><span>2500</span></div>
+      </div>
+      <div class="say" id="msg" aria-live="polite"><div class="t">開始</div><p>點上面的電器，把它插上延長線。</p></div>
+      <button class="btn" type="button" id="unplug">全部拔掉</button>
+    </div>
+  </div>
+  <div class="think"><b>想一想</b><p>吹風機和電暖器加起來就超過上限了。如果冬天早上姊姊在吹頭髮、媽媽開電暖器，兩個都插在同一條延長線上，可以怎麼改善？</p></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="hot">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>電線為什麼會熱到起火？</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">電流通過電線時會產生熱。正常情況下熱會散掉，但遇到下面這些情況，熱散不掉、越積越多，電線外面的塑膠皮就會融化、起火。</p>
+      <div class="cordbtns" id="cordBtns"></div>
+      <div class="say" id="cordMsg" aria-live="polite"></div>
+    </div>
+    <figure class="fig cord">
+      <svg viewBox="0 0 420 240" aria-hidden="true" id="cordSvg"></svg>
+    </figure>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="label">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>怎麼選一條安全的延長線？</h2></div>
+  <div class="cards">
+    <div class="card label-card">
+      <svg viewBox="0 0 150 110" aria-hidden="true"><rect x="4" y="4" width="142" height="102" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/><text x="75" y="34" text-anchor="middle" font-size="16" fill="var(--fg)">110V～ 15A</text><text x="75" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="var(--accent)">1650W</text><text x="75" y="90" text-anchor="middle" font-size="12" fill="var(--muted)">額定負載</text></svg>
+      <div><h3>看「額定標示」</h3><p>上面寫的瓦數就是它的極限。插上的電器加起來不能超過這個數字。</p></div>
+    </div>
+    <div class="card label-card">
+      <svg viewBox="0 0 150 110" aria-hidden="true"><path d="M75 8 l55 20 v30 c0 26 -22 42 -55 48 c-33 -6 -55 -22 -55 -48 v-30 z" fill="var(--good-soft)" stroke="var(--good)" stroke-width="3"/><path d="M50 56 l18 18 l34 -36" stroke="var(--good)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><h3>有「商品安全標章」</h3><p>經濟部標準檢驗局檢驗合格的延長線會貼安全標章，購買時要認明。</p></div>
+    </div>
+    <div class="card label-card">
+      <svg viewBox="0 0 150 110" aria-hidden="true"><rect x="20" y="30" width="110" height="50" rx="12" fill="#F5F5F5" stroke="#9E9E9E" stroke-width="3"/><rect x="34" y="40" width="28" height="30" rx="5" fill="#E53935"/><circle cx="96" cy="55" r="10" fill="#FFB300"/><text x="75" y="100" text-anchor="middle" font-size="12" fill="var(--muted)">過載保護開關</text></svg>
+      <div><h3>有過載保護</h3><p>用電超過上限時會自動跳開、斷電，多一層保護。但不能因此就插滿電器。</p></div>
+    </div>
+  </div>
+  <div class="card warn" style="margin-top:1rem"><h3>這些電器最好直接插牆上的插座</h3><p>電暖器、吹風機、電鍋、微波爐、烤箱、快煮壺、吸塵器……這些<b>會發熱</b>的電器很耗電，不要和別的電器共用延長線，也不要把延長線一條接一條串起來。</p></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>經濟部標準檢驗局：選購有「商品安全標章」的延長線，注意額定電壓 110V、電流 15A、容量 1650W，並在額定負載內使用；烤箱、電暖器、微波爐、吸塵器、電鍋等高功率電器勿共用或串接延長線。</li>
+      <li>頁面中各電器瓦數為常見機種的大約數字，實際以電器上的標示為準，可請學生回家查看。</li>
+      <li>工商時報引述消防署 2022～2024 年統計：住宅火災起火原因以電氣因素占 40.1% 最高。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>用電小偵探測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>經濟部標準檢驗局〈延長線選購及使用注意事項〉。</li>
+    <li>工商時報（2025/7/18）引述內政部消防署住宅火災起火原因統計。</li>
+    <li>國小健康與體育四上課本 單元 3 第 2 課〈用電安全須知〉。</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var LIMIT=1650,MAX=2500;
+var apps=[
+  {n:'手機充電器',w:20,ic:'<rect x="14" y="6" width="16" height="30" rx="4" fill="#90A4AE"/><path d="M22 36 v6" stroke="#333" stroke-width="3"/>'},
+  {n:'檯燈',w:15,ic:'<path d="M10 18 l12 -12 l12 12 z" fill="#FFD54F"/><path d="M22 18 v20 M14 40 h16" stroke="#555" stroke-width="3"/>'},
+  {n:'電風扇',w:50,ic:'<circle cx="22" cy="18" r="13" fill="none" stroke="#64B5F6" stroke-width="3"/><path d="M22 18 l8 -6 M22 18 l-8 -6 M22 18 v10" stroke="#64B5F6" stroke-width="3"/><path d="M22 31 v9 M14 42 h16" stroke="#555" stroke-width="3"/>'},
+  {n:'筆記型電腦',w:65,ic:'<rect x="8" y="8" width="28" height="20" rx="2" fill="#B0BEC5"/><path d="M4 32 h36" stroke="#78909C" stroke-width="4"/>'},
+  {n:'電視',w:120,ic:'<rect x="4" y="8" width="36" height="24" rx="3" fill="#455A64"/><path d="M16 38 h12" stroke="#555" stroke-width="3"/>'},
+  {n:'電鍋',w:800,big:1,ic:'<rect x="8" y="12" width="28" height="26" rx="8" fill="#ECEFF1" stroke="#90A4AE" stroke-width="2"/><path d="M22 10 q4 -6 0 -10" stroke="#bbb" stroke-width="2" fill="none"/>'},
+  {n:'微波爐',w:1100,big:1,ic:'<rect x="4" y="10" width="36" height="24" rx="3" fill="#CFD8DC"/><rect x="8" y="14" width="22" height="16" fill="#546E7A"/>'},
+  {n:'吹風機',w:1200,big:1,ic:'<path d="M6 12 h22 a8 8 0 0 1 0 16 h-22 z" fill="#F48FB1"/><path d="M18 28 l-4 14" stroke="#F48FB1" stroke-width="6" stroke-linecap="round"/>'},
+  {n:'電暖器',w:1200,big:1,ic:'<rect x="6" y="8" width="32" height="28" rx="4" fill="#FFCC80"/><path d="M12 14 v16 M18 14 v16 M24 14 v16 M30 14 v16" stroke="#E65100" stroke-width="2"/>'},
+  {n:'快煮壺',w:1200,big:1,ic:'<path d="M10 38 q-2 -24 12 -26 h4 q12 2 10 26 z" fill="#E57373"/><path d="M36 20 q6 2 2 10" stroke="#E57373" stroke-width="3" fill="none"/>'}
+];
+var on={};
+var appsEl=document.getElementById('apps');
+apps.forEach(function(a,i){
+  var b=document.createElement('button');b.type='button';b.className='app'+(a.big?' big':'');b.setAttribute('aria-pressed','false');
+  b.innerHTML='<svg viewBox="0 0 44 44" aria-hidden="true">'+a.ic+'</svg><b>'+a.n+'</b><span>約 '+a.w+' W</span>';
+  b.addEventListener('click',function(){
+    if(on[i]){delete on[i]}else{if(Object.keys(on).length>=4){say('bad','插孔滿了！','這條延長線只有 4 個插孔。先拔掉一個吧。');return}on[i]=1}
+    update();
+  });
+  appsEl.appendChild(b);
+});
+document.getElementById('limit').style.left=(LIMIT/MAX*100)+'%';
+function say(c,t,p){var m=document.getElementById('msg');m.className='say'+(c?' '+c:'');m.innerHTML='<div class="t">'+t+'</div><p>'+p+'</p>'}
+function update(){
+  var keys=Object.keys(on).map(Number),sum=0,bigs=0;
+  keys.forEach(function(i){sum+=apps[i].w;if(apps[i].big)bigs++});
+  appsEl.querySelectorAll('.app').forEach(function(b,i){b.setAttribute('aria-pressed',on[i]?'true':'false')});
+  document.getElementById('watt').textContent=sum+' W';
+  var f=document.getElementById('fill');f.style.width=Math.min(100,sum/MAX*100)+'%';
+  f.style.background=sum>LIMIT?'var(--bad)':sum>LIMIT*.7?'var(--warn)':'var(--good)';
+  var so=document.getElementById('sockets');so.innerHTML='';
+  for(var k=0;k<4;k++){var x=200+k*75;so.insertAdjacentHTML('beforeend','<rect x="'+(x-20)+'" y="72" width="40" height="36" rx="8" fill="'+(k<keys.length?'#FFE0B2':'#fff')+'" stroke="#BDBDBD" stroke-width="2"/><circle cx="'+(x-7)+'" cy="90" r="3" fill="#555"/><circle cx="'+(x+7)+'" cy="90" r="3" fill="#555"/>'+(k<keys.length?'<text x="'+x+'" y="58" text-anchor="middle" font-size="13" fill="var(--fg)">'+apps[keys[k]].n+'</text>':''))}
+  var over=sum>LIMIT;
+  document.getElementById('body').setAttribute('fill',over?'#FFCDD2':'#F5F5F5');
+  document.getElementById('wire').setAttribute('stroke',over?'#C62828':'#333');
+  var hf=document.getElementById('heatfx');hf.innerHTML='';
+  if(over){for(var j=0;j<5;j++){var x=140+j*80;hf.insertAdjacentHTML('beforeend','<path d="M'+x+' 56 q6 -10 0 -20 q-6 -10 0 -20" stroke="#E53935" stroke-width="3" fill="none" opacity=".8"/>')}hf.insertAdjacentHTML('beforeend','<path d="M40 128 q6 -10 0 -20 M70 104 q6 -10 0 -20" stroke="#E53935" stroke-width="3" fill="none"/>')}
+  if(!keys.length)say('','開始','點上面的電器，把它插上延長線。');
+  else if(over)say('bad','超過 1650 瓦了！','總共 '+sum+' 瓦，延長線和電線開始過熱，塑膠外皮可能融化、起火。'+(bigs>=2?'兩個以上會發熱的電器絕對不能插在一起。':''));
+  else if(bigs>=1&&sum>LIMIT*.7)say('','快到極限了','總共 '+sum+' 瓦，已經接近上限。會發熱的電器最好直接插牆上的插座。');
+  else say('good','還在安全範圍','總共 '+sum+' 瓦，沒有超過 1650 瓦。');
+}
+document.getElementById('unplug').addEventListener('click',function(){on={};update()});
+update();
+
+/* 2 電線過熱 */
+var cords=[
+  {t:'綁成一捆',d:'電線捆在一起，通電時產生的熱<b>散不出去</b>，溫度越來越高。用不到的長度要攤開，不要綁起來。',draw:'<g fill="none" stroke="#333" stroke-width="7"><ellipse cx="210" cy="120" rx="80" ry="40"/><ellipse cx="210" cy="120" rx="70" ry="32"/><ellipse cx="210" cy="120" rx="60" ry="24"/></g><rect x="196" y="76" width="28" height="90" fill="#8D6E63"/><g stroke="#E53935" stroke-width="3" fill="none"><path d="M150 70 q6 -10 0 -20 q-6 -10 0 -20"/><path d="M210 60 q6 -10 0 -20 q-6 -10 0 -20"/><path d="M270 70 q6 -10 0 -20 q-6 -10 0 -20"/></g>'},
+  {t:'被壓在下面',d:'電線被家具、門縫壓住，裡面的銅線會<b>斷裂</b>，通電時斷掉的地方會很熱，甚至產生火花。',draw:'<path d="M20 170 H400" stroke="#333" stroke-width="7"/><rect x="150" y="60" width="140" height="104" rx="6" fill="#8D6E63"/><rect x="160" y="164" width="20" height="16" fill="#6D4C41"/><rect x="260" y="164" width="20" height="16" fill="#6D4C41"/><circle cx="220" cy="172" r="16" fill="none" stroke="#E53935" stroke-width="3" stroke-dasharray="4 3"/><path d="M200 196 l8 -10 l6 12 l8 -12" stroke="#FFB300" stroke-width="3" fill="none"/>'},
+  {t:'外皮破損',d:'電線外皮破了，裡面的銅線露出來，容易<b>短路</b>冒出火花，也可能讓人觸電。破了要馬上換掉，不能只用膠帶貼。',draw:'<path d="M20 120 H180" stroke="#333" stroke-width="12" stroke-linecap="round"/><path d="M240 120 H400" stroke="#333" stroke-width="12" stroke-linecap="round"/><path d="M180 116 C200 100 220 140 240 116 M180 124 C200 140 220 100 240 124" stroke="#E0A040" stroke-width="4" fill="none"/><path d="M205 90 l6 -16 M218 92 l10 -14 M196 96 l-4 -16" stroke="#FFB300" stroke-width="3"/>'},
+  {t:'插頭積灰塵',d:'插頭和插座之間的灰塵吸了溼氣，會慢慢<b>導電、發熱</b>，最後起火，這叫做「積汙導電」。插頭要定期用乾布擦乾淨。',draw:'<rect x="120" y="60" width="200" height="120" rx="16" fill="#F5F5F5" stroke="#9E9E9E" stroke-width="3"/><rect x="170" y="90" width="100" height="60" rx="8" fill="#ECEFF1" stroke="#BDBDBD"/><rect x="190" y="96" width="60" height="48" rx="6" fill="#212121"/><path d="M220 144 v60" stroke="#212121" stroke-width="8"/><g fill="#A1887F">'+(function(){var s='';for(var i=0;i<26;i++){s+='<circle cx="'+(176+(i*37)%90)+'" cy="'+(150+(i*13)%10)+'" r="'+(2+(i%3))+'"/>'}return s})()+'</g><path d="M190 168 q6 -8 0 -16 M250 168 q6 -8 0 -16" stroke="#E53935" stroke-width="3" fill="none"/>'},
+  {t:'用力拉電線拔插頭',d:'拉扯電線會讓裡面的銅線慢慢斷掉。拔插頭時要<b>握住插頭</b>，不要拉電線。',draw:'<rect x="60" y="80" width="90" height="80" rx="10" fill="#F5F5F5" stroke="#9E9E9E" stroke-width="3"/><rect x="150" y="104" width="44" height="32" rx="6" fill="#212121"/><path d="M194 120 C250 120 260 150 330 150" stroke="#333" stroke-width="7" fill="none"/><path d="M320 132 q20 -6 30 14 q-10 16 -30 10" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><path d="M240 100 l20 -10 M250 112 l24 -2" stroke="#E53935" stroke-width="3"/><text x="300" y="96" font-size="18" fill="#E53935">✗</text>'}
+];
+var cb=document.getElementById('cordBtns');
+cords.forEach(function(c,i){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=c.t;b.addEventListener('click',function(){pickCord(i)});cb.appendChild(b)});
+function pickCord(i){cb.querySelectorAll('.chip').forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false')});document.getElementById('cordSvg').innerHTML='<rect width="420" height="240" fill="var(--surface)"/>'+cords[i].draw;var m=document.getElementById('cordMsg');m.className='say bad';m.innerHTML='<div class="t">'+cords[i].t+'</div><p>'+cords[i].d+'</p>'}
+pickCord(0);
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'常見的延長線最多可以負擔多少瓦？',o:['165 瓦','1650 瓦','16500 瓦'],a:1,e:'110 伏特 × 15 安培 = 1650 瓦。'},
+  {q:'下面哪一組電器插在同一條延長線上最危險？',o:['檯燈＋手機充電器','電暖器＋吹風機','電風扇＋電視'],a:1,e:'1200＋1200＝2400 瓦，遠遠超過 1650 瓦。'},
+  {q:'為什麼電線不可以綁成一捆？',o:['不好看','通電時的熱散不出去，溫度越來越高','會變短'],a:1,e:'熱散不出去，電線外皮可能融化起火。'},
+  {q:'插頭上積了灰塵，應該怎麼辦？',o:['用溼抹布擦','拔掉插頭後用乾布擦乾淨','不用管它'],a:1,e:'灰塵吸了溼氣會導電發熱；擦拭時要先拔插頭、用乾布。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

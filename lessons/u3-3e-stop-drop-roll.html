@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>停躺滾與低姿勢</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 停躺滾三格大按鈕 + 人物動畫；低姿勢：房間剖面＋煙層，滑桿控制姿勢 */
+.sdr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:820px){.sdr{grid-template-columns:minmax(0,1fr)}}
+.sdr svg,.low svg{display:block;width:100%;height:auto}
+.big3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.big3 button{appearance:none;border:3px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:18px;min-height:5.2rem;font-family:var(--font-display);font-size:2rem;cursor:pointer}
+.big3 button.done{background:var(--accent);color:var(--accent-ink)}
+.big3 button .s{display:block;font-size:.8rem;font-family:var(--font-body)}
+.range{width:100%;height:46px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:-.4rem}
+.meters{display:grid;gap:.4rem}
+.meter{display:grid;grid-template-columns:6.5em 1fr;gap:.6rem;align-items:center;font-size:.9rem}
+.track{height:16px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.fill{height:100%;border-radius:99px;transition:width .3s}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 3 課 火場應變・延伸學習</div>
+    <h1>停躺滾與低姿勢</h1>
+    <p class="k-lede">身上著火時，為什麼不能跑？為什麼要摀住臉？走廊充滿煙時，為什麼要把頭壓低？這些動作背後，都和「火需要氧氣」、「熱煙往上飄」有關。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#sdr"><span class="no">第 1 站</span><b>停、躺、滾</b><span>身上著火怎麼辦</span></a>
+      <a href="#low"><span class="no">第 2 站</span><b>低姿勢逃生</b><span>地面的空氣比較好</span></a>
+      <a href="#when"><span class="no">第 3 站</span><b>什麼時候用</b><span>情境判斷</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="sdr">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>衣服著火了！</h2></div>
+  <div class="sdr">
+    <figure class="fig"><svg viewBox="0 0 420 320" aria-hidden="true" id="sdrSvg"></svg></figure>
+    <div class="stack">
+      <p class="big">照順序按下三個按鈕，幫他把火弄熄。</p>
+      <div class="big3" id="big3">
+        <button type="button" data-k="0">停<span class="s">STOP</span></button>
+        <button type="button" data-k="1">躺<span class="s">DROP</span></button>
+        <button type="button" data-k="2">滾<span class="s">ROLL</span></button>
+      </div>
+      <div class="say" id="sdrMsg" aria-live="polite"></div>
+      <div class="btnrow"><button class="btn" type="button" id="run">如果他一直跑……</button><button class="btn" type="button" id="sdrReset">重來</button></div>
+    </div>
+  </div>
+  <div class="cards">
+    <div class="card"><h3>為什麼不能跑？</h3><p>跑起來會帶進更多空氣，火得到更多<b>氧氣</b>，反而燒得更大。</p></div>
+    <div class="card"><h3>為什麼要摀住臉？</h3><p>保護臉和眼睛，也避免把火焰和熱氣吸進<b>喉嚨和肺</b>。</p></div>
+    <div class="card"><h3>為什麼要滾？</h3><p>身體壓在地上，把火和空氣隔開，左右滾動就像用地板把火<b>悶熄</b>。火熄了以後，再做「沖脫泡蓋送」。</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="low">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>煙越來越多時，頭要放低</h2></div>
+  <div class="two">
+    <figure class="fig low">
+      <svg viewBox="0 0 440 320" aria-hidden="true" id="lowSvg"></svg>
+      <figcaption>示意圖：熱煙從天花板往下累積，越靠近地面空氣越乾淨、溫度越低</figcaption>
+    </figure>
+    <div class="stack">
+      <label for="time" class="muted" style="font-size:.9rem">時間經過</label>
+      <input id="time" class="range" type="range" min="0" max="3" value="1">
+      <div class="ticks" aria-hidden="true"><span>剛起火</span><span>1 分鐘</span><span>2 分鐘</span><span>3 分鐘</span></div>
+      <label for="pose" class="muted" style="font-size:.9rem">選擇姿勢</label>
+      <div class="chips" id="pose">
+        <button class="chip" type="button" data-p="0" aria-pressed="true">站著走</button>
+        <button class="chip" type="button" data-p="1" aria-pressed="false">彎腰走</button>
+        <button class="chip" type="button" data-p="2" aria-pressed="false">低姿勢爬行</button>
+      </div>
+      <div class="meters">
+        <div class="meter"><span>吸到的煙</span><div class="track"><div class="fill" id="mS" style="background:#546E7A"></div></div></div>
+        <div class="meter"><span>周圍溫度</span><div class="track"><div class="fill" id="mT" style="background:var(--bad)"></div></div></div>
+        <div class="meter"><span>移動速度</span><div class="track"><div class="fill" id="mV" style="background:var(--good)"></div></div></div>
+      </div>
+      <div class="say" id="lowMsg" aria-live="polite"></div>
+    </div>
+  </div>
+  <div class="card good" style="margin-top:1rem"><h3>低姿勢的正確做法</h3><p>頭部壓低、盡量靠近地面，<b>一手扶著牆壁</b>找出口，另一手輔助爬行。煙很濃時看不到路，沿著牆走就不容易迷路。</p></div>
+ </div>
+</section>
+
+<section class="k-sec" id="when">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>哪一種情況，用哪一招？</h2></div>
+  <div class="panel" id="sortBox"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>課本 p.79：逃生通道充滿濃煙時採低姿勢逃生；通道無煙則快步逃離，不必刻意爬行以免延誤。</li>
+      <li>停躺滾（Stop, Drop, Roll）：停止奔跑、就地躺下並以雙手摀臉、左右滾動至火熄。火熄後再進行灼燙傷急救「沖脫泡蓋送」。</li>
+      <li>熱煙因密度較低而上升，在天花板形成熱煙層並逐漸下降；靠近地面處溫度較低、能見度較佳，但仍可能有有毒氣體，因此低姿勢是爭取時間，不是長時間停留。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>火場技能測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 3 第 3 課〈身上著火的滅火方式〉、〈低姿勢火場逃生〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 停躺滾 */
+var stepI=0,fire=1;
+var poses=[
+  function(f){return person(210,'stand')+flames(210,170,f)},
+  function(f){return person(210,'stand')+flames(210,170,f)},
+  function(f){return person(210,'lie')+flames(210,262,f*.7)},
+  function(f){return person(210,'lie')+flames(210,262,f)}
+];
+function person(x,p){
+  if(p==='stand')return '<circle cx="'+x+'" cy="90" r="22" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="'+(x-22)+'" y="114" width="44" height="80" rx="16" fill="#42A5F5"/><rect x="'+(x-20)+'" y="192" width="16" height="70" rx="8" fill="#37474F"/><rect x="'+(x+4)+'" y="192" width="16" height="70" rx="8" fill="#37474F"/>';
+  if(p==='lie')return '<rect x="'+(x-90)+'" y="250" width="180" height="40" rx="18" fill="#42A5F5"/><circle cx="'+(x-104)+'" cy="270" r="20" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="'+(x-124)+'" y="252" width="26" height="34" rx="10" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/>';
+  if(p==='run')return '<circle cx="'+x+'" cy="90" r="22" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="'+(x-22)+'" y="114" width="44" height="80" rx="16" fill="#42A5F5" transform="rotate(12 '+x+' 150)"/><rect x="'+(x-30)+'" y="192" width="16" height="70" rx="8" fill="#37474F" transform="rotate(30 '+(x-22)+' 192)"/><rect x="'+(x+10)+'" y="192" width="16" height="70" rx="8" fill="#37474F" transform="rotate(-30 '+(x+18)+' 192)"/>';
+}
+function flames(x,y,f){if(f<=0.02)return '';var s='';for(var i=-2;i<=2;i++){var h=(46+Math.abs(i)*-6)*f*1.4,cx=x+i*18;s+='<path d="M'+(cx-12)+' '+y+' C'+(cx-10)+' '+(y-h*.6)+' '+(cx-3)+' '+(y-h*.8)+' '+cx+' '+(y-h)+' C'+(cx+3)+' '+(y-h*.8)+' '+(cx+10)+' '+(y-h*.6)+' '+(cx+12)+' '+y+' Z" fill="'+(i%2?'#FF7043':'#FFA726')+'" opacity=".9"/>'}return s}
+var svg=document.getElementById('sdrSvg');
+function draw(extra){svg.innerHTML='<rect width="420" height="320" fill="var(--surface)"/><rect x="0" y="290" width="420" height="30" fill="var(--sunk)"/>'+(extra||poses[stepI](fire))}
+function msg(c,t,p){var m=document.getElementById('sdrMsg');m.className='say'+(c?' '+c:'');m.innerHTML='<div class="t">'+t+'</div><p>'+p+'</p>'}
+var tips=['<b>停</b>：立刻停下來，不要奔跑。','<b>躺</b>：就地躺下，用雙手摀住臉。','<b>滾</b>：左右滾動，直到火熄滅。'];
+document.querySelectorAll('#big3 button').forEach(function(b){b.addEventListener('click',function(){
+  var k=+b.dataset.k;
+  if(k!==stepI){msg('bad','順序不對',stepI<3?'下一步是：'+tips[stepI]:'火已經熄了！');return}
+  b.classList.add('done');stepI++;
+  if(stepI===1){fire=1;draw();msg('good','停下來了','不跑，火就不會得到更多空氣。下一步：'+tips[1])}
+  if(stepI===2){fire=.8;draw();msg('good','躺下、摀住臉','保護臉和呼吸道。下一步：'+tips[2])}
+  if(stepI===3){var n=0;var r=setInterval(function(){n++;fire=Math.max(0,.8-n*.1);var off=(n%2?18:-18);svg.innerHTML='<rect width="420" height="320" fill="var(--surface)"/><rect x="0" y="290" width="420" height="30" fill="var(--sunk)"/>'+person(210+off,'lie')+flames(210+off,262,fire);if(fire<=0){clearInterval(r);msg('good','火熄滅了！','滾動把火和空氣隔開，火就熄了。接著用冷水「沖脫泡蓋送」處理燙傷，並送醫。')}},260)}
+})});
+document.getElementById('run').addEventListener('click',function(){var n=0;var r=setInterval(function(){n++;var x=60+n*30;svg.innerHTML='<rect width="420" height="320" fill="var(--surface)"/><rect x="0" y="290" width="420" height="30" fill="var(--sunk)"/>'+person(x,'run')+flames(x,170,1+n*.12);if(n>=11){clearInterval(r);msg('bad','火越燒越大！','奔跑會帶進更多空氣，火得到更多氧氣，燒得更大。記住：停、躺、滾！')}},150)});
+function reset(){stepI=0;fire=1;document.querySelectorAll('#big3 button').forEach(function(b){b.classList.remove('done')});draw();msg('bad','衣服著火了！','第一步是什麼？')}
+document.getElementById('sdrReset').addEventListener('click',reset);reset();
+
+/* 低姿勢 */
+var pose=0,time=document.getElementById('time');
+function lowDraw(){
+  var t=+time.value,layer=[30,120,180,220][t];
+  var s='<rect width="440" height="320" fill="var(--surface)"/><defs><linearGradient id="sm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#263238" stop-opacity=".95"/><stop offset="1" stop-color="#607D8B" stop-opacity=".55"/></linearGradient></defs><rect x="0" y="0" width="440" height="'+layer+'" fill="url(#sm)"/><rect x="0" y="290" width="440" height="30" fill="#BCAAA4"/><rect x="0" y="0" width="14" height="320" fill="#8D6E63"/>';
+  s+='<text x="430" y="20" text-anchor="end" font-size="13" fill="#fff">熱、濃煙</text><text x="430" y="284" text-anchor="end" font-size="13" fill="var(--good)">比較乾淨、比較涼</text>';
+  var head;
+  if(pose===0){head=110;s+='<circle cx="220" cy="110" r="20" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="200" y="132" width="40" height="80" rx="14" fill="#42A5F5"/><rect x="202" y="210" width="14" height="80" rx="7" fill="#37474F"/><rect x="224" y="210" width="14" height="80" rx="7" fill="#37474F"/>'}
+  if(pose===1){head=175;s+='<circle cx="190" cy="175" r="20" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="200" y="170" width="70" height="36" rx="14" fill="#42A5F5"/><rect x="250" y="200" width="14" height="90" rx="7" fill="#37474F"/><rect x="230" y="200" width="14" height="90" rx="7" fill="#37474F"/>'}
+  if(pose===2){head=250;s+='<circle cx="150" cy="250" r="18" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="160" y="246" width="90" height="30" rx="12" fill="#42A5F5"/><rect x="246" y="262" width="60" height="16" rx="8" fill="#37474F"/><rect x="130" y="262" width="12" height="28" rx="6" fill="var(--skin)"/><path d="M14 230 h0" /><rect x="14" y="228" width="0" height="0"/>'+'<path d="M150 240 L20 240" stroke="var(--skin-line)" stroke-dasharray="4 4"/><text x="70" y="232" font-size="12" fill="var(--muted)">一手扶牆</text>'}
+  svg2.innerHTML=s;
+  var inSmoke=head<layer;
+  var sm=inSmoke?Math.min(100,30+(layer-head)*.6):Math.max(5,(layer-head+60)*.4);
+  var tp=Math.max(10,Math.min(100,100-(head/320)*90+t*10));
+  document.getElementById('mS').style.width=Math.max(4,Math.min(100,sm))+'%';
+  document.getElementById('mT').style.width=tp+'%';
+  document.getElementById('mV').style.width=[95,65,35][pose]+'%';
+  var m=document.getElementById('lowMsg');
+  if(t===0){m.className='say good';m.innerHTML='<div class="t">剛起火，走廊還沒有煙</div><p>通道沒有煙時，不用爬，<b>快步離開</b>最好，爬行反而比較慢。</p>'}
+  else if(inSmoke){m.className='say bad';m.innerHTML='<div class="t">頭在濃煙裡！</div><p>吸進又熱又毒的煙非常危險。煙已經降下來了，要把頭壓得更低。</p>'}
+  else{m.className='say good';m.innerHTML='<div class="t">頭在煙的下面</div><p>'+(pose===2?'低姿勢爬行，吸到比較乾淨、比較涼的空氣。沿著牆找出口！':'目前頭還在煙下面，但煙會越來越低，要隨時準備壓低身體。')+'</p>'}
+}
+var svg2=document.getElementById('lowSvg');
+document.querySelectorAll('#pose .chip').forEach(function(b){b.addEventListener('click',function(){pose=+b.dataset.p;document.querySelectorAll('#pose .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});lowDraw()})});
+time.addEventListener('input',lowDraw);lowDraw();
+
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'sdr',t:'停、躺、滾',d:'身上著火'},{id:'low',t:'低姿勢逃生',d:'通道有濃煙'},{id:'fast',t:'快步離開',d:'通道沒有煙'}],
+  items:[
+    {t:'烤肉時袖子被火點著了',bin:'sdr',e:'身上著火，立刻停、躺、滾。'},
+    {t:'走廊上已經有濃濃的黑煙',bin:'low',e:'頭壓低、扶著牆，找出口。'},
+    {t:'警報響了，走廊和樓梯都沒有煙',bin:'fast',e:'通道安全就快步往外、往下逃。'},
+    {t:'鐵皮屋失火，通道充滿濃煙',bin:'low',e:'鐵皮屋不適合關門避難，要用低姿勢趕快逃出去。'},
+    {t:'同學的衣服下襬著火，他想往外跑',bin:'sdr',e:'大聲提醒他「停下來、躺下、滾！」'},
+    {t:'百貨公司警報響，樓梯間沒有煙',bin:'fast',e:'跟著指示燈，快步走樓梯往下。'}
+  ],
+  done:'全部分對了！先看狀況，再選對方法。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'身上著火時，為什麼不能奔跑？',o:['會跌倒','會帶進更多空氣，火燒得更大','會太累'],a:1,e:'火需要氧氣，跑步會讓它得到更多氧氣。'},
+  {q:'躺下時，雙手要做什麼？',o:['拍打身上的火','摀住臉','舉高求救'],a:1,e:'保護臉和呼吸道。'},
+  {q:'為什麼濃煙中要用低姿勢？',o:['比較不會被看到','熱煙往上飄，靠近地面的空氣比較乾淨、比較涼','爬比較快'],a:1,e:'熱煙聚集在上方，越低越安全。'},
+  {q:'逃生通道沒有煙的時候，應該怎麼走？',o:['一定要爬','快步離開','停在原地'],a:1,e:'沒有煙時不用爬，快步走比較快。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

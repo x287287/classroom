@@ -49,7 +49,7 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 .tab .n{font-size:12px;opacity:.75;font-variant-numeric:tabular-nums}
 
 .units{display:grid;gap:30px}
-.unit h2{font-size:24px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.unit h2{font-size:26px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
 .unit h2 .g{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);border:1px solid var(--line);background:var(--card);border-radius:6px;padding:0 8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:12px}
 .card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;min-width:0;color:inherit;text-decoration:none}
@@ -61,6 +61,11 @@ a.card:hover{border-color:var(--ink)}
 .card p{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
 .go{font-size:15px;font-weight:700;color:var(--accent);border-top:1px dashed var(--line);padding-top:10px}
 .go.none{color:var(--muted);font-weight:400;font-size:13px}
+.lesson-group{margin-top:18px}
+.lesson-h{font-family:var(--body);font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:2px dashed var(--line)}
+.lesson-h .n{font-size:12px;font-weight:500;color:var(--muted)}
+.lesson-h.game{color:var(--accent)}
+.chip.web{background:var(--leaf)}.chip.game{background:var(--accent)}
 .empty{background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted);display:grid;gap:8px;justify-items:center}
 .empty b{font-family:var(--display);font-size:20px;color:var(--ink)}
 footer{color:var(--muted);font-size:13px;text-align:center}
@@ -105,41 +110,66 @@ footer{color:var(--muted);font-size:13px;text-align:center}
    url ：lessons/ 資料夾裡的檔案，或完整的網址（https://…）
    ============================================================ */
 const MATERIALS = [
-  {
-    title: "看不見的菸惡魔：二手菸與三手菸",
-    type: "slide", grade: 4,
-    unit: "康軒健康四上　第二單元",
-    lesson: "第 1 課 菸與煙的真相",
-    note: "8 幕動畫：主流煙與側流煙、二手菸對孩子的影響、三手菸、如何遠離菸害。點畫面播放／暫停，左右滑動換幕。",
-    url: "lessons/smoke-devil.html"
-  },
-  {
-    title: "菸品大解密：紙菸、電子煙、加熱菸",
-    type: "slide", grade: 4,
-    unit: "康軒健康四上　第二單元",
-    lesson: "第 1 課 菸與煙的真相・延伸",
-    note: "8 幕動畫：三種菸品的構造與危害比較，結尾帶出「不好奇、不嘗試、不接受」。",
-    url: "lessons/tobacco-types.html"
-  },
-  {
-    title: "檳榔大解密",
-    type: "slide", grade: 4,
-    unit: "康軒健康四上　第二單元",
-    lesson: "第 2 課 酒與檳榔・延伸",
-    note: "三站互動：檳榔鹼與成癮循環、剖開檳榔果實、森林與檳榔園的水土保持比較，最後有小測驗。",
-    url: "lessons/betel.html"
-  },
-  {
-    title: "酒精三個為什麼",
-    type: "slide", grade: 4,
-    unit: "康軒健康四上　第二單元",
-    lesson: "第 2 課 酒與檳榔・延伸",
-    note: "為什麼會臉紅、為什麼會喝醉、為什麼會上癮，各有互動模型，最後有 O／X 小挑戰。",
-    url: "lessons/alcohol.html"
-  }
+  /* ---------- 單元 2 拒菸拒酒拒檳榔 ---------- */
+  { unit:"康軒健康四上　第二單元 拒菸拒酒拒檳榔", lesson:"第 1 課 菸與煙的真相", topic:"認識一手菸、二手菸、三手菸",
+    title:"看不見的菸惡魔：二手菸與三手菸", type:"slide", grade:4,
+    note:"8 幕動畫：主流煙與側流煙、二手菸對孩子的影響、三手菸、如何遠離菸害。", url:"lessons/smoke-devil.html" },
+  { unit:"康軒健康四上　第二單元 拒菸拒酒拒檳榔", lesson:"第 1 課 菸與煙的真相", topic:"電子煙是菸嗎？",
+    title:"菸品大解密：紙菸、電子煙、加熱菸", type:"slide", grade:4,
+    note:"8 幕動畫：三種菸品的構造與危害比較，結尾帶出「不好奇、不嘗試、不接受」。", url:"lessons/tobacco-types.html" },
+  { unit:"康軒健康四上　第二單元 拒菸拒酒拒檳榔", lesson:"第 2 課 酒與檳榔", topic:"過度飲酒的危害",
+    title:"酒精三個為什麼", type:"web", grade:4,
+    note:"為什麼會臉紅、為什麼會喝醉、為什麼會上癮，各有互動模型，最後有 O／X 小挑戰。", url:"lessons/alcohol.html" },
+  { unit:"康軒健康四上　第二單元 拒菸拒酒拒檳榔", lesson:"第 2 課 酒與檳榔", topic:"檳榔的組成",
+    title:"檳榔大解密", type:"web", grade:4,
+    note:"檳榔鹼與成癮循環、剖開檳榔果實、森林與檳榔園的水土保持比較，最後有小測驗。", url:"lessons/betel.html" },
+
+  /* ---------- 單元 3 熱與火的危機 ---------- */
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 1 課 小心灼燙傷", topic:"與灼燙傷患者相處",
+    title:"疤痕的祕密", type:"web", grade:4,
+    note:"燙傷後的復原之路、壓力衣為什麼要穿 2～3 年、哪些反應讓人溫暖或難過。", url:"lessons/u3-1a-burn-recovery.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 1 課 小心灼燙傷", topic:"灼燙傷分級",
+    title:"皮膚有幾層？", type:"web", grade:4,
+    note:"皮膚三層的構造、拉桿看燙傷深度，用「手掌法則」估算真實案例的燙傷面積。", url:"lessons/u3-1b-burn-depth.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 1 課 小心灼燙傷", topic:"灼燙傷預防",
+    title:"燙傷陷阱大搜查", type:"web", grade:4,
+    note:"在廚房客廳插畫中找出 9 個燙傷陷阱，模擬暖暖包的低溫燙傷，保護家中小小孩。", url:"lessons/u3-1c-burn-hazards.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 1 課 小心灼燙傷", topic:"灼燙傷急救處理方法",
+    title:"沖脫泡蓋送大挑戰", type:"web", grade:4,
+    note:"為什麼要沖 15～30 分鐘、五步驟排序、牙膏醬油等偏方破解、化學與電灼傷處理。", url:"lessons/u3-1d-burn-firstaid.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 2 課 防火安全檢查", topic:"用電安全須知",
+    title:"延長線吃得消嗎？", type:"web", grade:4,
+    note:"把電器插上延長線看瓦數有沒有超過 1650 W，認識電線過熱的五種原因與安全標章。", url:"lessons/u3-2a-power-strip.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 2 課 防火安全檢查", topic:"常見危險用火行為",
+    title:"火的三角形", type:"web", grade:4,
+    note:"燃燒三要素互動圖、油鍋起火實驗室（潑水、蓋鍋蓋、關火），用火習慣分類。", url:"lessons/u3-2b-fire-triangle.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 2 課 防火安全檢查", topic:"居家防火設備",
+    title:"家中的防火守門員", type:"web", grade:4,
+    note:"幫每個房間選偵煙式或定溫式警報器、警報器原理、滅火器拉瞄壓掃操作練習。", url:"lessons/u3-2c-fire-equipment.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 2 課 防火安全檢查", topic:"家庭逃生計畫",
+    title:"我家的兩條路", type:"web", grade:4,
+    note:"在平面圖上依不同火點畫出兩條逃生路線，認識集合點與演練。", url:"lessons/u3-2d-escape-plan.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 2 課 防火安全檢查", topic:"檢查公共場所防火措施",
+    title:"出口偵探", type:"web", grade:4,
+    note:"看懂出口標示燈與避難方向指示燈，在百貨公司樓層圖找設備、抓危險。", url:"lessons/u3-2e-public-safety.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 3 課 火場應變", topic:"發現火災時",
+    title:"119 報案模擬器", type:"web", grade:4,
+    note:"手機通話模擬，練習說清楚地址、火勢與受困人員；認識 119、110、112。", url:"lessons/u3-3a-call-119.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 3 課 火場應變", topic:"火場逃生避難迷思",
+    title:"煙跑得比你快", type:"web", grade:4,
+    note:"樓梯間人和煙賽跑、濃煙的三個可怕之處、8 張迷思翻翻牌。", url:"lessons/u3-3b-smoke-race.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 3 課 火場應變", topic:"火災逃生避難原則",
+    title:"小火快逃，濃煙關門", type:"web", grade:4,
+    note:"三種火災情境闖關（摸門、開門、關門避難），一扇門的力量與原則流程圖。", url:"lessons/u3-3c-escape-rules.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 3 課 火場應變", topic:"緩降機使用方式",
+    title:"認識緩降機", type:"web", grade:4,
+    note:"點零件認識構造、調速器的作用、掛丟套束推排序練習。", url:"lessons/u3-3d-descender.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"第 3 課 火場應變", topic:"身上著火的滅火方式・低姿勢火場逃生",
+    title:"停躺滾與低姿勢", type:"web", grade:4,
+    note:"停躺滾互動、煙層與姿勢模擬，判斷什麼情況該用哪一招。", url:"lessons/u3-3e-stop-drop-roll.html" }
 ];
 
-const TYPES={all:"全部",pdf:"講義",slide:"簡報",video:"影片",quiz:"練習題",other:"其他"};
+const TYPES={all:"全部",web:"互動教材",slide:"動畫簡報",game:"統整遊戲",pdf:"講義",video:"影片",quiz:"練習題",other:"其他"};
 const gradeName=g=>("一二三四五六"[g-1]||"")+"年級";
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $=id=>document.getElementById(id);
@@ -147,13 +177,19 @@ let curType="all", curGrade="all", query="";
 
 function filtered(){
   const q=query.trim().toLowerCase();
-  return MATERIALS.filter(i=>(curGrade==="all"||String(i.grade)===curGrade)&&(!q||[i.title,i.unit,i.lesson,i.note].join(" ").toLowerCase().includes(q)));
+  return MATERIALS.filter(i=>(curGrade==="all"||String(i.grade)===curGrade)&&(!q||[i.title,i.unit,i.lesson,i.topic,i.note].join(" ").toLowerCase().includes(q)));
+}
+function card(i){
+  const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.topic?`<span class="lesson">課本：${esc(i.topic)}</span>`:"<span></span>"}<div><h3>${esc(i.title)}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>`;
+  return i.url
+    ? `<a class="card" href="${esc(i.url)}">${inner}<span class="go">${i.type==="video"?"觀看":i.type==="game"?"開始玩":"打開"} →</span></a>`
+    : `<article class="card">${inner}<span class="go none">連結待補</span></article>`;
 }
 function render(){
   const base=filtered();
   $("tabs").innerHTML=Object.entries(TYPES).map(([k,v])=>{
     const n=k==="all"?base.length:base.filter(i=>i.type===k).length;
-    if(k!=="all"&&!n&&!MATERIALS.some(i=>i.type===k)) return "";
+    if(k!=="all"&&!MATERIALS.some(i=>i.type===k)) return "";
     return `<button class="tab" type="button" data-t="${k}" aria-pressed="${k===curType}">${v}<span class="n">${n}</span></button>`;
   }).join("");
   $("sTotal").textContent=MATERIALS.length;
@@ -161,17 +197,18 @@ function render(){
 
   const list=base.filter(i=>curType==="all"||i.type===curType);
   if(!list.length){$("units").innerHTML=`<div class="empty"><b>找不到符合的教材</b><span>換個關鍵字、年級或類型看看。</span></div>`;return;}
-  const groups=new Map();
-  list.forEach(i=>{const k=(i.grade||0)+"|"+(i.unit||"未分單元");if(!groups.has(k))groups.set(k,[]);groups.get(k).push(i);});
-  $("units").innerHTML=[...groups.keys()].map(k=>{
-    const[g,u]=k.split("|");
-    return `<section class="unit"><h2>${esc(u)}${+g?`<span class="g">${gradeName(+g)}</span>`:""}</h2><div class="cards">${
-      groups.get(k).map(i=>{
-        const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.lesson?`<span class="lesson">${esc(i.lesson)}</span>`:"<span></span>"}<div><h3>${esc(i.title)}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>`;
-        return i.url
-          ? `<a class="card" href="${esc(i.url)}">${inner}<span class="go">${i.type==="video"?"觀看":"打開"} →</span></a>`
-          : `<article class="card">${inner}<span class="go none">連結待補</span></article>`;
-      }).join("")}</div></section>`;
+  const units=new Map();
+  list.forEach(i=>{
+    const uk=(i.grade||0)+"|"+(i.unit||"未分單元");
+    if(!units.has(uk))units.set(uk,new Map());
+    const lk=i.type==="game"?"單元統整遊戲":(i.lesson||"其他");
+    const L=units.get(uk); if(!L.has(lk))L.set(lk,[]); L.get(lk).push(i);
+  });
+  $("units").innerHTML=[...units.keys()].map(uk=>{
+    const[g,u]=uk.split("|"); const L=units.get(uk);
+    return `<section class="unit"><h2>${esc(u)}${+g?`<span class="g">${gradeName(+g)}</span>`:""}</h2>${
+      [...L.keys()].map(lk=>`<div class="lesson-group"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}">${esc(lk)}<span class="n">${L.get(lk).length} 份</span></h3><div class="cards">${L.get(lk).map(card).join("")}</div></div>`).join("")
+    }</section>`;
   }).join("");
 }
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;curType=b.dataset.t;render();});

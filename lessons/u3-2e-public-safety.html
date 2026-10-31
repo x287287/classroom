@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>出口偵探</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 百貨樓層俯視圖找東西；標示燈比較用兩張大卡 */
+.signs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem}
+.sign svg{width:100%;max-width:320px;display:block;margin:0 auto}
+.mall{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+@media (max-width:900px){.mall{grid-template-columns:minmax(0,1fr)}}
+.mall svg{display:block;width:100%;height:auto}
+.spot{cursor:pointer}
+.spot .ring{fill:transparent;stroke:transparent;stroke-width:4}
+.spot:hover .ring,.spot:focus-visible .ring{stroke:var(--warn);stroke-dasharray:6 5}
+.spot.got .ring{stroke:var(--good);fill:rgba(30,138,90,.12)}
+.spot.got.bad .ring{stroke:var(--bad);fill:rgba(200,65,75,.12)}
+.spot:focus{outline:none}
+.tally{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.tally div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem}
+.tally b{font-family:var(--font-display);font-size:1.8rem;font-weight:400;display:block;line-height:1.1}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 2 課 防火安全檢查・延伸學習</div>
+    <h1>出口偵探</h1>
+    <p class="k-lede">百貨公司、電影院、餐廳都很大，人又多。萬一發生火災，你知道出口在哪裡嗎？學會看懂綠色的標示燈，再到百貨公司當一次出口偵探。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#signs"><span class="no">第 1 站</span><b>看懂綠色標示燈</b><span>出口燈和方向燈</span></a>
+      <a href="#mall"><span class="no">第 2 站</span><b>百貨公司大搜查</b><span>找設備、抓危險</span></a>
+      <a href="#habit"><span class="no">第 3 站</span><b>進門三件事</b><span>養成好習慣</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="signs">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>兩種綠色的燈，意思不一樣</h2></div>
+  <p class="big" style="max-width:44em">公共場所的天花板和牆上，常常有亮著的綠色小燈。就算停電、煙很濃，它們也會亮著，帶你找到出口。</p>
+  <div class="signs" style="margin-top:1rem">
+    <div class="card sign">
+      <svg viewBox="0 0 320 150" aria-hidden="true"><rect x="10" y="10" width="300" height="130" rx="10" fill="#1B8E3E"/><circle cx="80" cy="48" r="13" fill="#fff"/><path d="M80 62 l-16 30 l-20 8 M80 62 l10 34 l16 26 M80 62 l26 12 M86 96 l-26 26" stroke="#fff" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="170" y="30" width="110" height="90" fill="none" stroke="#fff" stroke-width="8"/><path d="M150 75 h20" stroke="#fff" stroke-width="8"/></svg>
+      <h3>出口標示燈</h3>
+      <p><b>綠色底、白色的人</b>跑向一扇門。裝在<b>出口的正上方</b>，意思是：「這裡就是出口！」</p>
+    </div>
+    <div class="card sign">
+      <svg viewBox="0 0 320 150" aria-hidden="true"><rect x="10" y="10" width="300" height="130" rx="10" fill="#fff" stroke="#9E9E9E" stroke-width="3"/><circle cx="110" cy="48" r="13" fill="#1B8E3E"/><path d="M110 62 l-16 30 l-20 8 M110 62 l10 34 l16 26 M110 62 l26 12 M116 96 l-26 26" stroke="#1B8E3E" stroke-width="10" stroke-linecap="round" fill="none"/><path d="M190 75 h80 M240 45 l30 30 l-30 30" stroke="#1B8E3E" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <h3>避難方向指示燈</h3>
+      <p><b>白色底、綠色的人加上箭頭</b>。裝在走廊、通道和轉彎的地方，意思是：「往箭頭的方向走，就會到出口。」</p>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:1rem">
+    <h3>考考你：這個燈應該裝在哪裡？</h3>
+    <div id="signQuiz" style="margin-top:.6rem"></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="mall">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>百貨公司大搜查</h2></div>
+  <p class="big" style="max-width:44em">這是百貨公司其中一層樓。找出 <b>6 個防火設備</b>，還有 <b>3 個危險的地方</b>。</p>
+  <div class="mall" style="margin-top:1rem">
+    <figure class="fig">
+      <svg viewBox="0 0 760 480" role="group" aria-label="百貨公司樓層圖">
+        <rect width="760" height="480" fill="#FAFAF7"/>
+        <rect x="20" y="20" width="720" height="440" fill="none" stroke="#5D4037" stroke-width="6"/>
+        <!-- shops -->
+        <g fill="#FFF3E0" stroke="#BCAAA4" stroke-width="2">
+          <rect x="40" y="40" width="180" height="140"/><rect x="240" y="40" width="200" height="140"/><rect x="460" y="40" width="160" height="140"/>
+          <rect x="40" y="300" width="180" height="140"/><rect x="240" y="300" width="200" height="140"/>
+        </g>
+        <g font-size="16" fill="#8D6E63" text-anchor="middle"><text x="130" y="116">服飾店</text><text x="340" y="116">玩具店</text><text x="540" y="116">書店</text><text x="130" y="376">美食街</text><text x="340" y="376">電器行</text></g>
+        <!-- corridor -->
+        <rect x="40" y="190" width="680" height="100" fill="#EFEBE9"/>
+        <!-- elevator -->
+        <rect x="460" y="300" width="80" height="140" fill="#CFD8DC" stroke="#90A4AE" stroke-width="2"/><text x="500" y="376" text-anchor="middle" font-size="15" fill="#546E7A">電梯</text>
+        <!-- stair A (left exit) -->
+        <rect x="20" y="200" width="20" height="80" fill="#FAFAF7"/>
+        <rect x="0" y="210" width="20" height="60" fill="#A5D6A7"/>
+        <!-- stair B (right) with fire door -->
+        <rect x="640" y="40" width="80" height="140" fill="#E8F5E9" stroke="#A5D6A7" stroke-width="2"/><path d="M650 170 h20 v-20 h20 v-20 h20" stroke="#81C784" stroke-width="4" fill="none"/><text x="680" y="80" text-anchor="middle" font-size="14" fill="#2E7D32">安全梯</text>
+        <!-- stair C bottom right blocked -->
+        <rect x="560" y="300" width="160" height="140" fill="#E8F5E9" stroke="#A5D6A7" stroke-width="2"/><text x="640" y="420" text-anchor="middle" font-size="14" fill="#2E7D32">安全梯</text>
+        <!-- items -->
+        <g id="exitL"><rect x="44" y="196" width="46" height="22" rx="3" fill="#1B8E3E"/><text x="67" y="212" text-anchor="middle" font-size="11" fill="#fff">出口</text></g>
+        <rect x="636" y="150" width="8" height="40" fill="#8D6E63"/><g><rect x="646" y="184" width="46" height="18" rx="3" fill="#1B8E3E"/><text x="669" y="197" text-anchor="middle" font-size="11" fill="#fff">出口</text></g>
+        <g><rect x="300" y="268" width="56" height="18" rx="3" fill="#fff" stroke="#9E9E9E"/><path d="M310 277 h24 M326 271 l8 6 l-8 6" stroke="#1B8E3E" stroke-width="3" fill="none"/></g>
+        <g><rect x="232" y="196" width="40" height="56" rx="10" fill="#D32F2F"/><text x="252" y="230" text-anchor="middle" font-size="11" fill="#fff">滅火器</text></g>
+        <g><rect x="560" y="196" width="40" height="60" rx="4" fill="#E53935"/><text x="580" y="230" text-anchor="middle" font-size="11" fill="#fff">消防栓</text></g>
+        <g><rect x="140" y="196" width="60" height="40" fill="#fff" stroke="#1B8E3E" stroke-width="2"/><path d="M150 226 h20 v-14 h20" stroke="#E53935" stroke-width="2" fill="none"/><circle cx="160" cy="210" r="3" fill="#E53935"/></g>
+        <g><circle cx="400" cy="200" r="10" fill="#fff" stroke="#9E9E9E" stroke-width="2"/><circle cx="400" cy="200" r="4" fill="#90A4AE"/></g>
+        <!-- hazards -->
+        <g><rect x="580" y="292" width="60" height="16" fill="#8D6E63"/><rect x="590" y="306" width="36" height="40" fill="#BCAAA4" stroke="#8D6E63"/><rect x="630" y="310" width="40" height="34" fill="#D7CCC8" stroke="#8D6E63"/></g>
+        <g><rect x="660" y="234" width="52" height="40" fill="#BCAAA4" stroke="#8D6E63"/><rect x="670" y="214" width="34" height="24" fill="#D7CCC8" stroke="#8D6E63"/></g>
+        <g><path d="M636 150 l-40 -20" stroke="#8D6E63" stroke-width="6"/><path d="M612 140 l-10 10" stroke="#5D4037" stroke-width="5"/></g>
+
+        <g class="spot" data-s="exit1" tabindex="0" role="button" aria-label="左邊出口"><circle class="ring" cx="56" cy="218" r="36"/></g>
+        <g class="spot" data-s="exit2" tabindex="0" role="button" aria-label="右上安全梯出口"><circle class="ring" cx="672" cy="190" r="34"/></g>
+        <g class="spot" data-s="dir" tabindex="0" role="button" aria-label="方向指示燈"><circle class="ring" cx="328" cy="277" r="34"/></g>
+        <g class="spot" data-s="ext" tabindex="0" role="button" aria-label="滅火器"><circle class="ring" cx="252" cy="224" r="36"/></g>
+        <g class="spot" data-s="hyd" tabindex="0" role="button" aria-label="消防栓"><circle class="ring" cx="580" cy="226" r="38"/></g>
+        <g class="spot" data-s="map" tabindex="0" role="button" aria-label="逃生避難路線圖"><circle class="ring" cx="170" cy="216" r="36"/></g>
+        <g class="spot" data-s="sprk" tabindex="0" role="button" aria-label="天花板上的圓形裝置"><circle class="ring" cx="400" cy="200" r="26"/></g>
+        <g class="spot bad" data-s="h1" tabindex="0" role="button" aria-label="安全梯門口的箱子"><circle class="ring" cx="625" cy="322" r="44"/></g>
+        <g class="spot bad" data-s="h2" tabindex="0" role="button" aria-label="走廊盡頭的雜物"><circle class="ring" cx="686" cy="246" r="38"/></g>
+        <g class="spot bad" data-s="h3" tabindex="0" role="button" aria-label="被卡住打開的門"><circle class="ring" cx="612" cy="140" r="30"/></g>
+      </svg>
+    </figure>
+    <div class="stack">
+      <div class="tally"><div><span class="muted" style="font-size:.85rem">防火設備</span><b id="tGood">0 / 6</b></div><div><span class="muted" style="font-size:.85rem">危險的地方</span><b id="tBad">0 / 3</b></div></div>
+      <div class="say" id="mallMsg" aria-live="polite"><div class="t">開始搜查</div><p>點樓層圖上你覺得重要的東西。</p></div>
+      <button class="btn" type="button" id="mallReset">重新搜查</button>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="habit">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>走進公共場所，先做三件事</h2></div>
+  <div class="cards">
+    <div class="card"><h3>① 看一眼逃生路線圖</h3><p>電梯旁、樓梯口常貼著路線圖，紅點是「目前位置」。記住離你最近的出口。</p></div>
+    <div class="card"><h3>② 找兩個不同方向的出口</h3><p>電影院、KTV 比較暗，抬頭找綠色的出口標示燈。一個出口有火，還有另一個。</p></div>
+    <div class="card"><h3>③ 注意通道暢不暢通</h3><p>安全門被鎖住、樓梯堆滿東西的地方很危險。可以告訴大人，請他們向店家或消防局反映。</p></div>
+  </div>
+  <div class="card warn" style="margin-top:1rem"><h3>真的發生火災時</h3><p>不搭電梯、不推擠，跟著綠色標示燈或工作人員的引導，從樓梯往下、往外逃生。</p></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>出口標示燈：綠底白色圖示，設於避難出口上方；避難方向指示燈：白底綠色圖示加箭頭，設於走廊、樓梯間及轉彎處，指引通往出口的方向。兩者在停電時由內建電池持續發亮。</li>
+      <li>安全梯的防火門平時應保持關閉（或設自動關閉裝置），火災時才能阻擋煙和火進入樓梯；用木塞、雜物把門卡住打開，會讓樓梯變成煙囪。</li>
+      <li>頁面中天花板圓形裝置為自動撒水頭示意。課本 p.68 資訊小站：居住 11 樓以上樓層須設置自動灑水設備。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>出口偵探測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 3 第 2 課〈檢查公共場所防火措施〉。</li><li>內政部消防署公共場所防火宣導資料。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+KIT.quiz(document.getElementById('signQuiz'),[
+  {q:'綠色底、白色小人跑向門的燈，應該裝在哪裡？',o:['出口的正上方','廁所裡面','電梯裡面'],a:0,e:'這是「出口標示燈」，告訴你這裡就是出口。'},
+  {q:'白色底、綠色小人加上箭頭的燈，是什麼意思？',o:['這裡是出口','往箭頭方向走可以到出口','這裡有滅火器'],a:1,e:'這是「避難方向指示燈」，裝在走廊和轉彎處。'}
+]);
+
+var info={
+  exit1:{g:1,t:'出口',d:'上方有綠色的出口標示燈，這是一個避難出口。'},
+  exit2:{g:1,t:'安全梯出口',d:'第二個不同方向的出口！一個出口有火，還能走另一個。'},
+  dir:{g:1,t:'避難方向指示燈',d:'箭頭指向出口的方向。煙很濃時，跟著它走。'},
+  ext:{g:1,t:'滅火器',d:'放在明顯、容易拿到的地方，剛起火時可以使用。'},
+  hyd:{g:1,t:'消防栓',d:'裡面有水帶，可以讓受過訓練的人員噴水滅火。'},
+  map:{g:1,t:'逃生避難路線圖',d:'先找紅點「目前位置」，再找最近的兩個出口。'},
+  sprk:{g:1,t:'自動撒水頭',d:'天花板上的小圓盤，溫度太高時會自動噴水。（這一題是加分題！）',bonus:1},
+  h1:{g:0,t:'安全梯門口堆滿箱子',d:'逃生時大家會被擋住、推擠，非常危險。避難通道一定要保持暢通。'},
+  h2:{g:0,t:'走廊盡頭堆雜物',d:'雜物擋住通道，也可能被點燃，讓火燒得更大。'},
+  h3:{g:0,t:'安全門被木塞卡住打開',d:'安全梯的防火門平常要關著，才能擋住煙和火。卡住打開，煙會整個灌進樓梯。'}
+};
+var got={};
+function tally(){var g=0,b=0;Object.keys(got).forEach(function(k){if(info[k].bonus)return;if(info[k].g)g++;else b++});document.getElementById('tGood').textContent=g+' / 6';document.getElementById('tBad').textContent=b+' / 3';return [g,b]}
+document.querySelectorAll('.spot').forEach(function(s){var go=function(){var k=s.dataset.s,i=info[k];got[k]=1;s.classList.add('got');var t=tally();var m=document.getElementById('mallMsg');m.className='say '+(i.g?'good':'bad');m.innerHTML='<div class="t">'+(i.g?'找到設備：':'發現危險：')+i.t+'</div><p>'+i.d+'</p>'+(t[0]===6&&t[1]===3?'<p style="margin-top:.4rem"><b>全部找到了！你是厲害的出口偵探。</b></p>':'')};s.addEventListener('click',go);s.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+document.getElementById('mallReset').addEventListener('click',function(){got={};document.querySelectorAll('.spot').forEach(function(s){s.classList.remove('got')});tally();var m=document.getElementById('mallMsg');m.className='say';m.innerHTML='<div class="t">開始搜查</div><p>點樓層圖上你覺得重要的東西。</p>'});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'在電影院裡，要怎麼在暗暗的地方找出口？',o:['找綠色的出口標示燈','找最亮的螢幕','跟著爆米花的香味'],a:0,e:'出口標示燈停電也會亮。'},
+  {q:'安全梯的防火門平常應該怎麼樣？',o:['用東西卡住打開，比較通風','保持關閉','拆掉'],a:1,e:'關著才能擋住煙和火進入樓梯。'},
+  {q:'在百貨公司聽到火災警報，應該怎麼逃生？',o:['搭電梯最快','走樓梯往下、往外逃','躲進廁所'],a:1,e:'火災時可能停電，電梯會受困。'},
+  {q:'進入一個新的公共場所時，最好先做什麼？',o:['先找好吃的','看逃生路線圖，找兩個出口','先去逛玩具店'],a:1,e:'事先知道出口，真的發生事情才不會慌。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

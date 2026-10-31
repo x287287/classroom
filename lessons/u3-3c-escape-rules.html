@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>小火快逃濃煙關門</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 情境闖關：左邊門的大插圖會跟著狀態變化，右邊是選項 */
+.game{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1.4rem;align-items:start}
+@media (max-width:860px){.game{grid-template-columns:minmax(0,1fr)}}
+.door svg{display:block;width:100%;max-width:380px;margin:0 auto;height:auto}
+.q-text{font-family:var(--font-display);font-size:1.45rem;line-height:1.45}
+.opt-list{display:grid;gap:.6rem;margin-top:.8rem}
+.opt-list button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.7rem 1rem;text-align:left;cursor:pointer;min-height:3.4rem;font-size:1.05rem}
+.opt-list button:active{transform:scale(.98)}
+.trail{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+.trail span{font-size:.82rem;padding:.1rem .55rem;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.trail span.bad{background:var(--bad-soft);color:var(--bad)}
+.scen{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.flow svg{display:block;width:100%;height:auto}
+.flow text{font-family:var(--font-body)}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 3 課 火場應變・延伸學習</div>
+    <h1>小火快逃，濃煙關門</h1>
+    <p class="k-lede">半夜被警報聲吵醒，打開門之前要先做什麼？門摸起來燙燙的代表什麼？為什麼「關門」反而能救命？用情境闖關把課本的逃生原則練到不用想也會。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#play"><span class="no">第 1 站</span><b>情境闖關</b><span>每一步都要做決定</span></a>
+      <a href="#door"><span class="no">第 2 站</span><b>一扇門的力量</b><span>為什麼要關門</span></a>
+      <a href="#map"><span class="no">第 3 站</span><b>原則總整理</b><span>一張圖記起來</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="play">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>情境闖關：你會怎麼做？</h2></div>
+  <div class="scen" id="scen"></div>
+  <div class="game">
+    <figure class="fig door"><svg viewBox="0 0 380 420" aria-hidden="true" id="doorSvg"></svg></figure>
+    <div class="stack">
+      <div class="panel">
+        <div class="muted" style="font-size:.85rem" id="where"></div>
+        <p class="q-text" id="qText"></p>
+        <div class="opt-list" id="opts"></div>
+      </div>
+      <div class="say" id="fb" aria-live="polite"></div>
+      <div class="trail" id="trail"></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="door">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>一扇關上的門，能幫你爭取時間</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">火災時，開著的門會讓煙和熱一下子灌進房間。<b>把門關上、塞住門縫</b>，就像多了一道牆，可以擋住濃煙和高溫，讓房間在一段時間內保持比較安全，等消防員來救。</p>
+      <div class="cards" style="margin-top:0">
+        <div class="card"><h3>為什麼摸門的上半部？</h3><p>熱煙會往上飄，門外如果有火，<b>門的上半部會先變燙</b>。用手背輕碰，比較不會燙傷手掌。</p></div>
+        <div class="card"><h3>用什麼塞門縫？</h3><p>毛巾、床單、衣服都可以，弄溼更好。塞住門下面的縫，煙就比較不會鑽進來。</p></div>
+        <div class="card"><h3>關門以後呢？</h3><p>到有窗戶的地方，打 119 說出你的位置，在窗邊揮手、用手電筒或手機燈光讓消防員看到你。</p></div>
+      </div>
+    </div>
+    <div class="card warn">
+      <h3>這些地方不適合關門避難</h3>
+      <p>如果在<b>鐵皮屋、木造房子</b>，或房間<b>沒有對外窗戶</b>、門是<b>玻璃門、塑膠門</b>這種不耐高溫的門，關門也擋不住火和煙。這時要想辦法用正確的方式，<b>趕快逃離現場</b>。</p>
+      <p style="margin-top:.6rem" class="muted">睡覺時把房門關上，也是一個保護自己的好習慣。</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="map">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>一張圖，記住逃生原則</h2></div>
+  <figure class="fig flow">
+    <svg viewBox="0 0 900 420" role="img" aria-label="火災逃生避難原則流程圖">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+      <g font-size="17">
+        <rect x="340" y="14" width="220" height="50" rx="25" fill="var(--accent)"/><text x="450" y="45" text-anchor="middle" fill="var(--accent-ink)">大喊失火，示警家人</text>
+        <line x1="450" y1="64" x2="450" y2="92" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar)"/>
+        <rect x="300" y="96" width="300" height="50" rx="12" fill="var(--sunk)" stroke="var(--line)"/><text x="450" y="127" text-anchor="middle" fill="var(--fg)">火在哪裡？</text>
+        <path d="M300 121 H170 V170" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+        <path d="M600 121 H730 V170" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+        <text x="236" y="112" text-anchor="middle" font-size="14" fill="var(--muted)">人和火都在室內</text>
+        <text x="664" y="112" text-anchor="middle" font-size="14" fill="var(--muted)">人在室內、火在室外</text>
+        <rect x="40" y="174" width="260" height="70" rx="12" fill="var(--good-soft)" stroke="var(--good)"/><text x="170" y="204" text-anchor="middle" fill="var(--fg)">隨手關門，阻隔火和煙</text><text x="170" y="228" text-anchor="middle" fill="var(--good)" font-size="15">往外、往下逃生</text>
+        <rect x="600" y="174" width="260" height="50" rx="12" fill="var(--sunk)" stroke="var(--line)"/><text x="730" y="205" text-anchor="middle" fill="var(--fg)">摸門板上半部</text>
+        <path d="M660 224 V270" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+        <path d="M800 224 V270" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+        <text x="650" y="252" text-anchor="end" font-size="14" fill="var(--bad)">燙</text>
+        <text x="810" y="252" font-size="14" fill="var(--muted)">不燙，開門看看</text>
+        <rect x="430" y="274" width="290" height="80" rx="12" fill="var(--bad-soft)" stroke="var(--bad)"/><text x="575" y="304" text-anchor="middle" fill="var(--fg)">關門、塞門縫</text><text x="575" y="330" text-anchor="middle" font-size="15" fill="var(--bad)">到有窗戶的房間，打 119</text>
+        <rect x="740" y="274" width="150" height="80" rx="12" fill="var(--sunk)" stroke="var(--line)"/><text x="815" y="304" text-anchor="middle" fill="var(--fg)">門外有煙？</text><text x="815" y="330" text-anchor="middle" font-size="14" fill="var(--muted)">有煙→關門</text>
+        <path d="M815 354 V384 H600" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+        <text x="760" y="404" text-anchor="middle" font-size="14" fill="var(--good)">沒有煙：往外、往下逃生</text>
+        <path d="M740 314 H722" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+      </g>
+    </svg>
+    <figcaption>整理自課本 p.76～77「火災逃生避難原則」</figcaption>
+  </figure>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>「小火快逃，濃煙關門」為內政部消防署宣導口訣：火勢小、通道無煙時立即往外往下逃生；通道已有濃煙時不要冒險穿越，應關門避難並撥打 119。</li>
+      <li>摸門測溫建議用手背輕觸門板上半部或門把；若門不燙才慢慢開一小縫觀察，看到煙就立刻關上。</li>
+      <li>課本 p.79：鐵皮屋、木造屋、無對外窗、門不耐高溫（玻璃門、塑膠門）時不適合關門避難。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>逃生原則測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 3 第 3 課〈火災逃生避難原則〉。</li><li>高雄市政府消防局住宅防火宣導資料（關門、塞門縫、摸門把測溫）。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 情境：每個節點 {txt, opts:[{t, go|end, ok, f}] , pic} */
+var S={
+  a:{name:'半夜，警報響了（門外有煙）',start:'wake'},
+  b:{name:'半夜，警報響了（門外沒煙）',start:'wake2'},
+  c:{name:'自己房間裡起火了',start:'inroom'}
+};
+var N={
+  wake:{w:'你的房間・半夜',q:'「嗶嗶嗶！」住警器響了，你聞到一點燒焦味。第一件事做什麼？',pic:'closed',opts:[
+    {t:'大喊「失火了！」叫醒家人',go:'feel',ok:1},
+    {t:'先把被子蓋好再睡一下',f:'警報響就是有危險，要立刻行動。'},
+    {t:'馬上衝去打開房門看看',f:'先別急著開門，門外可能就是火和煙。先示警，再測試門的溫度。'}]},
+  feel:{w:'你的房間・房門前',q:'房門是關著的。打開門之前，要先做什麼？',pic:'closed',opts:[
+    {t:'用手背摸摸門板的上半部',go:'feelcool',ok:1},
+    {t:'摸門板最下面',f:'熱煙往上飄，門的上半部會先變燙，要摸上半部。'},
+    {t:'直接打開',f:'門外如果有火，開門會讓煙和熱一下子衝進來。'}]},
+  feelcool:{w:'你的房間・房門前',q:'門摸起來不燙。你慢慢打開一條小縫，看到走廊有濃濃的黑煙！現在呢？',pic:'smoke',opts:[
+    {t:'立刻把門關上，用毛巾塞住門縫',go:'shelter',ok:1},
+    {t:'閉氣衝過去',f:'濃煙有毒又看不見路，衝進去非常危險。看到煙就要關門。'},
+    {t:'用溼毛巾摀住嘴巴再走出去',f:'溼毛巾擋不住一氧化碳，不能穿過濃煙。'}]},
+  shelter:{w:'你的房間・門已關好',q:'門關好了，門縫也塞住了。接下來呢？',pic:'shut',opts:[
+    {t:'到窗戶邊，打 119 說出位置，揮手求救',end:'good',ok:1,m:'你做到了「濃煙關門」！在有窗戶的房間等待，消防員很快會來救你。'},
+    {t:'躲到床底下',f:'消防員很難找到你。要到窗戶邊，讓外面的人看見你。'},
+    {t:'再打開門看看煙散了沒',f:'開門會讓煙灌進來。留在房間，打 119 等待救援。'}]},
+  wake2:{w:'你的房間・半夜',q:'警報響了！你已經大喊「失火了」。接下來？',pic:'closed',opts:[
+    {t:'用手背摸房門的上半部',go:'cool2',ok:1},
+    {t:'先找手機和存錢筒',f:'不要拿東西，每一秒都很重要。'},
+    {t:'躲進衣櫃',f:'躲起來消防員找不到你，煙也會鑽進去。'}]},
+  cool2:{w:'你的房間・房門前',q:'門不燙，你慢慢打開一條縫，走廊<b>沒有煙</b>，火在廚房那邊。怎麼做？',pic:'clear',opts:[
+    {t:'快步走出去，往外、往下逃生，隨手關門',end:'good',ok:1,m:'你做到了「小火快逃」！通道沒有煙就快點離開，隨手關門可以擋住火和煙。'},
+    {t:'先去廚房看看火有多大',f:'不要靠近火！通道安全時就趕快離開。'},
+    {t:'待在房間等煙來了再說',f:'通道安全時要把握時間逃生，等煙來了就出不去了。'}]},
+  inroom:{w:'你的房間・起火了',q:'檯燈旁邊的東西突然燒起來，火很快變大，房間裡開始有煙！',pic:'fireIn',opts:[
+    {t:'大喊失火，馬上離開房間',go:'leave',ok:1},
+    {t:'用棉被去拍火',f:'火已經變大了，不要自己滅火，趕快離開。'},
+    {t:'躲到房間角落',f:'火在房間裡，留在裡面最危險。'}]},
+  leave:{w:'走廊',q:'你已經跑出房間了，房門還開著。要怎麼做？',pic:'out',opts:[
+    {t:'隨手把房門關上，再往外、往下逃',end:'good',ok:1,m:'隨手關門可以把火和煙關在房間裡，讓家人有更多時間逃生。'},
+    {t:'門開著讓煙散出去',f:'門開著，火和煙會跑到走廊和其他房間。'},
+    {t:'回去拿書包',f:'絕對不要回去！'}]}
+};
+function pic(k){
+  var room='<rect width="380" height="420" fill="var(--surface)"/><rect x="0" y="360" width="380" height="60" fill="var(--sunk)"/>';
+  var door='<rect x="110" y="80" width="160" height="280" rx="4" fill="#A1887F" stroke="#6D4C41" stroke-width="4"/><circle cx="246" cy="230" r="9" fill="#FFD54F"/>';
+  var hand='<path d="M150 150 q-30 -10 -50 10 l-10 30 q20 10 40 0 z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/>';
+  var smoke='<g fill="#455A64" opacity=".8"><circle cx="300" cy="140" r="40"/><circle cx="330" cy="200" r="46"/><circle cx="300" cy="260" r="40"/><circle cx="340" cy="110" r="30"/></g>';
+  var s={
+    closed:room+door+'<text x="190" y="60" text-anchor="middle" font-size="18" fill="var(--bad)">嗶嗶嗶！</text>',
+    smoke:room+'<rect x="110" y="80" width="160" height="280" fill="#37474F"/>'+'<path d="M110 80 L190 100 L190 380 L110 360 Z" fill="#A1887F" stroke="#6D4C41" stroke-width="4"/>'+smoke,
+    shut:room+door+'<rect x="110" y="352" width="160" height="14" rx="6" fill="#64B5F6"/><text x="190" y="390" text-anchor="middle" font-size="14" fill="var(--muted)">毛巾塞住門縫</text><rect x="10" y="90" width="80" height="110" fill="#E3F2FD" stroke="#90A4AE" stroke-width="3"/>',
+    clear:room+'<rect x="110" y="80" width="160" height="280" fill="#ECEFF1"/><path d="M110 80 L190 100 L190 380 L110 360 Z" fill="#A1887F" stroke="#6D4C41" stroke-width="4"/><text x="230" y="230" text-anchor="middle" font-size="16" fill="var(--good)">沒有煙</text>',
+    fireIn:room+'<rect x="40" y="250" width="120" height="110" fill="#8D6E63"/><path d="M90 250 c10 -30 30 -40 30 -70 c10 20 20 30 10 60 z" fill="#FF7043"/><path d="M70 250 c4 -20 14 -26 14 -46 c8 14 10 20 6 46 z" fill="#FFCA28"/><g fill="#78909C" opacity=".5"><circle cx="120" cy="120" r="40"/><circle cx="180" cy="90" r="34"/></g>'+door,
+    out:room+'<rect x="110" y="80" width="160" height="280" fill="#FFCCBC"/><path d="M110 80 L190 100 L190 380 L110 360 Z" fill="#A1887F" stroke="#6D4C41" stroke-width="4"/><path d="M220 300 c10 -30 30 -40 30 -70 c10 20 20 30 10 60 z" fill="#FF7043"/>'
+  };
+  if(k==='closed')s[k]+=hand;
+  return s[k];
+}
+var curS='a',node,trail=[];
+function scenBtns(){var b=document.getElementById('scen');b.innerHTML='';Object.keys(S).forEach(function(k){var e=document.createElement('button');e.type='button';e.className='chip';e.setAttribute('aria-pressed',k===curS?'true':'false');e.textContent=S[k].name;e.addEventListener('click',function(){curS=k;begin()});b.appendChild(e)})}
+function fb(c,t,p){var m=document.getElementById('fb');m.className='say'+(c?' '+c:'');m.innerHTML='<div class="t">'+t+'</div><p>'+p+'</p>'}
+function show(id){
+  node=N[id];document.getElementById('where').textContent=node.w;document.getElementById('qText').innerHTML=node.q;document.getElementById('doorSvg').innerHTML=pic(node.pic);
+  var o=document.getElementById('opts');o.innerHTML='';
+  KIT.shuffle(node.opts).forEach(function(op){var b=document.createElement('button');b.type='button';b.innerHTML=op.t;b.addEventListener('click',function(){
+    if(op.ok){trail.push({t:op.t,ok:1});drawTrail();if(op.end){o.innerHTML='';fb('good','過關！',op.m+'<br><button class="btn fill" type="button" id="again" style="margin-top:.6rem">換一個情境</button>');document.getElementById('again').addEventListener('click',function(){var ks=Object.keys(S);curS=ks[(ks.indexOf(curS)+1)%ks.length];begin()})}else{fb('good','做得好！','繼續下一步。');show(op.go)}}
+    else{trail.push({t:op.t,ok:0});drawTrail();fb('bad','這樣很危險',op.f)}
+  });o.appendChild(b)});
+}
+function drawTrail(){var t=document.getElementById('trail');t.innerHTML='';trail.forEach(function(x){var s=document.createElement('span');if(!x.ok)s.className='bad';s.textContent=(x.ok?'✓ ':'✗ ')+x.t.replace(/<[^>]+>/g,'');t.appendChild(s)})}
+function begin(){trail=[];drawTrail();scenBtns();fb('','開始','讀一讀情境，選出最安全的做法。');show(S[curS].start)}
+begin();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'「小火快逃，濃煙關門」是什麼意思？',o:['火小時趕快逃，通道有濃煙時關門避難','火小時關門，火大時逃','不管怎樣都關門'],a:0,e:'通道安全就逃，有濃煙就關門等救援。'},
+  {q:'打開房門之前，應該摸門的哪裡？',o:['門的上半部','門的最下面','門的中間貼紙'],a:0,e:'熱煙往上飄，上半部會先變燙。'},
+  {q:'人和火都在室內，逃出房間時要記得做什麼？',o:['把門打開讓煙散出去','隨手關門','回去拿東西'],a:1,e:'關門可以把火和煙擋在裡面。'},
+  {q:'下面哪一種情況「不適合」關門避難？',o:['有窗戶的水泥房間','鐵皮屋或只有玻璃門的房間','有厚木門的臥室'],a:1,e:'不耐高溫的房子或門擋不住火和煙，要設法逃離。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

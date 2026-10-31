@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>沖脫泡蓋送大挑戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 為什麼要沖？溫度計動畫：熱會繼續往下走，冷水把它擋住 */
+.therm{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:760px){.therm{grid-template-columns:minmax(0,1fr)}}
+.therm svg{width:100%;height:auto;display:block}
+.timer{font-family:var(--font-display);font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--cool)}
+.kind{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:1rem}
+.kind .card h3{display:flex;align-items:center;gap:.5rem}
+.kind .card svg{width:42px;height:42px;flex:none}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 1 課 小心灼燙傷・延伸學習</div>
+    <h1>沖脫泡蓋送大挑戰</h1>
+    <p class="k-lede">課本教了燙傷急救五步驟。為什麼第一步一定是「沖」，而且要沖那麼久？阿嬤說塗牙膏、抹醬油，到底可不可以？被化學藥劑或電灼傷時，又要怎麼辦？</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#why"><span class="no">第 1 站</span><b>為什麼要沖那麼久</b><span>熱還在往下走</span></a>
+      <a href="#order"><span class="no">第 2 站</span><b>排排看</b><span>五步驟的順序</span></a>
+      <a href="#myth"><span class="no">第 3 站</span><b>偏方破解</b><span>牙膏、醬油可以嗎</span></a>
+      <a href="#kinds"><span class="no">第 4 站</span><b>特別的灼傷</b><span>化學、電、火焰</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="why">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>燙到之後，熱還在往皮膚裡面走</h2></div>
+  <div class="therm">
+    <div class="stack">
+      <p class="big">熱湯離開皮膚以後，皮膚裡面的<b>熱還沒有散掉</b>，會繼續往深處走，讓傷越來越深。就像剛煮好的蛋，撈起來以後裡面還在熟。</p>
+      <p>用流動的冷水沖 <b>15～30 分鐘</b>，可以把熱帶走、減輕疼痛，讓傷口不要變得更深。所以<b>先沖再送醫</b>，不要直接衝去醫院。</p>
+      <p class="muted">按「開始沖水」，看看沖水的效果。（模擬時間加快了）</p>
+      <div class="btnrow"><button class="btn fill" type="button" id="cool">開始沖水</button><button class="btn" type="button" id="noCool">不沖水，直接走</button><button class="btn" type="button" id="resetT">重來</button></div>
+    </div>
+    <div class="panel stack">
+      <svg viewBox="0 0 360 230" aria-hidden="true">
+        <rect x="20" y="70" width="320" height="30" fill="#F6D2B8"/>
+        <rect x="20" y="100" width="320" height="60" fill="#EFB3A0"/>
+        <rect x="20" y="160" width="320" height="50" fill="#F7E3A7"/>
+        <rect id="heatR" x="120" y="70" width="120" height="10" fill="#C0392B" opacity=".6"/>
+        <g id="water"></g>
+        <text x="24" y="92" font-size="12" fill="var(--fg)">表皮</text>
+        <text x="24" y="134" font-size="12" fill="var(--fg)">真皮</text>
+        <text x="24" y="190" font-size="12" fill="var(--fg)">皮下</text>
+      </svg>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap">
+        <div><div class="muted" style="font-size:.85rem">沖水時間</div><div class="timer" id="clock">0 分</div></div>
+        <div class="say" id="coolMsg" style="flex:1;min-width:12rem;min-height:4.5rem" aria-live="polite"><div class="t">準備</div><p>剛被熱水燙到了！</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="cards">
+    <div class="card"><h3>用冷水，不用冰水</h3><p>冰水、冰塊太冰，會讓血管收縮，反而傷害皮膚，還可能讓身體失溫。</p></div>
+    <div class="card"><h3>水流要小</h3><p>水柱太強會沖破水泡。可以讓水流在傷口旁邊，慢慢流過傷口。</p></div>
+    <div class="card"><h3>泡的時候發抖</h3><p>表示體溫降太多了，要立刻保暖、蓋好傷口，然後送醫。</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="order">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>五步驟，排排看</h2></div>
+  <p class="big" style="max-width:44em">小美的手被熱湯燙到了！依照正確的順序，點下面的卡片幫她急救。</p>
+  <div class="panel" id="orderBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="myth">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>家裡流傳的偏方，可以用嗎？</h2></div>
+  <p class="big" style="max-width:44em">很多長輩會用牙膏、醬油、麻油來處理燙傷。醫生提醒：這些東西<b>不會幫傷口降溫</b>，還可能讓傷口<b>感染</b>，醫生也要先把它們清乾淨才能治療。</p>
+  <div class="panel" id="sortBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="kinds">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>不同的灼傷，處理方法也不同</h2></div>
+  <div class="kind">
+    <div class="card">
+      <h3><svg viewBox="0 0 42 42" aria-hidden="true"><path d="M14 4 h14 v8 l8 20 a4 4 0 0 1 -4 6 h-22 a4 4 0 0 1 -4 -6 l8 -20 z" fill="var(--cool-soft)" stroke="var(--cool)" stroke-width="2"/><path d="M10 28 h22" stroke="var(--cool)" stroke-width="2"/></svg>化學灼傷</h3>
+      <p>被強酸、強鹼或清潔劑噴到：<b>立刻用大量清水長時間沖洗</b>，同時脫掉沾到藥劑的衣服（小心不要碰到自己）。噴到眼睛時，要撐開眼皮一直沖水，然後馬上就醫，並帶著藥劑的瓶子給醫生看。</p>
+    </div>
+    <div class="card warn">
+      <h3><svg viewBox="0 0 42 42" aria-hidden="true"><path d="M24 2 L8 24 h12 l-4 16 l18 -24 h-12 z" fill="#FFD54F" stroke="var(--bad)" stroke-width="2"/></svg>電灼傷</h3>
+      <p>看到有人觸電，<b>不可以直接用手去拉他</b>，你也會觸電！要先請大人<b>關掉電源</b>。電灼傷外表可能只有小小的傷口，但電流可能傷到身體裡面和心臟，一定要送醫檢查。</p>
+    </div>
+    <div class="card">
+      <h3><svg viewBox="0 0 42 42" aria-hidden="true"><path d="M21 4 c6 8 12 12 12 22 a12 12 0 0 1 -24 0 c0 -6 4 -8 6 -14 c2 4 4 4 6 2 z" fill="#FFAB91" stroke="var(--accent)" stroke-width="2"/></svg>火焰燒傷</h3>
+      <p>衣服著火時先「<b>停、躺、滾</b>」把火弄熄，再做沖脫泡蓋送。這在第 3 課「火場應變」會學到更多。</p>
+    </div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>台大醫院衛教：燙傷應以室溫（約 20°C）自來水沖洗 15～30 分鐘；勿直接冰敷以免二次傷害；勿塗抹醬油、牙膏、藥膏、麻油、鹽巴或浸鹽水、尿液等偏方，以免延誤治療。</li>
+      <li>大面積燙傷，尤其兒童和長者，浸泡時間不宜過長，以免失溫或延誤送醫。</li>
+      <li>化學灼傷沖洗時間通常比熱燙傷更長，並應攜帶化學品容器或標示就醫；電灼傷須先斷電再接觸傷者。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>急救小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>國立臺灣大學醫學院附設醫院健康電子報〈燒燙傷預防與急救〉。</li>
+    <li>國小健康與體育四上課本 單元 3 第 1 課〈灼燙傷急救處理方法〉。</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 1 沖水模擬 */
+var t=0,timer=null,mode='';
+function draw(){
+  var depth=mode==='cool'?Math.max(10,40-t*1.3):mode==='no'?Math.min(110,10+t*4):10;
+  if(mode==='cool'&&t<4)depth=10+t*4;
+  var hr=document.getElementById('heatR');hr.setAttribute('height',depth);
+  hr.setAttribute('opacity',mode==='cool'?Math.max(.12,.6-t*.02):.6);
+  document.getElementById('water').innerHTML=mode==='cool'?'<path d="M150 0 v60 M180 0 v62 M210 0 v60" stroke="var(--cool)" stroke-width="6" stroke-linecap="round" opacity=".6"/>':'';
+  document.getElementById('clock').textContent=(mode==='no'?'0':Math.min(30,t))+' 分';
+  var m=document.getElementById('coolMsg');
+  if(mode==='cool'){
+    if(t<15){m.className='say';m.innerHTML='<div class="t">沖水中</div><p>熱慢慢被帶走，疼痛減輕了。再繼續沖！</p>'}
+    else{m.className='say good';m.innerHTML='<div class="t">沖了 '+Math.min(30,t)+' 分鐘</div><p>熱散掉了，傷口沒有再變深。接下來可以「脫」了。</p>'}
+  }else if(mode==='no'){m.className='say bad';m.innerHTML='<div class="t">沒有沖水</div><p>熱繼續往下走，傷口從第一度變得更深了！</p>'}
+}
+function run(md){clearInterval(timer);mode=md;t=0;draw();timer=setInterval(function(){t++;draw();if((md==='cool'&&t>=30)||(md==='no'&&t>=25))clearInterval(timer)},180)}
+document.getElementById('cool').addEventListener('click',function(){run('cool')});
+document.getElementById('noCool').addEventListener('click',function(){run('no')});
+document.getElementById('resetT').addEventListener('click',function(){clearInterval(timer);mode='';t=0;draw();var m=document.getElementById('coolMsg');m.className='say';m.innerHTML='<div class="t">準備</div><p>剛被熱水燙到了！</p>'});
+draw();
+
+/* 2 排序 */
+KIT.order(document.getElementById('orderBox'),{
+  steps:[
+    {t:'沖',d:'用流動的冷水沖 15～30 分鐘，把熱帶走。',why:'要先把熱帶走，才能做其他事。'},
+    {t:'脫',d:'在水中輕輕脫掉衣服，脫不下來就用剪刀剪開，不要撕破水泡。',why:'要先沖水降溫，才在水中脫衣服。'},
+    {t:'泡',d:'在冷水中再泡 15～30 分鐘，可以減輕疼痛。',why:'衣服還沒脫，泡的效果不好。'},
+    {t:'蓋',d:'用乾淨的紗布蓋住傷口，不要塗任何東西。',why:'還沒降溫完成，太早蓋住熱會悶在裡面。'},
+    {t:'送',d:'送醫院治療。傷得重就打 119，送醫時注意保暖。',why:'先在家完成降溫，傷勢才不會更重。'}
+  ],
+  start:'小美的手被熱湯燙紅了，第一步要做什麼？',
+  done:'完全正確！記住口訣：沖、脫、泡、蓋、送。'
+});
+
+/* 3 偏方分類 */
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'ok',t:'可以這樣做',d:'正確的急救'},{id:'no',t:'千萬不要',d:'會讓傷口更糟'}],
+  items:[
+    {t:'塗牙膏',bin:'no',e:'牙膏不會降溫，還會黏在傷口上，增加感染的機會。'},
+    {t:'抹醬油',bin:'no',e:'醬油不乾淨，可能造成感染，醫生還要先清掉。'},
+    {t:'抹麻油',bin:'no',e:'油會把熱封在皮膚裡，反而散不掉。'},
+    {t:'直接冰敷',bin:'no',e:'太冰會造成二次傷害，要用冷水，不用冰塊。'},
+    {t:'把水泡弄破',bin:'no',e:'水泡是天然的保護膜，弄破容易感染。'},
+    {t:'撒鹽巴',bin:'no',e:'鹽巴會刺激傷口，非常痛，也不會幫忙降溫。'},
+    {t:'用流動的冷水沖',bin:'ok',e:'沖冷水是最重要的第一步。'},
+    {t:'用乾淨紗布輕輕蓋住',bin:'ok',e:'保護傷口、避免細菌跑進去。'},
+    {t:'告訴大人並送醫',bin:'ok',e:'燙傷要讓醫生檢查，尤其是臉、手、大面積的燙傷。'}
+  ],
+  done:'全部分對了！燙傷只要冷水，不要偏方。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'為什麼燙傷後要用冷水沖 15～30 分鐘？',o:['把皮膚洗乾淨','把還在皮膚裡的熱帶走，傷口才不會變深','讓水泡變大'],a:1,e:'熱會繼續往下走，沖水可以阻止傷口變深。'},
+  {q:'燙傷時可以用冰塊冰敷嗎？',o:['可以，越冰越好','不可以，會造成二次傷害','只有夏天可以'],a:1,e:'要用冷水，不是冰水或冰塊。'},
+  {q:'衣服黏在燙傷的皮膚上，應該怎麼辦？',o:['用力撕下來','在水中輕輕脫，脫不下就用剪刀剪開','不管它'],a:1,e:'動作要輕，避免撕破皮膚和水泡。'},
+  {q:'看到有人觸電倒地，你應該先做什麼？',o:['馬上用手把他拉開','請大人先關掉電源','潑水在他身上'],a:1,e:'直接碰觸會讓你也觸電，一定要先斷電。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

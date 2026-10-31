@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>煙跑得比你快</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 樓梯間剖面賽跑：人 vs 煙；迷思翻牌 */
+.race svg{display:block;width:100%;height:auto}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+@media (max-width:600px){.res{grid-template-columns:minmax(0,1fr)}}
+.res div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:.6rem .8rem}
+.res b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.6rem;line-height:1.15;font-variant-numeric:tabular-nums}
+.flips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:1rem}
+.flip{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:var(--r);padding:1rem 1.1rem;text-align:left;cursor:pointer;min-height:11rem;display:flex;flex-direction:column;gap:.5rem}
+.flip .q{font-family:var(--font-display);font-size:1.2rem;line-height:1.4}
+.flip .tag{align-self:flex-start}
+.flip .a{display:none;font-size:.98rem}
+.flip[aria-expanded="true"]{border-color:var(--bad);background:var(--bad-soft)}
+.flip[aria-expanded="true"] .a{display:block}
+.flip[aria-expanded="true"] .hint{display:none}
+.hint{font-size:.85rem;color:var(--muted);margin-top:auto}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 3 課 火場應變・延伸學習</div>
+    <h1>煙跑得比你快</h1>
+    <p class="k-lede">課本說：火場中的濃煙比火更致命。煙到底跑多快？為什麼往頂樓跑不安全？那些常聽到的逃生方法，背後有什麼科學原理？</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#race"><span class="no">第 1 站</span><b>人和煙賽跑</b><span>往上跑還是往下跑</span></a>
+      <a href="#why"><span class="no">第 2 站</span><b>煙為什麼危險</b><span>熱、看不見、有毒</span></a>
+      <a href="#myth"><span class="no">第 3 站</span><b>迷思翻翻牌</b><span>錯在哪裡</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="race">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>在樓梯間，你跑得贏煙嗎？</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">在平平的走廊上，煙每秒大約走 <b>0.5～1 公尺</b>，比人走路（每秒約 1～1.3 公尺）還慢。可是在<b>樓梯間</b>，熱煙往上衝，每秒可以跑 <b>3～5 公尺</b>，是人走路的好幾倍！</p>
+      <p>你住在 5 樓，3 樓的房子失火，濃煙正從樓梯間往上竄，往下的樓梯還沒有煙。要往上跑到頂樓（10 樓），還是往下跑到 1 樓？</p>
+      <div class="btnrow"><button class="btn" type="button" id="up">往上跑到頂樓</button><button class="btn fill" type="button" id="down">往下跑（通道沒有煙時）</button><button class="btn" type="button" id="flat">在走廊上比一比</button></div>
+      <div class="res"><div><span class="muted" style="font-size:.85rem">你的位置</span><b id="rMe">5 樓</b></div><div><span class="muted" style="font-size:.85rem">煙的位置</span><b id="rSmoke">3 樓</b></div><div><span class="muted" style="font-size:.85rem">時間</span><b id="rT">0 秒</b></div></div>
+      <div class="say" id="raceMsg" aria-live="polite"><div class="t">準備</div><p>選一個方向開始。</p></div>
+    </div>
+    <figure class="fig race">
+      <svg viewBox="0 0 360 460" aria-hidden="true" id="raceSvg"></svg>
+      <figcaption>示意模擬：每層樓高約 3 公尺，人在樓梯每秒約爬 0.5 公尺高度，煙往上每秒 3 公尺</figcaption>
+    </figure>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="why">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>濃煙的三個可怕之處</h2></div>
+  <div class="cards">
+    <div class="card warn"><h3>很燙</h3><p>熱煙會往上飄，聚集在天花板，越高的地方越熱。吸進滾燙的煙會燙傷喉嚨和呼吸道。</p></div>
+    <div class="card warn"><h3>看不見</h3><p>黑煙會擋住視線，熟悉的家也會讓人迷路，找不到門和樓梯。所以平時就要記住逃生路線。</p></div>
+    <div class="card warn"><h3>有毒</h3><p>煙裡有一氧化碳等有毒氣體，吸幾口就可能頭昏、昏倒。一氧化碳無色無味，溼毛巾也擋不住。</p></div>
+  </div>
+  <div class="think"><b>想一想</b><p>既然熱煙往上飄，那在充滿煙的走廊裡，身體應該放高還是放低？（第 3 課「低姿勢逃生」有答案）</p></div>
+ </div>
+</section>
+
+<section class="k-sec" id="myth">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>迷思翻翻牌</h2></div>
+  <p class="big" style="max-width:44em">這些都是常聽到的逃生方法，但其實都是<b>錯的</b>。先和同學討論錯在哪裡，再點卡片看答案。</p>
+  <div class="flips" id="flips" style="margin-top:1rem"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>煙的流動速度（日本消防宣導資料常用數據）：水平方向每秒約 0.5～1 公尺，比人步行（每秒約 1～1.3 公尺）慢；垂直方向（樓梯間等）每秒約 3～5 公尺，為步行速度的 2 倍以上。</li>
+      <li>樓梯間、電梯井等垂直空間會產生「煙囪效應」，熱煙快速上升，因此若下樓通道安全暢通，應往下、往外逃生。</li>
+      <li>課本 p.75 已列五個迷思（塑膠袋套頭、溼毛巾掩口鼻、搭電梯、躲浴室、往頂樓跑），本頁另補充三個常見迷思。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>濃煙小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>大阪府立西淀川支援學校防災資料（煙的水平與垂直擴散速度）。</li><li>國小健康與體育四上課本 單元 3 第 3 課〈火場逃生避難迷思〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var FL=10,H=40,svg=document.getElementById('raceSvg'),timer=null;
+function fy(f){return 440-f*H}
+function draw(me,smoke,mode){
+  var s='<rect width="360" height="460" fill="var(--surface)"/>';
+  for(var f=1;f<=FL;f++){var y=fy(f);s+='<line x1="40" y1="'+y+'" x2="340" y2="'+y+'" stroke="var(--line)" stroke-width="2"/><text x="30" y="'+(y+26)+'" text-anchor="end" font-size="13" fill="var(--muted)">'+f+'F</text>';s+='<path d="M220 '+(y+H)+' l20 -8 l20 -8 l20 -8 l20 -8 l20 -8" stroke="#BCAAA4" stroke-width="3" fill="none"/>'}
+  if(mode!=='flat'){var top=fy(smoke);s+='<rect x="200" y="'+top+'" width="140" height="'+Math.max(0,fy(3)-top)+'" fill="#455A64" opacity=".55"/>';if(fy(3)-top>24)s+='<text x="270" y="'+(top+20)+'" text-anchor="middle" font-size="14" fill="#fff">濃煙</text>'}
+  s+='<path d="M120 '+(fy(3)+H-4)+' q8 -14 0 -26 q-8 -12 0 -24" stroke="#FF7043" stroke-width="5" fill="none"/>';
+  var my=fy(me)+20;s+='<circle cx="270" cy="'+(my-6)+'" r="9" fill="#FFD54F" stroke="#8D6E63" stroke-width="2"/><rect x="263" y="'+(my+2)+'" width="14" height="14" rx="4" fill="#42A5F5"/>';
+  svg.innerHTML=s;
+}
+function flatDraw(pm,ps){var s='<rect width="360" height="460" fill="var(--surface)"/><rect x="20" y="180" width="320" height="100" fill="var(--sunk)" stroke="var(--line)"/><text x="180" y="170" text-anchor="middle" font-size="15" fill="var(--fg)">平平的走廊（30 公尺）</text>';s+='<rect x="20" y="182" width="'+(ps/30*320)+'" height="40" fill="#455A64" opacity=".55"/>';var x=20+pm/30*320;s+='<circle cx="'+x+'" cy="250" r="10" fill="#FFD54F" stroke="#8D6E63" stroke-width="2"/><rect x="'+(x-7)+'" y="258" width="14" height="14" rx="4" fill="#42A5F5"/><text x="340" y="300" text-anchor="end" font-size="13" fill="var(--good)">出口 →</text>';svg.innerHTML=s}
+function say(c,t,p){var m=document.getElementById('raceMsg');m.className='say'+(c?' '+c:'');m.innerHTML='<div class="t">'+t+'</div><p>'+p+'</p>'}
+function run(mode){
+  clearInterval(timer);var t=0,me=5,smoke=3,pm=0,ps=0;
+  say('','跑跑跑！','看看誰比較快……');
+  timer=setInterval(function(){
+    t+=1;
+    if(mode==='flat'){pm=Math.min(30,pm+1.1);ps=Math.min(30,ps+.75);flatDraw(pm,ps);document.getElementById('rMe').textContent=pm.toFixed(0)+' 公尺';document.getElementById('rSmoke').textContent=ps.toFixed(0)+' 公尺';document.getElementById('rT').textContent=t+' 秒';
+      if(pm>=30){clearInterval(timer);say('good','在走廊，你跑贏了','水平方向煙比人走路慢一點。但煙越積越多、越來越往下，所以還是要快點離開，不要停下來。')}return}
+    smoke=Math.min(FL,smoke+3/3);
+    if(mode==='up')me=Math.min(FL,me+.5/3*1);else me=Math.max(1,me-.5/3);
+    draw(me,smoke,mode);
+    document.getElementById('rMe').textContent=me.toFixed(1)+' 樓';document.getElementById('rSmoke').textContent='已到 '+Math.floor(smoke)+' 樓';document.getElementById('rT').textContent=t+' 秒';
+    if(mode==='up'&&smoke>=me){clearInterval(timer);say('bad','被濃煙追上了！','往上跑的時候，煙在樓梯間往上衝得比你快很多，才 '+t+' 秒就追上你，而且越往頂樓煙越濃、越熱。')}
+    if(mode==='down'&&me<=1){clearInterval(timer);say('good','安全到達 1 樓！','煙往上衝，你往下走，離煙越來越遠。所以只要往下的通道沒有煙、安全暢通，就要<b>往下、往外</b>逃生。')}
+  },300);
+}
+document.getElementById('up').addEventListener('click',function(){document.getElementById('rMe').textContent='5 樓';run('up')});
+document.getElementById('down').addEventListener('click',function(){run('down')});
+document.getElementById('flat').addEventListener('click',function(){run('flat')});
+draw(5,3,'up');
+
+var myths=[
+  {q:'用塑膠袋套住頭，裡面可以裝空氣。',a:'塑膠袋遇熱會<b>融化</b>，黏在臉上造成燙傷；袋子裡那一點空氣也撐不了多久。',book:1},
+  {q:'拿溼毛巾摀住口鼻，就能安全穿過濃煙。',a:'溼毛巾<b>擋不住一氧化碳</b>等有毒氣體。找毛巾、弄溼還會浪費逃生時間，應該立刻逃。',book:1},
+  {q:'搭電梯逃生比較快。',a:'火災時常常<b>停電</b>，人會被困在電梯裡；電梯井像煙囪，煙會灌進來。要走樓梯。',book:1},
+  {q:'浴室有水，躲進浴室最安全。',a:'浴室的門和天花板大多<b>不耐高溫</b>，也擋不住濃煙；水龍頭的水也不夠撲滅大火。',book:1},
+  {q:'住得比較高，就往頂樓跑等直升機。',a:'煙往上衝的速度比人快，越往頂樓<b>煙越濃、越熱</b>，頂樓的門也可能鎖住。下樓安全就往下逃。',book:1},
+  {q:'躲到床底下或衣櫃裡，火就燒不到。',a:'煙還是會鑽進去，而且消防員<b>很難找到你</b>。要逃生，或到有窗戶的房間關門避難、在窗邊求救。',book:0},
+  {q:'先回房間拿手機、存錢筒再逃。',a:'火災可能幾分鐘就讓整間房子充滿濃煙，<b>每一秒都很重要</b>。什麼都不拿，直接逃。',book:0},
+  {q:'電器起火，趕快潑水滅火。',a:'電器起火潑水可能<b>觸電</b>。要先請大人關掉電源，火很小時用滅火器，火大就立刻逃生。',book:0}
+];
+var fl=document.getElementById('flips');
+myths.forEach(function(m){var b=document.createElement('button');b.type='button';b.className='flip';b.setAttribute('aria-expanded','false');b.innerHTML='<span class="tag '+(m.book?'a':'w')+'">'+(m.book?'課本迷思':'延伸迷思')+'</span><span class="q">「'+m.q+'」</span><span class="a"><b class="hi">錯！</b>'+m.a+'</span><span class="hint">點一下看答案</span>';b.addEventListener('click',function(){b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')});fl.appendChild(b)});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'在樓梯間裡，煙往上跑的速度大約是？',o:['每秒 3～5 公尺，比人快很多','每秒 0.1 公尺，比人慢很多','和人一樣快'],a:0,e:'樓梯間像煙囪，熱煙往上衝得很快。'},
+  {q:'住在 5 樓，3 樓冒煙但往下的樓梯還沒有煙，應該？',o:['往上跑到頂樓','往下、往外逃生','躲進浴室'],a:1,e:'通道安全暢通時，往下往外最安全。'},
+  {q:'為什麼溼毛巾不能幫你安全穿過濃煙？',o:['毛巾太小','擋不住一氧化碳等有毒氣體','毛巾會著火'],a:1,e:'一氧化碳無色無味，溼毛巾擋不住。'},
+  {q:'火災時為什麼不能搭電梯？',o:['電梯太擠','可能停電被困住，電梯井也會灌進濃煙','電梯太慢'],a:1,e:'要走樓梯逃生。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

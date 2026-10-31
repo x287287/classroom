@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>皮膚有幾層</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 皮膚剖面（左）＋ 深度說明（右）；手掌法則用 100 個手掌格子 */
+.layer-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+.skin svg .lay{cursor:pointer;transition:opacity .2s}
+.skin svg .lay:hover{opacity:.85}
+.range{width:100%;height:46px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:-.4rem}
+.deg h3{font-size:1.6rem}
+.deg .rows{display:grid;grid-template-columns:5.5em 1fr;gap:.35rem .8rem;margin-top:.6rem}
+.deg .rows dt{color:var(--muted);font-size:.9rem}
+.deg .rows dd{margin:0}
+.palms{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;max-width:520px}
+.palms i{aspect-ratio:1;border-radius:6px 6px 10px 10px;background:var(--sunk);border:1px solid var(--line);transition:background .2s}
+.palms i.on{background:var(--bad);border-color:var(--bad)}
+.pct{font-family:var(--font-display);font-size:2.4rem;color:var(--bad);line-height:1}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 1 課 小心灼燙傷・延伸學習</div>
+    <h1>皮膚有幾層？</h1>
+    <p class="k-lede">課本把灼燙傷分成三度。為什麼最嚴重的第三度，反而不太會痛？醫生又是怎麼知道燙傷有多大一片？先認識皮膚的構造，答案就藏在裡面。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#skin"><span class="no">第 1 站</span><b>皮膚的三層</b><span>每一層負責什麼</span></a>
+      <a href="#depth"><span class="no">第 2 站</span><b>燙到多深？</b><span>拉一拉，看分級</span></a>
+      <a href="#palm"><span class="no">第 3 站</span><b>手掌量面積</b><span>醫生的小祕訣</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="skin">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>皮膚是身體最大的器官</h2></div>
+  <div class="two">
+    <figure>
+      <div class="fig skin">
+        <svg viewBox="0 0 440 360" role="group" aria-label="皮膚剖面圖">
+          <g class="lay" data-l="0" tabindex="0" role="button" aria-label="表皮層">
+            <path d="M20 70 Q120 58 220 70 T420 70 V112 H20 Z" fill="#F6D2B8" stroke="#C99475" stroke-width="2"/>
+          </g>
+          <g class="lay" data-l="1" tabindex="0" role="button" aria-label="真皮層">
+            <rect x="20" y="112" width="400" height="118" fill="#EFB3A0"/>
+            <!-- nerve -->
+            <path d="M80 226 C90 180 70 150 96 118" stroke="#E2B714" stroke-width="4" fill="none"/>
+            <circle cx="96" cy="118" r="5" fill="#E2B714"/>
+            <!-- sweat gland -->
+            <path d="M200 76 V180" stroke="#4F86C6" stroke-width="3"/>
+            <circle cx="200" cy="190" r="12" fill="none" stroke="#4F86C6" stroke-width="4"/>
+            <!-- hair follicle -->
+            <path d="M310 40 L314 76" stroke="#3a2a22" stroke-width="4"/>
+            <path d="M306 76 Q300 150 314 196 Q330 150 322 76 Z" fill="#E6A08E" stroke="#B9705E" stroke-width="2"/>
+            <!-- vessels -->
+            <path d="M20 214 C120 200 260 228 420 210" stroke="#C0392B" stroke-width="4" fill="none"/>
+            <path d="M20 222 C120 210 260 236 420 220" stroke="#3E64B5" stroke-width="4" fill="none"/>
+          </g>
+          <g class="lay" data-l="2" tabindex="0" role="button" aria-label="皮下組織">
+            <rect x="20" y="230" width="400" height="80" fill="#F7E3A7"/>
+            <g fill="#F2D27A" stroke="#D9B65A">
+              <ellipse cx="60" cy="262" rx="26" ry="18"/><ellipse cx="130" cy="276" rx="30" ry="20"/><ellipse cx="210" cy="258" rx="28" ry="18"/><ellipse cx="290" cy="278" rx="30" ry="20"/><ellipse cx="370" cy="262" rx="28" ry="18"/>
+            </g>
+          </g>
+          <rect x="20" y="310" width="400" height="34" fill="#C76B6B"/>
+          <text x="420" y="334" text-anchor="end" font-size="14" fill="#fff">肌肉</text>
+          <g font-size="14" fill="var(--fg)">
+            <text x="24" y="58">表皮層</text>
+            <text x="104" y="124" fill="#7a5a00">神經</text>
+            <text x="216" y="196" fill="#2c5a90">汗腺</text>
+            <text x="330" y="70">毛髮</text>
+            <text x="26" y="208" font-size="12" fill="#7a1f17">血管</text>
+            <text x="24" y="304" font-size="13" fill="#7a5a00">脂肪</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>皮膚剖面示意圖・點一點每一層</figcaption>
+    </figure>
+    <div class="stack">
+      <div class="layer-btns" id="layBtns">
+        <button class="chip" type="button" data-l="0">表皮層</button>
+        <button class="chip" type="button" data-l="1">真皮層</button>
+        <button class="chip" type="button" data-l="2">皮下組織</button>
+      </div>
+      <div class="say" id="layInfo" aria-live="polite"></div>
+      <div class="card"><h3>你知道嗎？</h3><p>把一個大人的皮膚攤平，大約有 <b>1.5～2 平方公尺</b>，差不多是一張雙人床那麼大，是人體最大的器官。</p></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="depth">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>燙到多深，決定有多嚴重</h2></div>
+  <div class="two">
+    <figure class="stack">
+      <div class="fig">
+        <svg viewBox="0 0 440 300" role="img" aria-label="燙傷深度示意圖">
+          <rect x="20" y="40" width="400" height="34" fill="#F6D2B8"/>
+          <rect x="20" y="74" width="400" height="56" fill="#EFB3A0"/>
+          <rect x="20" y="130" width="400" height="60" fill="#E6A08E"/>
+          <rect x="20" y="190" width="400" height="60" fill="#F7E3A7"/>
+          <rect x="20" y="250" width="400" height="34" fill="#C76B6B"/>
+          <path d="M80 190 C90 150 70 110 96 80" stroke="#E2B714" stroke-width="4" fill="none" id="nerve"/>
+          <g font-size="13" fill="var(--fg)">
+            <text x="414" y="62" text-anchor="end">表皮層</text>
+            <text x="414" y="106" text-anchor="end">真皮層（淺）</text>
+            <text x="414" y="164" text-anchor="end">真皮層（深）</text>
+            <text x="414" y="224" text-anchor="end">皮下組織</text>
+            <text x="414" y="272" text-anchor="end" fill="#fff">肌肉</text>
+          </g>
+          <!-- heat source -->
+          <g id="heat">
+            <path d="M200 6 q8 10 0 18 q-8 8 0 16" stroke="var(--accent)" stroke-width="4" fill="none"/>
+            <path d="M230 6 q8 10 0 18 q-8 8 0 16" stroke="var(--accent)" stroke-width="4" fill="none"/>
+            <path d="M260 6 q8 10 0 18 q-8 8 0 16" stroke="var(--accent)" stroke-width="4" fill="none"/>
+          </g>
+          <path id="burn" d="" fill="#7d1d16" opacity=".55"/>
+          <g id="blister"></g>
+        </svg>
+      </div>
+      <div>
+        <label for="dep" class="muted" style="font-size:.9rem">拉拉看：熱傷害往下走多深？</label>
+        <input id="dep" class="range" type="range" min="0" max="3" step="1" value="0">
+        <div class="ticks" aria-hidden="true"><span>沒燙到</span><span>第一度</span><span>第二度</span><span>第三度</span></div>
+      </div>
+    </figure>
+    <div class="panel deg" id="degInfo" aria-live="polite"></div>
+  </div>
+  <div class="think"><b>想一想</b><p>第三度燙傷最嚴重，卻常常「不太痛」。這是好事還是壞事？為什麼不能用「痛不痛」來判斷燙傷嚴不嚴重？</p></div>
+ </div>
+</section>
+
+<section class="k-sec" id="palm">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>用手掌量燙傷面積</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">醫生判斷燙傷嚴不嚴重，除了看<b>深度</b>，還要看<b>面積</b>。有一個簡單的方法：<mark>受傷的人自己的一個手掌（連手指）大約是全身皮膚的 1%</mark>。</p>
+      <p>也就是說，全身的皮膚大約等於 <b>100 個自己的手掌</b>。燙傷的面積越大，身體流失的水分越多、越容易感染，就越危險。</p>
+      <p class="muted">選一個真實發生過的意外，看看燙傷佔了全身多少：</p>
+      <div class="chips" id="cases"></div>
+      <div class="say" id="caseInfo" aria-live="polite"></div>
+    </div>
+    <figure class="stack" style="align-items:center">
+      <div class="pct" id="pct">0%</div>
+      <div class="palms" id="palms" aria-hidden="true"></div>
+      <figcaption>每一格代表受傷的人自己的一個手掌（約全身 1%）</figcaption>
+    </figure>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>「手掌法則」：以傷者本人的手掌（含手指）面積約為體表面積 1% 估算，適用於小面積或零散的燙傷；大面積時醫療人員會用九分法或兒童專用的 Lund-Browder 表。</li>
+      <li>第三度燙傷破壞真皮層的神經末梢，當下反而不易感到疼痛，傷口呈白色或焦黑的皮革樣，需要就醫，常須植皮。</li>
+      <li>案例來源：台大醫院衛教資料記錄的兒童燙傷案例（打翻熱水壺、拉倒超商關東煮）。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>皮膚小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>國小健康與體育四上課本 單元 3 第 1 課〈灼燙傷分級〉。</li>
+    <li>Auckland Regional Burn Service：手掌（含手指）約為體表面積 1%。</li>
+    <li>國立臺灣大學醫學院附設醫院健康電子報〈燒燙傷預防與急救〉（兒童燙傷案例）。</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 1 皮膚三層 */
+var lays=[
+  {n:'表皮層',d:'最外面薄薄的一層，像一面<b>防水的盾牌</b>，擋住細菌和灰塵，也讓身體裡的水分不會流失。最外層的細胞會一直脫落、換新。'},
+  {n:'真皮層',d:'皮膚的「工作室」，裡面有<b>神經</b>（感覺冷熱痛）、<b>血管</b>（送養分）、<b>汗腺</b>（流汗散熱）和<b>毛囊</b>（長毛髮）。燙傷傷到這裡，就可能留下疤痕。'},
+  {n:'皮下組織',d:'主要是<b>脂肪</b>，像一層軟墊，可以保暖、儲存能量，也保護裡面的肌肉和骨頭。'}
+];
+var layInfo=document.getElementById('layInfo'),layBtns=document.querySelectorAll('#layBtns .chip'),layG=document.querySelectorAll('.skin .lay');
+function pickLay(i){
+  layBtns.forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false')});
+  layG.forEach(function(g,k){g.style.opacity=k===i?1:.45});
+  layInfo.innerHTML='<div class="t">'+lays[i].n+'</div><p class="big">'+lays[i].d+'</p>';
+}
+layBtns.forEach(function(b){b.addEventListener('click',function(){pickLay(+b.dataset.l)})});
+layG.forEach(function(g){var go=function(){pickLay(+g.dataset.l)};g.addEventListener('click',go);g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+layInfo.innerHTML='<div class="t">點一點</div><p>點左邊的圖或上面的按鈕，認識皮膚的每一層。</p>';
+
+/* 2 深度 */
+var degs=[
+  {t:'還沒燙到',c:'var(--good)',where:'—',look:'皮膚正常',pain:'—',heal:'—'},
+  {t:'第一度灼燙傷',c:'var(--warn)',where:'表皮層',look:'紅腫、表面潮溼，<b>沒有水泡</b>。輕輕壓會變白。',pain:'<b>很痛</b>',heal:'通常幾天就會好，不太留疤。曬傷也屬於這一種。'},
+  {t:'第二度灼燙傷',c:'var(--accent)',where:'真皮層淺層',look:'紅腫、<b>起水泡</b>、有液體滲出。',pain:'<b>非常痛</b>（神經還在，而且被刺激）',heal:'約兩三週，可能留下輕微疤痕。'},
+  {t:'第三度灼燙傷',c:'var(--bad)',where:'真皮層深層以下',look:'白色或黑色，像<b>皮革</b>一樣硬。',pain:'<b>當下反而不太痛</b>，因為神經被燒壞了',heal:'無法自己長好，常常需要植皮，會留下明顯疤痕。'}
+];
+var dep=document.getElementById('dep');
+function drawDeg(v){
+  var y=[40,74,130,190][v];
+  var path=v===0?'':'M150 40 Q220 40 290 40 L'+(290-10)+' '+y+' Q220 '+(y+16)+' '+(150+10)+' '+y+' Z';
+  document.getElementById('burn').setAttribute('d',path);
+  document.getElementById('blister').innerHTML=v===2?'<ellipse cx="220" cy="38" rx="44" ry="14" fill="#fff" opacity=".7" stroke="#e8a" stroke-width="2"/>':'';
+  document.getElementById('nerve').setAttribute('opacity',v===3?.15:1);
+  var d=degs[v];
+  document.getElementById('degInfo').innerHTML='<h3 style="color:'+d.c+'">'+d.t+'</h3><dl class="rows"><dt>傷到哪裡</dt><dd>'+d.where+'</dd><dt>看起來</dt><dd>'+d.look+'</dd><dt>痛不痛</dt><dd>'+d.pain+'</dd><dt>復原</dt><dd>'+d.heal+'</dd></dl>'+(v===3?'<p class="say bad" style="margin-top:.8rem;min-height:0"><b>不痛不代表沒事！</b>第三度燙傷一定要馬上就醫。</p>':'')+(v===0?'<p class="muted" style="margin-top:.6rem">往右拉，看看熱傷害越來越深會怎樣。</p>':'');
+}
+dep.addEventListener('input',function(){drawDeg(+dep.value)});drawDeg(0);
+
+/* 3 手掌 */
+var palms=document.getElementById('palms');for(var i=0;i<100;i++)palms.appendChild(document.createElement('i'));
+var cases=[
+  {t:'熱湯灑在手臂上',p:3,d:'小鈞的熱湯意外，燙到手臂大約 <b>3 個手掌</b>大，約全身 3%。'},
+  {t:'打翻熱水壺（小腿）',p:4,d:'一歲的弟弟和哥哥打翻熱水壺，弟弟的小腿燙傷約 <b>4%</b>。'},
+  {t:'打翻熱水壺（手肘）',p:7,d:'同一個意外，四歲的哥哥手肘燙傷約 <b>7%</b>。'},
+  {t:'拉倒超商的關東煮',p:15,d:'一歲男孩在超商拉倒關東煮，全身 <b>15%</b> 二度燙傷，需要住院治療。'}
+];
+var caseBox=document.getElementById('cases'),caseInfo=document.getElementById('caseInfo');
+cases.forEach(function(c,i){var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=c.t;b.addEventListener('click',function(){pickCase(i)});caseBox.appendChild(b)});
+function pickCase(i){
+  var c=cases[i];
+  caseBox.querySelectorAll('.chip').forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false')});
+  palms.querySelectorAll('i').forEach(function(e,k){e.classList.toggle('on',k<c.p)});
+  document.getElementById('pct').textContent=c.p+'%';
+  caseInfo.className='say bad';
+  caseInfo.innerHTML='<div class="t">'+c.t+'</div><p>'+c.d+'</p>'+(c.p>=10?'<p style="margin-top:.3rem">對小小孩來說，這已經是很嚴重的燙傷了。</p>':'');
+}
+caseInfo.innerHTML='<div class="t">選一個案例</div><p>這些都是真實發生在台灣的兒童燙傷意外。</p>';
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'負責感覺冷、熱、痛的神經，主要在皮膚的哪一層？',o:['表皮層','真皮層','皮下組織'],a:1,e:'真皮層裡有神經、血管、汗腺和毛囊。'},
+  {q:'皮膚紅腫、起了水泡，最可能是第幾度燙傷？',o:['第一度','第二度','第三度'],a:1,e:'第二度燙傷傷到真皮層淺層，會起水泡。'},
+  {q:'為什麼第三度燙傷當下反而不太痛？',o:['因為傷得很輕','因為感覺痛的神經被燒壞了','因為皮膚很厚'],a:1,e:'神經被破壞了，所以感覺不到痛，但其實傷得最深。'},
+  {q:'一個人自己的手掌（連手指），大約是全身皮膚的多少？',o:['1%','10%','50%'],a:0,e:'全身皮膚大約等於 100 個自己的手掌。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

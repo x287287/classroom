@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>燙傷陷阱大搜查</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 一張大廚房插畫，熱點可點；右側為發現清單 */
+.hunt{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+@media (max-width:900px){.hunt{grid-template-columns:minmax(0,1fr)}}
+.scene svg{display:block;width:100%;height:auto;border-radius:12px}
+.hot{cursor:pointer}
+.hot .ring{fill:transparent;stroke:transparent;stroke-width:5}
+.hot:hover .ring,.hot:focus-visible .ring{stroke:var(--warn);stroke-dasharray:8 6}
+.hot.found .ring{stroke:var(--bad);fill:rgba(200,65,75,.12)}
+.hot:focus{outline:none}
+.found-list{display:grid;gap:.5rem;margin-top:.6rem}
+.found-list div{display:flex;gap:.6rem;align-items:flex-start;padding:.5rem .7rem;border-radius:12px;background:var(--sunk);font-size:.95rem}
+.found-list div.yes{background:var(--bad-soft)}
+.found-list i{font-style:normal;flex:none;width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;background:var(--line);font-size:.85rem;font-weight:700}
+.found-list .yes i{background:var(--bad);color:#fff}
+.counter{font-family:var(--font-display);font-size:1.6rem}
+.pack{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:720px){.pack{grid-template-columns:minmax(0,1fr)}}
+.range{width:100%;height:46px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:-.4rem}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 1 課 小心灼燙傷・延伸學習</div>
+    <h1>燙傷陷阱大搜查</h1>
+    <p class="k-lede">醫院的資料發現：燙傷最常發生的地方不是工廠，而是<b>家裡</b>，尤其是廚房和客廳。家裡到底藏著哪些燙傷陷阱？還有一種燙傷，溫度一點都不高，卻一樣會傷人。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#hunt"><span class="no">第 1 站</span><b>找出 9 個陷阱</b><span>廚房和客廳大搜查</span></a>
+      <a href="#low"><span class="no">第 2 站</span><b>低溫燙傷</b><span>暖暖包也會燙傷人</span></a>
+      <a href="#little"><span class="no">第 3 站</span><b>保護弟弟妹妹</b><span>小小孩特別危險</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="hunt">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>這個家裡藏了 9 個燙傷陷阱</h2></div>
+  <div class="hunt">
+    <figure class="fig scene">
+      <svg viewBox="0 0 800 520" role="group" aria-label="廚房與客廳插畫，可點選危險的地方" id="sceneSvg">
+        <rect x="0" y="0" width="800" height="520" fill="#FBF6EE"/>
+        <rect x="0" y="400" width="800" height="120" fill="#E8D9C2"/>
+        <!-- kitchen counter -->
+        <rect x="20" y="250" width="380" height="150" fill="#D7C2A3" stroke="#A88B64" stroke-width="2"/>
+        <rect x="20" y="236" width="380" height="18" fill="#BFA67F"/>
+        <!-- stove -->
+        <rect x="60" y="220" width="140" height="18" rx="4" fill="#555"/>
+        <!-- pot with handle out -->
+        <rect x="80" y="180" width="90" height="42" rx="6" fill="#9AA5B1" stroke="#6E7884" stroke-width="2"/>
+        <rect x="168" y="190" width="70" height="10" rx="5" fill="#333"/>
+        <path d="M95 175 q6 -12 0 -24 M125 175 q6 -12 0 -24 M155 175 q6 -12 0 -24" stroke="#bbb" stroke-width="3" fill="none"/>
+        <!-- rice cooker steam -->
+        <rect x="270" y="186" width="70" height="52" rx="14" fill="#F2F2F2" stroke="#BDBDBD" stroke-width="2"/>
+        <circle cx="305" cy="190" r="5" fill="#999"/>
+        <path d="M305 182 q8 -14 0 -28 q-8 -14 0 -28" stroke="#ccc" stroke-width="4" fill="none"/>
+        <!-- kettle with cord hanging -->
+        <path d="M356 236 q-4 -40 20 -44 h10 q20 4 16 44 z" fill="#E57373" stroke="#B85858" stroke-width="2"/>
+        <path d="M395 236 C400 300 380 330 392 400" stroke="#333" stroke-width="3" fill="none"/>
+        <!-- table with tablecloth -->
+        <rect x="470" y="300" width="250" height="14" fill="#8D6E63"/>
+        <rect x="488" y="314" width="12" height="86" fill="#8D6E63"/><rect x="690" y="314" width="12" height="86" fill="#8D6E63"/>
+        <path d="M460 296 h270 v10 l-20 60 l-20 -60 h-200 l-20 70 z" fill="#F48FB1" opacity=".9"/>
+        <!-- hot soup bowl at table edge -->
+        <ellipse cx="700" cy="292" rx="32" ry="10" fill="#FFF3E0" stroke="#D7B48A" stroke-width="2"/>
+        <path d="M670 290 q30 22 60 0" fill="#FFF3E0" stroke="#D7B48A" stroke-width="2"/>
+        <path d="M690 276 q6 -10 0 -20 M708 276 q6 -10 0 -20" stroke="#ccc" stroke-width="3" fill="none"/>
+        <!-- toddler -->
+        <circle cx="600" cy="386" r="22" fill="#F3C9A8" stroke="#C08A68" stroke-width="2"/>
+        <rect x="582" y="406" width="36" height="40" rx="12" fill="#FFD54F"/>
+        <path d="M612 412 L642 360" stroke="#F3C9A8" stroke-width="10" stroke-linecap="round"/>
+        <!-- water dispenser -->
+        <rect x="740" y="150" width="50" height="250" rx="6" fill="#ECEFF1" stroke="#B0BEC5" stroke-width="2"/>
+        <rect x="748" y="230" width="14" height="18" fill="#E53935"/><rect x="768" y="230" width="14" height="18" fill="#1E88E5"/>
+        <rect x="750" y="270" width="30" height="20" fill="#fff" stroke="#B0BEC5"/>
+        <!-- sofa with hair dryer / iron -->
+        <rect x="430" y="120" width="0" height="0"/>
+        <rect x="470" y="140" width="180" height="22" rx="4" fill="#90A4AE"/>
+        <rect x="480" y="162" width="10" height="40" fill="#90A4AE"/><rect x="630" y="162" width="10" height="40" fill="#90A4AE"/>
+        <path d="M520 138 l40 0 l10 -20 l-60 0 z" fill="#78909C"/>
+        <path d="M528 118 h40 v-6 h-40z" fill="#546E7A"/>
+        <text x="560" y="106" font-size="13" fill="#E53935" text-anchor="middle">還插著電</text>
+        <!-- heat pack on grandma's knee -->
+        <rect x="120" y="430" width="140" height="70" rx="20" fill="#A1887F"/>
+        <circle cx="150" cy="410" r="22" fill="#F3C9A8" stroke="#C08A68" stroke-width="2"/>
+        <path d="M130 400 q20 -26 40 0" fill="#CFD8DC"/>
+        <rect x="190" y="436" width="40" height="28" rx="4" fill="#FFCC80" stroke="#E0A85A" stroke-width="2"/>
+        <text x="210" y="455" font-size="12" text-anchor="middle" fill="#7a4a00">暖</text>
+        <!-- bathtub -->
+        <rect x="300" y="440" width="150" height="56" rx="20" fill="#E3F2FD" stroke="#90CAF9" stroke-width="2"/>
+        <rect x="430" y="420" width="10" height="24" fill="#90A4AE"/><path d="M430 420 h-24" stroke="#90A4AE" stroke-width="6"/>
+        <path d="M406 426 v20" stroke="#E53935" stroke-width="3" stroke-dasharray="3 3"/>
+        <path d="M340 450 q6 -10 0 -20 M370 450 q6 -10 0 -20" stroke="#ef9a9a" stroke-width="3" fill="none"/>
+
+        <!-- hotspots -->
+        <g class="hot" data-h="0" tabindex="0" role="button" aria-label="鍋柄"><circle class="ring" cx="205" cy="195" r="42"/></g>
+        <g class="hot" data-h="1" tabindex="0" role="button" aria-label="電鍋"><circle class="ring" cx="305" cy="180" r="48"/></g>
+        <g class="hot" data-h="2" tabindex="0" role="button" aria-label="快煮壺電線"><circle class="ring" cx="388" cy="300" r="46"/></g>
+        <g class="hot" data-h="3" tabindex="0" role="button" aria-label="桌巾"><circle class="ring" cx="630" cy="350" r="52"/></g>
+        <g class="hot" data-h="4" tabindex="0" role="button" aria-label="桌邊的熱湯"><circle class="ring" cx="700" cy="285" r="40"/></g>
+        <g class="hot" data-h="5" tabindex="0" role="button" aria-label="飲水機"><circle class="ring" cx="765" cy="240" r="40"/></g>
+        <g class="hot" data-h="6" tabindex="0" role="button" aria-label="熨斗"><circle class="ring" cx="545" cy="125" r="44"/></g>
+        <g class="hot" data-h="7" tabindex="0" role="button" aria-label="暖暖包"><circle class="ring" cx="210" cy="450" r="38"/></g>
+        <g class="hot" data-h="8" tabindex="0" role="button" aria-label="洗澡水"><circle class="ring" cx="390" cy="455" r="48"/></g>
+      </svg>
+    </figure>
+    <div class="stack">
+      <div class="counter">找到 <span id="cnt">0</span> / 9</div>
+      <p class="muted" style="font-size:.9rem">點畫面中危險的地方。</p>
+      <div class="say" id="hint" aria-live="polite"><div class="t">開始搜查</div><p>仔細看鍋子、電器、桌子和浴室。</p></div>
+      <div class="found-list" id="list"></div>
+      <button class="btn" type="button" id="reset">重新搜查</button>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="low">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>不燙的東西，也會燙傷人</h2></div>
+  <div class="pack">
+    <div class="stack">
+      <p class="big">暖暖包、熱水袋、電毯摸起來只是「溫溫的」，大約 50 度左右，比熱水低很多。可是如果<b>長時間貼在同一個地方</b>，熱會一點一點往皮膚深處走，造成<mark>低溫燙傷</mark>。</p>
+      <p>最可怕的是：低溫燙傷剛開始<b>不太會痛</b>，等發現時，皮膚可能已經起水泡、破皮。老人家和小小孩的皮膚比較薄、感覺比較慢，更要小心。</p>
+      <div class="card good"><h3>暖暖包安全用法</h3><p>① 隔著衣服或毛巾，不直接貼皮膚<br>② 每次不超過 30 分鐘，要換位置<br>③ 睡覺時不要用<br>④ 皮膚變紅、刺痛就馬上拿掉</p></div>
+    </div>
+    <div class="panel stack">
+      <h3>模擬看看：暖暖包貼在腿上</h3>
+      <div class="chips" id="cover">
+        <button class="chip" type="button" data-c="1" aria-pressed="true">隔著衣服</button>
+        <button class="chip" type="button" data-c="0" aria-pressed="false">直接貼皮膚</button>
+      </div>
+      <svg viewBox="0 0 400 150" aria-hidden="true">
+        <rect x="20" y="70" width="360" height="60" rx="20" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/>
+        <rect id="cloth" x="120" y="58" width="160" height="16" rx="6" fill="#90A4AE"/>
+        <rect x="150" y="36" width="100" height="26" rx="6" fill="#FFCC80" stroke="#E0A85A" stroke-width="2"/>
+        <ellipse id="red" cx="200" cy="86" rx="70" ry="12" fill="#E57373" opacity="0"/>
+        <g id="blis"></g>
+        <g id="waves" stroke="var(--accent)" stroke-width="3" fill="none"></g>
+      </svg>
+      <label for="time" class="muted" style="font-size:.9rem">貼了多久？</label>
+      <input id="time" class="range" type="range" min="0" max="4" step="1" value="0">
+      <div class="ticks" aria-hidden="true"><span>剛貼上</span><span>30 分鐘</span><span>1 小時</span><span>3 小時</span><span>整晚</span></div>
+      <div class="say" id="packMsg" aria-live="polite"></div>
+      <figcaption>示意模擬，實際情形因人而異</figcaption>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="little">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>家裡有小小孩時</h2></div>
+  <p class="big" style="max-width:44em">一兩歲的小孩什麼都想摸、什麼都想拉，個子又剛好到桌子邊。新聞裡很多燙傷意外，都發生在<b>大人一轉身</b>的時候。你可以當家裡的安全小幫手：</p>
+  <div class="cards">
+    <div class="card"><h3>熱的放裡面</h3><p>熱湯、熱茶、快煮壺放在桌子中間或高處，不放桌邊。</p></div>
+    <div class="card"><h3>不用桌巾</h3><p>小小孩一拉桌巾，桌上的熱湯就會全部倒下來。</p></div>
+    <div class="card"><h3>鍋柄朝內</h3><p>煮東西時鍋柄轉向牆壁，不要突出在爐子外面。</p></div>
+    <div class="card"><h3>抱小孩不拿熱飲</h3><p>手上有熱飲時不抱小孩，小孩一揮手就可能打翻。</p></div>
+    <div class="card"><h3>先放冷水再放熱水</h3><p>放洗澡水時先放冷水，再加熱水，最後用手肘試水溫。</p></div>
+    <div class="card"><h3>熱水出口有童鎖</h3><p>飲水機的熱水開關要有安全鎖，教弟弟妹妹不要碰紅色的按鈕。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>台大醫院衛教資料引用燒燙傷統計：燒燙傷多發生在家庭，家中又以廚房、客廳最常見，熱液、熱物、熱蒸氣為主要原因。</li>
+      <li>低溫燙傷：暖暖包、熱水袋等約 50°C 左右的熱源長時間接觸皮膚即可造成；皮膚科醫師建議每次使用不超過 30 分鐘、隔著衣物並移動位置，兒童與長者需有人照看。</li>
+      <li>延伸活動：請學生回家「搜查」自己家裡的燙傷陷阱，和家人一起改善。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>燙傷預防小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>國立臺灣大學醫學院附設醫院健康電子報〈燒燙傷預防與急救〉。</li>
+    <li>聯合新聞網〈用暖暖包要小心！長時間低溫接觸也會燙傷〉皮膚科醫師衛教。</li>
+    <li>國小健康與體育四上課本 單元 3 第 1 課〈灼燙傷預防〉。</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var hz=[
+  {t:'鍋柄朝外',d:'經過時一撞，整鍋熱湯就會翻倒。煮東西時鍋柄要轉向內側。'},
+  {t:'電鍋的蒸氣孔',d:'電鍋、蒸籠冒出的蒸氣溫度很高，手不要放在蒸氣孔上，開蓋時臉要離遠一點。'},
+  {t:'快煮壺電線垂下來',d:'小孩一拉電線，整壺熱水會倒在身上。電線要收好，不要垂在桌邊。'},
+  {t:'垂下來的桌巾',d:'小小孩很喜歡拉桌巾，桌上的熱湯就會跟著倒下來。'},
+  {t:'熱湯放在桌子邊',d:'熱湯、熱飲要放在桌子中間，小孩的手才拿不到。'},
+  {t:'飲水機的熱水開關',d:'裝熱水時要專心、不要裝太滿。熱水開關要有童鎖。'},
+  {t:'熨斗用完還插著電',d:'熨斗用完要立刻關電源、拔插頭，冷卻後收好。'},
+  {t:'暖暖包直接貼在皮膚上',d:'長時間貼著會造成「低溫燙傷」，要隔著衣服，每次不超過 30 分鐘。'},
+  {t:'先放熱水的洗澡水',d:'放洗澡水要先放冷水再加熱水，進去前用手肘試水溫。'}
+];
+var found={},list=document.getElementById('list'),hint=document.getElementById('hint');
+function renderList(){
+  list.innerHTML='';
+  hz.forEach(function(h,i){var d=document.createElement('div');if(found[i])d.className='yes';d.innerHTML='<i>'+(found[i]?'✓':i+1)+'</i><span>'+(found[i]?'<b>'+h.t+'</b>':'？？？')+'</span>';list.appendChild(d)});
+  document.getElementById('cnt').textContent=Object.keys(found).length;
+}
+document.querySelectorAll('.hot').forEach(function(g){
+  var go=function(){var i=+g.dataset.h;var first=!found[i];found[i]=1;g.classList.add('found');renderList();
+    var n=Object.keys(found).length;
+    hint.className='say bad';hint.innerHTML='<div class="t">'+(first?'找到了！':'這個找過了')+'：'+hz[i].t+'</div><p>'+hz[i].d+'</p>'+(n===hz.length?'<p style="margin-top:.4rem"><b class="ok">9 個陷阱全部找到！回家也幫家人檢查看看吧。</b></p>':'');};
+  g.addEventListener('click',go);g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+});
+document.getElementById('reset').addEventListener('click',function(){found={};document.querySelectorAll('.hot').forEach(function(g){g.classList.remove('found')});hint.className='say';hint.innerHTML='<div class="t">開始搜查</div><p>仔細看鍋子、電器、桌子和浴室。</p>';renderList()});
+renderList();
+
+/* 暖暖包模擬 */
+var cover=1,tm=document.getElementById('time');
+var states=[
+  [{m:'溫溫的，很舒服。',lv:0},{m:'溫溫的，很舒服。',lv:0}],
+  [{m:'皮膚有點紅了，該拿掉換個位置。',lv:1},{m:'隔著衣服還好，記得 30 分鐘就換位置。',lv:0}],
+  [{m:'皮膚紅、刺刺的，已經開始受傷了！',lv:2},{m:'皮膚有點紅了，已經貼太久了。',lv:1}],
+  [{m:'起水泡了！這就是低溫燙傷，但剛剛幾乎不覺得痛。',lv:3},{m:'皮膚紅、刺刺的，已經開始受傷了！',lv:2}],
+  [{m:'睡著時一直貼著，可能造成很深的燙傷，要看醫生。',lv:4},{m:'就算隔著衣服，整晚貼著也可能燙傷。睡覺時不要用。',lv:3}]
+];
+function drawPack(){
+  var t=+tm.value,s=states[t][cover];
+  document.getElementById('cloth').style.display=cover?'':'none';
+  document.getElementById('red').setAttribute('opacity',[0,.35,.6,.8,.95][s.lv]);
+  document.getElementById('blis').innerHTML=s.lv>=3?'<ellipse cx="185" cy="84" rx="18" ry="7" fill="#fff" opacity=".85"/><ellipse cx="220" cy="88" rx="12" ry="5" fill="#fff" opacity=".85"/>':'';
+  var w=document.getElementById('waves');w.innerHTML='';for(var k=0;k<=t;k++){w.insertAdjacentHTML('beforeend','<path d="M'+(170+k*12)+' '+(96+k*6)+' q6 4 12 0" opacity="'+(0.3+k*.15)+'"/>')}
+  var m=document.getElementById('packMsg');m.className='say'+(s.lv>=2?' bad':s.lv===0?' good':'');
+  m.innerHTML='<div class="t">'+['剛貼上','30 分鐘','1 小時','3 小時','整晚'][t]+'・'+(cover?'隔著衣服':'直接貼皮膚')+'</div><p>'+s.m+'</p>';
+}
+document.querySelectorAll('#cover .chip').forEach(function(b){b.addEventListener('click',function(){cover=+b.dataset.c;document.querySelectorAll('#cover .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});drawPack()})});
+tm.addEventListener('input',drawPack);drawPack();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'燙傷最常發生在哪裡？',o:['工廠','家裡的廚房和客廳','學校操場'],a:1,e:'燙傷多半發生在家裡，熱湯、熱水和蒸氣是主要原因。'},
+  {q:'煮東西時，鍋柄應該怎麼放？',o:['朝外比較好拿','轉向內側','拿掉鍋柄'],a:1,e:'鍋柄朝外容易被撞到或被小孩拉到。'},
+  {q:'暖暖包只有 50 度左右，為什麼還會燙傷？',o:['因為裡面有化學藥劑','長時間貼在同一個地方，熱會一直往皮膚深處走','因為暖暖包會爆炸'],a:1,e:'這叫做低溫燙傷，剛開始不太痛，更要小心。'},
+  {q:'放洗澡水的正確順序是？',o:['先放熱水再放冷水','先放冷水再放熱水，用手肘試水溫','只放熱水'],a:1,e:'先放冷水可以避免一開始的熱水燙到人。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

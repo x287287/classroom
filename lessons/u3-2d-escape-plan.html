@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我家的兩條路</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 平面圖路線規畫：點相鄰的房間一步步畫出逃生路線 */
+.plan{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+@media (max-width:900px){.plan{grid-template-columns:minmax(0,1fr)}}
+.plan svg{display:block;width:100%;height:auto}
+.rm{cursor:pointer}
+.rm rect{stroke:#6D5D4B;stroke-width:3;transition:fill .2s}
+.rm text{font-family:var(--font-display);font-size:19px;pointer-events:none}
+.rm.exit rect{fill:#E8F5E9}
+.rm.next rect{stroke:var(--accent);stroke-width:5;stroke-dasharray:10 6}
+.rm.onpath rect{fill:var(--accent-soft)}
+.rm.fire rect{fill:#FFCDD2}
+.rm.smoky rect{fill:#ECEFF1}
+.rm:focus{outline:none}
+.rm:focus-visible rect{stroke:var(--warn);stroke-width:6}
+.mission{display:grid;gap:.5rem}
+.mission button{appearance:none;text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.6rem .9rem;cursor:pointer;min-height:3.2rem}
+.mission button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.mission button .st{float:right;font-size:.85rem;color:var(--good);font-weight:700}
+</style>
+</head>
+<body class="u3">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 3 第 2 課 防火安全檢查・延伸學習</div>
+    <h1>我家的兩條路</h1>
+    <p class="k-lede">火災發生時，可能只有短短幾分鐘可以逃出來，沒有時間慢慢想。先在平面圖上規畫好<b>兩條往不同方向的路</b>，真的遇到時才不會慌張。來當家裡的逃生規畫師吧！</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#plan"><span class="no">第 1 站</span><b>畫出逃生路線</b><span>依火點換路線</span></a>
+      <a href="#meet"><span class="no">第 2 站</span><b>逃出來之後</b><span>集合點與演練</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="plan">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>從臥室逃到戶外</h2></div>
+  <div class="plan">
+    <figure class="fig">
+      <svg viewBox="0 0 600 400" role="group" aria-label="住家平面圖，點相鄰的房間畫出路線" id="planSvg">
+        <rect width="600" height="400" fill="var(--surface)"/>
+        <g id="rooms"></g>
+        <polyline id="route" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
+        <g id="marks"></g>
+      </svg>
+      <figcaption>從「我的臥室」出發，點<b>相鄰</b>的房間一步一步走；點最後一格可以退回</figcaption>
+    </figure>
+    <div class="stack">
+      <div class="mission" id="missions"></div>
+      <div class="say" id="msg" aria-live="polite"></div>
+      <div class="btnrow"><button class="btn" type="button" id="undo">退一步</button><button class="btn" type="button" id="clear">重畫</button></div>
+    </div>
+  </div>
+  <div class="think"><b>想一想</b><p>如果兩條路都被火和煙擋住了，該怎麼辦？（提示：找一間有窗戶的房間，關門、塞門縫，打 119 等待救援。第 3 課會學到。）</p></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="meet">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>逃出來之後，才是計畫的最後一步</h2></div>
+  <div class="cards">
+    <div class="card"><h3>約好集合點</h3><p>例如對面的便利商店、公園的大樹下。全家到齊才能確認<b>有沒有人還在裡面</b>，告訴消防員。</p></div>
+    <div class="card warn"><h3>絕對不回頭</h3><p>不回去拿手機、存錢筒或玩具。火和煙擴散得很快，回去可能就出不來了。寵物或家人還在裡面，要告訴消防員。</p></div>
+    <div class="card"><h3>每 6 個月演練一次</h3><p>和家人照著計畫走一次，晚上也試試看，確認每個人都會開鐵窗的逃生口。</p></div>
+    <div class="card"><h3>標出防火設備</h3><p>在平面圖上畫出滅火器、住警器、緊急照明燈的位置，貼在家中顯眼的地方。</p></div>
+  </div>
+  <div class="panel" style="margin-top:1rem">
+    <h3>把逃生步驟排排看</h3>
+    <div id="orderBox" style="margin-top:.6rem"></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>課本 p.70～71 家庭逃生計畫七步驟：畫平面圖、找 2 個以上出口、假設火點畫 2 條不同方向路線、鐵窗預留逃生口、標示防火設備、決定戶外集合點、每 6 個月演練。</li>
+      <li>本頁互動規則：火點所在房間不能通過；與火點相鄰的房間視為「濃煙區」，可以通過但會提示改走另一個方向。</li>
+      <li>延伸作業：請學生回家與家人畫出自己家的平面圖，用紅筆圈出兩個出口。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>逃生計畫測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 3 第 2 課〈家庭逃生計畫〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var R={
+  bal:{n:'陽臺',x:20,y:20,w:120,h:150,exit:1},
+  me:{n:'我的臥室',x:140,y:20,w:200,h:150},
+  bed2:{n:'爸媽臥室',x:340,y:20,w:240,h:150},
+  bath:{n:'浴室',x:20,y:170,w:120,h:110},
+  hall:{n:'走廊',x:140,y:170,w:440,h:60},
+  kit:{n:'廚房',x:20,y:280,w:200,h:100},
+  liv:{n:'客廳',x:220,y:230,w:260,h:150},
+  door:{n:'大門',x:480,y:230,w:100,h:150,exit:1}
+};
+var ADJ={bal:['me'],me:['bal','hall'],bed2:['hall'],bath:['hall'],hall:['me','bed2','bath','liv'],kit:['liv'],liv:['hall','kit','door'],door:['liv']};
+var M=[
+  {t:'任務 1：沒有火，找出兩個不同方向的出口',fire:null},
+  {t:'任務 2：廚房失火了！',fire:'kit'},
+  {t:'任務 3：客廳失火了！',fire:'liv'},
+  {t:'任務 4：爸媽的臥室失火了！',fire:'bed2'}
+];
+var cur=0,path=['me'],reached={},done={};
+function cen(k){var r=R[k];return [r.x+r.w/2,r.y+r.h/2]}
+function smoky(k){var f=M[cur].fire;return f&&ADJ[f].indexOf(k)>=0}
+function draw(){
+  var g=document.getElementById('rooms');g.innerHTML='';
+  var last=path[path.length-1],fire=M[cur].fire;
+  Object.keys(R).forEach(function(k){
+    var r=R[k],cls='rm'+(r.exit?' exit':'')+(path.indexOf(k)>=0?' onpath':'')+(k===fire?' fire':'')+(k!==fire&&smoky(k)&&path.indexOf(k)<0?' smoky':'')+(ADJ[last].indexOf(k)>=0&&path.indexOf(k)<0&&k!==fire?' next':'');
+    var el=document.createElementNS('http://www.w3.org/2000/svg','g');el.setAttribute('class',cls);el.setAttribute('tabindex','0');el.setAttribute('role','button');el.setAttribute('aria-label',r.n);
+    el.innerHTML='<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" fill="#FFFDF8"/><text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+7)+'" text-anchor="middle" fill="var(--fg)">'+r.n+'</text>'+(r.exit?'<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+32)+'" text-anchor="middle" font-size="13" fill="#2E7D32">出口</text>':'');
+    el.addEventListener('click',function(){tap(k)});el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(k)}});
+    g.appendChild(el);
+  });
+  document.getElementById('route').setAttribute('points',path.map(function(k){return cen(k).join(',')}).join(' '));
+  var mk=document.getElementById('marks'),s='';
+  var c=cen('me');s+='<circle cx="'+(c[0]-60)+'" cy="'+(c[1]-30)+'" r="14" fill="#FFD54F" stroke="#8D6E63" stroke-width="2"/><text x="'+(c[0]-60)+'" y="'+(c[1]-25)+'" text-anchor="middle" font-size="13">我</text>';
+  if(fire){var f=cen(fire);s+='<path d="M'+f[0]+' '+(f[1]-50)+' c14 18 26 26 26 44 a26 26 0 0 1 -52 0 c0 -12 8 -18 12 -28 c4 8 8 8 10 4 z" fill="#FF7043"/><path d="M'+f[0]+' '+(f[1]-20)+' c7 9 12 14 12 22 a12 12 0 0 1 -24 0 c0 -6 4 -10 6 -14 c2 4 4 4 6 2 z" fill="#FFCA28"/>'}
+  s+='<rect x="26" y="34" width="16" height="122" fill="none" stroke="#2E7D32" stroke-width="3" stroke-dasharray="6 4"/><text x="48" y="48" font-size="11" fill="#2E7D32">鐵窗逃生口</text>';
+  mk.innerHTML=s;
+  renderMissions();
+}
+function say(c,t,p){var m=document.getElementById('msg');m.className='say'+(c?' '+c:'');m.innerHTML='<div class="t">'+t+'</div><p>'+p+'</p>'}
+function tap(k){
+  var last=path[path.length-1],fire=M[cur].fire;
+  if(k===last&&path.length>1){path.pop();draw();return}
+  if(path.indexOf(k)>=0)return;
+  if(ADJ[last].indexOf(k)<0){say('bad','走不到那裡','「'+R[k].n+'」和「'+R[last].n+'」中間沒有門。請點有虛線框的相鄰房間。');return}
+  if(k===fire){say('bad','那裡正在燒！','不能經過起火的房間，換一個方向。');return}
+  path.push(k);
+  if(R[k].exit){finish(k);}else if(smoky(k)){say('','小心，這裡有濃煙','「'+R[k].n+'」就在火的旁邊，煙會很濃。可以通過，但想一想有沒有離火更遠的路？')}else say('','繼續走','已經走到「'+R[k].n+'」，下一步呢？');
+  draw();
+}
+function finish(k){
+  var fire=M[cur].fire,usedSmoky=path.some(function(p){return smoky(p)});
+  if(cur===0){
+    reached[k]=1;
+    if(Object.keys(reached).length>=2){done[0]=1;say('good','兩條路都找到了！','一條往<b>大門</b>、一條往<b>陽臺</b>。不管火從哪裡燒起來，至少還有另一條路。按下一個任務繼續。')}
+    else{say('good','找到一個出口：'+R[k].n,'很好！現在按「重畫」，找<b>另一個方向</b>的出口。')}
+  }else{
+    done[cur]=1;
+    if(usedSmoky)say('','逃出來了，但是經過了濃煙區','這條路可以走，但經過火旁邊很危險。如果有另一條離火更遠的路，最好選那一條；真的要經過濃煙，就用<b>低姿勢</b>快速通過。');
+    else say('good','安全逃出來了！','你選了一條<b>避開火和煙</b>的路線。到戶外集合點等家人。');
+  }
+}
+function renderMissions(){
+  var box=document.getElementById('missions');box.innerHTML='';
+  M.forEach(function(m,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed',i===cur?'true':'false');b.innerHTML=m.t+(done[i]?'<span class="st">完成</span>':'');b.addEventListener('click',function(){cur=i;path=['me'];reached={};draw();say('',m.t,m.fire?'從「我的臥室」出發，找一條避開火的路。':'從「我的臥室」出發，點相鄰的房間走到出口。')});box.appendChild(b)});
+}
+document.getElementById('undo').addEventListener('click',function(){if(path.length>1){path.pop();draw()}});
+document.getElementById('clear').addEventListener('click',function(){path=['me'];draw();say('','重新開始','從「我的臥室」出發。')});
+draw();say('',M[0].t,'從「我的臥室」出發，點相鄰的房間走到出口。');
+
+KIT.order(document.getElementById('orderBox'),{
+  steps:[
+    {t:'聽到警報，大喊「失火了」',d:'先讓全家人都知道。'},
+    {t:'選一條沒有火和煙的路',d:'照平時規畫好的路線走，一條不通就走另一條。'},
+    {t:'逃到戶外集合點',d:'不回頭拿東西。'},
+    {t:'清點人數',d:'確認全家都到齊。'},
+    {t:'打 119 報案',d:'在安全的地方報案，告訴消防員還有沒有人在裡面。'}
+  ],
+  start:'半夜聽到住警器響了，第一件事是？',
+  done:'正確！先示警、再逃生、集合清點、最後報案。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'家庭逃生計畫至少要規畫幾個出口？',o:['1 個','2 個以上，而且方向不同','不用規畫'],a:1,e:'一個出口被火擋住時，還有另一條路。'},
+  {q:'為什麼要約好戶外集合點？',o:['方便一起去吃宵夜','確認全家都逃出來了，沒有人還在裡面','讓鄰居看到'],a:1,e:'到齊才知道有沒有人需要消防員救援。'},
+  {q:'逃出來後，發現最喜歡的玩具忘在房間裡，應該怎麼做？',o:['趕快回去拿','留在集合點，不回頭','叫弟弟去拿'],a:1,e:'火和煙擴散很快，回去可能就出不來了。'},
+  {q:'家庭逃生計畫多久要演練一次？',o:['每 6 個月','每 10 年','發生火災時才練'],a:0,e:'課本建議每 6 個月和家人演練一次。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
