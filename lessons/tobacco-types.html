@@ -467,6 +467,7 @@ h1 em{font-style:normal;color:var(--ember)}
   </div>
 
   <div class="bar">
+    <a class="home" href="../index.html">⌂ 回書櫃</a>
     <button id="prev" type="button" aria-label="上一幕">◀ 上一幕</button>
     <button id="play" type="button">▶ 播放</button>
     <button id="next" type="button" aria-label="下一幕">下一幕 ▶</button>
@@ -598,4 +599,11 @@ h1 em{font-style:normal;color:var(--ember)}
 })();
 </script>
 
+<style>
+.bar .home{display:inline-flex;align-items:center;gap:.3em;font-size:clamp(16px,2.4cqh,26px);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;
+  padding:0 clamp(14px,2cqh,28px);min-height:clamp(48px,7cqh,76px);text-decoration:none;white-space:nowrap}
+.bar .home:hover{background:#34495f}
+.bar .home:focus-visible{outline:3px solid var(--tar);outline-offset:3px}
+@media (max-aspect-ratio: 5/4), (max-width: 700px){.bar .home{font-size:16px;min-height:48px}}
+</style>
 </body></html>

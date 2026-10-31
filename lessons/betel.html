@@ -549,4 +549,15 @@ qs.forEach((x,i)=>{
 });
 </script>
 
+<a class="home-fab" href="../index.html">⌂ 回書櫃</a>
+<style>
+.home-fab{position:fixed;z-index:20;left:max(16px,calc(env(safe-area-inset-left,0px) + 12px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+  display:inline-flex;align-items:center;gap:.3em;min-height:52px;padding:0 20px;border-radius:999px;
+  background:var(--leaf);color:var(--surface);border:2px solid var(--surface);font-family:var(--font-display);font-size:18px;font-weight:700;text-decoration:none;
+  box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.home-fab:hover{filter:brightness(1.08)}
+.home-fab:focus-visible{outline:3px solid var(--husk);outline-offset:3px}
+@media print{.home-fab{display:none}}
+body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 88px)}
+</style>
 </body></html>
