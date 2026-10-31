@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>拒絕對話模擬器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 對話畫面（左）＋ 已用過的拒絕方法收集冊（右） */
+.chat{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1.4rem;align-items:start}
+@media (max-width:900px){.chat{grid-template-columns:minmax(0,1fr)}}
+.room{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.room .top{background:var(--accent);color:var(--accent-ink);padding:.6rem 1rem;font-family:var(--font-display);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.log{padding:1rem;display:flex;flex-direction:column;gap:.6rem;min-height:300px;max-height:460px;overflow-y:auto;background:var(--sunk)}
+.b{max-width:85%;padding:.55rem .9rem;border-radius:16px;line-height:1.55}
+.b.them{background:var(--surface);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.b.me{background:var(--accent-soft);align-self:flex-end;border-bottom-right-radius:4px}
+.b.sys{align-self:center;font-size:.85rem;color:var(--muted);background:transparent;text-align:center}
+.b .who{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.1rem}
+.b .m{display:inline-block;margin-top:.3rem;font-size:.78rem;font-weight:700;color:var(--accent);background:var(--surface);border-radius:999px;padding:0 .6rem}
+.reply{display:grid;gap:.5rem;padding:.8rem;border-top:1px solid var(--line)}
+.reply button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.55rem .9rem;text-align:left;cursor:pointer;min-height:3.2rem;font-size:1rem}
+.book{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.book div{border:2px dashed var(--line);border-radius:12px;padding:.5rem .6rem;min-height:3.4rem;font-size:.9rem}
+.book div b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.05rem;color:var(--muted)}
+.book div.got{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.book div.got b{color:var(--accent)}
+.pose{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:760px){.pose{grid-template-columns:minmax(0,1fr)}}
+.pose svg{display:block;width:100%;max-width:280px;margin:0 auto;height:auto}
+.tog{display:grid;gap:.6rem}
+.tog .row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.tog .row span.l{min-width:3.5em;font-weight:700}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 3 課 向菸、酒、檳榔說不・延伸學習</div>
+    <h1>拒絕對話模擬器</h1>
+    <p class="k-lede">課本教了「天龍八不」八種拒絕方法。真的遇到時，對方可不會只問一次！他會激你、拜託你、說大家都在用。來場模擬對話，練習把八種方法都用上。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#chat"><span class="no">第 1 站</span><b>模擬對話</b><span>收集八種方法</span></a>
+      <a href="#tricks"><span class="no">第 2 站</span><b>常見的話術</b><span>對方會怎麼說</span></a>
+      <a href="#pose"><span class="no">第 3 站</span><b>拒絕的樣子</b><span>眼神、語氣、態度</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="chat">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>放學後，在公園……</h2></div>
+  <div class="chat">
+    <div class="room">
+      <div class="top"><span id="topic"></span><span id="round"></span></div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="reply" id="reply"></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <h3>天龍八不收集冊</h3>
+        <div class="book" id="book" style="margin-top:.5rem"></div>
+      </div>
+      <div class="chips" id="topics"></div>
+      <button class="btn" type="button" id="restart">重新開始這段對話</button>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="tricks">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>對方常用的四種話術</h2></div>
+  <div class="cards">
+    <div class="card"><h3>淡化危害</h3><p>「一口而已，不會怎樣啦。」<br><b>好用的回應：</b>告知理由法、反說服法</p></div>
+    <div class="card"><h3>激將法</h3><p>「你是不是膽小鬼？」<br><b>好用的回應：</b>反激將法、自我解嘲法</p></div>
+    <div class="card"><h3>拿友情當籌碼</h3><p>「你不試，就不是我朋友。」<br><b>好用的回應：</b>友誼勸服法、堅持拒絕法</p></div>
+    <div class="card"><h3>大家都在用</h3><p>「我們班很多人都試過了。」<br><b>好用的回應：</b>轉移話題法、遠離現場法</p></div>
+  </div>
+  <div class="card warn" style="margin-top:1rem"><h3>對方一直不放棄怎麼辦？</h3><p>不用一直跟他爭辯。直接<b>離開現場</b>，並告訴家人或老師。真正的朋友，不會逼你做傷害自己的事。</p></div>
+ </div>
+</section>
+
+<section class="k-sec" id="pose">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>說「不」的時候，身體也在說話</h2></div>
+  <div class="pose">
+    <figure class="fig"><svg viewBox="0 0 280 320" aria-hidden="true" id="kid"></svg></figure>
+    <div class="stack">
+      <div class="tog">
+        <div class="row"><span class="l">眼神</span><button class="chip" type="button" data-g="eye" data-v="1">真誠看著對方</button><button class="chip" type="button" data-g="eye" data-v="0">看地上</button></div>
+        <div class="row"><span class="l">語氣</span><button class="chip" type="button" data-g="voice" data-v="1">溫和堅定</button><button class="chip" type="button" data-g="voice" data-v="0">小聲猶豫</button></div>
+        <div class="row"><span class="l">態度</span><button class="chip" type="button" data-g="att" data-v="1">誠懇有禮</button><button class="chip" type="button" data-g="att" data-v="0">生氣罵人</button></div>
+      </div>
+      <div class="say" id="poseMsg" aria-live="polite"></div>
+    </div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>課本 p.48～49 天龍八不：堅持拒絕法、告知理由法、友誼勸服法、遠離現場法、自我解嘲法、轉移話題法、反說服法、反激將法；拒絕原則為真誠看著對方、溫和堅定的語氣、誠懇有禮的態度。（參考教育部宣導編寫）</li>
+      <li>模擬對話每一輪提供一個合適的拒絕回應、一個猶豫的回應、一個帶有攻擊性的回應。猶豫的回應會讓對方持續施壓；攻擊性的回應可能引發衝突。</li>
+      <li>資訊小站：兒童及少年福利與權益保障法規定未滿 18 歲不能吸菸、飲酒、嚼檳榔；菸害防制法規定未滿 20 歲不能吸菸。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>這是哪一種拒絕法？</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 2 第 3 課〈拒絕的方法（天龍八不）〉。</li><li>法務部反毒大本營〈拒毒技巧之天龍八不〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var M=['堅持拒絕法','告知理由法','友誼勸服法','遠離現場法','自我解嘲法','轉移話題法','反說服法','反激將法'];
+var T={
+  vape:{n:'電子煙',who:'阿凱',rounds:[
+    {say:'嘿，這是新的電子煙，葡萄口味的，香香的，你試一口！',opts:[{t:'不要，我真的不想試。',m:0,ok:1},{t:'嗯……我不知道耶……',ok:0,f:'猶豫的話，對方會覺得你可以被說服，繼續推給你。'},{t:'走開啦，你很煩！',ok:-1,f:'用罵的可能會吵起來。可以堅定，但不需要兇。'}]},
+    {say:'香香的又沒有菸味，不會怎樣啦！',opts:[{t:'電子煙有尼古丁，會上癮，在台灣也是違法的，我不要。',m:1,ok:1},{t:'好像……也是啦……',ok:0,f:'對方在淡化危害，要用事實回應他。'},{t:'你白痴喔，那很毒耶。',ok:-1,f:'說出理由很好，但罵人只會讓對方生氣。'}]},
+    {say:'你是不是膽小鬼啊？連這個都不敢！',opts:[{t:'如果因為你說我膽小我就試，那我才真的沒主見。',m:7,ok:1},{t:'我才不是膽小鬼……（伸手去拿）',ok:0,f:'這就是激將法！對方就是想讓你為了證明自己而嘗試。'},{t:'你才膽小鬼！',ok:-1,f:'互相罵來罵去，問題還是沒解決。'}]},
+    {say:'拜託啦，我們是好朋友耶！',opts:[{t:'就是因為我們是好朋友，我才希望我們都不要碰，被抓到也是違法的。',m:2,ok:1},{t:'那……一口就好喔……',ok:0,f:'真正的朋友不會逼你做傷害自己的事。'},{t:'誰是你朋友！',ok:-1,f:'可以拒絕事情，但不用傷害友情。'}]},
+    {say:'那你看我吸就好，等一下你就會想試了。',opts:[{t:'我要去補習了，先走囉！',m:3,ok:1},{t:'好啊，我看看。',ok:0,f:'留在現場，可能吸到二手煙，也更容易被說服。'},{t:'我要去跟老師告狀！',ok:0,f:'告訴老師是對的，但先離開現場更重要。'}]}
+  ]},
+  wine:{n:'水果酒',who:'表姊',rounds:[
+    {say:'這是水果酒，甜甜的，跟果汁差不多，你喝喝看。',opts:[{t:'就算喝起來甜甜的，它還是酒，酒精會影響小孩的腦部發育，我不要。',m:1,ok:1},{t:'看起來好好喝喔……',ok:0,f:'甜甜的味道只是把酒精蓋住了。'},{t:'你想害我喔？',ok:-1,f:'可以拒絕，但不用把對方想成壞人。'}]},
+    {say:'今天過年耶，大家都在喝，你不要掃興嘛！',opts:[{t:'哈哈，我酒量很差，喝一口就會倒，還是算了吧！',m:4,ok:1},{t:'好吧，那一點點就好……',ok:0,f:'「大家都在喝」不代表你也要喝。'},{t:'掃興就掃興，關你什麼事！',ok:-1,f:'太兇了，用輕鬆的方式也能拒絕。'}]},
+    {say:'喝一點又不會怎樣，你看阿姨也有喝啊。',opts:[{t:'喝酒會傷身體，還會讓爸媽擔心，表姊我們都不要喝好不好？',m:6,ok:1},{t:'也對，大人都喝……',ok:0,f:'大人喝不代表小孩可以喝，未滿 18 歲喝酒是違法的。'},{t:'那是阿姨笨。',ok:-1,f:'批評別人不會讓對方接受你的想法。'}]},
+    {say:'好啦好啦，最後一次問你，真的不喝？',opts:[{t:'不喝，謝謝！',m:0,ok:1},{t:'嗯……讓我想想……',ok:0,f:'這時候要清楚說「不」。'}]},
+    {say:'那你要幹嘛？很無聊耶。',opts:[{t:'我們去放仙女棒啦！',m:5,ok:1},{t:'不知道……',ok:0,f:'提出別的好玩的事，就能把話題轉開。'}]}
+  ]},
+  betel:{n:'檳榔',who:'鄰居大哥',rounds:[
+    {say:'小弟，要不要嚼檳榔？嚼了很有精神喔！',opts:[{t:'不用了，謝謝！',m:0,ok:1},{t:'嗯……真的會有精神嗎？',ok:0,f:'好奇是很多人嘗試的原因，要先想清楚。'},{t:'噁心！',ok:-1,f:'可以有禮貌地拒絕。'}]},
+    {say:'這顆沒有加荖花、石灰，不會致癌啦！',opts:[{t:'檳榔籽本身就會致癌，就算沒有添加物也一樣，我不要。',m:1,ok:1},{t:'喔，那應該還好吧……',ok:0,f:'這是錯誤的說法！檳榔籽本身就是致癌物。'}]},
+    {say:'男孩子嚼一顆有什麼關係，不要像女生一樣！',opts:[{t:'嚼不嚼檳榔跟是不是男生沒關係，我自己決定。',m:7,ok:1},{t:'好啦，我嚼……',ok:0,f:'對方在用激將法，還帶了刻板印象。你可以自己決定。'}]},
+    {say:'我嚼了十幾年，你看我也沒怎樣啊。',opts:[{t:'嚼檳榔的人得口腔癌的機會是一般人的 28 倍，大哥你也去做個口腔檢查好不好？',m:6,ok:1},{t:'嗯……好像也是……',ok:0,f:'「我沒事」不代表沒有危害，口腔癌常常到晚期才發現。'}]},
+    {say:'那你陪我在這邊聊天嘛。',opts:[{t:'我媽叫我回家吃飯了，掰掰！',m:3,ok:1},{t:'好啊……',ok:0,f:'離開讓你為難的地方，是最簡單有效的方法。'}]}
+  ]}
+};
+var cur='vape',ri=0,got={};
+var log=document.getElementById('log'),rep=document.getElementById('reply');
+function add(c,html){var d=document.createElement('div');d.className='b '+c;d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight}
+function book(){var b=document.getElementById('book');b.innerHTML='';M.forEach(function(m,i){b.insertAdjacentHTML('beforeend','<div class="'+(got[i]?'got':'')+'"><b>'+(i+1)+'. '+m+'</b>'+(got[i]?'已使用':'')+'</div>')})}
+function ask(){var t=T[cur];rep.innerHTML='';document.getElementById('round').textContent='第 '+Math.min(ri+1,t.rounds.length)+' / '+t.rounds.length+' 回合';
+  if(ri>=t.rounds.length){add('sys','對話結束：你成功拒絕了 '+t.who+'！');var n=Object.keys(got).length;add('sys','收集冊：'+n+' / 8 種方法'+(n<8?'，換個話題繼續收集吧！':'，全部收集完成！'));return}
+  var r=t.rounds[ri];add('them','<span class="who">'+t.who+'</span>'+r.say);
+  KIT.shuffle(r.opts).forEach(function(o){var b=document.createElement('button');b.type='button';b.textContent=o.t;b.addEventListener('click',function(){
+    if(o.ok===1){add('me',o.t+'<br><span class="m">'+M[o.m]+'</span>');got[o.m]=1;book();ri++;setTimeout(ask,500)}
+    else{add('me',o.t);setTimeout(function(){add('sys','提示：'+o.f)},250)}
+  });rep.appendChild(b)});
+}
+function start(){log.innerHTML='';ri=0;var t=T[cur];document.getElementById('topic').textContent='話題：'+t.n+'（'+t.who+'）';add('sys','選一句話回應。選到好的拒絕方法，對話才會往下走。');ask();topics()}
+function topics(){var b=document.getElementById('topics');b.innerHTML='';Object.keys(T).forEach(function(k){var e=document.createElement('button');e.type='button';e.className='chip';e.setAttribute('aria-pressed',k===cur?'true':'false');e.textContent='話題：'+T[k].n;e.addEventListener('click',function(){cur=k;start()});b.appendChild(e)})}
+document.getElementById('restart').addEventListener('click',start);
+book();start();
+
+/* 姿勢 */
+var P={eye:1,voice:1,att:1};
+function kid(){var s='<rect width="280" height="320" fill="var(--surface)"/>';
+  var hy=P.eye?80:96;
+  s+='<circle cx="140" cy="'+hy+'" r="44" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/><path d="M98 '+(hy-8)+' c6 -40 78 -40 84 0 c-14 -12 -70 -12 -84 0z" fill="#3a2a22"/>';
+  if(P.eye)s+='<circle cx="124" cy="'+(hy+2)+'" r="5" fill="#3a2a22"/><circle cx="156" cy="'+(hy+2)+'" r="5" fill="#3a2a22"/>';else s+='<path d="M118 '+(hy+10)+' h12 M150 '+(hy+10)+' h12" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>';
+  if(P.att)s+='<path d="M124 '+(hy+22)+' q16 10 32 0" stroke="#3a2a22" stroke-width="3" fill="none" stroke-linecap="round"/>';else s+='<path d="M120 '+(hy+28)+' q20 -12 40 0" stroke="#3a2a22" stroke-width="3" fill="none"/><path d="M116 '+(hy-14)+' l14 6 M164 '+(hy-14)+' l-14 6" stroke="#3a2a22" stroke-width="3"/>';
+  s+='<rect x="100" y="'+(hy+46)+'" width="80" height="110" rx="26" fill="#26A69A"/>';
+  if(P.att)s+='<path d="M180 '+(hy+70)+' l50 -20" stroke="var(--skin)" stroke-width="16" stroke-linecap="round"/><rect x="222" y="'+(hy+36)+'" width="26" height="30" rx="8" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/>';else s+='<path d="M180 '+(hy+70)+' l46 -36" stroke="var(--skin)" stroke-width="16" stroke-linecap="round"/><text x="230" y="'+(hy+24)+'" font-size="22" fill="var(--bad)">!</text>';
+  var bubble=P.voice?'不，謝謝。':'嗯……不太……';s+='<rect x="10" y="10" width="'+(P.voice?120:150)+'" height="40" rx="18" fill="'+(P.voice?'var(--accent-soft)':'var(--sunk)')+'" stroke="var(--line)"/><text x="'+(P.voice?70:85)+'" y="37" text-anchor="middle" font-size="'+(P.voice?20:15)+'" fill="var(--fg)">'+bubble+'</text>';
+  document.getElementById('kid').innerHTML=s;
+  document.querySelectorAll('.tog .chip').forEach(function(b){b.setAttribute('aria-pressed',P[b.dataset.g]==+b.dataset.v?'true':'false')});
+  var good=P.eye+P.voice+P.att,m=document.getElementById('poseMsg');
+  if(good===3){m.className='say good';m.innerHTML='<div class="t">完美的拒絕！</div><p>真誠看著對方、溫和堅定的語氣、誠懇有禮的態度。對方會知道你是認真的，也不會覺得被冒犯。</p>'}
+  else if(!P.att){m.className='say bad';m.innerHTML='<div class="t">太兇了</div><p>生氣罵人容易吵架，甚至打起來。拒絕可以很堅定，但要有禮貌。</p>'}
+  else{m.className='say';m.innerHTML='<div class="t">看起來不太確定</div><p>'+(!P.eye?'眼睛看地上，對方會覺得你不是真的想拒絕。':'')+(!P.voice?'小聲猶豫的語氣，對方會覺得再拜託一下就好了。':'')+'</p>'}
+}
+document.querySelectorAll('.tog .chip').forEach(function(b){b.addEventListener('click',function(){P[b.dataset.g]=+b.dataset.v;kid()})});kid();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'「我想上廁所，我先離開了。」是哪一種方法？',o:['遠離現場法','反說服法','堅持拒絕法'],a:0,e:'找理由離開讓你為難的地方。'},
+  {q:'「如果因為你說我膽小我就嘗試，那我就太沒主見了。」是？',o:['自我解嘲法','反激將法','轉移話題法'],a:1,e:'對方用激將法，你就用反激將法。'},
+  {q:'「你要不要和我一起去踢足球？」是？',o:['轉移話題法','友誼勸服法','告知理由法'],a:0,e:'提出別的活動，把話題轉開。'},
+  {q:'「不行，我很膽小，我不敢試啦！」是？',o:['堅持拒絕法','自我解嘲法','反說服法'],a:1,e:'用開自己玩笑的方式，輕鬆拒絕。'},
+  {q:'拒絕時，哪一種態度最好？',o:['低頭小聲說','真誠看著對方，溫和堅定、有禮貌','大聲罵對方'],a:1,e:'這是課本提醒的三個拒絕原則。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

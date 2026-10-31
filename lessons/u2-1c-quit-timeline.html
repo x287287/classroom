@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>戒菸後的身體修復</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 時間軸按鈕列＋人體圖，器官跟著時間變綠 */
+.tl{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.6rem;scroll-snap-type:x mandatory}
+.tl button{appearance:none;flex:0 0 auto;scroll-snap-align:start;min-width:6.4rem;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.5rem .6rem;cursor:pointer;text-align:center;font-family:var(--font-display);font-size:1.1rem;line-height:1.25}
+.tl button small{display:block;font-family:var(--font-body);font-size:.72rem;color:var(--muted)}
+.tl button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.tl button[aria-pressed="true"] small{color:var(--accent-ink)}
+.tl button.past{border-color:var(--accent)}
+.bodybox{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:1.2rem;align-items:center}
+@media (max-width:820px){.bodybox{grid-template-columns:minmax(0,1fr)}}
+.bodybox svg{display:block;width:100%;max-width:320px;margin:0 auto;height:auto}
+.org{transition:fill .5s}
+.when{font-family:var(--font-display);font-size:2.4rem;color:var(--accent);line-height:1.1}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:.8rem;align-items:end}
+.calc label{display:grid;gap:.3rem;font-size:.9rem;color:var(--muted)}
+.calc input{font-size:1.4rem;padding:.4rem .7rem;border:2px solid var(--line);border-radius:12px;background:var(--surface);width:100%}
+.money{font-family:var(--font-display);font-size:2.6rem;color:var(--good);line-height:1;font-variant-numeric:tabular-nums}
+.buy{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+.buy span{background:var(--good-soft);color:var(--good);border-radius:999px;padding:.2rem .8rem;font-size:.95rem}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 1 課 菸與煙的真相・延伸學習</div>
+    <h1>戒菸後的身體修復</h1>
+    <p class="k-lede">課本告訴我們吸菸對全身的傷害。好消息是：<b>只要停止吸菸，身體馬上就開始修復</b>，什麼時候戒都不嫌晚。這些知識，可以拿來鼓勵想戒菸的家人。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#timeline"><span class="no">第 1 站</span><b>修復時間軸</b><span>20 分鐘到 15 年</span></a>
+      <a href="#money"><span class="no">第 2 站</span><b>省下多少錢</b><span>戒菸存錢計算機</span></a>
+      <a href="#help"><span class="no">第 3 站</span><b>我可以怎麼幫忙</b><span>陪家人戒菸</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="timeline">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>停止吸菸後，身體發生了什麼事？</h2></div>
+  <div class="tl" id="tl" role="group" aria-label="戒菸後經過的時間"></div>
+  <div class="panel bodybox" style="margin-top:.6rem">
+    <svg viewBox="0 0 300 460" aria-hidden="true">
+      <circle cx="150" cy="62" r="46" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/>
+      <path class="org" id="o-brain" d="M115 52 c0 -34 70 -34 70 0 c8 -2 10 14 0 16 c-6 10 -64 10 -70 0 c-10 -2 -8 -18 0 -16z" fill="#CFD8DC"/>
+      <rect x="132" y="104" width="36" height="22" fill="var(--skin)"/>
+      <rect x="70" y="122" width="160" height="230" rx="60" fill="#E3F2FD" stroke="#90CAF9" stroke-width="2"/>
+      <path class="org" id="o-lungL" d="M140 160 c-38 -4 -52 40 -48 90 c2 30 34 34 48 14z" fill="#CFD8DC"/>
+      <path class="org" id="o-lungR" d="M160 160 c38 -4 52 40 48 90 c-2 30 -34 34 -48 14z" fill="#CFD8DC"/>
+      <path class="org" id="o-heart" d="M150 220 c-14 -20 -40 -6 -30 14 l30 30 l30 -30 c10 -20 -16 -34 -30 -14z" fill="#CFD8DC"/>
+      <path class="org" id="o-blood" d="M90 300 C120 290 180 310 210 300" stroke="#CFD8DC" stroke-width="8" fill="none"/>
+      <rect x="80" y="350" width="50" height="100" rx="20" fill="#E3F2FD" stroke="#90CAF9" stroke-width="2"/><rect x="170" y="350" width="50" height="100" rx="20" fill="#E3F2FD" stroke="#90CAF9" stroke-width="2"/>
+      <g font-size="13" fill="var(--muted)"><text x="250" y="60">大腦</text><text x="250" y="200">肺</text><text x="250" y="240">心臟</text><text x="250" y="304">血液循環</text></g>
+    </svg>
+    <div class="stack" aria-live="polite">
+      <div class="muted" style="font-size:.9rem">戒菸後</div>
+      <div class="when" id="when"></div>
+      <p class="big" id="what"></p>
+      <div class="btnrow"><button class="btn" type="button" id="prev">← 上一站</button><button class="btn fill" type="button" id="next">下一站 →</button></div>
+    </div>
+  </div>
+  <div class="think"><b>想一想</b><p>戒菸 20 分鐘身體就開始變好。如果家裡有人吸菸，你可以怎麼用這個時間軸鼓勵他？</p></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="money">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>戒菸存錢計算機</h2></div>
+  <p class="big" style="max-width:44em">吸菸不只傷身體，也很花錢。輸入看看，戒菸一年可以省下多少？（可以請家人告訴你一包菸多少錢。）</p>
+  <div class="panel" style="margin-top:1rem">
+    <div class="calc">
+      <label for="price">一包菸大約多少元？<input id="price" type="number" min="0" step="5" value="100" inputmode="numeric"></label>
+      <label for="packs">一天吸幾包？<input id="packs" type="number" min="0" step="0.5" value="1" inputmode="decimal"></label>
+      <div><div class="muted" style="font-size:.9rem">一年可以省下</div><div class="money" id="saved">0 元</div></div>
+    </div>
+    <div class="buy" id="buy"></div>
+    <p class="muted" style="font-size:.85rem;margin-top:.6rem">預設的價格只是舉例，實際價格依品牌不同。</p>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="help">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>陪家人戒菸，我可以這樣做</h2></div>
+  <div class="cards">
+    <div class="card good"><h3>免費戒菸專線</h3><p style="font-family:var(--font-display);font-size:1.8rem;color:var(--good)">0800-63-63-63</p><p>有專人用電話陪伴、提供方法，完全免費。</p></div>
+    <div class="card"><h3>醫院的戒菸門診</h3><p>很多醫院和診所有戒菸門診，醫生可以提供戒菸的幫助。</p></div>
+    <div class="card"><h3>用說的，也用做的</h3><p>寫一張鼓勵的卡片、陪家人散步運動，想吸菸的時候一起做別的事。</p></div>
+    <div class="card"><h3>不放棄</h3><p>很多人要試好幾次才成功。家人又吸菸時不要罵他，跟他說：「我們再試一次！」</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>時間軸依世界衛生組織（WHO）〈戒菸的健康益處〉：20 分鐘心跳血壓下降；12 小時血中一氧化碳恢復正常；2～12 週循環改善、肺功能增加；1～9 個月咳嗽與呼吸短促減少；1 年冠心病風險約為吸菸者一半；5～15 年中風風險降至非吸菸者；10 年肺癌風險約為吸菸者一半；15 年冠心病風險與非吸菸者相同。</li>
+      <li>戒菸專線 0800-63-63-63 為課本 p.37 資訊小站所列資源。</li>
+      <li>教學提醒：班上學生家人可能吸菸，引導時以「關心、鼓勵」為主，避免讓學生感到被指責。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>戒菸小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>World Health Organization, “Tobacco: Health benefits of smoking cessation”.</li><li>國小健康與體育四上課本 單元 2 第 1 課〈菸對健康的危害〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var T=[
+  {t:'還在吸菸',s:'現在',d:'吸菸讓心跳變快、血壓升高，一氧化碳讓血液缺氧，肺裡卡滿焦油。',g:[]},
+  {t:'20 分鐘',s:'最後一根菸後',d:'<b>心跳和血壓</b>開始下降，回到比較正常的狀態。',g:['heart']},
+  {t:'12 小時',s:'半天',d:'血液裡的<b>一氧化碳</b>降回正常，氧氣又能好好送到全身。',g:['heart','blood']},
+  {t:'2～12 週',s:'幾個星期',d:'<b>血液循環</b>變好，<b>肺功能</b>增加，走路、爬樓梯比較不喘。',g:['heart','blood','lungL']},
+  {t:'1～9 個月',s:'幾個月',d:'<b>咳嗽</b>和<b>呼吸急促</b>減少了，肺慢慢把髒東西清出去。',g:['heart','blood','lungL','lungR']},
+  {t:'1 年',s:'一年',d:'得到<b>心臟病</b>的風險，大約只剩吸菸者的一半。',g:['heart','blood','lungL','lungR']},
+  {t:'5 年',s:'五年',d:'<b>中風</b>的風險慢慢降低，戒菸 5～15 年後會降到和不吸菸的人一樣。',g:['heart','blood','lungL','lungR','brain']},
+  {t:'10 年',s:'十年',d:'得到<b>肺癌</b>的風險，大約只剩吸菸者的一半，其他癌症的風險也降低。',g:['heart','blood','lungL','lungR','brain']},
+  {t:'15 年',s:'十五年',d:'得到心臟病的風險，已經和<b>從來不吸菸的人一樣</b>了！',g:['heart','blood','lungL','lungR','brain']}
+];
+var cur=0,tl=document.getElementById('tl');
+T.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.innerHTML=x.t+'<small>'+x.s+'</small>';b.addEventListener('click',function(){go(i)});tl.appendChild(b)});
+function go(i){cur=Math.max(0,Math.min(T.length-1,i));var x=T[cur];
+  tl.querySelectorAll('button').forEach(function(b,k){b.setAttribute('aria-pressed',k===cur?'true':'false');b.classList.toggle('past',k<cur)});
+  ['brain','lungL','lungR','heart','blood'].forEach(function(o){var el=document.getElementById('o-'+o),on=x.g.indexOf(o)>=0;var col=cur===0?(o==='lungL'||o==='lungR'?'#5D4037':o==='heart'?'#E57373':'#B0BEC5'):on?'#66BB6A':'#CFD8DC';if(o==='blood')el.setAttribute('stroke',col);else el.setAttribute('fill',col)});
+  document.getElementById('when').textContent=x.t;document.getElementById('what').innerHTML=x.d;
+  document.getElementById('prev').disabled=cur===0;document.getElementById('next').disabled=cur===T.length-1;
+}
+document.getElementById('prev').addEventListener('click',function(){go(cur-1)});document.getElementById('next').addEventListener('click',function(){go(cur+1)});go(0);
+
+function calc(){var p=Math.max(0,+document.getElementById('price').value||0),n=Math.max(0,+document.getElementById('packs').value||0),y=Math.round(p*n*365);
+  document.getElementById("saved").textContent=y.toLocaleString('zh-TW')+' 元';
+  var items=[['腳踏車',4000],['運動鞋',2000],['家庭旅行',15000],['一本故事書',300]],b=document.getElementById('buy');b.innerHTML='';
+  if(y>0)items.forEach(function(it){var c=Math.floor(y/it[1]);if(c>0)b.insertAdjacentHTML('beforeend','<span>約 '+c+' '+(it[0]==='家庭旅行'?'次':it[0]==='腳踏車'?'台':it[0]==='運動鞋'?'雙':'本')+it[0].replace('一本','')+'</span>')});
+}
+['price','packs'].forEach(function(id){document.getElementById(id).addEventListener('input',calc)});calc();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'戒菸後多久，心跳和血壓就開始下降？',o:['20 分鐘','1 年','10 年'],a:0,e:'身體馬上就開始修復。'},
+  {q:'戒菸 12 小時後，血液裡哪一種有毒氣體會降回正常？',o:['氧氣','一氧化碳','二氧化碳'],a:1,e:'一氧化碳少了，氧氣就能送到全身。'},
+  {q:'戒菸 15 年後，得到心臟病的風險會變成？',o:['跟吸菸者一樣','跟從來不吸菸的人一樣','更高'],a:1,e:'什麼時候戒都不嫌晚。'},
+  {q:'免費戒菸專線的號碼是？',o:['0800-63-63-63','119','110'],a:0,e:'可以把這支電話告訴想戒菸的家人。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

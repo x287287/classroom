@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>決定天秤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 天秤在中間，左右兩堆理由卡；點卡片增加重要程度（0～3 顆星） */
+.scene-pick{display:flex;flex-wrap:wrap;gap:.5rem}
+.situ{font-family:var(--font-display);font-size:1.35rem;line-height:1.5}
+.scale-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:1rem;align-items:start}
+@media (max-width:900px){.scale-wrap{grid-template-columns:minmax(0,1fr)}}
+.side h3{text-align:center}
+.side .cardlist{display:grid;gap:.5rem;margin-top:.5rem}
+.rc{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.55rem .8rem;text-align:left;cursor:pointer;min-height:3.4rem;display:flex;justify-content:space-between;gap:.6rem;align-items:center;font-size:.98rem}
+.rc .stars{flex:none;color:var(--warn);letter-spacing:.1em;font-size:1.05rem}
+.rc.w1{border-color:var(--accent)}.rc.w2{border-color:var(--accent);background:var(--accent-soft)}.rc.w3{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.scale svg{display:block;width:100%;height:auto}
+.beam{transition:transform .6s cubic-bezier(.3,1.4,.5,1);transform-origin:220px 90px}
+.steps5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.4rem}
+@media (max-width:640px){.steps5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.steps5 div{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:.4rem .5rem;font-size:.85rem;text-align:center}
+.steps5 div.on{border-color:var(--accent);background:var(--accent-soft)}
+.steps5 b{display:block;font-family:var(--font-display);font-weight:400;font-size:1rem}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 2 課 酒與檳榔・延伸學習</div>
+    <h1>決定天秤</h1>
+    <p class="k-lede">課本裡小誠用「做決定」五步驟拒絕了檳榔。生活中還會遇到很多類似的邀請。把每個理由放上天秤，看看它有多重，再做出健康的好決定。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#scale"><span class="no">第 1 站</span><b>放上天秤</b><span>三個新情境</span></a>
+      <a href="#first"><span class="no">第 2 站</span><b>第一口從哪裡來</b><span>小心身邊的邀請</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="scale">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>你會怎麼決定？</h2></div>
+  <div class="scene-pick" id="pick"></div>
+  <div class="panel" style="margin-top:1rem"><p class="situ" id="situ"></p></div>
+  <div class="steps5" id="s5" style="margin-top:1rem">
+    <div><b>步驟 1</b>確定要做決定</div><div><b>步驟 2</b>列出選擇</div><div><b>步驟 3</b>比較優缺點</div><div><b>步驟 4</b>做出決定</div><div><b>步驟 5</b>是健康的好決定嗎</div>
+  </div>
+  <div class="scale-wrap" style="margin-top:1rem">
+    <div class="side"><h3 id="lName">接受</h3><div class="cardlist" id="lCards"></div></div>
+    <figure class="fig scale">
+      <svg viewBox="0 0 440 300" aria-hidden="true">
+        <rect width="440" height="300" fill="var(--surface)"/>
+        <path d="M200 270 h40 l-10 -170 h-20 z" fill="#8D6E63"/>
+        <rect x="150" y="268" width="140" height="16" rx="6" fill="#6D4C41"/>
+        <g class="beam" id="beam">
+          <rect x="40" y="84" width="360" height="12" rx="6" fill="#A1887F"/>
+          <circle cx="220" cy="90" r="12" fill="#6D4C41"/>
+          <g id="panL"><line x1="60" y1="96" x2="40" y2="170" stroke="#8D6E63" stroke-width="2"/><line x1="60" y1="96" x2="120" y2="170" stroke="#8D6E63" stroke-width="2"/><path d="M30 170 h100 q-10 26 -50 26 q-40 0 -50 -26z" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2"/><text x="80" y="188" text-anchor="middle" font-size="18" id="wl" fill="var(--bad)">0</text></g>
+          <g id="panR"><line x1="380" y1="96" x2="320" y2="170" stroke="#8D6E63" stroke-width="2"/><line x1="380" y1="96" x2="400" y2="170" stroke="#8D6E63" stroke-width="2"/><path d="M310 170 h100 q-10 26 -50 26 q-40 0 -50 -26z" fill="var(--good-soft)" stroke="var(--good)" stroke-width="2"/><text x="360" y="188" text-anchor="middle" font-size="18" id="wr" fill="var(--good)">0</text></g>
+        </g>
+      </svg>
+      <figcaption>點兩邊的理由卡，每點一次加一顆星（最多 3 顆，再點歸零）</figcaption>
+    </figure>
+    <div class="side"><h3 id="rName">拒絕</h3><div class="cardlist" id="rCards"></div></div>
+  </div>
+  <div class="btnrow" style="margin-top:1rem;justify-content:center"><button class="btn fill" type="button" id="decide">我做好決定了</button><button class="btn" type="button" id="clear">重新放</button></div>
+  <div class="say" id="msg" style="margin-top:1rem" aria-live="polite"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="first">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>第一口，常常來自身邊的人</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">衛生福利部的調查發現，青少年第一次嚼檳榔，<b>超過 7 成</b>是家人或朋友邀請的，而原因多半是<b>好奇</b>。</p>
+      <p>熟悉的人邀請你，比陌生人更難拒絕。所以要先想好：遇到這種情況，我要怎麼決定、怎麼說？</p>
+    </div>
+    <div class="card warn"><h3>小心這些「好像有道理」的話</h3><p>「吃一顆提神，才不會想睡。」<br>「這是水果酒，跟果汁差不多。」<br>「電子煙香香的，沒有害啦。」<br>「大家都在用，只有你不敢。」</p><p style="margin-top:.4rem">聽到這些話，就是你該停下來、用五步驟想一想的時候。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>教師手冊：根據衛生福利部國民健康署統計，青少年首次嚼檳榔有七成源自家人和朋友的邀請，原因多為好奇。</li>
+      <li>天秤的權重由學生自行決定，沒有標準答案；重點是讓學生說出「為什麼這個理由比較重要」。可分組討論後再上台操作。</li>
+      <li>課本 p.46～47「做決定」五步驟：確定必須做決定、列出所有選擇、列出優缺點、做出決定、檢視是否為健康的好決定。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>做決定小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本與教師手冊 單元 2 第 2 課〈遠離檳榔〉。</li><li>衛生福利部〈青少年第一口檳榔 超過 7 成來自親友〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var SC=[
+  {n:'生日派對的水果酒',s:'同學的生日派對上，有人拿出粉紅色的水果酒說：「這甜甜的，跟果汁一樣，喝一點啦！」',L:'喝一口',R:'拒絕',
+   l:['滿足好奇心，想知道是什麼味道','大家都喝，我不想被說掃興','看起來很漂亮'],
+   r:['只要有酒精就是酒，未滿 18 歲喝酒違法','酒精會影響還在發育的大腦','爸媽會擔心','可以喝真的果汁，一樣開心']},
+  {n:'叔叔的提神檳榔',s:'過年回老家，叔叔遞給你一顆檳榔：「嚼一顆提神啦，晚上守歲才不會想睡！」',L:'嚼一顆',R:'拒絕',
+   l:['不想讓叔叔不高興','好奇檳榔是什麼味道','說不定真的可以提神'],
+   r:['檳榔籽本身就會致癌','檳榔會上癮，嚼了就很難停','牙齒和嘴巴會變紅、變髒','想睡可以去洗把臉、跟大家玩遊戲']},
+  {n:'表哥的電子煙',s:'表哥拿出一支像隨身碟的電子煙：「這是芒果口味的，香香的又沒有害，你試試看。」',L:'試一口',R:'拒絕',
+   l:['香香的，好像很好玩','表哥說沒有害','拒絕會很尷尬'],
+   r:['電子煙在台灣全面禁止，使用違法','裡面有尼古丁，一樣會上癮','香味只是蓋住了有害物質','可以跟表哥說：「我們去打球啦！」']}
+];
+var cur=0,W={};
+function pick(){var p=document.getElementById('pick');p.innerHTML='';SC.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',i===cur?'true':'false');b.textContent='情境 '+(i+1)+'：'+s.n;b.addEventListener('click',function(){cur=i;W={};build()});p.appendChild(b)})}
+function stars(n){return n?'★'.repeat(n)+'<span style="opacity:.25">'+'★'.repeat(3-n)+'</span>':'<span style="opacity:.3">☆☆☆</span>'}
+function build(){
+  pick();var s=SC[cur];document.getElementById('situ').textContent=s.s;document.getElementById('lName').textContent='選擇一：'+s.L;document.getElementById('rName').textContent='選擇二：'+s.R;
+  ['l','r'].forEach(function(side){var box=document.getElementById(side+'Cards');box.innerHTML='';s[side].forEach(function(t,i){var k=side+i;var b=document.createElement('button');b.type='button';var w=W[k]||0;b.className='rc'+(w?' w'+w:'');b.innerHTML='<span>'+t+'</span><span class="stars">'+stars(w)+'</span>';b.setAttribute('aria-label',t+'，重要程度 '+w+' 顆星');b.addEventListener('click',function(){W[k]=((W[k]||0)+1)%4;build()});box.appendChild(b)})});
+  var wl=0,wr=0;Object.keys(W).forEach(function(k){if(k[0]==='l')wl+=W[k];else wr+=W[k]});
+  document.getElementById('wl').textContent=wl;document.getElementById('wr').textContent=wr;
+  var ang=Math.max(-14,Math.min(14,(wr-wl)*2.2));document.getElementById('beam').style.transform='rotate('+ang+'deg)';
+  ['panL','panR'].forEach(function(id,j){document.getElementById(id).style.transform='rotate('+(-ang)+'deg)';document.getElementById(id).style.transformOrigin=(j?380:60)+'px 96px'});
+  var any=wl+wr>0;document.querySelectorAll('#s5 div').forEach(function(d,i){d.classList.toggle('on',i<(any?3:2))});
+}
+document.getElementById('decide').addEventListener('click',function(){
+  var s=SC[cur],wl=0,wr=0;Object.keys(W).forEach(function(k){if(k[0]==='l')wl+=W[k];else wr+=W[k]});
+  var m=document.getElementById('msg');document.querySelectorAll('#s5 div').forEach(function(d){d.classList.add('on')});
+  if(wl+wr===0){m.className='say';m.innerHTML='<div class="t">先比較優缺點</div><p>點兩邊的理由卡，幫每個理由加上重要程度。</p>';document.querySelectorAll('#s5 div').forEach(function(d,i){d.classList.toggle('on',i<2)});return}
+  if(wr>wl){m.className='say good';m.innerHTML='<div class="t">決定：'+s.R+'</div><p>天秤倒向「'+s.R+'」。這個決定保護了你的健康，也遵守了法律，<b>是一個健康的好決定！</b>拒絕時記得：眼神真誠、語氣溫和堅定、態度有禮貌。</p>'}
+  else if(wr===wl){m.className='say';m.innerHTML='<div class="t">天秤一樣重</div><p>再想一想：哪一邊的理由跟<b>健康和安全</b>有關？那些理由應該比較重要喔。</p>'}
+  else{m.className='say bad';m.innerHTML='<div class="t">天秤倒向「'+s.L+'」</div><p>步驟 5 問自己：<b>這是一個健康的好決定嗎？</b>「怕尷尬」、「好奇」的理由，真的比健康和法律更重要嗎？試著重新評估看看。</p>'}
+});
+document.getElementById('clear').addEventListener('click',function(){W={};build();var m=document.getElementById('msg');m.className='say';m.innerHTML='<div class="t">開始</div><p>讀完情境，幫兩邊的理由加上重要程度。</p>'});
+document.getElementById('clear').click();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'「做決定」的最後一步是什麼？',o:['趕快答應','問自己：這是一個健康的好決定嗎？','聽大家的'],a:1,e:'做完決定要再檢查一次。'},
+  {q:'同學說「水果酒跟果汁一樣」，正確的想法是？',o:['那就可以喝','只要有酒精就是酒','果汁也有酒精'],a:1,e:'甜味只是蓋住了酒精的味道。'},
+  {q:'青少年第一次嚼檳榔，大多是誰邀請的？',o:['陌生人','家人或朋友','老師'],a:1,e:'超過 7 成來自親友，所以更要先想好怎麼拒絕。'},
+  {q:'比較優缺點時，哪一類理由應該最重要？',o:['怕被說掃興','健康和安全','好奇心'],a:1,e:'健康和安全是做決定時最重要的考量。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

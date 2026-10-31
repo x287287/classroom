@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>無菸家庭標誌設計師</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 設計工具：左側選項面板，右側大預覽，可全螢幕展示 */
+.studio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:1.4rem;align-items:start}
+@media (max-width:900px){.studio{grid-template-columns:minmax(0,1fr)}}
+.opt{display:grid;gap:.4rem}
+.opt h3{font-size:1.05rem;color:var(--muted)}
+.icons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
+.icons button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.4rem;cursor:pointer;min-height:4.6rem}
+.icons button svg{width:100%;height:3.4rem}
+.icons button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.swatch{display:flex;gap:.5rem;flex-wrap:wrap}
+.swatch button{appearance:none;width:3rem;height:3rem;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.swatch button[aria-pressed="true"]{box-shadow:0 0 0 4px var(--fg)}
+.txt{width:100%;font-size:1.2rem;padding:.5rem .8rem;border:2px solid var(--line);border-radius:12px;background:var(--surface)}
+.preview{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem;display:grid;place-items:center}
+.preview svg{width:100%;max-width:560px;height:auto;display:block}
+.preview:fullscreen{background:#fff;padding:2rem}
+.preview:fullscreen svg{max-width:none;height:90vh;width:auto}
+.pledge{background:#FFFDF5;border:3px double #C9B88A;border-radius:12px;padding:1.4rem 1.6rem;font-family:var(--font-display);font-size:1.2rem;line-height:1.9;color:#3E3A2E}
+.pledge h3{text-align:center;font-size:1.6rem;margin-bottom:.4rem;color:#3E3A2E}
+.checks{display:grid;gap:.4rem}
+.checks label{display:flex;gap:.6rem;align-items:center;min-height:2.8rem;padding:.3rem .6rem;border:2px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer}
+.checks input{width:1.4rem;height:1.4rem;accent-color:var(--accent)}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 3 課 向菸、酒、檳榔說不・延伸學習</div>
+    <h1>無菸家庭標誌設計師</h1>
+    <p class="k-lede">課本裡琳琳用行動支持無菸、無酒、無檳榔的健康家庭：設計標誌、說出健康宣言。好的標誌要怎麼設計，別人一眼就看懂？動手設計你的標誌，再寫下你的健康宣言。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#tips"><span class="no">第 1 站</span><b>好標誌的祕密</b><span>三個設計原則</span></a>
+      <a href="#studio"><span class="no">第 2 站</span><b>設計我的標誌</b><span>選圖、配色、寫標語</span></a>
+      <a href="#pledge"><span class="no">第 3 站</span><b>我的健康宣言</b><span>寫下決心</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="tips">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>為什麼禁菸標誌一眼就看得懂？</h2></div>
+  <div class="cards">
+    <div class="card"><h3>① 圖形簡單</h3><p>一根菸、一個杯子，不用畫得很仔細。越簡單，越遠就看得懂。</p></div>
+    <div class="card"><h3>② 顏色對比強</h3><p>紅色的圓圈加斜線，大家都知道是「禁止」。白底紅圈最醒目。</p></div>
+    <div class="card"><h3>③ 文字短短的</h3><p>標語最好 8 個字以內，例如「無菸家庭，健康滿分」。</p></div>
+    <div class="card good"><h3>你知道嗎？</h3><p>每年 <b>5 月 31 日</b>是世界衛生組織訂的「世界無菸日」，提醒全世界菸害的危險。</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="studio">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>設計我的標誌</h2></div>
+  <div class="studio">
+    <div class="stack">
+      <div class="opt"><h3>1. 選擇要禁止的東西</h3><div class="icons" id="icons"></div></div>
+      <div class="opt"><h3>2. 選擇主色</h3><div class="swatch" id="sw"></div></div>
+      <div class="opt"><h3>3. 選一句標語，或自己寫（8 個字以內最好）</h3><div class="chips" id="slogans"></div><input class="txt" id="slogan" maxlength="14" aria-label="標語"></div>
+      <div class="opt"><h3>4. 寫上設計者</h3><input class="txt" id="by" maxlength="12" placeholder="例如：四年三班 小明" aria-label="設計者"></div>
+    </div>
+    <div class="stack">
+      <div class="preview" id="preview"><svg viewBox="0 0 600 640" id="sign" role="img" aria-label="標誌預覽"></svg></div>
+      <div class="btnrow"><button class="btn fill" type="button" id="fs">全螢幕展示</button></div>
+      <p class="muted" style="font-size:.85rem">在大螢幕上全螢幕展示，請同學猜猜看你的標誌在說什麼。</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="pledge">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>我的健康宣言</h2></div>
+  <div class="two">
+    <div class="stack">
+      <label class="opt" for="pname"><h3>我的名字</h3></label><input class="txt" id="pname" maxlength="10" placeholder="寫下你的名字">
+      <div class="opt"><h3>我承諾（可以選很多個）</h3>
+        <div class="checks" id="checks"></div>
+      </div>
+    </div>
+    <div class="pledge" id="pledgeOut" aria-live="polite"></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>課本 p.50～51「實踐健康信念」：說出健康宣言、寫下期望放入時光膠囊、向家人宣傳危害、設計拒絕標誌張貼在家中。本頁可作為學習單「實踐健康信念（一）（二）」的數位版。</li>
+      <li>建議活動：學生輪流在觸控螢幕上設計標誌並全螢幕展示，全班票選；也可請學生依螢幕上的設計畫在紙上帶回家張貼。</li>
+      <li>世界無菸日（World No Tobacco Day）為每年 5 月 31 日，由世界衛生組織設立。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 2 第 3 課〈實踐健康信念〉。</li><li>World Health Organization, World No Tobacco Day.</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var IC={
+  smoke:{n:'菸',d:function(c){return '<rect x="-110" y="-16" width="170" height="32" rx="4" fill="#fff" stroke="#333" stroke-width="6"/><rect x="60" y="-16" width="40" height="32" rx="4" fill="#E0A060" stroke="#333" stroke-width="6"/><rect x="-118" y="-16" width="14" height="32" fill="#FF7043"/><path d="M-120 -30 q-10 -24 4 -44 M-104 -34 q-8 -20 6 -38" stroke="#90A4AE" stroke-width="6" fill="none"/>'}},
+  wine:{n:'酒',d:function(){return '<path d="M-40 -90 h80 l-10 70 q-30 30 -60 0 z" fill="#F48FB1" stroke="#333" stroke-width="6"/><path d="M0 -10 v70 M-34 64 h68" stroke="#333" stroke-width="8" stroke-linecap="round"/>'}},
+  betel:{n:'檳榔',d:function(){return '<ellipse cx="0" cy="0" rx="46" ry="66" fill="#66BB6A" stroke="#333" stroke-width="6"/><path d="M0 -66 v-26" stroke="#5D4037" stroke-width="8"/><ellipse cx="-14" cy="-14" rx="10" ry="18" fill="#A5D6A7" opacity=".8"/>'}},
+  all:{n:'三種都禁',d:function(){return '<g transform="translate(-58,-30) scale(.42)">'+IC.smoke.d()+'</g><g transform="translate(58,-30) scale(.5)">'+IC.wine.d()+'</g><g transform="translate(0,50) scale(.5)">'+IC.betel.d()+'</g>'}}
+};
+var COL={'#D32F2F':'紅','#2E7D6B':'綠','#1565C0':'藍','#EF6C00':'橘'};
+var SL=['無菸家庭，健康滿分','拒菸拒酒拒檳榔','我家不吸菸','愛家人，不吸菸','健康從我家開始'];
+var st={icon:'smoke',col:'#D32F2F',sl:SL[0],by:''};
+var icons=document.getElementById('icons');
+Object.keys(IC).forEach(function(k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label',IC[k].n);b.innerHTML='<svg viewBox="-140 -110 280 220">'+IC[k].d()+'</svg>';b.addEventListener('click',function(){st.icon=k;draw()});b.dataset.k=k;icons.appendChild(b)});
+var sw=document.getElementById('sw');Object.keys(COL).forEach(function(c){var b=document.createElement('button');b.type='button';b.style.background=c;b.dataset.c=c;b.setAttribute('aria-label',COL[c]+'色');b.addEventListener('click',function(){st.col=c;draw()});sw.appendChild(b)});
+var sls=document.getElementById('slogans');SL.forEach(function(t){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;b.addEventListener('click',function(){st.sl=t;document.getElementById('slogan').value=t;draw()});sls.appendChild(b)});
+var inp=document.getElementById('slogan');inp.value=st.sl;inp.addEventListener('input',function(){st.sl=inp.value;draw()});
+document.getElementById('by').addEventListener('input',function(e){st.by=e.target.value;draw()});
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function draw(){
+  icons.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===st.icon?'true':'false')});
+  sw.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===st.col?'true':'false')});
+  sls.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',b.textContent===st.sl?'true':'false')});
+  var c=st.col,s='<rect width="600" height="640" rx="30" fill="#fff" stroke="'+c+'" stroke-width="14"/>';
+  s+='<g transform="translate(300,270)">'+IC[st.icon].d()+'</g>';
+  s+='<circle cx="300" cy="270" r="190" fill="none" stroke="'+c+'" stroke-width="34"/><line x1="166" y1="136" x2="434" y2="404" stroke="'+c+'" stroke-width="34" stroke-linecap="round"/>';
+  var t=esc(st.sl||''),fsz=t.length<=8?62:t.length<=11?48:40;
+  s+='<text x="300" y="545" text-anchor="middle" font-size="'+fsz+'" font-family="Huninn, Noto Sans TC, sans-serif" fill="'+c+'">'+t+'</text>';
+  if(st.by)s+='<text x="300" y="605" text-anchor="middle" font-size="22" font-family="Noto Sans TC, sans-serif" fill="#78909C">設計：'+esc(st.by)+'</text>';
+  document.getElementById('sign').innerHTML=s;
+}
+document.getElementById('fs').addEventListener('click',function(){var p=document.getElementById('preview');try{if(document.fullscreenElement)document.exitFullscreen();else if(p.requestFullscreen)p.requestFullscreen().catch(function(){})}catch(e){}});
+draw();
+
+var PL=['不接受別人給的菸、酒、檳榔','不因為好奇而嘗試','不因為怕失去朋友而嘗試','向家人宣傳菸、酒、檳榔的危害','鼓勵吸菸的家人撥打戒菸專線','遠離有二手菸的地方'];
+var on={0:1,1:1};var ck=document.getElementById('checks');
+PL.forEach(function(t,i){var l=document.createElement('label');l.innerHTML='<input type="checkbox" id="pl'+i+'"'+(on[i]?' checked':'')+'><span>'+t+'</span>';l.querySelector('input').addEventListener('change',function(e){if(e.target.checked)on[i]=1;else delete on[i];pledge()});ck.appendChild(l)});
+document.getElementById('pname').addEventListener('input',pledge);
+function pledge(){var n=esc(document.getElementById('pname').value||'＿＿＿＿');var list=Object.keys(on).map(function(k){return '<li>'+PL[k]+'</li>'}).join('');
+  document.getElementById('pledgeOut').innerHTML='<h3>我的健康宣言</h3><p>我 <b>'+n+'</b> 了解吸菸、飲酒、嚼檳榔會對自己和他人的健康造成危害，所以我承諾：</p><ol style="margin:.3rem 0 .6rem;padding-left:1.4em">'+(list||'<li style="color:#B9AE90">（從左邊選擇你的承諾）</li>')+'</ol><p style="text-align:right">宣言人：'+n+'</p>'}
+pledge();
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

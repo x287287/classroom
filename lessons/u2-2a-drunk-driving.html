@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>反應慢一秒</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 道路俯視：車子、斑馬線上的小孩；下方是距離長條 */
+.road svg{display:block;width:100%;height:auto}
+.ctrl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:1rem}
+.bars{display:grid;gap:.5rem}
+.bar{display:grid;grid-template-columns:6.5em 1fr 4.5em;gap:.6rem;align-items:center;font-size:.92rem}
+.bar .track{height:22px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden;display:flex}
+.bar .r{background:var(--warn);height:100%;transition:width .4s}
+.bar .b{background:var(--cool);height:100%;transition:width .4s}
+.bar .v{font-variant-numeric:tabular-nums;text-align:right;font-weight:700}
+.legend{display:flex;gap:1rem;font-size:.82rem;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:.9em;height:.9em;border-radius:3px;vertical-align:-.1em;margin-right:.3em}
+.rule{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1rem}
+.rule .num{font-family:var(--font-display);font-size:2rem;color:var(--accent);line-height:1.1}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 2 課 酒與檳榔・延伸學習</div>
+    <h1>反應慢一秒</h1>
+    <p class="k-lede">課本說酒駕是錯誤又違法的行為。為什麼「只喝一點點」也不行？因為酒精會讓大腦的反應變慢。車子開得很快，慢一點點，就可能多衝出好幾公尺。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#sim"><span class="no">第 1 站</span><b>煞車模擬器</b><span>反應慢會怎樣</span></a>
+      <a href="#law"><span class="no">第 2 站</span><b>酒駕的規定</b><span>腳踏車也算</span></a>
+      <a href="#say"><span class="no">第 3 站</span><b>勸家人不酒駕</b><span>可以怎麼說</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="sim">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>前面有小朋友過馬路！</h2></div>
+  <p class="big" style="max-width:46em">駕駛看到危險，要先<b>反應</b>過來，才會踩下煞車。在反應的這段時間裡，車子<b>完全沒有減速</b>。喝了酒，反應時間會變長，車子就會衝得更遠。</p>
+  <figure class="fig road" style="margin-top:1rem"><svg viewBox="0 0 900 220" aria-hidden="true" id="roadSvg"></svg></figure>
+  <div class="ctrl" style="margin-top:1rem">
+    <div class="panel stack">
+      <h3>車速</h3>
+      <div class="chips" id="spd"><button class="chip" type="button" data-v="30">30 公里</button><button class="chip" type="button" data-v="50" aria-pressed="true">50 公里</button><button class="chip" type="button" data-v="60">60 公里</button></div>
+      <h3>駕駛的狀態</h3>
+      <div class="chips" id="drv"><button class="chip" type="button" data-r="1" aria-pressed="true">清醒</button><button class="chip" type="button" data-r="1.5">喝了一點酒</button><button class="chip" type="button" data-r="2">喝了很多酒</button></div>
+      <button class="btn fill" type="button" id="go">小朋友衝出來了！踩煞車</button>
+    </div>
+    <div class="panel stack">
+      <div class="bars" id="bars"></div>
+      <div class="legend"><span><i style="background:var(--warn)"></i>反應時間內衝出去的距離</span><span><i style="background:var(--cool)"></i>踩煞車後滑行的距離</span></div>
+      <div class="say" id="msg" aria-live="polite"><div class="t">準備</div><p>選好車速和駕駛狀態，按下按鈕。小朋友在前方 30 公尺。</p></div>
+    </div>
+  </div>
+  <p class="muted" style="font-size:.85rem;margin-top:.6rem">示意模擬：清醒時反應時間以 1 秒計算，喝酒後的反應時間為舉例，用來說明「反應變慢」的影響；煞車距離以乾燥路面估算。</p>
+ </div>
+</section>
+
+<section class="k-sec alt" id="law">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>酒駕的規定，比你想的更嚴格</h2></div>
+  <div class="rule">
+    <div class="card"><div class="num">0.15</div><h3>就會被開罰</h3><p>警察用酒測器測呼氣，每公升呼氣的酒精達 <b>0.15 毫克</b>以上，就算酒駕，會被罰款、吊扣駕照。</p></div>
+    <div class="card warn"><div class="num">0.25</div><h3>犯了刑法</h3><p>達到 <b>0.25 毫克</b>以上，就觸犯刑法的「公共危險罪」，可能要坐牢。</p></div>
+    <div class="card"><div class="num">都算</div><h3>騎機車、腳踏車也一樣</h3><p>不論駕駛哪一種交通工具，喝了酒就不能騎、不能開。騎腳踏車酒駕也會被罰。</p></div>
+    <div class="card"><div class="num">連坐</div><h3>同車的大人也會被罰</h3><p>明知道駕駛喝了酒還搭他的車，同車的大人也會受罰。拒絕酒測，罰得更重。</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="say">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>聚餐後，叔叔說「我只喝一杯，沒關係啦」</h2></div>
+  <p class="big" style="max-width:44em">你可以怎麼回應？分分看，哪些話有幫助。</p>
+  <div class="panel" id="sortBox" style="margin-top:1rem"></div>
+  <div class="cards">
+    <div class="card good"><h3>指定駕駛</h3><p>出門前就先說好：今天由<b>不喝酒的人</b>開車。</p></div>
+    <div class="card good"><h3>搭車回家</h3><p>叫計程車、搭大眾運輸，或請代理駕駛幫忙把車開回家。</p></div>
+    <div class="card good"><h3>喝酒不開車，開車不喝酒</h3><p>這句話可以寫成卡片，送給家裡會開車的大人。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>道路交通管理處罰條例：呼氣酒精濃度達每公升 0.15 毫克以上即屬酒駕，處罰鍰並吊扣駕照；刑法第 185-3 條：達每公升 0.25 毫克以上屬公共危險罪。慢車（含自行車）酒駕亦有罰則；同車乘客亦有連帶處罰；拒測處罰更重。實際罰鍰金額以最新法規為準。</li>
+      <li>模擬計算：反應距離＝車速（公尺／秒）× 反應時間；煞車距離＝車速² ÷（2 × 7 公尺／秒²），約為乾燥路面的減速度。喝酒後的反應時間為教學示意數值，用於比較，並非特定研究結果。</li>
+      <li>教師手冊：根據內政部警政署統計，每年因酒駕而受傷、死亡的人數多達上千人。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>酒駕零容忍測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>交通部 道安資訊查詢網〈防制酒駕〉相關規定。</li><li>國小健康與體育四上課本與教師手冊 單元 2 第 2 課〈酒駕零容忍〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var V=50,RT=1,KID=30,anim=null,runs=[];
+function dist(v,rt){var ms=v/3.6;return {r:ms*rt,b:ms*ms/(2*7)}}
+function scene(carX,stopped,hit){
+  var px=function(m){return 60+m*24};
+  var s='<rect width="900" height="220" fill="#E8F5E9"/><rect x="0" y="60" width="900" height="110" fill="#616161"/><path d="M0 115 H900" stroke="#FFF" stroke-width="4" stroke-dasharray="26 18"/>';
+  for(var i=0;i<8;i++)s+='<rect x="'+(px(KID)-30)+'" y="'+(62+i*14)+'" width="60" height="9" fill="#fff"/>';
+  for(var m=0;m<=35;m+=5)s+='<text x="'+px(m)+'" y="200" text-anchor="middle" font-size="13" fill="#2E7D32">'+m+' m</text><line x1="'+px(m)+'" y1="172" x2="'+px(m)+'" y2="182" stroke="#2E7D32" stroke-width="2"/>';
+  var kx=px(KID);s+='<circle cx="'+kx+'" cy="78" r="10" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2"/><rect x="'+(kx-8)+'" y="88" width="16" height="20" rx="6" fill="#FFB300"/>';
+  var cx=px(carX);s+='<g transform="translate('+(cx-60)+',122)"><rect width="60" height="34" rx="8" fill="'+(hit?'#C62828':'#1E88E5')+'"/><rect x="34" y="5" width="18" height="24" rx="4" fill="#BBDEFB"/><circle cx="12" cy="36" r="6" fill="#212121"/><circle cx="48" cy="36" r="6" fill="#212121"/></g>';
+  if(stopped)s+='<text x="'+cx+'" y="56" text-anchor="middle" font-size="16" fill="'+(hit?'#C62828':'#2E7D32')+'">'+(hit?'撞到了！':'停住了')+'</text>';
+  document.getElementById('roadSvg').innerHTML=s;
+}
+function bars(){var b=document.getElementById('bars');b.innerHTML='';var max=60;runs.slice(-3).forEach(function(r){var tot=r.r+r.b;b.insertAdjacentHTML('beforeend','<div class="bar"><span>'+r.lab+'</span><div class="track"><div class="r" style="width:'+(r.r/max*100)+'%"></div><div class="b" style="width:'+(r.b/max*100)+'%"></div></div><span class="v">'+tot.toFixed(1)+' m</span></div>')});if(!runs.length)b.innerHTML='<p class="muted">按下按鈕後，這裡會比較每一次的停車距離（最多顯示 3 次）。</p>'}
+function go(){
+  clearInterval(anim);var d=dist(V,RT),tot=d.r+d.b,t=0,pos=0,ms=V/3.6;
+  var lab=V+' 公里・'+({1:'清醒',1.5:'喝一點',2:'喝很多'})[RT];
+  anim=setInterval(function(){t+=.05;
+    if(t<=RT){pos=ms*t}else{var tb=t-RT,v=Math.max(0,ms-7*tb);pos=d.r+(ms*ms-v*v)/(2*7);if(v<=0){pos=tot}}
+    var hit=pos>=KID-1.5;scene(Math.min(pos,34),pos>=tot||hit&&pos>=tot,hit);
+    if(pos>=tot){clearInterval(anim);runs.push({lab:lab,r:d.r,b:d.b});bars();var m=document.getElementById('msg');
+      if(tot>=KID-1.5){m.className='say bad';m.innerHTML='<div class="t">停車距離 '+tot.toFixed(1)+' 公尺：撞到小朋友了！</div><p>光是反應的時間，車子就衝了 <b>'+d.r.toFixed(1)+' 公尺</b>。'+(RT>1?'喝了酒，反應慢了 '+(RT-1)+' 秒，就多衝出 '+((RT-1)*ms).toFixed(1)+' 公尺。':'車速太快也很危險。')+'</p>'}
+      else{m.className='say good';m.innerHTML='<div class="t">停車距離 '+tot.toFixed(1)+' 公尺：及時停住</div><p>反應時間內衝了 '+d.r.toFixed(1)+' 公尺，煞車又滑了 '+d.b.toFixed(1)+' 公尺。換成喝了酒的駕駛試試看？</p>'}}
+  },40);
+}
+document.querySelectorAll('#spd .chip').forEach(function(b){b.addEventListener('click',function(){V=+b.dataset.v;document.querySelectorAll('#spd .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});scene(0)})});
+document.querySelectorAll('#drv .chip').forEach(function(b){b.addEventListener('click',function(){RT=+b.dataset.r;document.querySelectorAll('#drv .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});scene(0)})});
+document.getElementById('go').addEventListener('click',go);
+scene(0);bars();
+
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'ok',t:'有幫助的回應'},{id:'no',t:'沒有幫助的回應'}],
+  items:[
+    {t:'「叔叔，喝酒不開車，我們搭計程車好嗎？」',bin:'ok',e:'清楚說出主張，又提供解決方法。'},
+    {t:'「一杯應該還好吧……」（然後上車）',bin:'no',e:'只要喝了酒，反應就會變慢，不能冒險。'},
+    {t:'「請阿姨開車，她今天沒有喝酒。」',bin:'ok',e:'找指定駕駛，是很好的辦法。'},
+    {t:'「你酒駕會被警察抓啦，笨蛋！」',bin:'no',e:'罵人會讓對方生氣，不容易聽進去。'},
+    {t:'「我很擔心你，我希望大家都平安回家。」',bin:'ok',e:'說出自己的感受，最能打動人。'},
+    {t:'什麼都不說，假裝沒看到',bin:'no',e:'你的一句話，可能就能避免一場車禍。'}
+  ],
+  done:'全部分對了！溫和、堅定，再加上解決方法。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'為什麼喝了酒，停車需要的距離會變長？',o:['酒讓車子變重','反應變慢，車子在反應時間裡繼續衝','輪胎會變滑'],a:1,e:'反應的那段時間，車子完全沒有減速。'},
+  {q:'呼氣酒精濃度達每公升多少毫克，就會觸犯刑法？',o:['0.05','0.25','1.00'],a:1,e:'0.15 以上會被罰，0.25 以上觸犯公共危險罪。'},
+  {q:'下面哪一種交通工具，喝酒後也不能騎？',o:['只有汽車','機車和腳踏車也不行','腳踏車可以'],a:1,e:'不論哪一種交通工具，喝酒都不能駕駛。'},
+  {q:'聚餐後大人喝了酒，最好的做法是？',o:['開慢一點就好','請沒喝酒的人開車，或搭計程車回家','休息五分鐘再開'],a:1,e:'喝酒不開車，開車不喝酒。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

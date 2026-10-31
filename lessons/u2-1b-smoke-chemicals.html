@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>一根菸裡的化學工廠</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 配對遊戲：左化學物質、右生活用品；紅血球搶位子模擬；尼古丁賽跑 */
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+.match .col{display:grid;gap:.5rem;align-content:start}
+.match button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.55rem .9rem;min-height:3.3rem;text-align:left;cursor:pointer;font-size:1.02rem}
+.match button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.match button.paired{border-color:var(--good);background:var(--good-soft);cursor:default}
+.match button.shake{border-color:var(--bad);background:var(--bad-soft)}
+.match .col h3{font-size:1rem;color:var(--muted)}
+.rbc svg,.race svg{display:block;width:100%;height:auto}
+.range{width:100%;height:46px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:-.4rem}
+.organs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.organs div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.5rem .6rem;text-align:center}
+.organs b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.1rem}
+.organs span{font-size:.85rem}
+.clock{font-family:var(--font-display);font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--bad)}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 1 課 菸與煙的真相・延伸學習</div>
+    <h1>一根菸裡的化學工廠</h1>
+    <p class="k-lede">課本說菸裡有尼古丁、焦油、一氧化碳和其他化學物質。「其他」到底有多少？那些名字你可能在別的地方看過！一氧化碳又是怎麼讓人缺氧的？</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#match"><span class="no">第 1 站</span><b>這個也在菸裡？</b><span>化學物質配對</span></a>
+      <a href="#co"><span class="no">第 2 站</span><b>一氧化碳搶位子</b><span>血液為什麼缺氧</span></a>
+      <a href="#nic"><span class="no">第 3 站</span><b>尼古丁 10 秒到大腦</b><span>為什麼那麼快上癮</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="match">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>超過 7,000 種化學物質</h2></div>
+  <p class="big" style="max-width:46em">菸點燃後產生的煙裡，有<b>超過 7,000 種</b>化學物質，其中數百種有毒，<b>至少 93 種</b>會致癌。很多名字，其實就出現在你家的其他東西裡。先點左邊一個化學物質，再點右邊它也會出現的地方。</p>
+  <div class="panel" style="margin-top:1rem">
+    <div class="match">
+      <div class="col" id="colL"><h3>菸裡的化學物質</h3></div>
+      <div class="col" id="colR"><h3>它也出現在……</h3></div>
+    </div>
+    <div class="say" id="matchMsg" style="margin-top:1rem" aria-live="polite"><div class="t">開始配對</div><p>先點左邊的一個化學物質。</p></div>
+  </div>
+  <div class="think"><b>想一想</b><p>沒有人會去聞去光水或吃老鼠藥。可是吸菸的人，卻把這些東西一口一口吸進肺裡。你會怎麼跟家人說明？</p></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="co">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>一氧化碳：搶座位的壞蛋</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">血液裡的<b>紅血球</b>像一台台小巴士，車上的「座位」（血紅素）負責載<b>氧氣</b>到全身。</p>
+      <p>一氧化碳搶座位的本領，比氧氣強 <b>200 多倍</b>，而且一坐上去就不太下來。座位被搶走，氧氣就上不了車，大腦、心臟、肌肉都會<b>缺氧</b>：頭昏、想睡、注意力不集中，心臟也要更辛苦地工作。</p>
+      <label for="puffs" class="muted" style="font-size:.9rem">拉拉看：吸了幾根菸？</label>
+      <input id="puffs" class="range" type="range" min="0" max="4" value="0">
+      <div class="ticks" aria-hidden="true"><span>不吸菸</span><span>1 根</span><span>半包</span><span>一包</span><span>每天兩包</span></div>
+      <div class="organs">
+        <div><b>大腦</b><span id="oB">精神很好</span></div>
+        <div><b>心臟</b><span id="oH">輕鬆跳動</span></div>
+        <div><b>肌肉</b><span id="oM">很有力氣</span></div>
+      </div>
+    </div>
+    <figure class="fig rbc">
+      <svg viewBox="0 0 440 300" aria-hidden="true" id="rbcSvg"></svg>
+      <figcaption>示意圖：每台小巴士有 4 個座位。藍色＝氧氣，灰黑色＝一氧化碳</figcaption>
+    </figure>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="nic">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>尼古丁：只要大約 10 秒</h2></div>
+  <div class="two">
+    <figure class="fig race"><svg viewBox="0 0 420 380" aria-hidden="true" id="nicSvg"></svg></figure>
+    <div class="stack">
+      <p class="big">吸一口菸，尼古丁從肺進到血液，大約 <b>10 秒</b>就到達大腦，讓人覺得有精神、舒服。可是這種感覺來得快、<b>退得也快</b>，沒多久就想再吸一根。</p>
+      <div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap"><div><div class="muted" style="font-size:.85rem">經過時間</div><div class="clock" id="nicClock">0 秒</div></div><button class="btn fill" type="button" id="nicGo">吸一口，開始計時</button></div>
+      <div class="say" id="nicMsg" aria-live="polite"><div class="t">路線</div><p>嘴巴 → 肺 → 心臟 → 大腦</p></div>
+      <div class="card warn"><h3>來得快、退得快，就容易上癮</h3><p>大腦很快就習慣尼古丁，一沒有就覺得煩躁、不舒服，只好一根接一根。很多大人說「我隨時可以戒」，真正要戒時才發現很難。</p></div>
+    </div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>教師手冊：菸草中含有超過 7,000 種化學物質和化合物，其中數百種有毒，至少 93 種為已知致癌物，至少 22% 的癌症由菸害造成。</li>
+      <li>配對中的物質皆為菸煙中常見的有害成分（丙酮、氨、砷、甲醛、鎘、丁烷、一氧化碳、甲苯），並非菸品添加，而是燃燒產生或菸草本身含有。</li>
+      <li>一氧化碳與血紅素的結合力約為氧氣的 200～250 倍，降低血液攜氧能力；尼古丁吸入後約 10 秒內即可到達大腦。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>菸的成分測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上教師手冊 單元 2 第 1 課（菸草化學物質數據）。</li><li>衛生福利部國民健康署 菸害防制資料。</li><li>國小健康與體育四上課本 單元 2 第 1 課〈菸的主要成分〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 1 配對 */
+var pairs=[
+  ['丙酮','去光水'],['氨','強力清潔劑'],['砷','老鼠藥'],['甲醛','防腐劑（福馬林）'],
+  ['鎘','電池'],['丁烷','打火機的燃料'],['一氧化碳','汽機車的廢氣'],['甲苯','油漆的稀釋劑']
+];
+var tips={'丙酮':'擦指甲油用的去光水，味道很刺鼻。','氨':'很強的清潔劑裡有它，聞到會嗆到流眼淚。','砷':'就是「砒霜」，以前被用來做老鼠藥，有劇毒。','甲醛':'用來保存標本的防腐劑，會致癌。','鎘':'電池裡的重金屬，會傷害腎臟。','丁烷':'打火機裡的燃料。','一氧化碳':'汽機車排氣管排出的有毒氣體。','甲苯':'油漆稀釋劑裡的溶劑，會傷害神經。'};
+var colL=document.getElementById('colL'),colR=document.getElementById('colR'),pickL=null,matched=0;
+KIT.shuffle(pairs).forEach(function(p){var b=document.createElement('button');b.type='button';b.textContent=p[0];b.dataset.k=p[0];b.addEventListener('click',function(){if(b.classList.contains('paired'))return;colL.querySelectorAll('button').forEach(function(z){z.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');pickL=b;msg('','選好了：'+p[0],'它也會出現在哪裡？點右邊。')});colL.appendChild(b)});
+KIT.shuffle(pairs).forEach(function(p){var b=document.createElement('button');b.type='button';b.textContent=p[1];b.dataset.k=p[0];b.addEventListener('click',function(){
+  if(b.classList.contains('paired'))return;
+  if(!pickL){msg('','先選左邊','先點左邊的一個化學物質。');return}
+  if(pickL.dataset.k===b.dataset.k){pickL.classList.add('paired');b.classList.add('paired');pickL.setAttribute('aria-pressed','false');matched++;msg('good','配對成功：'+pickL.textContent+' ↔ '+b.textContent,tips[pickL.dataset.k]+(matched===pairs.length?'<br><b>8 組全部配對完成！</b>':''));pickL=null}
+  else{b.classList.add('shake');setTimeout(function(){b.classList.remove('shake')},500);msg('bad','再想想','「'+pickL.textContent+'」不是在「'+b.textContent+'」裡喔。')}
+});colR.appendChild(b)});
+function msg(c,t,p){var m=document.getElementById('matchMsg');m.className='say'+(c?' '+c:'');m.innerHTML='<div class="t">'+t+'</div><p>'+p+'</p>'}
+
+/* 2 紅血球 */
+var puffs=document.getElementById('puffs');
+var coSeats=[0,2,5,8,11];
+var st=[['精神很好','輕鬆跳動','很有力氣'],['還好','還好','還好'],['有點昏昏的','跳快一點','容易累'],['頭昏、不專心','很辛苦','沒力氣'],['頭痛、想睡','負擔很重','爬樓梯就喘']];
+function drawRBC(){
+  var v=+puffs.value,n=coSeats[v],s='<rect width="440" height="300" fill="var(--surface)"/><path d="M0 60 Q220 20 440 60 V240 Q220 280 0 240 Z" fill="#FDECEA" stroke="#F5B7B1" stroke-width="3"/>',k=0;
+  for(var r=0;r<2;r++)for(var c=0;c<3;c++){var x=80+c*140,y=105+r*95;s+='<ellipse cx="'+x+'" cy="'+y+'" rx="56" ry="34" fill="#E57373" stroke="#C0392B" stroke-width="3"/><ellipse cx="'+x+'" cy="'+y+'" rx="24" ry="12" fill="#EF9A9A"/>';
+    for(var q=0;q<4;q++){var sx=x-36+q*24,sy=y-2,co=k<n;k++;s+='<circle cx="'+sx+'" cy="'+sy+'" r="9" fill="'+(co?'#37474F':'#42A5F5')+'" stroke="#fff" stroke-width="2"/>'}}
+  s+='<text x="20" y="290" font-size="14" fill="var(--muted)">氧氣座位 '+(24-n)+' / 24</text>';
+  document.getElementById('rbcSvg').innerHTML=s;
+  document.getElementById('oB').textContent=st[v][0];document.getElementById('oH').textContent=st[v][1];document.getElementById('oM').textContent=st[v][2];
+}
+puffs.addEventListener('input',drawRBC);drawRBC();
+
+/* 3 尼古丁 */
+var pts=[[210,330,'嘴巴'],[210,250,'肺'],[260,190,'心臟'],[210,70,'大腦']];
+function body(dotI,t){var s='<rect width="420" height="380" fill="var(--surface)"/><circle cx="210" cy="70" r="52" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/><path d="M170 60 q40 -40 80 0" fill="#F8BBD0" opacity=".8"/><rect x="190" y="120" width="40" height="24" fill="var(--skin)"/><rect x="130" y="140" width="160" height="220" rx="60" fill="#B3E5FC"/><path d="M200 220 c-30 -4 -44 30 -40 70 c2 24 30 28 40 12z M220 220 c30 -4 44 30 40 70 c-2 24 -30 28 -40 12z" fill="#F8BBD0"/><path d="M252 180 c10 -14 30 -6 24 10 l-16 18 l-16 -18 c-6 -6 0 -14 8 -10z" fill="#E53935"/>';
+  s+='<polyline points="'+pts.map(function(p){return p[0]+','+p[1]}).join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 6"/>';
+  pts.forEach(function(p,i){s+='<text x="'+(p[0]+(i===2?30:40))+'" y="'+(p[1]+5)+'" font-size="15" fill="var(--fg)">'+p[2]+'</text>'});
+  if(dotI!=null){var a=pts[Math.floor(dotI)],b=pts[Math.min(3,Math.floor(dotI)+1)],f=dotI-Math.floor(dotI);s+='<circle cx="'+(a[0]+(b[0]-a[0])*f)+'" cy="'+(a[1]+(b[1]-a[1])*f)+'" r="10" fill="#FFB300" stroke="#fff" stroke-width="3"/>'}
+  if(t>=10)s+='<text x="210" y="24" text-anchor="middle" font-size="18" fill="var(--bad)">到了！</text>';
+  document.getElementById('nicSvg').innerHTML=s;
+}
+var nt=null;
+document.getElementById('nicGo').addEventListener('click',function(){clearInterval(nt);var t=0;nt=setInterval(function(){t+=.25;var di=Math.min(3,t/10*3);body(di,t);document.getElementById('nicClock').textContent=Math.min(10,Math.round(t))+' 秒';var m=document.getElementById('nicMsg');
+  if(t>=10){clearInterval(nt);m.className='say bad';m.innerHTML='<div class="t">大約 10 秒，尼古丁到達大腦</div><p>大腦送出「好舒服」的訊號。但幾十分鐘後感覺消退，人又開始想吸下一根。</p>'}else{m.className='say';m.innerHTML='<div class="t">尼古丁前進中……</div><p>現在經過：'+pts[Math.floor(di)][2]+'</p>'}},250)});
+body(null,0);
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'菸點燃後的煙裡，大約有多少種化學物質？',o:['大約 10 種','超過 7,000 種','只有尼古丁一種'],a:1,e:'其中數百種有毒，至少 93 種會致癌。'},
+  {q:'一氧化碳為什麼會讓身體缺氧？',o:['它會讓人停止呼吸','它搶走紅血球上載氧氣的座位','它會把氧氣吃掉'],a:1,e:'一氧化碳搶座位的本領比氧氣強 200 多倍。'},
+  {q:'吸一口菸後，尼古丁大約多久到達大腦？',o:['10 秒','1 小時','1 天'],a:0,e:'來得快、退得快，所以很容易上癮。'},
+  {q:'下面哪一種物質，同時出現在菸裡和老鼠藥裡？',o:['砷','鈣','維生素 C'],a:0,e:'砷就是砒霜，有劇毒。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

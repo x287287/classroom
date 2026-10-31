@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>嘴巴的五個警訊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 口腔示意圖（卡通風格）＋ 五字口訣按鈕；數字條帶 */
+.mouth{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:820px){.mouth{grid-template-columns:minmax(0,1fr)}}
+.mouth svg{display:block;width:100%;max-width:420px;margin:0 auto;height:auto}
+.five{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem}
+.five button{appearance:none;border:3px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:16px;min-height:4.6rem;font-family:var(--font-display);font-size:2rem;cursor:pointer}
+.five button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sign{opacity:0;transition:opacity .3s}
+.sign.on{opacity:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr));gap:1rem}
+.stats .card b.n{display:block;font-family:var(--font-display);font-weight:400;font-size:2.4rem;color:var(--bad);line-height:1.1}
+.surv{display:grid;gap:.6rem}
+.surv .row{display:grid;grid-template-columns:5.5em 1fr 3.5em;gap:.6rem;align-items:center}
+.surv .track{height:26px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.surv .fill{height:100%;border-radius:99px}
+.surv .v{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 2 課 酒與檳榔・延伸學習</div>
+    <h1>嘴巴的五個警訊</h1>
+    <p class="k-lede">課本說嚼檳榔會引起口腔黏膜病變，甚至得到口腔癌。口腔癌在台灣有多常見？嘴巴出現哪些變化要特別小心？你可以怎麼提醒家人去做檢查？</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#num"><span class="no">第 1 站</span><b>數字會說話</b><span>口腔癌有多常見</span></a>
+      <a href="#five"><span class="no">第 2 站</span><b>破、斑、硬、突、腫</b><span>五個警訊</span></a>
+      <a href="#check"><span class="no">第 3 站</span><b>早發現早治療</b><span>免費口腔檢查</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="num">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>口腔癌，數字會說話</h2></div>
+  <div class="stats">
+    <div class="card"><b class="n">第 4 名</b><p>口腔癌是台灣<b>男性</b>最常得到的癌症第 4 名，也是男性癌症死亡原因的第 4 名。</p></div>
+    <div class="card"><b class="n">每天約 20 人</b><p>2019 年有 7,468 位男性新診斷口腔癌，平均每天約 20 人。</p></div>
+    <div class="card"><b class="n">7 成</b><p>口腔癌病人裡，大約 <b>70%</b> 有嚼檳榔，<b>8 成以上</b>有吸菸。</p></div>
+    <div class="card"><b class="n">28 倍</b><p>課本資訊小站：嚼檳榔的人得到口腔癌的機會，是一般人的 28 倍。</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="five">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>口腔癌的五個警訊</h2></div>
+  <p class="big" style="max-width:44em">醫生用一個五字口訣，提醒大家注意嘴巴的變化：<b>破、斑、硬、突、腫</b>。點下面的字看看。</p>
+  <div class="mouth" style="margin-top:1rem">
+    <figure class="fig">
+      <svg viewBox="0 0 420 320" aria-hidden="true">
+        <rect width="420" height="320" fill="var(--surface)"/>
+        <ellipse cx="210" cy="170" rx="180" ry="130" fill="#F8C9C0" stroke="#D98C80" stroke-width="4"/>
+        <ellipse cx="210" cy="170" rx="150" ry="100" fill="#E57373"/>
+        <path d="M90 110 q120 -50 240 0" stroke="#fff" stroke-width="22" stroke-linecap="round" fill="none"/>
+        <path d="M100 236 q110 44 220 0" stroke="#fff" stroke-width="20" stroke-linecap="round" fill="none"/>
+        <ellipse cx="210" cy="200" rx="80" ry="44" fill="#F48FB1"/>
+        <path d="M210 168 v40" stroke="#EC407A" stroke-width="3"/>
+        <text x="210" y="300" text-anchor="middle" font-size="13" fill="var(--muted)">口腔示意圖（張開嘴巴的樣子）</text>
+        <g class="sign" id="s0"><ellipse cx="120" cy="170" rx="18" ry="10" fill="#FFF8E1" stroke="#C62828" stroke-width="3"/><circle cx="120" cy="170" r="34" fill="none" stroke="var(--warn)" stroke-width="3" stroke-dasharray="6 5"/></g>
+        <g class="sign" id="s1"><ellipse cx="295" cy="160" rx="22" ry="12" fill="#FAFAFA" opacity=".95"/><ellipse cx="275" cy="190" rx="14" ry="8" fill="#B71C1C" opacity=".85"/><circle cx="285" cy="175" r="40" fill="none" stroke="var(--warn)" stroke-width="3" stroke-dasharray="6 5"/></g>
+        <g class="sign" id="s2"><path d="M70 150 q20 20 0 40 M350 150 q-20 20 0 40" stroke="#ECEFF1" stroke-width="10" fill="none"/><text x="210" y="60" text-anchor="middle" font-size="16" fill="var(--bad)">嘴巴張不開</text></g>
+        <g class="sign" id="s3"><path d="M180 222 q8 -16 16 -4 q8 -14 14 2 q6 -10 12 2 l-4 10 h-34 z" fill="#E1BEE7" stroke="#8E24AA" stroke-width="2"/><circle cx="200" cy="222" r="34" fill="none" stroke="var(--warn)" stroke-width="3" stroke-dasharray="6 5"/></g>
+        <g class="sign" id="s4"><ellipse cx="380" cy="230" rx="24" ry="20" fill="#F8C9C0" stroke="#C62828" stroke-width="3"/><circle cx="380" cy="230" r="36" fill="none" stroke="var(--warn)" stroke-width="3" stroke-dasharray="6 5"/></g>
+      </svg>
+    </figure>
+    <div class="stack">
+      <div class="five" id="fiveBtns">
+        <button type="button" data-i="0">破</button><button type="button" data-i="1">斑</button><button type="button" data-i="2">硬</button><button type="button" data-i="3">突</button><button type="button" data-i="4">腫</button>
+      </div>
+      <div class="say" id="sInfo" aria-live="polite"><div class="t">點一個字</div><p>認識五個警訊。</p></div>
+      <div class="card"><h3>家人有這些情況？</h3><p>請他<b>盡快去看牙醫或耳鼻喉科</b>。這些不一定就是癌症，但一定要讓醫生檢查。</p></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="check">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>越早發現，越有機會治好</h2></div>
+  <div class="two">
+    <div class="panel stack">
+      <h3>發現時的病情，決定存活的機會</h3>
+      <div class="surv">
+        <div class="row"><span>早期發現</span><div class="track"><div class="fill" style="width:80%;background:var(--good)"></div></div><span class="v">約 8 成</span></div>
+        <div class="row"><span>晚期才發現</span><div class="track"><div class="fill" style="width:38%;background:var(--bad)"></div></div><span class="v">不到 4 成</span></div>
+      </div>
+      <p class="muted" style="font-size:.85rem">口腔癌病人的存活率（衛生福利部資料）</p>
+    </div>
+    <div class="card good">
+      <h3>免費口腔黏膜檢查</h3>
+      <p><b>30 歲以上</b>、有<b>嚼檳榔</b>（包括已經戒掉的）或<b>吸菸</b>的人，政府提供<b>每 2 年一次免費</b>的口腔黏膜檢查。</p>
+      <p style="margin-top:.4rem">只要帶健保卡，到有合作的牙科或耳鼻喉科診所就可以做，幾分鐘就完成，不會痛。</p>
+    </div>
+  </div>
+  <div class="think"><b>想一想</b><p>如果家裡有嚼檳榔或吸菸的大人，你可以怎麼提醒他去做口腔檢查？試著用「我訊息」說說看。</p></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>衛生福利部：口腔癌為我國青壯年男性好發癌症，男性發生率與死亡率皆居第 4 位；108 年男性新診斷 7,468 人，109 年 3,380 人死於口腔癌；當年個案中 81.8% 有吸菸、70% 有嚼檳榔習慣。</li>
+      <li>早期發現存活率約 8 成，晚期則不到 4 成；國民健康署補助 30 歲以上嚼檳榔（含已戒）或吸菸民眾每 2 年 1 次口腔黏膜檢查，每年篩檢出近 3,000 名癌前病變及 1,000 多名口腔癌。</li>
+      <li>警訊口訣「破、斑、硬、突、腫」：破（超過 2 週未癒合的傷口潰瘍）、斑（不明紅斑或白斑）、硬（黏膜變硬、張口困難）、突（不規則突起）、腫（臉頸部腫塊或不對稱）。頁面插圖為卡通示意，避免使用真實病灶照片。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>口腔健康測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>衛生福利部新聞稿〈口腔癌防治〉（口腔黏膜檢查、統計數據、五大警訊）。</li><li>國小健康與體育四上課本 單元 2 第 2 課〈嚼檳榔的危害〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var S=[
+  {t:'破',d:'嘴巴裡的傷口或破洞，<b>超過 2 個星期</b>都沒有好。一般的嘴破大約一兩週就會好。'},
+  {t:'斑',d:'嘴巴裡出現說不出原因的<b>白色或紅色斑塊</b>，擦不掉。'},
+  {t:'硬',d:'口腔黏膜慢慢<b>變硬、變緊</b>，最後嘴巴<b>張不開</b>，吃東西、說話都有困難。這和檳榔的粗纖維、成分讓口腔一直受傷有關。'},
+  {t:'突',d:'口腔表面長出<b>不規則的突起</b>，像小小的花椰菜。'},
+  {t:'腫',d:'<b>臉頰或脖子</b>摸到腫塊，或是左右兩邊看起來不對稱。'}
+];
+document.querySelectorAll('#fiveBtns button').forEach(function(b){b.addEventListener('click',function(){var i=+b.dataset.i;document.querySelectorAll('#fiveBtns button').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});document.querySelectorAll('.sign').forEach(function(g,k){g.classList.toggle('on',k===i)});var m=document.getElementById('sInfo');m.className='say bad';m.innerHTML='<div class="t">'+S[i].t+'</div><p class="big">'+S[i].d+'</p>'})});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'口腔癌是台灣男性最常見癌症的第幾名？',o:['第 1 名','第 4 名','第 20 名'],a:1,e:'每天大約有 20 位男性被診斷出口腔癌。'},
+  {q:'口腔癌的五個警訊口訣是？',o:['破、斑、硬、突、腫','紅、橙、黃、綠、藍','酸、甜、苦、辣、鹹'],a:0,e:'出現這些變化要盡快看醫生。'},
+  {q:'嘴巴的傷口超過多久沒好，要特別注意？',o:['2 天','2 個星期','2 年'],a:1,e:'一般嘴破約一兩週會好，超過 2 週要就醫。'},
+  {q:'政府提供誰免費的口腔黏膜檢查？',o:['所有小朋友','30 歲以上有嚼檳榔或吸菸的人','只有醫生'],a:1,e:'每 2 年一次，帶健保卡就可以做。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

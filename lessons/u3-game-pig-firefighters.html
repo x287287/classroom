@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>小豬消防隊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 一個畫面的闖關：左側關卡地圖，右側大場景插圖＋問題 */
+:root{--sky:#FFF4E6;--path:#F3D9B8;--fire:#E5531A;--ok:#1E8A5A}
+html,body{height:100%}
+body{background:var(--sky);overflow:hidden}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(6px,1.2vh,14px);padding-block:clamp(8px,1.6vh,18px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.top h1{font-size:clamp(1.5rem,3.4vh,2.3rem);color:var(--fire)}
+.top .sub{font-size:clamp(.8rem,1.6vh,1rem);color:var(--muted)}
+.top .stars{font-family:var(--font-display);font-size:clamp(1.1rem,2.6vh,1.6rem);color:#B26A00}
+.top button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem 1rem;min-height:2.8rem;cursor:pointer;font-family:var(--font-display)}
+.main{display:grid;grid-template-columns:clamp(200px,20vw,300px) minmax(0,1fr);gap:clamp(8px,1.4vw,18px);min-height:0}
+.map{background:var(--surface);border-radius:22px;padding:.8rem;display:flex;flex-direction:column;gap:.5rem;overflow:auto;border:1px solid var(--line)}
+.map h2{font-size:1.1rem;color:var(--muted);text-align:center}
+.lv{appearance:none;display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:.5rem .7rem;text-align:left;cursor:pointer;min-height:4.2rem}
+.lv .n{width:2.4rem;height:2.4rem;border-radius:50%;display:grid;place-items:center;background:var(--line);font-family:var(--font-display);font-size:1.2rem}
+.lv b{font-family:var(--font-display);font-weight:400;font-size:1.08rem;display:block;line-height:1.25}
+.lv small{color:#B26A00;letter-spacing:.1em}
+.lv.open .n{background:var(--fire);color:#fff}
+.lv.cur{border-color:var(--fire);background:#FFF1E8}
+.lv.done .n{background:var(--ok);color:#fff}
+.lv:disabled{opacity:.45;cursor:default}
+.stage{background:var(--surface);border-radius:22px;border:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(10px,1.6vw,22px);padding:clamp(12px,2vh,24px);min-height:0;overflow:auto}
+.art svg{display:block;width:100%;height:auto;border-radius:16px}
+.story{font-size:clamp(.95rem,2vh,1.15rem);color:var(--muted)}
+.qq{font-family:var(--font-display);font-size:clamp(1.3rem,3.2vh,2.1rem);line-height:1.45;margin:.2rem 0 .6rem}
+.chs{display:grid;gap:clamp(6px,1vh,12px)}
+.chs button{appearance:none;border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:.6rem 1rem;min-height:clamp(3.2rem,7vh,4.6rem);font-size:clamp(1.02rem,2.2vh,1.35rem);text-align:left;cursor:pointer}
+.chs button.right{border-color:var(--ok);background:var(--good-soft)}
+.chs button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.chs button[aria-pressed="true"]{border-color:var(--fire);background:#FFF1E8}
+.fb{margin-top:.6rem}
+.prog{display:flex;gap:.35rem;margin-bottom:.4rem}
+.prog i{flex:1;height:.55rem;border-radius:99px;background:var(--line)}
+.prog i.on{background:var(--fire)}
+.overlay{position:fixed;inset:0;background:rgba(60,30,10,.55);display:grid;place-items:center;z-index:50;padding:1rem}
+.overlay[hidden]{display:none}
+.cert{background:#FFFDF5;border:10px double #D9A441;border-radius:24px;padding:clamp(18px,3vh,40px);max-width:760px;width:100%;text-align:center;display:grid;gap:.8rem;max-height:94vh;overflow:auto}
+.cert h2{font-size:clamp(2rem,5vh,3rem);color:var(--fire)}
+.cert .nm{font-family:var(--font-display);font-size:clamp(1.6rem,4vh,2.4rem);border-bottom:3px solid #D9A441;display:inline-block;padding:0 1rem;min-width:8em}
+.cert input{font-size:1.3rem;padding:.4rem .8rem;border-radius:12px;border:2px solid var(--line);text-align:center}
+.win{background:var(--surface);border-radius:24px;padding:clamp(18px,3vh,34px);max-width:600px;width:100%;text-align:center;display:grid;gap:.8rem}
+.win h2{font-size:clamp(1.8rem,4.6vh,2.6rem);color:var(--ok)}
+.win .st{font-size:2.6rem;color:#F2A900;letter-spacing:.2em}
+@media (max-width:900px),(max-height:560px){
+  body{overflow:auto}.app{height:auto;min-height:100%}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .map{flex-direction:row;overflow-x:auto}.map h2{display:none}.lv{min-width:12rem}
+  .stage{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body class="u3">
+<div class="app">
+  <div class="top">
+    <div><h1>小豬消防隊</h1><div class="sub">健康與體育 四上｜單元 3 熱與火的危機・統整遊戲</div></div>
+    <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap"><span class="stars" id="totStars">★ 0 / 15</span><button type="button" id="bFs">全螢幕</button><button type="button" id="bReset">重新開始</button></div>
+  </div>
+  <div class="main">
+    <nav class="map" id="map" aria-label="關卡"><h2>闖關地圖</h2></nav>
+    <section class="stage" id="stage" aria-live="polite">
+      <div class="art" id="art"></div>
+      <div id="qa"></div>
+    </section>
+  </div>
+</div>
+
+<div class="overlay" id="ovWin" hidden><div class="win"><h2 id="winT">過關！</h2><div class="st" id="winS">★★★</div><p id="winP"></p><div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bNextLv">下一關 →</button></div></div></div>
+<div class="overlay" id="ovCert" hidden>
+  <div class="cert">
+    <h2>小小消防員證書</h2>
+    <p>恭喜</p>
+    <div><span class="nm" id="certName">四年＿班</span></div>
+    <p style="font-size:1.2rem">完成「小豬消防隊」五大關卡，學會燙傷急救、用電用火安全、防火設備、火場逃生的本領，<br>特頒此證，請繼續當家裡的防火小尖兵！</p>
+    <p class="stars" id="certStars" style="font-size:2rem"></p>
+    <label for="inClass" class="muted">輸入班級或名字：</label>
+    <input id="inClass" maxlength="16" placeholder="例如：四年三班">
+    <div class="btnrow" style="justify-content:center"><button class="btn" type="button" id="bCertClose">回到地圖</button></div>
+  </div>
+</div>
+
+<script src="../assets/kit.js"></script>
+<script>
+function pig(x,y,s,c,extra){c=c||'#F8B4C0';return '<g transform="translate('+x+','+y+') scale('+(s||1)+')"><ellipse cx="0" cy="40" rx="30" ry="34" fill="'+c+'" stroke="#C97C8C" stroke-width="3"/><circle cx="0" cy="0" r="28" fill="'+c+'" stroke="#C97C8C" stroke-width="3"/><path d="M-22 -18 l-8 -16 l16 6z M22 -18 l8 -16 l-16 6z" fill="'+c+'" stroke="#C97C8C" stroke-width="3"/><ellipse cx="0" cy="8" rx="12" ry="9" fill="#F48FB1" stroke="#C97C8C" stroke-width="2"/><circle cx="-4" cy="8" r="2.5" fill="#8E3B4F"/><circle cx="4" cy="8" r="2.5" fill="#8E3B4F"/><circle cx="-10" cy="-6" r="3.5" fill="#3a2a22"/><circle cx="10" cy="-6" r="3.5" fill="#3a2a22"/><path d="M-26 -22 h52 v-10 q-26 -18 -52 0z" fill="#E53935"/>'+(extra||'')+'</g>'}
+var ART={
+  kitchen:function(){return '<rect width="440" height="320" fill="#FFF8EE"/><rect x="0" y="250" width="440" height="70" fill="#E9D7BE"/><rect x="20" y="170" width="220" height="80" fill="#D7C2A3"/><rect x="40" y="150" width="90" height="22" rx="6" fill="#9AA5B1"/><path d="M150 230 q40 30 90 10 l10 20 q-60 20 -110 -10z" fill="#FFCC80" opacity=".8"/>'+pig(300,170,1.2,'#F8B4C0','<path d="M-34 36 l-18 10" stroke="#E57373" stroke-width="10" stroke-linecap="round"/><text x="-60" y="30" font-size="14" fill="#C62828">好燙！</text>')},
+  living:function(){return '<rect width="440" height="320" fill="#F3F7FB"/><rect x="0" y="250" width="440" height="70" fill="#D7CCC8"/><rect x="60" y="200" width="200" height="40" rx="12" fill="#F5F5F5" stroke="#9E9E9E" stroke-width="3"/><g fill="#FFE0B2" stroke="#BDBDBD" stroke-width="2"><rect x="100" y="208" width="30" height="24" rx="5"/><rect x="140" y="208" width="30" height="24" rx="5"/><rect x="180" y="208" width="30" height="24" rx="5"/><rect x="220" y="208" width="30" height="24" rx="5"/></g><path d="M20 240 c20 -20 40 0 40 -20" stroke="#333" stroke-width="6" fill="none"/><rect x="100" y="120" width="60" height="60" rx="6" fill="#FFCC80"/><path d="M110 130 v40 M125 130 v40 M140 130 v40" stroke="#E65100" stroke-width="3"/><path d="M200 150 h30 a10 10 0 0 1 0 20 h-30z" fill="#F48FB1"/>'+pig(360,170,1.1,'#F8C6CF')},
+  stove:function(f){var potFire=(f===undefined||f===3),lid=(f===0||f===2);return '<rect width="440" height="320" fill="#FFF3E0"/><rect x="0" y="250" width="440" height="70" fill="#E9D7BE"/><rect x="60" y="200" width="260" height="50" fill="#D7C2A3"/><rect x="90" y="186" width="150" height="16" rx="4" fill="#555"/><path d="M100 140 h130 l-12 46 h-106z" fill="#78909C"/>'+(potFire?'<path d="M120 140 c6 -40 26 -50 30 -80 c10 30 20 40 14 80z M160 140 c6 -30 20 -40 24 -64 c8 24 16 34 10 64z" fill="#FF7043"/><path d="M140 140 c4 -20 12 -26 14 -40 c6 16 8 22 4 40z" fill="#FFCA28"/>':'')+(lid?'<path d="M96 140 q70 -40 140 0z" fill="#B0BEC5"/><circle cx="166" cy="116" r="7" fill="#546E7A"/>':'')+(f===2?'<path d="M300 200 c6 -30 20 -40 24 -64 c8 24 16 34 10 64z" fill="#FF7043"/><rect x="290" y="196" width="40" height="8" fill="#fff"/>':'')+(f===3?'<path d="M40 250 c10 -120 60 -150 70 -240 c30 90 60 120 40 240z M160 250 c10 -100 50 -130 60 -230 c24 80 50 110 34 230z M270 250 c8 -90 40 -110 50 -190 c20 70 40 90 28 190z" fill="#FF7043" opacity=".9"/><path d="M80 250 c6 -60 30 -80 34 -130 c16 50 30 70 20 130z" fill="#FFCA28"/>':'')+pig(380,170,1,'#F8B4C0')},
+  bedroom:function(sm){return '<rect width="440" height="320" fill="#ECEFF1"/><rect x="0" y="260" width="440" height="60" fill="#BCAAA4"/><rect x="30" y="200" width="160" height="60" rx="10" fill="#90CAF9"/><rect x="30" y="180" width="50" height="30" rx="8" fill="#fff"/><rect x="260" y="60" width="120" height="200" fill="#A1887F" stroke="#6D4C41" stroke-width="4"/><circle cx="360" cy="160" r="7" fill="#FFD54F"/>'+(sm?'<g fill="#455A64" opacity=".75"><circle cx="400" cy="120" r="40"/><circle cx="420" cy="190" r="44"/></g>':'')+'<text x="320" y="44" text-anchor="middle" font-size="18" fill="#C62828">嗶嗶嗶！</text><rect x="40" y="40" width="90" height="100" fill="#E3F2FD" stroke="#90A4AE" stroke-width="4"/>'+pig(190,150,1.05)},
+  mall:function(sm){return '<rect width="440" height="320" fill="#FAFAF7"/><rect x="0" y="260" width="440" height="60" fill="#EFEBE9"/><rect x="40" y="60" width="120" height="120" fill="#FFF3E0" stroke="#BCAAA4" stroke-width="2"/><rect x="300" y="70" width="70" height="26" rx="4" fill="#1B8E3E"/><text x="335" y="88" text-anchor="middle" font-size="13" fill="#fff">出口</text><rect x="300" y="100" width="70" height="150" fill="#E8F5E9" stroke="#A5D6A7" stroke-width="3"/>'+(sm?'<rect x="0" y="0" width="440" height="140" fill="#455A64" opacity=".55"/>':'')+pig(200,190,1)+pig(250,200,.8,'#F8C6CF')}
+};
+var LV=[
+  {n:'熱湯打翻了',topic:'灼燙傷急救',art:'kitchen',story:'小豬三兄弟在煮火鍋。二哥跑來跑去，不小心撞翻熱湯，手臂被燙得又紅又起水泡！',steps:[
+    {t:'c',q:'第一件事要做什麼？',o:[{t:'用流動的冷水沖 15～30 分鐘',ok:1},{t:'塗牙膏降溫',f:'牙膏不會降溫，還可能讓傷口感染。'},{t:'拿冰塊冰敷',f:'太冰會造成二次傷害，要用冷水。'}]},
+    {t:'o',q:'接下來，把急救五步驟排好順序。',items:['沖','脫','泡','蓋','送']},
+    {t:'c',q:'二哥手上的水泡要怎麼處理？',o:[{t:'不要弄破，用乾淨紗布蓋好送醫',ok:1},{t:'用針刺破比較快好',f:'水泡是保護膜，弄破容易感染。'},{t:'把水泡的皮撕掉',f:'這樣會更痛，也更容易感染。'}]}
+  ]},
+  {n:'用電大檢查',topic:'用電安全',art:'living',story:'冬天到了，大哥把電暖器、吹風機都插在同一條延長線上，電線還綁成一捆……',steps:[
+    {t:'m',q:'選出所有「危險」的用電習慣（可以選很多個），再按確定。',o:[{t:'電線綁成一捆',ok:1},{t:'拉電線來拔插頭',ok:1},{t:'插頭上積滿灰塵',ok:1},{t:'電暖器和吹風機插同一條延長線',ok:1},{t:'拔插頭時握住插頭',ok:0},{t:'用乾布擦插頭的灰塵',ok:0}]},
+    {t:'c',q:'延長線最多 1650 瓦，電暖器 1200 瓦＋吹風機 1200 瓦，怎麼辦？',o:[{t:'超過了！會發熱的電器分開，直接插牆上插座',ok:1},{t:'沒關係，延長線很耐用',f:'2400 瓦遠超過 1650 瓦，電線會過熱起火。'},{t:'再接一條延長線串起來',f:'延長線不可以串接，一樣會過熱。'}]}
+  ]},
+  {n:'油鍋起火了',topic:'用火安全・滅火器',art:'stove',story:'三弟在炸地瓜球，接了一通電話回來，油鍋竟然冒出火來了！',steps:[
+    {t:'c',q:'油鍋起火，要怎麼做？',o:[{t:'蓋上鍋蓋，再關火',ok:1},{t:'潑一杯水',f:'水會讓著火的油噴出來，火更大！'},{t:'拿電風扇來吹',f:'風會帶來更多氧氣，火燒得更旺。'}]},
+    {t:'c',q:'旁邊的紙巾也燒起來了，火還很小。可以怎麼做？',o:[{t:'請大哥拿滅火器來滅火',ok:1},{t:'用嘴巴吹熄',f:'吹氣會讓火更大，也很危險。'},{t:'不管它，先吃地瓜球',f:'小火很快會變大火！'}],art2:2},
+    {t:'o',q:'滅火器怎麼用？排出正確順序。',items:['拉','瞄','壓','掃'],art2:2},
+    {t:'c',art2:3,q:'如果火已經燒到天花板了呢？',o:[{t:'不要滅火，立刻逃到戶外，再打 119',ok:1},{t:'繼續用滅火器',f:'火太大時滅火器沒用，要先逃生。'},{t:'躲進浴室',f:'浴室擋不住火和濃煙。'}]}
+  ]},
+  {n:'半夜警報響',topic:'逃生避難原則・119',art:'bedroom',story:'半夜，住警器突然「嗶嗶嗶」響了，小豬弟弟聞到燒焦的味道……',steps:[
+    {t:'c',q:'第一件事做什麼？',o:[{t:'大喊「失火了！」叫醒哥哥們',ok:1},{t:'蓋上棉被繼續睡',f:'警報響就是有危險，要馬上行動。'},{t:'先找存錢筒',f:'不要拿東西，每一秒都很重要。'}]},
+    {t:'c',q:'打開房門前，要先做什麼？',o:[{t:'用手背摸門板的上半部',ok:1},{t:'直接打開門',f:'門外可能有火和煙，要先測溫度。'},{t:'摸門的最下面',f:'熱煙往上飄，要摸上半部。'}]},
+    {t:'c',q:'門不燙，打開一條縫，看到走廊都是濃煙！',o:[{t:'馬上關門，用毛巾塞住門縫',ok:1},{t:'閉氣衝過去',f:'濃煙有毒又看不見，太危險了。'},{t:'用溼毛巾摀嘴走出去',f:'溼毛巾擋不住一氧化碳。'}],sm:1},
+    {t:'c',q:'接下來呢？',o:[{t:'到窗邊打 119，揮手讓消防員看到',ok:1},{t:'躲到床底下',f:'消防員會找不到你。'},{t:'再開門看看煙散了沒',f:'開門會讓煙灌進來。'}],sm:1},
+    {t:'c',q:'打 119 時，地址要怎麼說？',o:[{t:'「森林市小豬路 3 號 2 樓」',ok:1},{t:'「在我家啦！」',f:'消防員不知道你家在哪，要說完整地址。'},{t:'「在森林附近」',f:'太模糊了，要說路名、門牌和樓層。'}],sm:1}
+  ]},
+  {n:'百貨公司大逃生',topic:'公共場所・低姿勢・緩降機・停躺滾',art:'mall',story:'小豬三兄弟在百貨公司買新衣服，突然響起火災警報！',steps:[
+    {t:'c',q:'要往哪裡逃？',o:[{t:'跟著綠色的出口標示燈走樓梯',ok:1},{t:'搭電梯最快',f:'火災時可能停電，會被困在電梯裡。'},{t:'往頂樓跑',f:'煙往上衝，越往上越危險。'}]},
+    {t:'c',q:'走廊開始有濃煙了！',o:[{t:'低姿勢，一手扶牆找出口',ok:1},{t:'站直快跑',f:'頭在煙裡會吸到又熱又毒的煙。'},{t:'停下來等煙散',f:'煙只會越來越多，要繼續逃。'}],sm:1},
+    {t:'c',q:'樓梯被火擋住了，窗邊有緩降機，也沒有其他安全的地方。',o:[{t:'請工作人員協助使用緩降機',ok:1},{t:'從窗戶跳下去',f:'非常危險！'},{t:'回去拿剛買的衣服',f:'絕對不要回頭拿東西。'}],sm:1},
+    {t:'o',q:'緩降機的使用步驟，排出正確順序。',items:['掛','丟','套','束','推']},
+    {t:'c',q:'下來後，三弟的衣角沾到火星燒起來了！',o:[{t:'停下、躺下摀臉、左右滾動',ok:1},{t:'快跑去找水',f:'奔跑會讓火得到更多氧氣，燒得更大。'},{t:'用手拍打',f:'手會燙傷，要停、躺、滾。'}]}
+  ]}
+];
+var st={open:1,stars:[0,0,0,0,0],cur:0,step:0,miss:0};
+function $(id){return document.getElementById(id)}
+function drawMap(){var m=$('map');m.innerHTML='<h2>闖關地圖</h2>';LV.forEach(function(l,i){var b=document.createElement('button');b.type='button';b.className='lv'+(i<st.open?' open':'')+(st.stars[i]?' done':'')+(i===st.cur?' cur':'');b.disabled=i>=st.open;b.innerHTML='<span class="n">'+(i+1)+'</span><span><b>'+l.n+'</b><small>'+(st.stars[i]?'★'.repeat(st.stars[i])+'☆'.repeat(3-st.stars[i]):l.topic)+'</small></span>';b.addEventListener('click',function(){begin(i)});m.appendChild(b)});var tot=st.stars.reduce(function(a,b){return a+b},0);$('totStars').textContent='★ '+tot+' / 15'}
+function begin(i){st.cur=i;st.step=0;st.miss=0;drawMap();show()}
+function art(step){var l=LV[st.cur],k=l.art,a=ART[k];var arg=step&&step.art2!=null?step.art2:step&&step.sm?1:undefined;$('art').innerHTML='<svg viewBox="0 0 440 320" aria-hidden="true">'+a(arg)+'</svg>'}
+function show(){
+  var l=LV[st.cur],s=l.steps[st.step];art(s);
+  var prog='<div class="prog">'+l.steps.map(function(_,i){return '<i class="'+(i<=st.step?'on':'')+'"></i>'}).join('')+'</div>';
+  var qa=$('qa');qa.innerHTML=prog+'<div class="muted" style="font-size:.9rem">第 '+(st.cur+1)+' 關・'+l.n+'</div>'+(st.step===0?'<p class="story">'+l.story+'</p>':'')+'<p class="qq">'+s.q+'</p><div class="chs" id="chs"></div><div class="say fb" id="fb" hidden></div>';
+  var chs=$('chs'),fb=$('fb');
+  if(s.t==='c'){KIT.shuffle(s.o).forEach(function(o){var b=document.createElement('button');b.type='button';b.textContent=o.t;b.addEventListener('click',function(){
+    if(o.ok){b.classList.add('right');chs.querySelectorAll('button').forEach(function(z){z.disabled=true});good()}else{b.classList.add('wrong');b.disabled=true;st.miss++;fb.hidden=false;fb.className='say fb bad';fb.innerHTML='<div class="t">再想想</div><p>'+o.f+'</p>'}
+  });chs.appendChild(b)})}
+  else if(s.t==='m'){var sel={};KIT.shuffle(s.o).forEach(function(o){var b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed','false');b.textContent=o.t;b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on?'true':'false');if(on)sel[o.t]=o;else delete sel[o.t]});chs.appendChild(b)});
+    var ok=document.createElement('button');ok.type='button';ok.className='btn fill';ok.textContent='確定';ok.style.justifySelf='start';ok.addEventListener('click',function(){var need=s.o.filter(function(o){return o.ok}).length,got=Object.keys(sel).filter(function(k){return sel[k].ok}).length,bad=Object.keys(sel).filter(function(k){return !sel[k].ok}).length;
+      if(got===need&&!bad){chs.querySelectorAll('button').forEach(function(z){z.disabled=true;if(sel[z.textContent])z.classList.add('right')});good()}
+      else{st.miss++;fb.hidden=false;fb.className='say fb bad';fb.innerHTML='<div class="t">還差一點</div><p>'+(bad?'有些選到的其實是<b>安全</b>的做法喔。':'')+(got<need?'還有 '+(need-got)+' 個危險的習慣沒有選到。':'')+'</p>'}});chs.appendChild(ok)}
+  else if(s.t==='o'){var box=document.createElement('div');chs.appendChild(box);KIT.order(box,{steps:s.items.map(function(t){return {t:t}}),start:'第一步是什麼？',done:'順序正確！'});
+    var watch=setInterval(function(){if(!document.body.contains(box)){clearInterval(watch);return}var filled=box.querySelectorAll('.slot.filled').length;var wrongNow=box.querySelector('.say.bad');if(wrongNow&&!box._m){box._m=1;st.miss++}if(!wrongNow)box._m=0;if(filled===s.items.length){clearInterval(watch);box.querySelectorAll('.btn').forEach(function(z){z.remove()});good()}},200)}
+}
+function good(){var l=LV[st.cur],fb=$('fb');fb.hidden=false;fb.className='say fb good';var last=st.step===l.steps.length-1;fb.innerHTML='<div class="t">答對了！</div>'+(last?'':'<button class="btn fill" type="button" id="goNext" style="margin-top:.4rem">繼續 →</button>');
+  if(last){setTimeout(win,500)}else{$('goNext').addEventListener('click',function(){st.step++;show()});$('goNext').focus()}}
+function win(){var s=Math.max(1,3-st.miss);if(s>st.stars[st.cur])st.stars[st.cur]=s;if(st.open<LV.length&&st.cur+1>=st.open)st.open=st.cur+2;drawMap();
+  $('winT').textContent='第 '+(st.cur+1)+' 關過關！';$('winS').textContent='★'.repeat(s)+'☆'.repeat(3-s);$('winP').textContent=st.miss?'錯了 '+st.miss+' 次。可以再挑戰一次，拿到三顆星！':'全部一次答對，太厲害了！';
+  $('bNextLv').textContent=st.cur===LV.length-1?'領取證書':'下一關 →';$('ovWin').hidden=false}
+$('bNextLv').addEventListener('click',function(){$('ovWin').hidden=true;if(st.cur===LV.length-1){cert()}else begin(st.cur+1)});
+function cert(){var tot=st.stars.reduce(function(a,b){return a+b},0);$('certStars').textContent='★ '+tot+' / 15';$('ovCert').hidden=false}
+$('inClass').addEventListener('input',function(e){$('certName').textContent=e.target.value||'四年＿班'});
+$('bCertClose').addEventListener('click',function(){$('ovCert').hidden=true});
+$('bReset').addEventListener('click',function(){st={open:1,stars:[0,0,0,0,0],cur:0,step:0,miss:0};begin(0)});
+$('bFs').addEventListener('click',function(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(function(){})}catch(e){}});
+document.addEventListener('fullscreenchange',function(){$('bFs').textContent=document.fullscreenElement?'離開全螢幕':'全螢幕'});
+begin(0);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

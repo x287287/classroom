@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>禁菸地圖大挑戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 小鎮地圖：每個地點是一個可點的圖示，點了會蓋上禁菸章或問號 */
+.town{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.2rem;align-items:start}
+@media (max-width:900px){.town{grid-template-columns:minmax(0,1fr)}}
+.town svg{display:block;width:100%;height:auto}
+.pl{cursor:pointer}
+.pl:focus{outline:none}
+.pl:focus-visible rect.b{stroke:var(--warn);stroke-width:5}
+.pl text{font-family:var(--font-display);pointer-events:none}
+.law{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:760px){.law{grid-template-columns:minmax(0,1fr)}}
+.law svg{display:block;width:100%;max-width:280px;margin:0 auto;height:auto}
+.newlaw{display:grid;gap:.6rem}
+.newlaw div{display:grid;grid-template-columns:auto 1fr;gap:.8rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:.6rem .9rem}
+.newlaw b.n{font-family:var(--font-display);font-weight:400;font-size:1.6rem;color:var(--accent);min-width:3.2em;text-align:center}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 1 課 菸與煙的真相・延伸學習</div>
+    <h1>禁菸地圖大挑戰</h1>
+    <p class="k-lede">2023 年，台灣的《菸害防制法》大修改，禁菸的地方變多了，規定也變嚴格了。這個小鎮裡，哪些地方不可以吸菸？新的法律又改了什麼？</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#map"><span class="no">第 1 站</span><b>小鎮禁菸大搜查</b><span>點地點蓋章</span></a>
+      <a href="#law"><span class="no">第 2 站</span><b>新法改了什麼</b><span>五個重點</span></a>
+      <a href="#do"><span class="no">第 3 站</span><b>看到有人違規</b><span>我可以怎麼做</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="map">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>這些地方可以吸菸嗎？</h2></div>
+  <div class="town">
+    <figure class="fig">
+      <svg viewBox="0 0 760 500" role="group" aria-label="小鎮地圖" id="townSvg"></svg>
+      <figcaption>點地圖上的每個地點</figcaption>
+    </figure>
+    <div class="stack">
+      <div style="font-family:var(--font-display);font-size:1.5rem">已檢查 <span id="cnt">0</span> / <span id="tot">0</span></div>
+      <div class="say" id="msg" aria-live="polite"><div class="t">開始搜查</div><p>點地圖上的地點，看看可不可以吸菸。</p></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="law">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>2023 年新法的五個重點</h2></div>
+  <div class="law">
+    <div class="newlaw">
+      <div><b class="n">20 歲</b><span>禁止吸菸的年齡從 18 歲提高到 <b>20 歲</b>。</span></div>
+      <div><b class="n">全禁</b><span><b>電子煙</b>全面禁止：不能製造、進口、販賣、廣告，也不能使用。</span></div>
+      <div><b class="n">審查</b><span><b>加熱菸</b>要經過衛生福利部審查通過才能賣，沒通過的和電子煙一樣禁止。</span></div>
+      <div><b class="n">擴大</b><span><b>大專校院、幼兒園、托嬰中心</b>全面禁菸，禁菸的地方變多了。</span></div>
+      <div><b class="n">50%</b><span>菸盒上的<b>警示圖文</b>，從原本 35% 放大到菸盒的 <b>50%</b>。</span></div>
+    </div>
+    <div class="stack" style="align-items:center">
+      <svg viewBox="0 0 220 300" aria-hidden="true" id="pack"></svg>
+      <div class="chips"><button class="chip" type="button" data-p="35" aria-pressed="false">舊規定 35%</button><button class="chip" type="button" data-p="50" aria-pressed="true">新規定 50%</button></div>
+      <p class="muted" style="font-size:.85rem;text-align:center">菸盒示意圖：紅色區域是健康警示</p>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="do">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>看到有人在禁菸的地方吸菸</h2></div>
+  <div class="panel" id="sortBox"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>衛生福利部：2023 年 3 月 22 日施行的《菸害防制法》修正重點包括擴大禁菸場所（大專校院、幼兒園、托嬰中心、居家式托育場所全面禁菸；酒吧、夜店僅可於獨立空調之室內吸菸室吸菸）、禁菸年齡提高至 20 歲、全面禁止類菸品（含電子煙）、指定菸品（含加熱菸）須經健康風險評估審查、菸盒警示圖文擴大至 50%、加重罰責。</li>
+      <li>教師手冊所列禁菸場所類型：教育場所、醫療機構、老人福利機構、大眾運輸工具與車站、文化休閒場所（含戶外籃球場、網球場、游泳池等）、各級機關指定場所（國家公園、風景區、超商騎樓等）、易燃易爆物品場所（加油站）、公共消費場所（飯店、百貨公司、餐廳）。</li>
+      <li>課本 p.38 資訊小站：多數室內公共場所全面禁止吸菸，違者最高可罰 1 萬元。檢舉可洽各縣市衛生局。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>禁菸規定測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>衛生福利部〈菸害防制法修正條文 3 月 22 日施行〉新聞稿。</li><li>國小健康與體育四上課本與教師手冊 單元 2 第 1 課〈禁菸場所停看聽〉。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var P=[
+  {n:'國小',x:40,y:40,c:'#FFE082',ban:1,d:'學校全面禁菸，連學校周邊也常有禁菸告示。'},
+  {n:'幼兒園',x:210,y:40,c:'#F8BBD0',ban:1,d:'新法規定幼兒園、托嬰中心全面禁菸，保護最小的孩子。'},
+  {n:'醫院',x:380,y:40,c:'#B3E5FC',ban:1,d:'醫療機構禁菸，病人最需要乾淨的空氣。'},
+  {n:'大學',x:550,y:40,c:'#C5CAE9',ban:1,d:'新法規定大專校院也全面禁菸了！'},
+  {n:'公車站',x:40,y:190,c:'#C8E6C9',ban:1,d:'大眾運輸工具和車站、候車室都禁菸。'},
+  {n:'加油站',x:210,y:190,c:'#FFCCBC',ban:1,d:'有易燃易爆的油料，吸菸可能引發火災甚至爆炸！'},
+  {n:'圖書館',x:380,y:190,c:'#D7CCC8',ban:1,d:'文化場所禁菸。'},
+  {n:'百貨公司',x:550,y:190,c:'#E1BEE7',ban:1,d:'百貨公司、餐廳、飯店等公共消費場所禁菸。'},
+  {n:'餐廳',x:40,y:340,c:'#FFF9C4',ban:1,d:'室內公共場所大多全面禁菸，吃飯時不會吸到二手菸。'},
+  {n:'籃球場',x:210,y:340,c:'#FFE0B2',ban:1,d:'就算在戶外，籃球場、網球場、游泳池這類運動場所也禁菸。'},
+  {n:'超商騎樓',x:380,y:340,c:'#B2EBF2',ban:2,d:'很多縣市政府公告超商騎樓禁菸。要看當地的規定和告示牌。'},
+  {n:'我家',x:550,y:340,c:'#DCEDC8',ban:0,d:'法律沒有規定家裡禁菸，但家人吸菸會產生二手菸和三手菸。可以和家人約定：一起打造<b>無菸家庭</b>！'}
+];
+var seen={};
+function draw(){
+  var s='<rect width="760" height="500" fill="#F1F8E9"/><path d="M0 172 H760 M0 322 H760" stroke="#CFD8DC" stroke-width="16"/><path d="M190 0 V500 M360 0 V500 M530 0 V500" stroke="#CFD8DC" stroke-width="16"/>';
+  P.forEach(function(p,i){
+    s+='<g class="pl" data-i="'+i+'" tabindex="0" role="button" aria-label="'+p.n+'"><rect class="b" x="'+p.x+'" y="'+p.y+'" width="150" height="116" rx="14" fill="'+p.c+'" stroke="#8D6E63" stroke-width="3"/><text x="'+(p.x+75)+'" y="'+(p.y+70)+'" text-anchor="middle" font-size="22" fill="#3E2723">'+p.n+'</text>';
+    if(seen[i]){
+      if(p.ban===1)s+='<g transform="translate('+(p.x+122)+','+(p.y+26)+')"><circle r="22" fill="#fff" stroke="#D32F2F" stroke-width="5"/><rect x="-12" y="-3" width="20" height="6" fill="#555"/><rect x="8" y="-3" width="5" height="6" fill="#FF7043"/><line x1="-15" y1="-15" x2="15" y2="15" stroke="#D32F2F" stroke-width="5"/></g>';
+      else if(p.ban===2)s+='<g transform="translate('+(p.x+122)+','+(p.y+26)+')"><circle r="22" fill="#fff" stroke="#F9A825" stroke-width="5"/><text y="9" text-anchor="middle" font-size="26" fill="#F9A825">?</text></g>';
+      else s+='<g transform="translate('+(p.x+122)+','+(p.y+26)+')"><circle r="22" fill="#fff" stroke="#43A047" stroke-width="5"/><text y="8" text-anchor="middle" font-size="18" fill="#43A047">家</text></g>';
+    }
+    s+='</g>';
+  });
+  var svg=document.getElementById('townSvg');svg.innerHTML=s;
+  svg.querySelectorAll('.pl').forEach(function(g){var go=function(){tap(+g.dataset.i)};g.addEventListener('click',go);g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+  document.getElementById('cnt').textContent=Object.keys(seen).length;document.getElementById('tot').textContent=P.length;
+}
+function tap(i){seen[i]=1;draw();var p=P[i],m=document.getElementById('msg');
+  m.className='say '+(p.ban===1?'bad':p.ban===2?'':'good');
+  m.innerHTML='<div class="t">'+p.n+'：'+(p.ban===1?'禁菸！':p.ban===2?'要看當地規定':'法律沒規定，但可以自己決定')+'</div><p>'+p.d+'</p>'+(Object.keys(seen).length===P.length?'<p style="margin-top:.4rem"><b>全部檢查完了！你發現了嗎？大部分的公共場所都禁菸。</b></p>':'');
+  var sv=document.getElementById('townSvg').querySelector('.pl[data-i="'+i+'"]');if(sv)sv.focus({preventScroll:true});
+}
+draw();
+
+function pack(pct){var h=Math.round(220*pct/100);document.getElementById('pack').innerHTML='<rect x="30" y="40" width="160" height="240" rx="10" fill="#ECEFF1" stroke="#90A4AE" stroke-width="3"/><rect x="30" y="20" width="160" height="34" rx="8" fill="#CFD8DC" stroke="#90A4AE" stroke-width="3"/><rect x="40" y="'+(270-h)+'" width="140" height="'+h+'" rx="6" fill="#E53935"/><text x="110" y="'+(270-h/2+6)+'" text-anchor="middle" font-size="18" fill="#fff">健康警示 '+pct+'%</text><text x="110" y="'+(270-h-18)+'" text-anchor="middle" font-size="14" fill="#78909C">品牌</text>'}
+document.querySelectorAll('[data-p]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-p]').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});pack(+b.dataset.p)})});pack(50);
+
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'ok',t:'好的做法'},{id:'no',t:'不好的做法'}],
+  items:[
+    {t:'告訴爸爸媽媽或身邊的大人',bin:'ok',e:'讓大人來處理，最安全。'},
+    {t:'告訴店家或工作人員',bin:'ok',e:'店家有責任維持禁菸。'},
+    {t:'離開有煙的地方，不吸二手菸',bin:'ok',e:'先保護自己。'},
+    {t:'自己衝過去罵陌生人',bin:'no',e:'可能發生衝突，讓自己有危險。請大人幫忙。'},
+    {t:'忍著不說，繼續吸二手菸',bin:'no',e:'二手菸會傷害健康，可以離開或請大人處理。'},
+    {t:'請大人向縣市衛生局檢舉',bin:'ok',e:'各縣市衛生局負責稽查禁菸場所。'}
+  ],
+  done:'全部分對了！保護自己、請大人幫忙，是最好的方法。'
+});
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'2023 年新法規定，幾歲以下不可以吸菸？',o:['18 歲','20 歲','16 歲'],a:1,e:'禁菸年齡提高到 20 歲。'},
+  {q:'在台灣，電子煙現在的規定是？',o:['大人可以用','全面禁止','只在家可以用'],a:1,e:'不能製造、進口、販賣、廣告和使用。'},
+  {q:'為什麼加油站一定要禁菸？',o:['因為味道不好聞','有易燃易爆的油料，可能引發火災爆炸','因為員工不喜歡'],a:1,e:'菸的火星碰到汽油蒸氣非常危險。'},
+  {q:'菸盒上的健康警示圖文，新法規定要佔多少？',o:['10%','35%','50%'],a:2,e:'從 35% 放大到 50%。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>說服力實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 左：四個步驟逐一選句子；右：組合出來的信，旁邊有「說服力」表 */
+.lab{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.4rem;align-items:start}
+@media (max-width:900px){.lab{grid-template-columns:minmax(0,1fr)}}
+.stepbox h3{color:var(--accent)}
+.opts{display:grid;gap:.55rem;margin-top:.6rem}
+.opts button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.65rem .9rem;text-align:left;min-height:3.2rem;cursor:pointer;font-size:1.02rem}
+.opts button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.letter{background:#FFFDF5;border:2px solid #E8DFC8;border-radius:12px;padding:1.4rem 1.5rem;font-family:var(--font-display);font-size:1.2rem;line-height:1.9;color:#3E3A2E;min-height:18rem;background-image:repeating-linear-gradient(transparent,transparent 2.25rem,#EFE6CF 2.25rem,#EFE6CF calc(2.25rem + 1px))}
+.letter p{margin:0 0 .2rem}
+.letter .blank{color:#B9AE90}
+.power{display:grid;grid-template-columns:5.5em 1fr;gap:.6rem;align-items:center}
+.power .track{height:20px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.power .fill{height:100%;width:0;border-radius:99px;background:var(--good);transition:width .4s}
+.imsg{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;font-family:var(--font-display);font-size:1.25rem;line-height:2}
+.imsg select{font:inherit;font-size:1.05rem;padding:.2rem .5rem;border:2px solid var(--accent);border-radius:10px;background:var(--surface);color:var(--fg);max-width:100%}
+</style>
+</head>
+<body class="u2">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">健康與體育 四上｜單元 2 第 2 課 酒與檳榔・延伸學習</div>
+    <h1>說服力實驗室</h1>
+    <p class="k-lede">琳琳用「倡議宣導」四步驟勸爸爸戒酒。同樣的意思，換一種說法，效果可能差很多。來實驗看看，哪一種說法最能打動家人？</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#lab"><span class="no">第 1 站</span><b>組一封信</b><span>四步驟選句子</span></a>
+      <a href="#imsg"><span class="no">第 2 站</span><b>「我訊息」</b><span>說出感受不吵架</span></a>
+      <a href="#res"><span class="no">第 3 站</span><b>可以找誰幫忙</b><span>專業資源</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="lab">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>寫一封給爸爸的信</h2></div>
+  <div class="lab">
+    <div class="stack">
+      <div class="chips" id="stepChips"></div>
+      <div class="panel stepbox" id="stepBox"></div>
+      <div class="say" id="fb" aria-live="polite"></div>
+    </div>
+    <div class="stack">
+      <div class="letter" id="letter" aria-live="polite"></div>
+      <div class="power"><span>說服力</span><div class="track"><div class="fill" id="pw"></div></div></div>
+      <button class="btn" type="button" id="reset">重新寫一封</button>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="imsg">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>用「我訊息」說出心裡話</h2></div>
+  <div class="two">
+    <div class="stack">
+      <p class="big">「你每天都喝酒，很討厭耶！」這種以「你」開頭、在指責對方的話，叫做<b>「你訊息」</b>，聽的人容易生氣、想反駁。</p>
+      <p>換成以「我」開頭，說出<b>我的感受、原因和希望</b>，就是<b>「我訊息」</b>。對方比較聽得進去，也不容易吵架。</p>
+      <div class="cards" style="margin-top:0">
+        <div class="card warn"><h3>你訊息</h3><p>「你很臭耶，不要再喝了！」</p></div>
+        <div class="card good"><h3>我訊息</h3><p>「我覺得很擔心，因為喝酒會傷肝，我希望你能少喝一點。」</p></div>
+      </div>
+    </div>
+    <div class="panel stack">
+      <h3>組組看你的「我訊息」</h3>
+      <div class="imsg">
+        <span>我覺得</span>
+        <select id="f1" aria-label="感受"><option>很擔心</option><option>有點害怕</option><option>很難過</option><option>很捨不得</option></select>
+        <span>，因為</span>
+        <select id="f2" aria-label="原因"><option>喝酒會傷害你的肝和心臟</option><option>你喝醉時我不知道該怎麼辦</option><option>我想要你健健康康陪我長大</option><option>新聞說酒駕會造成車禍</option></select>
+        <span>，我希望</span>
+        <select id="f3" aria-label="希望"><option>你可以慢慢戒酒</option><option>週末我們一起去運動</option><option>你喝酒後不要開車</option><option>你累的時候跟我聊聊天</option></select>
+        <span>。</span>
+      </div>
+      <div class="say good" id="imsgOut" aria-live="polite"></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="res">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>家人喝酒的問題，不是你一個人的責任</h2></div>
+  <div class="cards">
+    <div class="card"><h3>告訴信任的大人</h3><p>其他家人、老師、輔導老師都可以聽你說。說出來，就有人可以一起想辦法。</p></div>
+    <div class="card"><h3>安心專線 1925</h3><p>24 小時免費的心理諮詢電話。家人或你自己覺得心情很難過、壓力很大時，都可以打。</p></div>
+    <div class="card"><h3>醫院的戒酒治療</h3><p>酒癮就像生病一樣，光靠忍耐很難戒掉。醫院有專門的醫生可以幫忙，政府也有補助。</p></div>
+    <div class="card warn"><h3>先保護自己</h3><p>如果家人喝醉後會生氣、打人或摔東西，先離開到安全的地方，並告訴老師或撥打 113 保護專線。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>課本 p.42～43「倡議宣導」四步驟：清楚說明主張、運用事實證據、了解對方想法、找到適當的解決方法。本頁每一步提供一個較有效與兩個較無效的說法，並說明原因。</li>
+      <li>「我訊息」（I-message）為常見的溝通技巧：我覺得＿＿（感受），因為＿＿（原因），我希望＿＿（期待）。</li>
+      <li>教師手冊提到飲酒與家暴的關聯。若學生透露家中有酗酒或暴力情形，請依校內輔導與通報流程處理。113 為保護專線（家暴、兒少保護），1925 為衛福部安心專線。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>倡議小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol><li>國小健康與體育四上課本 單元 2 第 2 課〈爸爸別喝酒〉。</li><li>衛生福利部 安心專線 1925、113 保護專線。</li></ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+var steps=[
+  {n:'步驟 1',t:'清楚說明自己的主張',o:[
+    {s:'爸爸，喝酒會傷害身體，我希望您可以戒酒。',p:3,f:'清楚、有禮貌地說出你希望他做什麼。'},
+    {s:'爸爸，你很臭，不要再喝了啦！',p:1,f:'用罵的，爸爸可能會生氣，不想聽你說下去。'},
+    {s:'爸爸……那個……沒事。',p:0,f:'不說出主張，爸爸不會知道你的想法。'}]},
+  {n:'步驟 2',t:'運用事實證據支持立場',o:[
+    {s:'我查了衛生福利部的資料，長期喝酒會讓人得到肝病、心臟病和癌症。',p:3,f:'可靠的資料來源最有說服力。'},
+    {s:'同學說喝酒會變笨。',p:1,f:'「同學說」不一定正確，要找可靠的資料。'},
+    {s:'反正喝酒就是不好。',p:0,f:'沒有說出原因，很難說服別人。'}]},
+  {n:'步驟 3',t:'了解對方的想法',o:[
+    {s:'爸爸，您是不是工作很累，才想喝酒放鬆？',p:3,f:'先了解爸爸為什麼喝酒，才能找到真正的解決方法。'},
+    {s:'我不管你為什麼喝，不准喝就對了。',p:0,f:'不聽對方的想法，對方也不會聽你的。'},
+    {s:'大人都很愛找藉口。',p:1,f:'這句話會讓爸爸覺得被看不起。'}]},
+  {n:'步驟 4',t:'找到適當的解決方法',o:[
+    {s:'下班後我陪您去公園散步，累了我們一起聊天，好嗎？',p:3,f:'提供可以取代喝酒的放鬆方法，還表達了愛和陪伴。'},
+    {s:'你自己想辦法啦。',p:0,f:'沒有提供方法，爸爸可能不知道怎麼開始。'},
+    {s:'我把家裡的酒全部倒掉！',p:1,f:'沒有先討論就做，可能讓爸爸生氣。一起想辦法比較好。'}]}
+];
+var cur=0,pick={};
+function render(){
+  var sc=document.getElementById('stepChips');sc.innerHTML='';
+  steps.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',i===cur?'true':'false');b.textContent=s.n+(pick[i]!=null?' ✓':'');b.addEventListener('click',function(){cur=i;render()});sc.appendChild(b)});
+  var s=steps[cur],box=document.getElementById('stepBox');
+  box.innerHTML='<div class="muted" style="font-size:.85rem">'+s.n+'</div><h3>'+s.t+'</h3><div class="opts"></div>';
+  var o=box.querySelector('.opts');
+  s.o.forEach(function(op,k){var b=document.createElement('button');b.type='button';b.textContent=op.s;b.setAttribute('aria-pressed',pick[cur]===k?'true':'false');b.addEventListener('click',function(){pick[cur]=k;var f=document.getElementById('fb');f.className='say '+(op.p===3?'good':'bad');f.innerHTML='<div class="t">'+(op.p===3?'很有說服力！':'可以更好')+'</div><p>'+op.f+'</p>'+(op.p===3&&cur<3?'<button class="btn fill" type="button" id="nx" style="margin-top:.5rem">下一步 →</button>':'');var nx=document.getElementById('nx');if(nx)nx.addEventListener('click',function(){cur++;render()});render()});o.appendChild(b)});
+  var L='<p>親愛的爸爸：</p>',sum=0;
+  steps.forEach(function(st,i){if(pick[i]!=null){L+='<p>'+st.o[pick[i]].s+'</p>';sum+=st.o[pick[i]].p}else L+='<p class="blank">（'+st.t+'）</p>'});
+  L+='<p style="text-align:right">愛您的孩子</p>';
+  document.getElementById('letter').innerHTML=L;
+  var pw=document.getElementById('pw');pw.style.width=(sum/12*100)+'%';pw.style.background=sum>=11?'var(--good)':sum>=7?'var(--warn)':'var(--bad)';
+}
+document.getElementById('reset').addEventListener('click',function(){cur=0;pick={};var f=document.getElementById('fb');f.className='say';f.innerHTML='<div class="t">開始</div><p>每一步選一句話，組成一封給爸爸的信。</p>';render()});
+document.getElementById('reset').click();
+
+function im(){var t='我覺得'+f1.value+'，因為'+f2.value+'，我希望'+f3.value+'。';document.getElementById('imsgOut').innerHTML='<div class="t">你的我訊息</div><p class="big">「'+t+'」</p>'}
+var f1=document.getElementById('f1'),f2=document.getElementById('f2'),f3=document.getElementById('f3');[f1,f2,f3].forEach(function(s){s.addEventListener('change',im)});im();
+
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'「倡議宣導」的第一步是什麼？',o:['清楚說明自己的主張','把酒藏起來','大聲罵人'],a:0,e:'先讓對方清楚知道你希望他怎麼做。'},
+  {q:'哪一個是比較可靠的事實證據？',o:['同學說的','衛生福利部的資料','網路上不知道誰寫的留言'],a:1,e:'政府機關、醫院等可靠來源比較有說服力。'},
+  {q:'下面哪一句是「我訊息」？',o:['你很煩耶！','我很擔心你的身體，希望你少喝一點。','你為什麼都不聽？'],a:1,e:'以「我」開頭，說出感受和希望。'},
+  {q:'為什麼要「了解對方的想法」？',o:['才能找到真正適合的解決方法','才能找到他的錯','為了拖時間'],a:0,e:'知道爸爸為什麼喝酒，才知道可以用什麼取代。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

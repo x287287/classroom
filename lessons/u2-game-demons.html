@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>趕走三惡魔</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 一個畫面的對戰版：上方三隻惡魔與血條，左右兩隊分數，中間題目卡 */
+:root{--red:#E2463F;--red-soft:#FDE4E2;--blue:#2F6FD6;--blue-soft:#E2ECFC;--stage:#1F2A44;--stage2:#2B3A5E}
+html,body{height:100%}
+body{background:var(--stage);color:#fff;overflow:hidden}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(6px,1.2vh,14px);padding-block:clamp(8px,1.6vh,18px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.top h1{font-size:clamp(1.4rem,3.2vh,2.2rem);color:#FFD54F}
+.top .sub{font-size:clamp(.8rem,1.6vh,1rem);color:#B7C3DE}
+.ctrl{display:flex;gap:.5rem;flex-wrap:wrap}
+.ctrl button{appearance:none;border:2px solid #4A5D8A;background:var(--stage2);color:#fff;border-radius:999px;padding:.3rem 1rem;min-height:2.8rem;cursor:pointer;font-family:var(--font-display);font-size:1rem}
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3.2fr) minmax(0,1fr);gap:clamp(8px,1.4vw,18px);min-height:0}
+.team{border-radius:22px;padding:1rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;text-align:center;transition:transform .3s,box-shadow .3s;min-width:0}
+.team.red{background:var(--red)} .team.blue{background:var(--blue)}
+.team.turn{box-shadow:0 0 0 6px #FFD54F;transform:scale(1.03)}
+.team .nm{font-family:var(--font-display);font-size:clamp(1.3rem,3vh,2rem);overflow-wrap:anywhere}
+.team .sc{font-family:var(--font-display);font-size:clamp(3rem,10vh,6.5rem);line-height:1;font-variant-numeric:tabular-nums}
+.team .lbl{font-size:.9rem;opacity:.85}
+.team .yt{font-size:.95rem;background:#FFD54F;color:#3E2C00;border-radius:999px;padding:.1rem .8rem;font-weight:700;visibility:hidden}
+.team.turn .yt{visibility:visible}
+.center{display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(6px,1vh,12px);min-height:0}
+.demons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.dm{background:var(--stage2);border-radius:18px;padding:.4rem .6rem .6rem;display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;opacity:.55;transition:opacity .3s,transform .3s}
+.dm.cur{opacity:1;box-shadow:0 0 0 3px #FFD54F}
+.dm.dead{opacity:.35;filter:grayscale(1)}
+.dm svg{width:clamp(48px,8vh,84px);height:auto}
+.dm b{font-family:var(--font-display);font-weight:400;font-size:clamp(1rem,2.2vh,1.3rem)}
+.hp{height:14px;border-radius:99px;background:#121A2E;overflow:hidden;margin-top:.3rem}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#FF7043,#FFCA28);transition:width .5s}
+.dm.hit{animation:hit .5s}
+@keyframes hit{0%,100%{transform:none}25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
+.qcard{background:#fff;color:#1F2A27;border-radius:24px;padding:clamp(14px,2.4vh,30px) clamp(16px,2vw,34px);display:flex;flex-direction:column;gap:clamp(8px,1.4vh,16px);min-height:0;overflow:auto}
+.qmeta{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;font-size:.95rem;color:#5A6762}
+.qmeta .tag{font-size:.95rem}
+.qt{font-family:var(--font-display);font-size:clamp(1.3rem,3.4vh,2.3rem);line-height:1.45}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:clamp(8px,1.2vh,14px)}
+.opts button{appearance:none;border:3px solid #D5DCD7;background:#F6F7F4;color:#1F2A27;border-radius:18px;padding:.6rem 1rem;min-height:clamp(3.4rem,8vh,5.4rem);font-size:clamp(1.05rem,2.4vh,1.5rem);text-align:left;cursor:pointer}
+.opts button.right{border-color:#1E8A5A;background:#DDF3E7}
+.opts button.wrong{border-color:#C8414B;background:#FBE3E5}
+.opts.ox{grid-template-columns:1fr 1fr}
+.opts.ox button{text-align:center;font-family:var(--font-display);font-size:clamp(2.4rem,7vh,4rem)}
+.fb{font-size:clamp(1rem,2.2vh,1.3rem);min-height:1.6em}
+.fb.ok{color:#1E8A5A} .fb.no{color:#C8414B}
+.timer{height:10px;border-radius:99px;background:#E3E7E4;overflow:hidden}
+.timer i{display:block;height:100%;background:#FFB300;transition:width .25s linear}
+.foot{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap}
+.foot button{appearance:none;border:0;background:#FFD54F;color:#3E2C00;border-radius:999px;padding:.4rem 1.6rem;min-height:3.2rem;font-family:var(--font-display);font-size:clamp(1.1rem,2.4vh,1.4rem);cursor:pointer}
+.foot button.sec{background:var(--stage2);color:#fff;border:2px solid #4A5D8A}
+.foot button:disabled{opacity:.4;cursor:default}
+.overlay{position:fixed;inset:0;background:rgba(15,22,40,.86);display:grid;place-items:center;z-index:50;padding:1rem}
+.overlay[hidden]{display:none}
+.panel2{background:#fff;color:#1F2A27;border-radius:26px;padding:clamp(18px,3vh,36px);max-width:760px;width:100%;display:grid;gap:1rem;text-align:center;max-height:94vh;overflow:auto}
+.panel2 h2{font-size:clamp(1.8rem,5vh,3rem);color:#C2410C}
+.panel2 .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.panel2 label{display:grid;gap:.3rem;text-align:left;font-weight:700}
+.panel2 input{font-size:1.3rem;padding:.5rem .8rem;border-radius:12px;border:2px solid #D5DCD7}
+.panel2 .chips{justify-content:center}
+.beam{position:fixed;height:12px;border-radius:99px;z-index:40;pointer-events:none;transform-origin:left center;animation:beam .55s ease-out forwards}
+@keyframes beam{from{opacity:1;transform:scaleX(0)}70%{opacity:1;transform:scaleX(1)}to{opacity:0;transform:scaleX(1)}}
+@media (max-width:860px),(max-height:560px){
+  body{overflow:auto}.app{height:auto;min-height:100%}
+  .main{grid-template-columns:1fr 1fr}.center{grid-column:1/-1;order:-1}
+  .team .sc{font-size:3rem}
+  .demons{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.beam{display:none}.dm.hit{animation:none}}
+</style>
+</head>
+<body class="u2">
+<div class="app" id="app">
+  <div class="top">
+    <div><h1>趕走三惡魔</h1><div class="sub">健康與體育 四上｜單元 2 拒菸拒酒拒檳榔・統整遊戲</div></div>
+    <div class="ctrl"><button type="button" id="bSet">設定</button><button type="button" id="bFs">全螢幕</button></div>
+  </div>
+  <div class="main">
+    <div class="team red" id="tRed"><span class="yt">輪到你們</span><span class="nm" id="nRed">紅隊</span><span class="sc" id="sRed">0</span><span class="lbl">攻擊次數</span></div>
+    <div class="center">
+      <div class="demons" id="demons"></div>
+      <div class="qcard" id="qcard" aria-live="polite"></div>
+    </div>
+    <div class="team blue" id="tBlue"><span class="yt">輪到你們</span><span class="nm" id="nBlue">藍隊</span><span class="sc" id="sBlue">0</span><span class="lbl">攻擊次數</span></div>
+  </div>
+  <div class="foot">
+    <button type="button" id="bNext" disabled>下一題 →</button>
+    <button type="button" class="sec" id="bSteal" hidden>換對方搶答</button>
+    <button type="button" class="sec" id="bSkip">跳過這題</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovSet">
+  <div class="panel2">
+    <h2>趕走三惡魔</h2>
+    <p>全班分成兩隊，輪流派人上台作答。答對就能攻擊惡魔！<br>菸惡魔、酒惡魔、檳榔惡魔各有 <b id="hpTxt">4</b> 點血，三隻都趕走就過關。</p>
+    <div class="row">
+      <label for="inRed">紅隊名稱<input id="inRed" value="紅隊" maxlength="8"></label>
+      <label for="inBlue">藍隊名稱<input id="inBlue" value="藍隊" maxlength="8"></label>
+    </div>
+    <div><b>每題時間</b><div class="chips" id="tChips" style="margin-top:.4rem"><button class="chip" type="button" data-t="0" aria-pressed="true">不計時</button><button class="chip" type="button" data-t="20">20 秒</button><button class="chip" type="button" data-t="30">30 秒</button></div></div>
+    <div><b>每隻惡魔的血量</b><div class="chips" id="hChips" style="margin-top:.4rem"><button class="chip" type="button" data-h="3">3（短）</button><button class="chip" type="button" data-h="4" aria-pressed="true">4</button><button class="chip" type="button" data-h="6">6（長）</button></div></div>
+    <div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bStart" style="font-size:1.3rem;min-height:3.4rem;padding:0 2rem">開始對戰</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="ovEnd" hidden>
+  <div class="panel2">
+    <h2 id="endTitle">三惡魔全部被趕走了！</h2>
+    <p id="endText" style="font-size:1.3rem"></p>
+    <svg viewBox="0 0 300 120" style="width:100%;max-width:360px;margin:0 auto" aria-hidden="true"><path d="M60 100 h180 l-20 -60 l-35 30 l-35 -50 l-35 50 l-35 -30 z" fill="#FFD54F" stroke="#C79100" stroke-width="4"/><circle cx="150" cy="18" r="8" fill="#FFD54F"/></svg>
+    <p>記住：<b>不好奇、不嘗試、不接受！</b></p>
+    <div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bAgain">再玩一次</button></div>
+  </div>
+</div>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* ===== 題庫：d 代表惡魔（smoke 菸、wine 酒、betel 檳榔）；ox:true 為是非題 ===== */
+var Q=[
+  {d:'smoke',q:'吸菸的人吐出來的煙，加上菸頭自己冒出的煙，叫做？',o:['一手菸','二手菸','三手菸'],a:1,e:'二手菸會讓旁邊不吸菸的人也受害。'},
+  {d:'smoke',q:'菸熄了以後，殘留在衣服、沙發、窗簾上的有害物質叫做？',o:['一手菸','二手菸','三手菸'],a:2,e:'菸味散了，毒還在。'},
+  {d:'smoke',q:'菸裡讓人上癮的主要成分是？',o:['焦油','尼古丁','一氧化碳'],a:1,e:'尼古丁約 10 秒就到大腦。'},
+  {d:'smoke',q:'會讓手指和牙齒變黃、讓肺變黑的黃色黏性物質是？',o:['焦油','尼古丁','氧氣'],a:0,e:'焦油還會導致癌症。'},
+  {d:'smoke',q:'一氧化碳會讓身體缺氧。',ox:1,a:true,e:'它搶走紅血球上載氧氣的座位。'},
+  {d:'smoke',q:'電子煙香香的，所以不是菸，對身體沒有害。',ox:1,a:false,e:'電子煙也是菸品，會上癮、危害健康。'},
+  {d:'smoke',q:'在台灣，電子煙現在的規定是？',o:['大人可以用','全面禁止','只能在家用'],a:1,e:'2023 年新法全面禁止。'},
+  {d:'smoke',q:'2023 年新法規定，未滿幾歲不可以吸菸？',o:['18 歲','20 歲','16 歲'],a:1,e:'禁菸年齡提高到 20 歲。'},
+  {d:'smoke',q:'下面哪一個地方一定禁菸？',o:['加油站','自己的房間','山上的步道'],a:0,e:'有易燃易爆的油料，非常危險。'},
+  {d:'smoke',q:'免費戒菸專線的號碼是？',o:['0800-63-63-63','119','113'],a:0,e:'可以把它告訴想戒菸的家人。'},
+  {d:'smoke',q:'戒菸 20 分鐘後，心跳和血壓就開始下降。',ox:1,a:true,e:'身體馬上就開始修復。'},
+  {d:'smoke',q:'同學說：「電子煙沒有害，你試試看。」哪一句是「告知理由法」？',o:['電子煙有尼古丁會上癮，我不想試。','我要去上廁所。','我們去踢球吧！'],a:0,e:'說出拒絕的理由。'},
+  {d:'wine',q:'有些人一喝酒就臉紅，是因為？',o:['很會喝酒','有毒的乙醛清不掉','血液循環很好'],a:1,e:'這叫酒精不耐症，更不應該喝酒。'},
+  {d:'wine',q:'水果酒甜甜的，所以不算是酒。',ox:1,a:false,e:'只要有酒精就是酒。'},
+  {d:'wine',q:'喝醉的人喝杯咖啡，酒精就會馬上消失。',ox:1,a:false,e:'只有時間能讓肝臟慢慢處理酒精。'},
+  {d:'wine',q:'為什麼喝了酒不能開車？',o:['車子會變重','反應變慢、判斷錯誤','會想睡午覺'],a:1,e:'反應慢一秒，車子就多衝好幾公尺。'},
+  {d:'wine',q:'騎腳踏車前喝了酒，可以騎嗎？',o:['可以，腳踏車沒關係','不可以，腳踏車也不能酒駕','慢慢騎就好'],a:1,e:'不論哪種交通工具都不行。'},
+  {d:'wine',q:'未滿幾歲的人不可以喝酒？',o:['12 歲','18 歲','30 歲'],a:1,e:'兒少法規定未滿 18 歲不能飲酒。'},
+  {d:'wine',q:'長期飲酒最容易傷害哪一個器官？',o:['肝','頭髮','指甲'],a:0,e:'可能造成肝硬化、肝癌。'},
+  {d:'wine',q:'倡議宣導的第一步是？',o:['清楚說明自己的主張','把酒藏起來','大聲罵人'],a:0,e:'先讓對方知道你希望他怎麼做。'},
+  {d:'wine',q:'哪一句是「我訊息」？',o:['你很臭耶！','我很擔心你的身體，希望你少喝一點。','你怎麼都不聽？'],a:1,e:'說出自己的感受和希望。'},
+  {d:'wine',q:'小孩的大腦還在發育，喝酒會影響大腦發育。',ox:1,a:true,e:'所以未成年絕對不能喝酒。'},
+  {d:'wine',q:'表姊說「今天過年，大家都在喝」，回答「我酒量很差，一喝就倒」是哪一種拒絕法？',o:['自我解嘲法','反激將法','友誼勸服法'],a:0,e:'用開自己玩笑的方式拒絕。'},
+  {d:'wine',q:'聚餐後大人喝了酒，最好的做法是？',o:['開慢一點就好','找沒喝酒的人開車或搭計程車','休息 5 分鐘再開'],a:1,e:'喝酒不開車，開車不喝酒。'},
+  {d:'betel',q:'檳榔只要不加荖花和石灰，就不會致癌。',ox:1,a:false,e:'檳榔籽本身就會致癌。'},
+  {d:'betel',q:'讓人嚼檳榔會上癮的主要物質是？',o:['檳榔鹼','維生素 C','糖分'],a:0,e:'檳榔鹼會影響大腦。'},
+  {d:'betel',q:'檳榔像菜瓜布一樣、會磨傷口腔的是？',o:['粗纖維','果汁','種子的花紋'],a:0,e:'中果皮的粗纖維會一直磨損口腔。'},
+  {d:'betel',q:'嚼檳榔的人得口腔癌的機會，是一般人的幾倍？',o:['2 倍','28 倍','100 倍'],a:1,e:'課本資訊小站的數字。'},
+  {d:'betel',q:'口腔癌的五個警訊口訣是？',o:['破、斑、硬、突、腫','東、南、西、北、中','金、木、水、火、土'],a:0,e:'出現這些變化要盡快看醫生。'},
+  {d:'betel',q:'嚼檳榔可以保護牙齒。',ox:1,a:false,e:'反而會造成牙周病、口腔癌。'},
+  {d:'betel',q:'山坡上種滿檳榔樹，為什麼容易土石流？',o:['檳榔樹根淺，又只有一層葉子擋雨','檳榔樹根很深','檳榔樹會吸光雨水'],a:0,e:'抓不住泥土，擋不住雨滴。'},
+  {d:'betel',q:'「做決定」的最後一步是？',o:['趕快答應','問自己：這是健康的好決定嗎？','聽大家的'],a:1,e:'做完決定要再檢查一次。'},
+  {d:'betel',q:'鄰居說「男孩子嚼一顆有什麼關係」，回答「嚼不嚼跟是不是男生沒關係，我自己決定」是？',o:['反激將法','轉移話題法','遠離現場法'],a:0,e:'不被對方的激將法影響。'},
+  {d:'betel',q:'青少年第一次嚼檳榔，大多是誰邀請的？',o:['陌生人','家人或朋友','老師'],a:1,e:'超過 7 成來自親友。'},
+  {d:'betel',q:'「我想上廁所，我先離開了。」是哪一種拒絕法？',o:['遠離現場法','堅持拒絕法','反說服法'],a:0,e:'離開讓你為難的地方。'},
+  {d:'betel',q:'拒絕時應該真誠看著對方，用溫和堅定的語氣。',ox:1,a:true,e:'還要有誠懇有禮的態度。'}
+];
+var DM=[
+  {k:'smoke',n:'菸惡魔',c:'#9C8CB9',art:function(c){return '<circle cx="50" cy="55" r="34" fill="'+c+'"/><circle cx="28" cy="40" r="18" fill="'+c+'"/><circle cx="72" cy="40" r="18" fill="'+c+'"/><rect x="20" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(-20 25 23)"/><rect x="70" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(20 75 23)"/><rect x="18" y="6" width="10" height="6" fill="#FF7043" transform="rotate(-20 23 9)"/><rect x="72" y="6" width="10" height="6" fill="#FF7043" transform="rotate(20 77 9)"/><circle cx="40" cy="52" r="6" fill="#fff"/><circle cx="60" cy="52" r="6" fill="#fff"/><circle cx="41" cy="53" r="3" fill="#222"/><circle cx="61" cy="53" r="3" fill="#222"/><path d="M38 72 q12 -8 24 0" stroke="#222" stroke-width="3" fill="none"/>'}},
+  {k:'wine',n:'酒惡魔',c:'#D8708A',art:function(c){return '<rect x="38" y="6" width="24" height="22" rx="4" fill="'+c+'"/><path d="M30 28 h40 q8 10 8 22 v34 q0 8 -8 8 h-40 q-8 0 -8 -8 v-34 q0 -12 8 -22z" fill="'+c+'"/><rect x="30" y="56" width="40" height="18" fill="#fff" opacity=".85"/><path d="M26 32 l-10 -14 M74 32 l10 -14" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="44" r="5" fill="#fff"/><circle cx="58" cy="44" r="5" fill="#fff"/><circle cx="43" cy="45" r="2.5" fill="#222"/><circle cx="59" cy="45" r="2.5" fill="#222"/><text x="50" y="70" text-anchor="middle" font-size="11" fill="'+c+'">酒</text>'}},
+  {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
+];
+var S={hp:4,time:0,team:0,score:[0,0],dmi:0,dhp:[4,4,4],used:{},cur:null,answered:false,stealing:false,timerId:null,left:0};
+var names=['紅隊','藍隊'];
+function $(id){return document.getElementById(id)}
+function drawDemons(){var b=$('demons');b.innerHTML='';DM.forEach(function(d,i){var dead=S.dhp[i]<=0;var el=document.createElement('div');el.className='dm'+(i===S.dmi&&!dead?' cur':'')+(dead?' dead':'');el.id='dm'+i;el.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true">'+d.art(d.c)+'</svg><div><b>'+d.n+(dead?'（被趕走了）':'')+'</b><div class="hp"><i style="width:'+(Math.max(0,S.dhp[i])/S.hp*100)+'%"></i></div></div>';b.appendChild(el)})}
+function drawTeams(){$('sRed').textContent=S.score[0];$('sBlue').textContent=S.score[1];$('nRed').textContent=names[0];$('nBlue').textContent=names[1];$('tRed').classList.toggle('turn',S.team===0);$('tBlue').classList.toggle('turn',S.team===1)}
+function pickQ(){var d=DM[S.dmi].k;var pool=Q.filter(function(q,i){return q.d===d&&!S.used[i]});if(!pool.length){Object.keys(S.used).forEach(function(k){if(Q[k].d===d)delete S.used[k]});pool=Q.filter(function(q){return q.d===d})}var q=pool[Math.floor(Math.random()*pool.length)];S.used[Q.indexOf(q)]=1;return q}
+function showQ(){
+  clearInterval(S.timerId);S.answered=false;S.resolved=false;S.stealing=false;$('bNext').disabled=true;$('bNext').textContent='下一題 →';$('bSteal').hidden=true;
+  var q=S.cur=pickQ(),card=$('qcard'),d=DM[S.dmi];
+  card.innerHTML='<div class="qmeta"><span><span class="tag" style="background:'+d.c+';color:#fff">攻擊'+d.n+'</span>　<span id="who">輪到 <b style="color:'+(S.team?'var(--blue)':'var(--red)')+'">'+names[S.team]+'</b> 作答</span></span><span id="tLeft"></span></div>'+(S.time?'<div class="timer"><i id="tBar" style="width:100%"></i></div>':'')+'<div class="qt">'+q.q+'</div><div class="opts'+(q.ox?' ox':'')+'" id="opts"></div><div class="fb" id="fb"></div>';
+  var opts=$('opts');
+  if(q.ox){[['O',true],['X',false]].forEach(function(p){var b=document.createElement('button');b.type='button';b.textContent=p[0];b.setAttribute('aria-label',p[1]?'對':'錯');b.addEventListener('click',function(){answer(p[1]===q.a,b)});opts.appendChild(b)})}
+  else{q.o.forEach(function(t,k){var b=document.createElement('button');b.type='button';b.textContent=t;b.addEventListener('click',function(){answer(k===q.a,b)});opts.appendChild(b)})}
+  if(S.time){S.left=S.time;$('tLeft').textContent=S.left+' 秒';S.timerId=setInterval(function(){S.left-=.25;var bar=$('tBar');if(bar)bar.style.width=Math.max(0,S.left/S.time*100)+'%';$('tLeft').textContent=Math.ceil(Math.max(0,S.left))+' 秒';if(S.left<=0){clearInterval(S.timerId);if(!S.answered){answer(false,null)}}},250)}
+}
+function reveal(btn){var q=S.cur;$('opts').querySelectorAll('button').forEach(function(z,i){var isAns=q.ox?((z.textContent==='O')===q.a):i===q.a;if(isAns)z.classList.add('right');else if(z===btn)z.classList.add('wrong');z.disabled=true})}
+function resolve(msg){S.resolved=true;reveal(null);var fb=$('fb');fb.className='fb no';fb.textContent=msg+'正確答案已標示。'+(S.cur.e||'');$('bSteal').hidden=true;$('bNext').textContent='下一題 →';$('bNext').disabled=false}
+function answer(ok,btn){
+  if(S.answered)return;S.answered=true;clearInterval(S.timerId);var fb=$('fb');
+  if(ok){S.resolved=true;reveal(btn);fb.className='fb ok';fb.textContent=(S.stealing?'搶答成功！':'答對了！')+(S.cur.e||'');S.score[S.team]++;$('bSteal').hidden=true;$('bNext').textContent='下一題 →';attack();return}
+  if(btn){btn.classList.add('wrong');btn.disabled=true}
+  if(S.stealing){resolve('搶答也答錯了。');return}
+  fb.className='fb no';fb.textContent=(btn?'答錯了！':'時間到！')+'可以讓對方搶答，或直接公布答案。';
+  $('bSteal').hidden=false;$('bNext').textContent='公布答案';$('bNext').disabled=false;
+}
+function afterWrong(){}
+function attack(){
+  var from=$(S.team?'tBlue':'tRed').getBoundingClientRect(),to=$('dm'+S.dmi).getBoundingClientRect();
+  var x1=from.left+from.width/2,y1=from.top+from.height/2,x2=to.left+to.width/2,y2=to.top+to.height/2;
+  var bm=document.createElement('div');bm.className='beam';bm.style.background=S.team?'#7FB2FF':'#FF8A80';bm.style.left=x1+'px';bm.style.top=y1+'px';bm.style.width=Math.hypot(x2-x1,y2-y1)+'px';bm.style.transform='rotate('+Math.atan2(y2-y1,x2-x1)+'rad)';document.body.appendChild(bm);setTimeout(function(){bm.remove()},600);
+  setTimeout(function(){S.dhp[S.dmi]--;drawDemons();drawTeams();var el=$('dm'+S.dmi);if(el)el.classList.add('hit');
+    if(S.dhp[S.dmi]<=0){$('fb').textContent+='　'+DM[S.dmi].n+'被趕走了！';S.dmi++;drawDemons();if(S.dmi>=DM.length){setTimeout(end,900);return}}
+    $('bNext').disabled=false},450);
+}
+function advance(){if(S.stealing){S.stealing=false;S.team=1-S.team}S.team=1-S.team;drawTeams();showQ()}
+$('bNext').addEventListener('click',function(){if(!S.resolved){resolve('');return}advance()});
+$('bSteal').addEventListener('click',function(){S.stealing=true;S.answered=false;S.team=1-S.team;drawTeams();$('bSteal').hidden=true;$('bNext').textContent='公布答案';$('bNext').disabled=false;
+  var fb=$('fb');fb.className='fb';fb.textContent='換 '+names[S.team]+' 搶答！';$('who').innerHTML='換 <b style="color:'+(S.team?'var(--blue)':'var(--red)')+'">'+names[S.team]+'</b> 搶答';
+  if(S.time){S.left=S.time;clearInterval(S.timerId);S.timerId=setInterval(function(){S.left-=.25;var bar=$('tBar');if(bar)bar.style.width=Math.max(0,S.left/S.time*100)+'%';$('tLeft').textContent=Math.ceil(Math.max(0,S.left))+' 秒';if(S.left<=0){clearInterval(S.timerId);if(!S.answered){S.answered=true;resolve('時間到！')}}},250)}
+});
+$('bSkip').addEventListener('click',advance);
+function end(){var a=S.score[0],b=S.score[1];$('endTitle').textContent='三惡魔全部被趕走了！';$('endText').innerHTML=a===b?'兩隊同分（'+a+' 比 '+b+'），全班一起合作成功！':'<b>'+(a>b?names[0]:names[1])+'</b> 攻擊最多次，獲勝！（'+names[0]+' '+a+'：'+b+' '+names[1]+'）<br>但最重要的是，全班一起趕走了三惡魔！';$('ovEnd').hidden=false}
+function start(){names=[$('inRed').value.trim()||'紅隊',$('inBlue').value.trim()||'藍隊'];S.score=[0,0];S.dmi=0;S.dhp=[S.hp,S.hp,S.hp];S.used={};S.team=0;$('ovSet').hidden=true;$('ovEnd').hidden=true;drawDemons();drawTeams();showQ()}
+$('bStart').addEventListener('click',start);
+$('bAgain').addEventListener('click',function(){$('ovEnd').hidden=true;$('ovSet').hidden=false});
+$('bSet').addEventListener('click',function(){clearInterval(S.timerId);$('ovSet').hidden=false});
+document.querySelectorAll('#tChips .chip').forEach(function(b){b.addEventListener('click',function(){S.time=+b.dataset.t;document.querySelectorAll('#tChips .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')})})});
+document.querySelectorAll('#hChips .chip').forEach(function(b){b.addEventListener('click',function(){S.hp=+b.dataset.h;$('hpTxt').textContent=S.hp;document.querySelectorAll('#hChips .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')})})});
+$('bFs').addEventListener('click',function(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(function(){})}catch(e){}});
+document.addEventListener('fullscreenchange',function(){$('bFs').textContent=document.fullscreenElement?'離開全螢幕':'全螢幕'});
+drawDemons();drawTeams();$('qcard').innerHTML='<div class="qt" style="text-align:center">設定好隊名後，按「開始對戰」</div>';
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
