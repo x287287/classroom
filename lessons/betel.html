@@ -1,9 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>檳榔大解密</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../assets/fonts.css">
 <style>
 /* Layout: 大螢幕教學用，一條直向長頁；頂部三個大章節按鈕，章節間以色帶分隔，互動圖在左、說明在右，窄螢幕改為上下 */
 :root{
@@ -142,6 +140,46 @@ footer ol{padding-left:1.2em;margin:.4rem 0 0}
 footer a{color:inherit}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+<style id="kit-look">
+/* 統一外觀：與其他補充教材（assets/kit.css）相同的顏色、字級、按鈕與圓角；內容不變 */
+:root{--leaf:#2E7D6B;--leaf-soft:#E0F0EA;--betel:#C8414B;--betel-soft:#FBE3E5;
+  --bg:#F6F7F4;--surface:#FFFFFF;--sunk:#EEF1EC;--fg:#1F2A27;--muted:#5A6762;--line:#D5DCD7;--r:16px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--leaf:#5CC9A9;--leaf-soft:#17342B;--betel:#FF7B84;--betel-soft:#3D1D21;
+  --bg:#121815;--surface:#1A221E;--sunk:#151C19;--fg:#E8EEEA;--muted:#A3B0AA;--line:#2E3A35}}
+:root[data-theme="dark"]{--leaf:#5CC9A9;--leaf-soft:#17342B;--betel:#FF7B84;--betel-soft:#3D1D21;
+  --bg:#121815;--surface:#1A221E;--sunk:#151C19;--fg:#E8EEEA;--muted:#A3B0AA;--line:#2E3A35}
+html{font-size:clamp(17px, .45vw + 13.5px, 24px);-webkit-text-size-adjust:100%}
+body{touch-action:manipulation}
+.wrap{max-width:1200px}
+header.wrap{padding-block:2rem 1.4rem;background:var(--surface);box-shadow:0 0 0 100vmax var(--surface);clip-path:inset(0 -100vmax)}
+.kicker{font-size:.82rem}
+h1{font-size:clamp(2.1rem, 3.6vw + 1rem, 3.4rem);margin-top:.15rem}
+.chapters a{background:var(--bg);min-height:4.2rem;padding:.85rem 1rem}
+.chapters a b{font-size:1.25rem}
+.chapters a .no{font-size:.78rem}
+section{padding-block:2.4rem}
+section:nth-of-type(2){background:var(--sunk)}
+.sec-head{margin-bottom:1.1rem}
+.sec-head .no{font-size:1rem;color:#FFFFFF}
+h2{font-size:clamp(1.6rem, 1.8vw + 1rem, 2.3rem)}
+h3{font-size:1.25rem;margin-bottom:.35rem}
+mark{background:var(--leaf-soft)}
+.btn{min-height:2.9rem;font-family:var(--font-display);font-size:1rem}
+.btn.fill,.partbtns button.on{color:#FFFFFF}
+.btn:active,.partbtns button:active,.opts button:active{transform:scale(.97)}
+:focus-visible{outline:3px solid #C77A0A;outline-offset:3px;border-radius:8px}
+.partbtns button{min-height:2.8rem;padding:.35rem 1rem}
+.think{margin-top:1.5rem}
+.think b{display:block}
+details.teacher summary{padding:.75rem 1.1rem;min-height:2.8rem}
+.q{border-width:2px}
+.opts button{border-radius:12px;padding:.5rem 1rem;min-height:3rem}
+.feedback.ok{color:#1E8A5A}
+footer{padding-block:1.8rem 2.5rem}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.fill,:root:not([data-theme="light"]) .partbtns button.on,:root:not([data-theme="light"]) .sec-head .no{color:#0D1F19}}
+:root[data-theme="dark"] .btn.fill,:root[data-theme="dark"] .partbtns button.on,:root[data-theme="dark"] .sec-head .no{color:#0D1F19}
+</style>
+
 
 <header class="wrap">
   <div class="kicker">健康與體育・拒菸拒酒拒檳榔 延伸學習</div>
