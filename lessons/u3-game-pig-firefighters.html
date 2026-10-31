@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -9,49 +9,89 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="../assets/kit.css">
 <style>
-/* 一個畫面的闖關：左側關卡地圖，右側大場景插圖＋問題 */
-:root{--sky:#FFF4E6;--path:#F3D9B8;--fire:#E5531A;--ok:#1E8A5A}
+/* 遊戲固定使用自己的配色（不跟著系統深色模式）：暖色消防局風格，左側關卡地圖，右側大場景＋問題 */
+:root{color-scheme:light;--ink:#2B2320;--muted2:#6B5E57;--paper:#FFF7EC;--card:#FFFFFF;--line2:#EADBC8;--fire:#D9481A;--fire2:#FF7A45;--ok:#1E8A5A;--no:#C8414B;--gold:#F2A900}
 html,body{height:100%}
-body{background:var(--sky);overflow:hidden}
+body{background:linear-gradient(180deg,#FFE7CF 0%,var(--paper) 40%);color:var(--ink);overflow:hidden}
 .app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(6px,1.2vh,14px);padding-block:clamp(8px,1.6vh,18px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.top h1{font-size:clamp(1.5rem,3.4vh,2.3rem);color:var(--fire)}
-.top .sub{font-size:clamp(.8rem,1.6vh,1rem);color:var(--muted)}
-.top .stars{font-family:var(--font-display);font-size:clamp(1.1rem,2.6vh,1.6rem);color:#B26A00}
-.top button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem 1rem;min-height:2.8rem;cursor:pointer;font-family:var(--font-display)}
-.main{display:grid;grid-template-columns:clamp(200px,20vw,300px) minmax(0,1fr);gap:clamp(8px,1.4vw,18px);min-height:0}
-.map{background:var(--surface);border-radius:22px;padding:.8rem;display:flex;flex-direction:column;gap:.5rem;overflow:auto;border:1px solid var(--line)}
-.map h2{font-size:1.1rem;color:var(--muted);text-align:center}
-.lv{appearance:none;display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:.5rem .7rem;text-align:left;cursor:pointer;min-height:4.2rem}
-.lv .n{width:2.4rem;height:2.4rem;border-radius:50%;display:grid;place-items:center;background:var(--line);font-family:var(--font-display);font-size:1.2rem}
-.lv b{font-family:var(--font-display);font-weight:400;font-size:1.08rem;display:block;line-height:1.25}
-.lv small{color:#B26A00;letter-spacing:.1em}
+.top h1{font-size:clamp(1.6rem,3.6vh,2.5rem);color:var(--fire);display:flex;align-items:center;gap:.4rem}
+.top h1 .badge{display:inline-grid;place-items:center;height:1.6em;padding:0 .5em;border-radius:999px;background:var(--fire);color:#fff;font-size:.6em;letter-spacing:.04em}
+.top .sub{font-size:clamp(.8rem,1.6vh,1rem);color:var(--muted2)}
+.top .stars{font-family:var(--font-display);font-size:clamp(1.15rem,2.8vh,1.7rem);color:#9A5B00;background:#FFF1C9;border:2px solid #F4D27A;border-radius:999px;padding:.1rem .9rem}
+.top button{appearance:none;border:2px solid var(--line2);background:var(--card);color:var(--ink);border-radius:999px;padding:.3rem 1.1rem;min-height:2.9rem;cursor:pointer;font-family:var(--font-display);font-size:1rem}
+.main{display:grid;grid-template-columns:clamp(210px,20vw,300px) minmax(0,1fr);gap:clamp(8px,1.4vw,18px);min-height:0}
+.map{background:var(--card);border-radius:24px;padding:.8rem;display:flex;flex-direction:column;gap:.55rem;overflow:auto;border:2px solid var(--line2)}
+.map h2{font-size:1.1rem;color:var(--muted2);text-align:center}
+.lv{appearance:none;display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;border:3px solid var(--line2);background:#FFFCF7;color:var(--ink);border-radius:18px;padding:.5rem .7rem;text-align:left;cursor:pointer;min-height:4.4rem;font:inherit}
+.lv .n{width:2.5rem;height:2.5rem;border-radius:50%;display:grid;place-items:center;background:#E6DCD0;color:#8A7C70;font-family:var(--font-display);font-size:1.25rem}
+.lv b{font-family:var(--font-display);font-weight:400;font-size:1.1rem;display:block;line-height:1.25;color:var(--ink)}
+.lv small{color:var(--muted2);font-size:.82rem}
+.lv small.st{color:var(--gold);letter-spacing:.12em;font-size:1rem}
 .lv.open .n{background:var(--fire);color:#fff}
-.lv.cur{border-color:var(--fire);background:#FFF1E8}
 .lv.done .n{background:var(--ok);color:#fff}
-.lv:disabled{opacity:.45;cursor:default}
-.stage{background:var(--surface);border-radius:22px;border:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(10px,1.6vw,22px);padding:clamp(12px,2vh,24px);min-height:0;overflow:auto}
-.art svg{display:block;width:100%;height:auto;border-radius:16px}
-.story{font-size:clamp(.95rem,2vh,1.15rem);color:var(--muted)}
-.qq{font-family:var(--font-display);font-size:clamp(1.3rem,3.2vh,2.1rem);line-height:1.45;margin:.2rem 0 .6rem}
-.chs{display:grid;gap:clamp(6px,1vh,12px)}
-.chs button{appearance:none;border:3px solid var(--line);background:var(--bg);border-radius:18px;padding:.6rem 1rem;min-height:clamp(3.2rem,7vh,4.6rem);font-size:clamp(1.02rem,2.2vh,1.35rem);text-align:left;cursor:pointer}
-.chs button.right{border-color:var(--ok);background:var(--good-soft)}
-.chs button.wrong{border-color:var(--bad);background:var(--bad-soft)}
-.chs button[aria-pressed="true"]{border-color:var(--fire);background:#FFF1E8}
+.lv.cur{border-color:var(--fire);background:#FFE9DD;box-shadow:0 4px 0 #F2B9A0}
+.lv:disabled{cursor:default;background:#F6F1EA;border-style:dashed}
+.lv:disabled b{color:#9C8F84}
+.lv:disabled .n::after{content:""}
+.stage{background:var(--card);border-radius:24px;border:2px solid var(--line2);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(10px,1.6vw,24px);padding:clamp(12px,2vh,24px);min-height:0;overflow:auto}
+.art{position:relative}
+.art svg{display:block;width:100%;height:auto;border-radius:18px;border:3px solid var(--line2)}
+.art .cap{position:absolute;left:12px;top:12px;background:var(--fire);color:#fff;font-family:var(--font-display);font-size:clamp(.95rem,2vh,1.2rem);padding:.15rem .8rem;border-radius:999px}
+.story{font-size:clamp(1rem,2.2vh,1.2rem);color:var(--ink);background:#FFF4E2;border-left:5px solid var(--fire2);border-radius:0 12px 12px 0;padding:.5rem .8rem;margin:.3rem 0}
+.lvname{font-size:clamp(.85rem,1.8vh,1rem);color:var(--muted2)}
+.qq{font-family:var(--font-display);font-size:clamp(1.35rem,3.4vh,2.2rem);line-height:1.45;margin:.3rem 0 .6rem;color:var(--ink)}
+.chs{display:grid;gap:clamp(7px,1.1vh,12px)}
+.chs>button{appearance:none;-webkit-appearance:none;position:relative;border:3px solid #E2D3C1;background:#FFFCF7;color:var(--ink);border-radius:18px;padding:.6rem 3rem .6rem 1.1rem;min-height:clamp(3.3rem,7.2vh,4.8rem);font:inherit;font-size:clamp(1.05rem,2.3vh,1.4rem);font-weight:500;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:1}
+.chs>button:disabled{color:var(--ink);opacity:1;cursor:default}
+.chs>button:active:not(:disabled){transform:scale(.98);background:#FFF1E2}
+.chs>button::after{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);font-size:1.5em;font-weight:700;line-height:1}
+.chs>button.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.chs>button.right:disabled{color:#fff}
+.chs>button.right::after{content:"✓";color:#fff}
+.chs>button.wrong{background:#fff;border-color:var(--no);border-style:dashed;color:var(--no)}
+.chs>button.wrong:disabled{color:var(--no)}
+.chs>button.wrong::after{content:"✗";color:var(--no)}
+.chs>button[aria-pressed="true"]{background:#FFE1CF;border-color:var(--fire);color:var(--ink)}
+.chs>button[aria-pressed="true"]::after{content:"✔";color:var(--fire)}
+.chs>button[aria-pressed="true"].right{background:var(--ok);border-color:var(--ok);color:#fff}
+.chs>button[aria-pressed="true"].right::after{content:"✓";color:#fff}
+.chs .btn.fill{background:var(--fire);border-color:var(--fire);color:#fff;min-height:3.2rem;font-size:1.15rem;padding:0 1.6rem}
 .fb{margin-top:.6rem}
+.say.fb{background:#FFF4E2;border-color:#F0D4B0;color:var(--ink)}
+.say.fb.good{background:#E3F5EB;border-color:var(--ok)}
+.say.fb.good .t{color:var(--ok)}
+.say.fb.bad{background:#FDE7E9;border-color:var(--no)}
+.say.fb.bad .t{color:var(--no)}
+.say.fb p{color:var(--ink)}
+.say.fb .btn.fill{background:var(--fire);border-color:var(--fire);color:#fff;font-size:1.15rem;min-height:3.2rem;padding:0 1.6rem}
+/* 排序題（KIT.order）在遊戲裡也用固定配色 */
+.chs .k-order .slot{background:#FFFCF7;border-color:#E2D3C1;color:var(--ink)}
+.chs .k-order .slot.filled{background:#E3F5EB;border-color:var(--ok)}
+.chs .k-order .slot.filled b{color:var(--ok)}
+.chs .k-order .slot.wrongpos{background:#FDE7E9;border-color:var(--no)}
+.chs .k-order .slot .n{color:var(--muted2)}
+.chs .k-order .pool button{background:#fff;border:3px solid var(--fire);color:var(--ink);font-family:var(--font-display);font-size:1.5rem;min-width:4.2rem;min-height:3.6rem;justify-content:center;text-align:center}
+.chs .k-order .say{background:#FFF4E2;border-color:#F0D4B0;color:var(--ink)}
+.chs .k-order .say.good{background:#E3F5EB;border-color:var(--ok)}
+.chs .k-order .say.bad{background:#FDE7E9;border-color:var(--no)}
+.chs .k-order .say p,.chs .k-order .muted{color:var(--muted2)}
 .prog{display:flex;gap:.35rem;margin-bottom:.4rem}
-.prog i{flex:1;height:.55rem;border-radius:99px;background:var(--line)}
+.prog i{flex:1;height:.65rem;border-radius:99px;background:#EADFD2}
 .prog i.on{background:var(--fire)}
-.overlay{position:fixed;inset:0;background:rgba(60,30,10,.55);display:grid;place-items:center;z-index:50;padding:1rem}
+.overlay{position:fixed;inset:0;background:rgba(60,30,10,.6);display:grid;place-items:center;z-index:50;padding:1rem}
 .overlay[hidden]{display:none}
-.cert{background:#FFFDF5;border:10px double #D9A441;border-radius:24px;padding:clamp(18px,3vh,40px);max-width:760px;width:100%;text-align:center;display:grid;gap:.8rem;max-height:94vh;overflow:auto}
+.cert{background:#FFFDF5;color:var(--ink);border:10px double #D9A441;border-radius:24px;padding:clamp(18px,3vh,40px);max-width:760px;width:100%;text-align:center;display:grid;gap:.8rem;max-height:94vh;overflow:auto}
 .cert h2{font-size:clamp(2rem,5vh,3rem);color:var(--fire)}
-.cert .nm{font-family:var(--font-display);font-size:clamp(1.6rem,4vh,2.4rem);border-bottom:3px solid #D9A441;display:inline-block;padding:0 1rem;min-width:8em}
-.cert input{font-size:1.3rem;padding:.4rem .8rem;border-radius:12px;border:2px solid var(--line);text-align:center}
-.win{background:var(--surface);border-radius:24px;padding:clamp(18px,3vh,34px);max-width:600px;width:100%;text-align:center;display:grid;gap:.8rem}
+.cert p{color:var(--ink)}
+.cert .nm{font-family:var(--font-display);font-size:clamp(1.6rem,4vh,2.4rem);border-bottom:3px solid #D9A441;display:inline-block;padding:0 1rem;min-width:8em;color:var(--ink)}
+.cert input{font-size:1.3rem;padding:.4rem .8rem;border-radius:12px;border:2px solid var(--line2);text-align:center;background:#fff;color:var(--ink)}
+.cert .btn{background:#fff;border-color:var(--fire);color:var(--fire)}
+.win{background:var(--card);color:var(--ink);border-radius:24px;padding:clamp(18px,3vh,34px);max-width:600px;width:100%;text-align:center;display:grid;gap:.8rem;border:4px solid var(--ok)}
 .win h2{font-size:clamp(1.8rem,4.6vh,2.6rem);color:var(--ok)}
-.win .st{font-size:2.6rem;color:#F2A900;letter-spacing:.2em}
+.win p{color:var(--ink)}
+.win .st{font-size:3rem;color:var(--gold);letter-spacing:.2em}
+.win .btn.fill{background:var(--fire);border-color:var(--fire);color:#fff;font-size:1.25rem;min-height:3.4rem;padding:0 2rem}
 @media (max-width:900px),(max-height:560px){
   body{overflow:auto}.app{height:auto;min-height:100%}
   .main{grid-template-columns:minmax(0,1fr)}
@@ -63,7 +103,7 @@ body{background:var(--sky);overflow:hidden}
 <body class="u3">
 <div class="app">
   <div class="top">
-    <div><h1>小豬消防隊</h1><div class="sub">健康與體育 四上｜單元 3 熱與火的危機・統整遊戲</div></div>
+    <div><h1><span class="badge" aria-hidden="true">119</span>小豬消防隊</h1><div class="sub">健康與體育 四上｜單元 3 熱與火的危機・統整遊戲</div></div>
     <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap"><span class="stars" id="totStars">★ 0 / 15</span><button type="button" id="bFs">全螢幕</button><button type="button" id="bReset">重新開始</button></div>
   </div>
   <div class="main">
@@ -132,13 +172,13 @@ var LV=[
 ];
 var st={open:1,stars:[0,0,0,0,0],cur:0,step:0,miss:0};
 function $(id){return document.getElementById(id)}
-function drawMap(){var m=$('map');m.innerHTML='<h2>闖關地圖</h2>';LV.forEach(function(l,i){var b=document.createElement('button');b.type='button';b.className='lv'+(i<st.open?' open':'')+(st.stars[i]?' done':'')+(i===st.cur?' cur':'');b.disabled=i>=st.open;b.innerHTML='<span class="n">'+(i+1)+'</span><span><b>'+l.n+'</b><small>'+(st.stars[i]?'★'.repeat(st.stars[i])+'☆'.repeat(3-st.stars[i]):l.topic)+'</small></span>';b.addEventListener('click',function(){begin(i)});m.appendChild(b)});var tot=st.stars.reduce(function(a,b){return a+b},0);$('totStars').textContent='★ '+tot+' / 15'}
+function drawMap(){var m=$('map');m.innerHTML='<h2>闖關地圖</h2>';LV.forEach(function(l,i){var b=document.createElement('button');b.type='button';b.className='lv'+(i<st.open?' open':'')+(st.stars[i]?' done':'')+(i===st.cur?' cur':'');b.disabled=i>=st.open;b.innerHTML='<span class="n">'+(i+1)+'</span><span><b>'+l.n+'</b>'+(st.stars[i]?'<small class="st">'+'★'.repeat(st.stars[i])+'☆'.repeat(3-st.stars[i])+'</small>':'<small>'+l.topic+'</small>')+'</span>';b.addEventListener('click',function(){begin(i)});m.appendChild(b)});var tot=st.stars.reduce(function(a,b){return a+b},0);$('totStars').textContent='★ '+tot+' / 15'}
 function begin(i){st.cur=i;st.step=0;st.miss=0;drawMap();show()}
-function art(step){var l=LV[st.cur],k=l.art,a=ART[k];var arg=step&&step.art2!=null?step.art2:step&&step.sm?1:undefined;$('art').innerHTML='<svg viewBox="0 0 440 320" aria-hidden="true">'+a(arg)+'</svg>'}
+function art(step){var l=LV[st.cur],k=l.art,a=ART[k];var arg=step&&step.art2!=null?step.art2:step&&step.sm?1:undefined;$('art').innerHTML='<span class="cap">第 '+(st.cur+1)+' 關</span><svg viewBox="0 0 440 320" aria-hidden="true">'+a(arg)+'</svg>'}
 function show(){
   var l=LV[st.cur],s=l.steps[st.step];art(s);
   var prog='<div class="prog">'+l.steps.map(function(_,i){return '<i class="'+(i<=st.step?'on':'')+'"></i>'}).join('')+'</div>';
-  var qa=$('qa');qa.innerHTML=prog+'<div class="muted" style="font-size:.9rem">第 '+(st.cur+1)+' 關・'+l.n+'</div>'+(st.step===0?'<p class="story">'+l.story+'</p>':'')+'<p class="qq">'+s.q+'</p><div class="chs" id="chs"></div><div class="say fb" id="fb" hidden></div>';
+  var qa=$('qa');qa.innerHTML=prog+'<div class="lvname">第 '+(st.cur+1)+' 關・'+l.n+'・第 '+(st.step+1)+' / '+l.steps.length+' 題</div>'+(st.step===0?'<p class="story">'+l.story+'</p>':'')+'<p class="qq">'+s.q+'</p><div class="chs" id="chs"></div><div class="say fb" id="fb" hidden></div>';
   var chs=$('chs'),fb=$('fb');
   if(s.t==='c'){KIT.shuffle(s.o).forEach(function(o){var b=document.createElement('button');b.type='button';b.textContent=o.t;b.addEventListener('click',function(){
     if(o.ok){b.classList.add('right');chs.querySelectorAll('button').forEach(function(z){z.disabled=true});good()}else{b.classList.add('wrong');b.disabled=true;st.miss++;fb.hidden=false;fb.className='say fb bad';fb.innerHTML='<div class="t">再想想</div><p>'+o.f+'</p>'}
