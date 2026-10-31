@@ -48,8 +48,7 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 .tab[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .tab .n{font-size:12px;opacity:.75;font-variant-numeric:tabular-nums}
 
-.units{display:grid;gap:30px}
-.unit h2{font-size:26px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.units{display:grid;gap:16px}
 .unit h2 .g{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);border:1px solid var(--line);background:var(--card);border-radius:6px;padding:0 8px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:12px}
 .card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;min-width:0;color:inherit;text-decoration:none}
@@ -61,6 +60,19 @@ a.card:hover{border-color:var(--ink)}
 .card p{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
 .go{font-size:15px;font-weight:700;color:var(--accent);border-top:1px dashed var(--line);padding-top:10px}
 .go.none{color:var(--muted);font-weight:400;font-size:13px}
+.unit{background:var(--card);border:2px solid var(--ink);border-radius:18px;overflow:hidden}
+.unit h2{margin:0;font-size:inherit}
+.unit-toggle{appearance:none;width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--card);border:0;padding:18px 20px;min-height:72px;cursor:pointer;text-align:left;color:var(--ink);font:inherit}
+.unit-toggle .ut{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.3}
+.unit-toggle .cnt{font-size:14px;color:var(--muted);margin-left:auto}
+.unit-toggle .chev{width:34px;height:34px;flex:none;border-radius:50%;background:var(--ink);position:relative;transition:transform .2s}
+.unit-toggle .chev::before{content:"";position:absolute;left:9px;top:11px;width:11px;height:11px;border-right:3px solid var(--paper);border-bottom:3px solid var(--paper);transform:rotate(-45deg)}
+.unit.open .unit-toggle .chev{transform:rotate(90deg)}
+.unit.open .unit-toggle{border-bottom:2px dashed var(--line)}
+.unit-body{padding:4px 20px 22px}
+.allbtns{display:flex;gap:8px;flex-wrap:wrap}
+.mini{appearance:none;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 16px;min-height:44px;cursor:pointer;font:inherit;font-size:15px}
+@media (max-width:560px){.unit-toggle .ut{font-size:21px}.unit-toggle .cnt{margin-left:0;width:100%}.unit-body{padding:4px 14px 18px}}
 .lesson-group{margin-top:18px}
 .lesson-h{font-family:var(--body);font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:2px dashed var(--line)}
 .lesson-h .n{font-size:12px;font-weight:500;color:var(--muted)}
@@ -96,6 +108,7 @@ footer{color:var(--muted);font-size:13px;text-align:center}
       </select>
     </div>
     <div class="tabs" role="group" aria-label="教材類型" id="tabs"></div>
+    <div class="allbtns" id="allBtns"><button class="mini" type="button" id="expandAll">全部展開</button><button class="mini" type="button" id="collapseAll">全部收合</button></div>
   </section>
 
   <main class="units" id="units"></main>
@@ -237,13 +250,30 @@ function render(){
     const lk=i.type==="game"?"單元統整遊戲":(i.lesson||"其他");
     const L=units.get(uk); if(!L.has(lk))L.set(lk,[]); L.get(lk).push(i);
   });
-  $("units").innerHTML=[...units.keys()].map(uk=>{
+  const filtering=!!query.trim()||curType!=="all"||curGrade!=="all";
+  $("units").innerHTML=[...units.keys()].map((uk,ui)=>{
     const[g,u]=uk.split("|"); const L=units.get(uk);
-    return `<section class="unit"><h2>${esc(u)}${+g?`<span class="g">${gradeName(+g)}</span>`:""}</h2>${
+    const total=[...L.values()].reduce((a,x)=>a+x.length,0);
+    const isOpen=filtering||!!openSet[uk];
+    const lessons=[...L.keys()].filter(k=>k!=="單元統整遊戲").length, hasGame=L.has("單元統整遊戲");
+    return `<section class="unit${isOpen?" open":""}"><h2><button class="unit-toggle" type="button" aria-expanded="${isOpen}" aria-controls="ub${ui}" data-uk="${esc(uk)}"><span class="chev" aria-hidden="true"></span><span class="ut">${esc(u)}</span>${+g?`<span class="g">${gradeName(+g)}</span>`:""}<span class="cnt">${lessons} 課・${total} 份教材${hasGame?"・含統整遊戲":""}</span></button></h2><div class="unit-body" id="ub${ui}"${isOpen?"":" hidden"}>${
       [...L.keys()].map(lk=>`<div class="lesson-group"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}">${esc(lk)}<span class="n">${L.get(lk).length} 份</span></h3><div class="cards">${L.get(lk).map(card).join("")}</div></div>`).join("")
-    }</section>`;
+    }</div></section>`;
   }).join("");
+  $("allBtns").hidden=filtering;
 }
+/* 展開狀態記在這台電腦的瀏覽器裡（下次打開保持一樣）；讀不到也沒關係，預設全部收合 */
+let openSet={};
+try{openSet=JSON.parse(localStorage.getItem("shelfOpen")||"{}")||{}}catch(e){openSet={}}
+function saveOpen(){try{localStorage.setItem("shelfOpen",JSON.stringify(openSet))}catch(e){}}
+$("units").addEventListener("click",e=>{
+  const b=e.target.closest(".unit-toggle"); if(!b)return;
+  const sec=b.closest(".unit"), body=sec.querySelector(".unit-body"), open=b.getAttribute("aria-expanded")!=="true";
+  b.setAttribute("aria-expanded",open); body.hidden=!open; sec.classList.toggle("open",open);
+  if(!query.trim()&&curType==="all"&&curGrade==="all"){ if(open)openSet[b.dataset.uk]=1; else delete openSet[b.dataset.uk]; saveOpen(); }
+});
+$("expandAll").addEventListener("click",()=>{document.querySelectorAll(".unit-toggle").forEach(b=>openSet[b.dataset.uk]=1);saveOpen();render();});
+$("collapseAll").addEventListener("click",()=>{openSet={};saveOpen();render();});
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;curType=b.dataset.t;render();});
 $("gradeSel").addEventListener("change",e=>{curGrade=e.target.value;render();});
 $("q").addEventListener("input",e=>{query=e.target.value;render();});
