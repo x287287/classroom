@@ -135,6 +135,18 @@ details.teacher ul{margin:.3rem 0 0;padding-left:1.2em}
 .feedback.ok{color:var(--leaf)}
 .feedback.no{color:var(--betel)}
 
+/* Red mouth */
+.red{margin-top:1.6rem;background:var(--surface);border:2px solid var(--betel);border-radius:var(--r);padding:1.2rem 1.3rem;display:flex;flex-direction:column;gap:1rem}
+.red h3{color:var(--betel);margin:0}
+.react{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.react .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:7.5rem;padding:.6rem .9rem;border-radius:12px;background:var(--husk-soft);border:1px solid var(--line);text-align:center;line-height:1.4}
+.react .chip b{font-family:var(--font-display);font-weight:400;font-size:1.2rem}
+.react .chip span{font-size:.8rem;color:var(--muted)}
+.react .chip.out{background:var(--betel);border-color:var(--betel)}
+.react .chip.out b,.react .chip.out span{color:var(--surface)}
+.react .op{font-family:var(--font-display);font-size:1.6rem;color:var(--muted)}
+.red-text{display:flex;flex-direction:column;gap:.6rem;max-width:46em}
+@media (max-width:640px){.react{flex-direction:column;align-items:stretch;gap:.3rem}.react .chip{min-width:0}.react .op{text-align:center;line-height:1}.react .op.to{transform:rotate(90deg)}}
 footer{padding-block:2rem 3rem;font-size:.8rem;color:var(--muted)}
 footer ol{padding-left:1.2em;margin:.4rem 0 0}
 footer a{color:inherit}
@@ -343,8 +355,26 @@ footer{padding-block:1.8rem 2.5rem}
   <h3 style="margin-top:2rem">我們在路邊看到的「一顆檳榔」，其實是好幾樣東西組合起來的</h3>
   <div class="quid">
     <div class="item"><b>菁仔（檳榔籽）</b><p>還沒成熟的綠色檳榔果實，整顆連著粗纖維一起嚼。含有檳榔鹼，本身就會致癌。</p></div>
-    <div class="item"><b><span class="plus">＋</span> 荖花、荖藤或荖葉</b><p>夾在檳榔中間或包在外面。裡面有黃樟素等成分，會傷害口腔細胞。</p></div>
-    <div class="item"><b><span class="plus">＋</span> 石灰（紅灰、白灰）</b><p>強鹼性的粉，會讓嘴巴裡變成很刺激的環境，加重口腔黏膜的破壞。</p></div>
+    <div class="item"><b><span class="plus">＋</span> 荖花或荖藤</b><p>夾在檳榔中間。荖花含有很多<strong>黃樟素</strong>，黃樟素被列為「可能致癌」的物質，會傷害口腔細胞。</p></div>
+    <div class="item"><b><span class="plus">＋</span> 荖葉</b><p>用來把檳榔包起來。荖葉本身<strong>目前沒有被列為致癌物</strong>，但它包著檳榔一起嚼，檳榔籽的傷害一樣跑不掉。</p></div>
+    <div class="item"><b><span class="plus">＋</span> 石灰（紅灰、白灰）</b><p>強鹼性的粉，會讓嘴巴裡變成很刺激的環境，加重口腔黏膜的破壞，也是口水變紅的原因。</p></div>
+  </div>
+
+  <div class="red" id="redMouth">
+    <h3>為什麼嚼了檳榔，嘴巴會紅紅的？</h3>
+    <div class="react" aria-label="檳榔籽的單寧酸加上石灰和口水，變成暗紅色的檳榔汁">
+      <div class="chip"><b>檳榔籽</b><span>含有單寧酸</span></div>
+      <span class="op">＋</span>
+      <div class="chip"><b>石灰</b><span>強鹼性</span></div>
+      <span class="op">＋</span>
+      <div class="chip"><b>口水</b><span>一直嚼、一直流</span></div>
+      <span class="op to">→</span>
+      <div class="chip out"><b>暗紅色的汁</b><span>俗稱「檳榔汁」</span></div>
+    </div>
+    <div class="red-text">
+      <p>檳榔籽裡有一種叫<mark>單寧酸</mark>的物質，喝濃茶時舌頭澀澀的，也是單寧在作怪。嚼檳榔時加了石灰，單寧酸碰到鹼性的石灰會起變化，和口水混在一起，就變成<strong class="hi">暗紅色</strong>的汁液。所以嚼檳榔的人嘴唇、舌頭、牙齒都紅紅的，這不是流血，也不是加了紅色色素。</p>
+      <p>這些紅色汁液會沾在牙齒上，嚼久了牙齒變成黑褐色、刷也刷不掉，就是課本說的「牙齒沾上汙漬」。吐在地上，又變成馬路上一塊塊的紅色汙漬（第 3 站）。</p>
+    </div>
   </div>
 
   <div class="think"><b>想一想</b><p>中果皮的粗纖維像菜瓜布。如果每天在嘴巴裡用菜瓜布刷來刷去，口腔會變成什麼樣子？</p></div>
@@ -354,7 +384,9 @@ footer{padding-block:1.8rem 2.5rem}
       <li>檳榔果實屬核果類型：果皮由外而內分為外果皮、中果皮（纖維質，占果實大部分）、內果皮，包住一顆種子。</li>
       <li>成熟種子縱切面可見大理石般的褐色花紋，這是種皮向內摺入胚乳形成的紋路（嚼食胚乳）。中藥「檳榔」即為乾燥的成熟種子。</li>
       <li>台灣嚼食的「菁仔」是未成熟的青果，種子尚軟，所以會連同果皮纖維一起咀嚼；課本 p.45「資訊小站」說明粗纖維會磨損口腔造成潰瘍。</li>
-      <li>課本 p.44 檳榔的組成：檳榔籽＋荖花（或荖藤）／荖葉，可直接對照本站下方三張卡片。</li>
+      <li>課本 p.44 檳榔的組成：檳榔籽＋荖花（或荖藤）／荖葉，可直接對照本站下方的組成卡片。</li>
+      <li>荖葉與荖花要分開說：IARC 第 85 卷（2004）評估荖葉（<i>Piper betle</i> 葉）時，動物實驗的證據傾向「不具致癌性」，荖葉目前未被列為致癌物。荖花（花序）含高量黃樟素，黃樟素屬 IARC 2B 類「可能對人類致癌」。課本 p.44 寫「荖花、荖葉的成分會導致基因突變」，上課時可補充這個區別，重點仍放在「檳榔籽本身就是第一類致癌物」。</li>
+      <li>口水變紅：國健署說明，白灰或紅灰與檳榔中的單寧酸作用，會使唾液變成暗紅色；石灰造成的鹼性口腔環境也會釋放活性氧，傷害口腔細胞。</li>
     </ul>
   </div></details>
  </div>
@@ -461,6 +493,8 @@ footer{padding-block:1.8rem 2.5rem}
   <b>資料來源</b>
   <ol>
     <li>衛生福利部國民健康署：檳榔防制相關新聞稿（檳榔為第一類致癌物、檳榔鹼與檳榔素可能成癮、荖花與石灰的危害）。</li>
+    <li>衛生福利部國民健康署〈只要不加紅、白灰等添加物，吃檳榔就不會得口腔癌？〉（石灰與單寧酸作用使唾液變暗紅色）。</li>
+    <li>IARC Monographs Vol. 85 (2004) Betel-quid and Areca-nut Chewing（荖葉的致癌性評估）；IARC 黃樟素（safrole）分類為 2B 類。</li>
     <li>國小健康與體育四上課本 單元 2 第 2 課〈酒與檳榔〉。</li>
     <li>Lan et al. (2022) Frontiers in Pharmacology；Li et al. (2025) Frontiers in Integrative Neuroscience（檳榔鹼與大腦獎賞系統）。</li>
     <li>林壯沛、盧惠生、黃良鑫（2008）〈坡地檳榔園水土流失控制之探討〉，森林集水區經營研討會論文集。</li>
@@ -567,6 +601,7 @@ const qs=[
   {q:"讓人嚼檳榔會上癮的主要物質是什麼？",o:["檳榔鹼","維生素 C","糖分"],a:0,e:"檳榔鹼（還有檳榔素）會影響大腦，讓人越嚼越想嚼。"},
   {q:"檳榔果實裡像菜瓜布一樣、會磨傷口腔的是哪一層？",o:["外果皮","中果皮","胚"],a:1,e:"中果皮是厚厚的粗纖維，嚼的時候會不斷磨損口腔。"},
   {q:"同學說：「這顆檳榔沒加荖花和石灰，所以不會致癌。」這句話對嗎？",o:["對，只有配料會致癌","不對，檳榔籽本身就會致癌"],a:1,e:"檳榔是第一類致癌物，就算不加任何配料，檳榔籽本身也會致癌。"},
+  {q:"嚼檳榔的人口水紅紅的，主要原因是什麼？",o:["嘴巴流血了","檳榔裡的單寧酸碰到石灰起變化","檳榔被加了紅色色素"],a:1,e:"單寧酸碰到鹼性的石灰，和口水混在一起，就變成暗紅色的檳榔汁。"},
   {q:"為什麼山坡上種滿檳榔樹，下大雨時泥土容易被沖走？",o:["檳榔樹的根很深","檳榔樹根淺，又只有一層樹葉擋雨","檳榔樹會吸光雨水"],a:1,e:"淺淺的鬚根抓不住泥土，高高的單層樹冠擋不住雨滴，泥土就容易流失。"}
 ];
 const qb=document.getElementById('quizBox');
