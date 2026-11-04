@@ -2,11 +2,11 @@
    每頁可在自己的 <style> 覆寫 --accent / --accent-soft / --accent-ink 換成單元主色。 */
 :root{
   --bg:#F6F7F4; --surface:#FFFFFF; --sunk:#EEF1EC; --fg:#1F2A27; --muted:#5A6762; --line:#D5DCD7;
-  --accent:#2E7D6B; --accent-soft:#E0F0EA; --accent-ink:#FFFFFF;
-  --good:#1E8A5A; --good-soft:#DDF3E7;
-  --bad:#C8414B;  --bad-soft:#FBE3E5;
-  --warn:#C77A0A; --warn-soft:#FCEFD6;
-  --cool:#2F6FB3; --cool-soft:#E2EDF9;
+  --accent:#2A7563; --accent-soft:#E0F0EA; --accent-ink:#FFFFFF;
+  --good:#17734B; --good-soft:#DDF3E7;
+  --bad:#B0333D;  --bad-soft:#FBE3E5;
+  --warn:#93570A; --warn-soft:#FCEFD6;
+  --cool:#2A64A3; --cool-soft:#E2EDF9;
   --skin:#F3C9A8; --skin-line:#C08A68;
   --font-display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
@@ -23,8 +23,8 @@
   }
 }
 /* 單元主色：<body class="u2"> 拒菸拒酒拒檳榔（青綠）、<body class="u3"> 熱與火的危機（火橘） */
-body.u2{--accent:#2E7D6B;--accent-soft:#E0F0EA;--accent-ink:#FFFFFF}
-body.u3{--accent:#BF4719;--accent-soft:#FCE8DD;--accent-ink:#FFFFFF}
+body.u2{--accent:#2A7563;--accent-soft:#E0F0EA;--accent-ink:#FFFFFF}
+body.u3{--accent:#B44216;--accent-soft:#FCE8DD;--accent-ink:#FFFFFF}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) body.u2{--accent:#5CC9A9;--accent-soft:#17342B;--accent-ink:#0D1F19}
   :root:not([data-theme="light"]) body.u3{--accent:#FF8A5B;--accent-soft:#3A2218;--accent-ink:#1A0E08}

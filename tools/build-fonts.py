@@ -10,7 +10,7 @@
   -more  Big5 常用字裡其他的字（只有頁面用到這些字時瀏覽器才會下載）
 新增教材後，如果用了常用字以外的字，重跑一次這個腳本即可。
 """
-import glob, os, sys
+import glob, hashlib, os, sys
 from fontTools import subset
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
@@ -73,8 +73,9 @@ for fam, wt, src, name, axes in FONTS:
         print(fn, os.path.getsize(os.path.join(OUT, fn)) // 1024, "KB")
         # 「more」先宣告、範圍寫寬；「site」後宣告優先使用，所以網站已用到的字只會下載 site 檔
         rng = "U+2E80-9FFF,U+F900-FAFF,U+FE30-FE4F,U+FF00-FFEF" if part == "more" else ranges(cps)
+        ver = hashlib.md5(open(os.path.join(OUT, fn), "rb").read()).hexdigest()[:8]  # 換字後網址會變，離線快取才會更新
         css.append("@font-face{font-family:'%s';font-style:normal;font-weight:%s;font-display:swap;"
-                   "src:url('fonts/%s') format('woff2');unicode-range:%s}" % (fam, wt, fn, rng))
+                   "src:url('fonts/%s?v=%s') format('woff2');unicode-range:%s}" % (fam, wt, fn, ver, rng))
     os.remove(tmp)
 open(os.path.join(ROOT, "assets", "fonts.css"), "w", encoding="utf-8").write("\n".join(css) + "\n")
 print("assets/fonts.css written")

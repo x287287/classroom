@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>菸品大解密</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="../assets/fonts.css">
@@ -144,7 +144,27 @@ h1 em{font-style:normal;color:var(--ember)}
   <header>
     <h1>菸品大解密：<em>紙菸、電子煙、加熱菸</em></h1>
     <span class="eyebrow">健康與體育 四上｜單元 2 第 1 課 菸與煙的真相・延伸</span>
+      <button type="button" class="srcbtn" id="srcBtn">資料來源</button>
   </header>
+<div class="srcdlg" id="srcDlg" hidden role="dialog" aria-modal="true" aria-labelledby="srcT"><div class="box">
+  <h2 id="srcT">資料來源與老師補充</h2>
+  <h3>資料來源</h3>
+  <ol>
+    <li>菸害防制法修正條文（2023-03-22 施行）：全面禁止電子煙等類菸品的製造、輸入、販賣、供應、展示、廣告及使用；加熱菸等指定菸品須通過健康風險評估審查；禁菸年齡提高為 20 歲。參考<a href="https://health.tvbs.com.tw/medical/338587">TVBS 健康2.0 報導</a>。</li>
+    <li>衛生福利部國民健康署（2023-06-27）〈<a href="https://www.mohw.gov.tw/fp-16-74984-1.html">民眾攜帶加熱菸入境 代購或自用都違法 依情節輕重 處不同罰鍰</a>〉。</li>
+    <li>World Health Organization (2020). <a href="https://www.who.int/publications-detail-redirect/WHO-HEP-HPR-2020.2"><i>Heated tobacco products: information sheet</i>, 2nd ed.</a>：加熱菸加熱菸草的溫度低於紙菸（通常低於 600°C）；目前沒有證據顯示加熱菸比傳統菸品危害小。</li>
+    <li>國民健康署等單位宣導，引自<a href="https://www.taiwannews.com.tw/ch/news/3801755">台灣英文新聞（2019-10-23）</a>：紙菸的煙含 7,000 多種化學物質，其中 93 種為致癌成分；加熱菸的煙霧同樣含尼古丁和致癌物質。</li>
+    <li>國小健康與體育四上課本 單元 2 第 1 課〈菸與煙的真相〉。</li>
+  </ol>
+  <h3>老師補充</h3>
+  <ul>
+    <li>共 8 幕，約 15 分鐘（含討論）。畫面裡的「約 300°C」是概略值，不同產品的加熱溫度約在 250～350°C 之間。</li>
+    <li>加熱菸是否已有產品通過健康風險評估審查，會隨國健署審查結果變動，上課前可先查國健署最新公告。</li>
+    <li>電子煙常偽裝成文具或玩具：提醒學生撿到不明物品不要碰、不要聞，交給老師或家長。</li>
+  </ul>
+  <button type="button" class="close">關閉</button>
+</div></div>
+
 
   <div class="view">
     <div class="slot">
@@ -606,5 +626,26 @@ html body{padding-bottom:0}
   html body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 }
 </style>
+<style id="src-dlg">
+/* 資料來源按鈕與視窗 */
+.srcbtn{margin-left:auto;align-self:center;appearance:none;border:2px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:999px;min-height:44px;padding:0 18px;font:700 clamp(14px,1.7cqh,18px)/1 var(--body);cursor:pointer}
+.srcbtn:active{transform:scale(.97)}
+.srcdlg{position:fixed;inset:0;z-index:50;background:rgba(5,10,20,.7);display:grid;place-items:center;padding:16px}
+.srcdlg[hidden]{display:none}
+.srcdlg .box{background:#FFFFFF;color:#1F2A27;border-radius:20px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:22px 26px;font:400 17px/1.7 var(--body)}
+.srcdlg h2{margin:0 0 .4rem;font:400 26px/1.3 var(--display)}
+.srcdlg h3{margin:1rem 0 .2rem;font:700 17px/1.4 var(--body);color:#2A7563}
+.srcdlg ol,.srcdlg ul{margin:.2rem 0;padding-left:1.3em}
+.srcdlg li{margin:.2rem 0}
+.srcdlg a{color:#2A64A3}
+.srcdlg .close{display:block;margin:1.2rem auto 0;appearance:none;border:0;background:#2A7563;color:#fff;border-radius:999px;min-height:48px;padding:0 32px;font:700 18px/1 var(--body);cursor:pointer}
+</style>
+<script>
+(function(){var b=document.getElementById('srcBtn'),d=document.getElementById('srcDlg');
+function open(){d.hidden=false;d.querySelector('.close').focus()}function close(){d.hidden=true;b.focus()}
+b.addEventListener('click',open);d.querySelector('.close').addEventListener('click',close);
+d.addEventListener('click',function(e){if(e.target===d)close()});
+d.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Escape')close()});})();
+</script>
 <script src="../assets/home-fab.js"></script>
 </body></html>

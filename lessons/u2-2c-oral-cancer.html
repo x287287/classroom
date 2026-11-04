@@ -44,8 +44,8 @@
  <div class="wrap">
   <div class="k-sec-head"><span class="no">第 1 站</span><h2>口腔癌，數字會說話</h2></div>
   <div class="stats">
-    <div class="card"><b class="n">第 4 名</b><p>口腔癌是台灣<b>男性</b>最常得到的癌症第 4 名，也是男性癌症死亡原因的第 4 名。</p></div>
-    <div class="card"><b class="n">每天約 20 人</b><p>2019 年有 7,468 位男性新診斷口腔癌，平均每天約 20 人。</p></div>
+    <div class="card"><b class="n">第 4 名</b><p>口腔癌是台灣<b>男性</b>最常得到的癌症第 4 名；在全國的癌症死亡原因裡排第 6 名。</p></div>
+    <div class="card"><b class="n">每天約 23 人</b><p>台灣每年有超過 8,000 人新診斷口腔癌，平均每天約 23 人，其中 9 成是男性。</p></div>
     <div class="card"><b class="n">7 成</b><p>口腔癌病人裡，大約 <b>70%</b> 有嚼檳榔，<b>8 成以上</b>有吸菸。</p></div>
     <div class="card"><b class="n">28 倍</b><p>課本資訊小站：嚼檳榔的人得到口腔癌的機會，是一般人的 28 倍。</p></div>
   </div>
@@ -106,7 +106,7 @@
   <div class="think"><b>想一想</b><p>如果家裡有嚼檳榔或吸菸的大人，你可以怎麼提醒他去做口腔檢查？試著用「我訊息」說說看。</p></div>
   <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
     <ul>
-      <li>衛生福利部：口腔癌為我國青壯年男性好發癌症，男性發生率與死亡率皆居第 4 位；108 年男性新診斷 7,468 人，109 年 3,380 人死於口腔癌；當年個案中 81.8% 有吸菸、70% 有嚼檳榔習慣。</li>
+      <li>112 年癌症登記報告（114 年 12 月公布）：口腔癌為男性癌症發生第 4 位、全體第 6 位。114 年死因統計：口腔癌為全體癌症死因第 6 位。</li><li>國民健康署（112 年 7 月）：每年逾 8,000 人新診斷口腔癌（約每天 23 人），9 成為男性；個案中 8 成以上吸菸、7 成嚼檳榔、5 成以上兩者皆有。</li><li>「嚼檳榔者罹患口腔癌的機會是未嚼者的 28 倍」為國民健康署引用的研究數據，與課本資訊小站一致。</li>
       <li>早期發現存活率約 8 成，晚期則不到 4 成；國民健康署補助 30 歲以上嚼檳榔（含已戒）或吸菸民眾每 2 年 1 次口腔黏膜檢查，每年篩檢出近 3,000 名癌前病變及 1,000 多名口腔癌。</li>
       <li>警訊口訣「破、斑、硬、突、腫」：破（超過 2 週未癒合的傷口潰瘍）、斑（不明紅斑或白斑）、硬（黏膜變硬、張口困難）、突（不規則突起）、腫（臉頸部腫塊或不對稱）。頁面插圖為卡通示意，避免使用真實病灶照片。</li>
     </ul>
@@ -123,7 +123,7 @@
 
 <footer class="k-foot wrap">
   <b>資料來源</b>
-  <ol><li>衛生福利部新聞稿〈口腔癌防治〉（口腔黏膜檢查、統計數據、五大警訊）。</li><li>國小健康與體育四上課本 單元 2 第 2 課〈嚼檳榔的危害〉。</li></ol>
+  <ol><li>衛生福利部國民健康署（2023-07-10）〈<a href="https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4705&amp;pid=17306">吸菸、嚼檳榔增加口腔癌風險 定期口腔黏膜檢查 降低26%口腔癌的死亡風險</a>〉。</li><li>衛生福利部 112 年癌症登記報告（2025-12-30 公布），引自<a href="https://www.healthnews.com.tw/article/67251">健康醫療網報導</a>。</li><li>衛生福利部〈<a href="https://www.mohw.gov.tw/cp-16-86970-1.html">114 年死因統計</a>〉（2026-06-22）。</li><li>衛生福利部新聞稿〈口腔癌防治〉（存活率、五大警訊）；<a href="https://newtalk.tw/news/view/2020-11-26/499852">新頭殼報導</a>引國健署資料（嚼檳榔 28 倍）。</li><li>國小健康與體育四上課本 單元 2 第 2 課〈嚼檳榔的危害〉。</li></ol>
 </footer>
 
 <script src="../assets/kit.js"></script>
@@ -138,7 +138,7 @@ var S=[
 document.querySelectorAll('#fiveBtns button').forEach(function(b){b.addEventListener('click',function(){var i=+b.dataset.i;document.querySelectorAll('#fiveBtns button').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')});document.querySelectorAll('.sign').forEach(function(g,k){g.classList.toggle('on',k===i)});var m=document.getElementById('sInfo');m.className='say bad';m.innerHTML='<div class="t">'+S[i].t+'</div><p class="big">'+S[i].d+'</p>'})});
 
 KIT.quiz(document.getElementById('quizBox'),[
-  {q:'口腔癌是台灣男性最常見癌症的第幾名？',o:['第 1 名','第 4 名','第 20 名'],a:1,e:'每天大約有 20 位男性被診斷出口腔癌。'},
+  {q:'口腔癌是台灣男性最常見癌症的第幾名？',o:['第 1 名','第 4 名','第 20 名'],a:1,e:'台灣每天大約有 23 人被診斷出口腔癌，9 成是男性。'},
   {q:'口腔癌的五個警訊口訣是？',o:['破、斑、硬、突、腫','紅、橙、黃、綠、藍','酸、甜、苦、辣、鹹'],a:0,e:'出現這些變化要盡快看醫生。'},
   {q:'嘴巴的傷口超過多久沒好，要特別注意？',o:['2 天','2 個星期','2 年'],a:1,e:'一般嘴破約一兩週會好，超過 2 週要就醫。'},
   {q:'政府提供誰免費的口腔黏膜檢查？',o:['所有小朋友','30 歲以上有嚼檳榔或吸菸的人','只有醫生'],a:1,e:'每 2 年一次，帶健保卡就可以做。'}

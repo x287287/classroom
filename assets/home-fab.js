@@ -102,6 +102,17 @@
     if (wrap.parentNode !== host) host.appendChild(wrap);
     if (ov.parentNode !== host) host.appendChild(ov);
   }
+  /* 上課工具視窗（計時器、抽籤、小白板） */
+  if (me && !window.__classTools) {
+    var t = document.createElement("script");
+    t.src = me.replace(/home-fab\.js(\?.*)?$/, "class-tools.js");
+    document.head.appendChild(t);
+  }
+  /* 離線使用：讓這台電腦存一份教材（只在正式網站上執行） */
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && me) {
+    try { navigator.serviceWorker.register(new URL("../sw.js", me).href, { scope: new URL("../", me).href }).catch(function () {}); } catch (e) {}
+  }
+
   document.addEventListener("fullscreenchange", place);
   document.addEventListener("webkitfullscreenchange", place);
   if (document.body) place();

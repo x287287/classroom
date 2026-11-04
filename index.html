@@ -9,7 +9,7 @@
 /* Layout: 方格簿 grid paper; a slim cover band, a toolbar (search + filters), then materials grouped by 單元 as index cards. */
 :root{
   --paper:#F4F8F6;--grid:#D9E8E1;--ink:#1E3A34;--muted:#5C7770;--card:#FFFFFF;--line:#C9DBD3;
-  --accent:#E8622C;--accent-ink:#FFFFFF;--leaf:#2F8F5B;--sun:#F5B521;--sky:#3E86C8;--plum:#9A5BC4;
+  --accent:#C4501E;--accent-ink:#FFFFFF;--leaf:#23784B;--sun:#F5B521;--sky:#2C6FAD;--plum:#9A5BC4;
   --display:"LXGW WenKai TC","Kaiti TC","DFKai-SB","BiauKai",serif;
   --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   color-scheme:light;
@@ -135,7 +135,7 @@ footer{color:var(--muted);font-size:13px;text-align:center}
 
   <main class="units" id="units"></main>
 
-  <footer>教室小書櫃</footer>
+  <footer>教室小書櫃<span id="offline"></span></footer>
 </div>
 
 <script>
@@ -324,6 +324,21 @@ $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)re
 $("gradeSel").addEventListener("change",e=>{curGrade=e.target.value;render();});
 $("q").addEventListener("input",e=>{query=e.target.value;render();});
 render();
+/* 離線使用：把教材存到這台電腦（只在正式網站上執行） */
+(function(){
+  if(!("serviceWorker" in navigator)||(location.protocol!=="https:"&&location.hostname!=="localhost"))return;
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  const el=$("offline");let tries=0;
+  async function check(){
+    try{
+      const urls=MATERIALS.map(m=>m.url).filter(Boolean);let n=0;
+      for(const u of urls){if(await caches.match(u))n++;}
+      el.textContent=n>=urls.length?"・已存到這台電腦，網路斷線也能用":"・正在存到這台電腦（"+n+" / "+urls.length+"）";
+      if(n<urls.length&&++tries<40)setTimeout(check,3000);
+    }catch(e){}
+  }
+  navigator.serviceWorker.ready.then(check).catch(()=>{});
+})();
 </script>
 </body>
 </html>

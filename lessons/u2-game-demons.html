@@ -101,7 +101,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background-ima
 <div class="app" id="app">
   <div class="top">
     <div><h1>趕走三惡魔</h1><div class="sub">健康與體育 四上｜單元 2 拒菸拒酒拒檳榔・統整遊戲</div></div>
-    <div class="ctrl"><button type="button" id="bSet">設定</button><button type="button" id="bFs">全螢幕</button></div>
+    <div class="ctrl"><button type="button" id="bTeach" class="tbtn">老師說明</button><button type="button" id="bSet">設定</button><button type="button" id="bFs">全螢幕</button></div>
   </div>
   <div class="main">
     <div class="team red" id="tRed"><span class="yt">輪到你們</span><span class="nm" id="nRed">紅隊</span><span class="sc" id="sRed">0</span><span class="lbl">攻擊次數</span></div>
@@ -131,7 +131,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background-ima
     </div>
     <div><b>每題時間</b><div class="chips" id="tChips" style="margin-top:.4rem"><button class="chip" type="button" data-t="0" aria-pressed="true">不計時</button><button class="chip" type="button" data-t="20">20 秒</button><button class="chip" type="button" data-t="30">30 秒</button></div></div>
     <div><b>每隻惡魔的血量</b><div class="chips" id="hChips" style="margin-top:.4rem"><button class="chip" type="button" data-h="3">3（短）</button><button class="chip" type="button" data-h="4" aria-pressed="true">4</button><button class="chip" type="button" data-h="6">6（長）</button></div></div>
-    <div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bStart" style="font-size:1.3rem;min-height:3.4rem;padding:0 2rem">開始對戰</button></div>
+    <div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bStart" style="font-size:1.3rem;min-height:3.4rem;padding:0 2rem">開始對戰</button><button class="btn" type="button" id="bTeach2" style="min-height:3.4rem">老師說明</button></div>
   </div>
 </div>
 
@@ -207,6 +207,42 @@ document.querySelectorAll('#hChips .chip').forEach(function(b){b.addEventListene
 $('bFs').addEventListener('click',function(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(function(){})}catch(e){}});
 document.addEventListener('fullscreenchange',function(){$('bFs').textContent=document.fullscreenElement?'離開全螢幕':'全螢幕'});
 drawDemons();drawTeams();$('qcard').innerHTML='<div class="qt" style="text-align:center">設定好隊名後，按「開始對戰」</div>';
+</script>
+<div class="tdlg" id="tDlg" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
+  <h2 id="tT">老師說明：趕走三惡魔</h2>
+  <h3>對應課本</h3>
+  <ul><li>單元 2〈拒菸拒酒拒檳榔〉三課（課本 p.30–53）：菸的危害、酒與檳榔、拒絕的技巧。</li><li>題庫共 36 題，菸、酒、檳榔惡魔各 12 題，同一隻惡魔的題目出完之前不會重複。</li></ul>
+  <h3>玩法</h3>
+  <ol>
+    <li>全班分成紅、藍兩隊，按「設定」可以改隊名、每題時間和惡魔血量。</li>
+    <li>兩隊輪流派一個人上台作答。答對就攻擊惡魔一次。</li>
+    <li>答錯時，可以按「換對方搶答」。搶答也答錯就公布答案。</li>
+    <li>菸、酒、檳榔三隻惡魔都被趕走就結束，攻擊次數多的隊伍獲勝。</li>
+  </ol>
+  <h3>時間安排</h3>
+  <ul><li>預設（血量 4、不計時）約 30 分鐘。只有 15～20 分鐘時，把血量改成 3、每題 20 秒。</li><li>每題公布答案後，可以停下來請學生說說「為什麼」，再按下一題。</li></ul>
+  <h3>小提醒</h3>
+  <ul><li>可以讓上台的同學先和隊友討論 10 秒，讓每個人都參與。</li><li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js）。</li></ul>
+  <button type="button" class="close">關閉</button>
+</div></div>
+<style id="teach-dlg">
+/* 老師說明視窗 */
+.tbtn{appearance:none;border-radius:999px;min-height:2.9rem;padding:.3rem 1.1rem;cursor:pointer;font:inherit;font-family:var(--font-display);font-size:1rem}
+.tdlg{position:fixed;inset:0;z-index:200;background:rgba(10,15,30,.72);display:grid;place-items:center;padding:16px}
+.tdlg[hidden]{display:none}
+.tdlg .box{background:#FFFFFF;color:#1F2A27;border-radius:22px;max-width:780px;width:100%;max-height:90vh;overflow:auto;padding:22px 28px;font-size:1rem;line-height:1.7;text-align:left}
+.tdlg h2{margin:0 0 .3rem;font-family:var(--font-display);font-weight:400;font-size:1.7rem;color:#1F2A27}
+.tdlg h3{margin:1rem 0 .2rem;font-size:1.05rem;color:#2A7563}
+.tdlg ul,.tdlg ol{margin:.2rem 0;padding-left:1.3em}
+.tdlg li{margin:.15rem 0}
+.tdlg .close{display:block;margin:1.2rem auto 0;appearance:none;border:0;background:#2A7563;color:#fff;border-radius:999px;min-height:48px;padding:0 32px;font:inherit;font-weight:700;cursor:pointer}
+</style>
+<script>
+(function(){var b=document.getElementById('bTeach'),d=document.getElementById('tDlg');
+function open(){d.hidden=false;d.querySelector('.close').focus()}function close(){d.hidden=true;b.focus()}
+b.addEventListener('click',open);var b2=document.getElementById('bTeach2');if(b2)b2.addEventListener('click',function(){b=b2;open()});d.querySelector('.close').addEventListener('click',close);
+d.addEventListener('click',function(e){if(e.target===d)close()});
+d.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Escape')close()});})();
 </script>
 <script src="../assets/home-fab.js"></script>
 </body>

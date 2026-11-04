@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>看不見的菸惡魔</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="../assets/fonts.css">
@@ -142,7 +142,27 @@ h1 em{font-style:normal;color:var(--ember)}
   <header>
     <h1>看不見的<em>菸惡魔</em>：二手菸與三手菸</h1>
     <span class="eyebrow">健康與體育 四上｜單元 2 第 1 課 菸與煙的真相</span>
+      <button type="button" class="srcbtn" id="srcBtn">資料來源</button>
   </header>
+<div class="srcdlg" id="srcDlg" hidden role="dialog" aria-modal="true" aria-labelledby="srcT"><div class="box">
+  <h2 id="srcT">資料來源與老師補充</h2>
+  <h3>資料來源</h3>
+  <ol>
+    <li>衛生福利部・國民健康署（2021-08-23）〈<a href="https://www.mohw.gov.tw/cp-2704-62868-1.html">因疫而害 家庭二、三手菸暴露率攀升</a>〉：三手菸是菸熄滅後殘留在環境中的污染物，暴露時間可長達數週至數月；免費戒菸專線 0800-63-63-63。</li>
+    <li>U.S. Surgeon General (2006). <a href="https://webarchive.library.unt.edu/web/20121017190916/http://www.surgeongeneral.gov/library/reports/secondhandsmoke/factsheet6.html"><i>The Health Consequences of Involuntary Exposure to Tobacco Smoke</i>, Fact Sheet</a>：二手菸會造成嬰幼兒支氣管炎、肺炎，增加中耳炎風險，使氣喘發作更頻繁；二手菸沒有安全的暴露量。</li>
+    <li>ASH (2020). <a href="https://ash.org.uk/uploads/SecondhandSmoke.pdf"><i>Fact Sheet: Secondhand Smoke</i></a>：許多有毒氣體在側流煙中的濃度較高；室內的煙約 85% 來自側流煙。</li>
+    <li>Sleiman, M. et al. (2010). Formation of carcinogens indoors by surface-mediated reactions of nicotine with nitrous acid. <i>PNAS</i>, 107(15)：殘留的尼古丁會與空氣中的亞硝酸反應，生成致癌的菸草特有亞硝胺。</li>
+    <li>國小健康與體育四上課本 單元 2 第 1 課〈菸與煙的真相〉。</li>
+  </ol>
+  <h3>老師補充</h3>
+  <ul>
+    <li>每一幕可點畫面播放／暫停，左右滑動換幕；共 8 幕，約 15 分鐘（含討論）。</li>
+    <li>第 7 幕「懷疑一下」對應課本的批判思考：直接吸菸對吸菸者傷害最大，二、三手菸的重點是「不吸菸的人也躲不掉」。</li>
+    <li>談到家人吸菸時，避免讓學生覺得被指責；把重點放在「可以怎麼做」，例如有禮貌地請家人到戶外、鼓勵撥打戒菸專線。</li>
+  </ul>
+  <button type="button" class="close">關閉</button>
+</div></div>
+
 
   <div class="view">
     <div class="slot">
@@ -617,5 +637,26 @@ html body{padding-bottom:0}
   html body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 }
 </style>
+<style id="src-dlg">
+/* 資料來源按鈕與視窗 */
+.srcbtn{margin-left:auto;align-self:center;appearance:none;border:2px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:999px;min-height:44px;padding:0 18px;font:700 clamp(14px,1.7cqh,18px)/1 var(--body);cursor:pointer}
+.srcbtn:active{transform:scale(.97)}
+.srcdlg{position:fixed;inset:0;z-index:50;background:rgba(5,10,20,.7);display:grid;place-items:center;padding:16px}
+.srcdlg[hidden]{display:none}
+.srcdlg .box{background:#FFFFFF;color:#1F2A27;border-radius:20px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:22px 26px;font:400 17px/1.7 var(--body)}
+.srcdlg h2{margin:0 0 .4rem;font:400 26px/1.3 var(--display)}
+.srcdlg h3{margin:1rem 0 .2rem;font:700 17px/1.4 var(--body);color:#2A7563}
+.srcdlg ol,.srcdlg ul{margin:.2rem 0;padding-left:1.3em}
+.srcdlg li{margin:.2rem 0}
+.srcdlg a{color:#2A64A3}
+.srcdlg .close{display:block;margin:1.2rem auto 0;appearance:none;border:0;background:#2A7563;color:#fff;border-radius:999px;min-height:48px;padding:0 32px;font:700 18px/1 var(--body);cursor:pointer}
+</style>
+<script>
+(function(){var b=document.getElementById('srcBtn'),d=document.getElementById('srcDlg');
+function open(){d.hidden=false;d.querySelector('.close').focus()}function close(){d.hidden=true;b.focus()}
+b.addEventListener('click',open);d.querySelector('.close').addEventListener('click',close);
+d.addEventListener('click',function(e){if(e.target===d)close()});
+d.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Escape')close()});})();
+</script>
 <script src="../assets/home-fab.js"></script>
 </body></html>

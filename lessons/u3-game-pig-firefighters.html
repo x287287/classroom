@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../assets/kit.css">
 <style>
 /* 遊戲固定使用自己的配色（不跟著系統深色模式）：暖色消防局風格，左側關卡地圖，右側大場景＋問題 */
-:root{color-scheme:light;--ink:#2B2320;--muted2:#6B5E57;--paper:#FFF7EC;--card:#FFFFFF;--line2:#EADBC8;--fire:#D9481A;--fire2:#FF7A45;--ok:#1E8A5A;--no:#C8414B;--gold:#F2A900}
+:root{color-scheme:light;--ink:#2B2320;--muted2:#6B5E57;--paper:#FFF7EC;--card:#FFFFFF;--line2:#EADBC8;--fire:#C23E14;--fire2:#FF7A45;--ok:#1E8A5A;--no:#C8414B;--gold:#F2A900}
 html,body{height:100%}
 body{background:linear-gradient(180deg,#FFE7CF 0%,var(--paper) 40%);color:var(--ink);overflow:hidden}
 .app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(6px,1.2vh,14px);padding-block:clamp(8px,1.6vh,18px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -102,7 +102,7 @@ body{background:linear-gradient(180deg,#FFE7CF 0%,var(--paper) 40%);color:var(--
 <div class="app">
   <div class="top">
     <div><h1><span class="badge" aria-hidden="true">119</span>小豬消防隊</h1><div class="sub">健康與體育 四上｜單元 3 熱與火的危機・統整遊戲</div></div>
-    <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap"><span class="stars" id="totStars">★ 0 / 15</span><button type="button" id="bFs">全螢幕</button><button type="button" id="bReset">重新開始</button></div>
+    <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap"><span class="stars" id="totStars">★ 0 / 15</span><button type="button" id="bTeach" class="tbtn">老師說明</button><button type="button" id="bFs">全螢幕</button><button type="button" id="bReset">重新開始</button></div>
   </div>
   <div class="main">
     <nav class="map" id="map" aria-label="關卡"><h2>闖關地圖</h2></nav>
@@ -172,6 +172,42 @@ $('bReset').addEventListener('click',function(){st={open:1,stars:[0,0,0,0,0],cur
 $('bFs').addEventListener('click',function(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(function(){})}catch(e){}});
 document.addEventListener('fullscreenchange',function(){$('bFs').textContent=document.fullscreenElement?'離開全螢幕':'全螢幕'});
 begin(0);
+</script>
+<div class="tdlg" id="tDlg" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
+  <h2 id="tT">老師說明：小豬消防隊</h2>
+  <h3>對應課本</h3>
+  <ul><li>單元 3〈熱與火的危機〉三課（課本 p.54–81）。</li><li>五關依序是：熱湯打翻了（灼燙傷急救）、用電大檢查（用電安全）、油鍋起火了（用火安全・滅火器）、半夜警報響（逃生避難・119）、百貨公司大逃生（公共場所・低姿勢・緩降機・停躺滾）。</li></ul>
+  <h3>玩法</h3>
+  <ol>
+    <li>從左邊的闖關地圖選關卡，過一關才會打開下一關。</li>
+    <li>題目有單選、複選和排順序。答錯會出現提示，可以再試一次。</li>
+    <li>每關最多 3 顆星，答錯越少星星越多，全部 5 關共 15 顆星。</li>
+    <li>五關都完成後會出現「小小消防員證書」，可以輸入班級或名字，只顯示在畫面上，不會存檔或上傳。</li>
+  </ol>
+  <h3>時間安排</h3>
+  <ul><li>五關全部玩完約 30 分鐘；也可以每上完一課玩對應的 1～2 關。</li></ul>
+  <h3>小提醒</h3>
+  <ul><li>可以全班一起玩：每題先請學生用手勢或小白板表態，再請一位同學上台點選。</li><li>排順序的題目（沖脫泡蓋送、拉瞄壓掃）適合請學生邊點邊做動作。</li><li>想修改關卡或題目，跟 Claude 說就好（資料在 lessons/data/u3-game-levels.js）。</li></ul>
+  <button type="button" class="close">關閉</button>
+</div></div>
+<style id="teach-dlg">
+/* 老師說明視窗 */
+.tbtn{appearance:none;border-radius:999px;min-height:2.9rem;padding:.3rem 1.1rem;cursor:pointer;font:inherit;font-family:var(--font-display);font-size:1rem}
+.tdlg{position:fixed;inset:0;z-index:200;background:rgba(10,15,30,.72);display:grid;place-items:center;padding:16px}
+.tdlg[hidden]{display:none}
+.tdlg .box{background:#FFFFFF;color:#1F2A27;border-radius:22px;max-width:780px;width:100%;max-height:90vh;overflow:auto;padding:22px 28px;font-size:1rem;line-height:1.7;text-align:left}
+.tdlg h2{margin:0 0 .3rem;font-family:var(--font-display);font-weight:400;font-size:1.7rem;color:#1F2A27}
+.tdlg h3{margin:1rem 0 .2rem;font-size:1.05rem;color:#2A7563}
+.tdlg ul,.tdlg ol{margin:.2rem 0;padding-left:1.3em}
+.tdlg li{margin:.15rem 0}
+.tdlg .close{display:block;margin:1.2rem auto 0;appearance:none;border:0;background:#2A7563;color:#fff;border-radius:999px;min-height:48px;padding:0 32px;font:inherit;font-weight:700;cursor:pointer}
+</style>
+<script>
+(function(){var b=document.getElementById('bTeach'),d=document.getElementById('tDlg');
+function open(){d.hidden=false;d.querySelector('.close').focus()}function close(){d.hidden=true;b.focus()}
+b.addEventListener('click',open);d.querySelector('.close').addEventListener('click',close);
+d.addEventListener('click',function(e){if(e.target===d)close()});
+d.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Escape')close()});})();
 </script>
 <script src="../assets/home-fab.js"></script>
 </body>
