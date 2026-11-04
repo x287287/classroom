@@ -7,7 +7,7 @@
 - `lessons/`：每份教材一個獨立的 HTML 檔。補充教材命名為 `u<單元>-<課><a,b,c…>-<英文代號>.html`，統整遊戲為 `u<單元>-game-<代號>.html`。
 - `lessons/data/`：統整遊戲的題庫／關卡（`u2-game-questions.js`、`u3-game-levels.js`），檔頭有格式說明；改題目只要改這裡。
 - `assets/home-fab.js`：共用的左下角懸浮按鈕：「⌂ 回書櫃」與「QR」（顯示這份教材網址的 QR Code，產生器是 `assets/vendor/qrcode.js`，MIT）。它也會自動載入 `assets/class-tools.js` 並註冊離線用的 `sw.js`。
-- `assets/class-tools.js`：「上課工具」懸浮視窗（計時器、抽籤、小白板），每份教材打開時出現在右上角（手機寬度預設收起），可拖曳、收起；位置依教材分別記在 localStorage（`ctPos:<檔名>`），計時器與抽籤紀錄（`ctTimer`、`ctDraw`）跨教材延續。抽籤只用座號，不放學生姓名。
+- `assets/class-tools.js`：「上課工具」懸浮視窗（計時器：拖拉轉盤設定，10／60 分鐘盤；抽籤；白板：全螢幕白板／格線／黑板；畫筆：直接畫在教材上、有螢光筆、可暫停去點教材、跟著頁面捲動），每份教材打開時出現在右上角（手機寬度預設收起），可拖曳、收起；位置依教材分別記在 localStorage（`ctPos:<檔名>`），計時器與抽籤紀錄（`ctTimer`、`ctDraw`）跨教材延續。抽籤只用座號，不放學生姓名。
 - `sw.js`：離線快取。首頁、所有教材（從 `MATERIALS` 讀取）、共用檔與 `-site` 字型會存到教室電腦；有網路時一律先抓最新版。新增共用檔時記得加到 `CORE`。
 - `assets/fonts.css`、`assets/fonts/`：自架字型（Huninn 粉圓、Noto Sans TC、霞鶩文楷 TC，皆 OFL，授權見 `assets/fonts/OFL.txt`），不連 Google Fonts。每份教材用 `<link rel="stylesheet" href="../assets/fonts.css">` 載入。由 `tools/build-fonts.py` 產生：`-site` 檔含網站目前用到的字，`-more` 檔含其他 Big5 常用字（用到才下載）。新教材若用了罕用字，重跑腳本。
 - `assets/kit.css`、`assets/kit.js`：補充教材共用的版面與互動元件（`KIT.quiz`、`KIT.ox`、`KIT.order`、`KIT.sort`、`KIT.stepper`）。`<body class="u2">` 或 `class="u3"` 套用單元主色。
