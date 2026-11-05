@@ -78,6 +78,13 @@
     ".ct-range input{width:76px;min-height:46px;border:2px solid #C9DBD3;border-radius:12px;text-align:center;font:700 20px/1 " + FONT + ";color:#1F2A27;background:#FFFFFF;user-select:text;-webkit-user-select:text}",
     ".ct-step{min-width:46px}",
     ".ct-hist{font-size:14px;color:#4A5A55;min-height:1.5em;overflow-wrap:anywhere}",
+    ".ct-abs{display:grid;gap:8px;padding:10px;border:2px dashed #C9DBD3;border-radius:14px;background:#F8FAF9}",
+    ".ct-abs[hidden]{display:none}",
+    ".ct-abs p{margin:0;font-size:14px;color:#4A5A55}",
+    ".ct-absgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-height:260px;overflow:auto;touch-action:pan-y}",
+    ".ct-absgrid button{min-height:44px;border-radius:10px;border:2px solid #C9DBD3;background:#FFFFFF;color:#1E3A34;font-variant-numeric:tabular-nums}",
+    ".ct-absgrid button[aria-pressed=true]{background:#FBE3E5;border-color:#B0333D;color:#B0333D;text-decoration:line-through}",
+    ".ct-b.abs{border-style:dashed}",
     ".ct-note{font-size:14px;color:#4A5A55;margin:0}",
     /* 大畫面 */
     ".ct-big{position:fixed;inset:0;z-index:" + (Z + 3) + ";background:#10201C;color:#FFFFFF;display:grid;grid-template-rows:1fr auto;place-items:center;padding:24px;font-family:" + FONT + "}",
@@ -115,6 +122,9 @@
     /* 工具列（白板、畫筆共用） */
     ".ct-bar{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;padding:8px 10px;max-width:calc(100vw - 20px);background:#FFFFFF;border:2px solid #1E3A34;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:1;touch-action:none}",
     ".ct-bar.bottom{top:auto;bottom:10px}",
+    /* 畫筆工具列在下方時，讓出左下角的「回書櫃」按鈕 */
+    ".ct-pen .ct-bar.bottom{left:calc(50% + 120px);max-width:calc(100vw - 260px)}",
+    "@media (max-width:700px){.ct-pen .ct-bar.bottom{left:50%;max-width:calc(100vw - 20px);bottom:84px}}",
     ".ct-bar .sep{width:2px;align-self:stretch;background:#E3ECE8;margin:0 2px}",
     ".ct-bar .ttl{font:400 18px/1 " + DISPLAY + ";color:#1E3A34;padding:0 4px}",
     ".ct-sw{width:46px;height:46px;border-radius:50%;border:3px solid #FFFFFF;box-shadow:0 0 0 2px #C9DBD3}",
@@ -176,8 +186,8 @@
   }
   tabs.addEventListener("click", function (e) { var b = e.target.closest("button[data-t]"); if (b) showTab(b.dataset.t); });
 
-  /* 收起／展開：大螢幕預設展開，手機（學生掃 QR 打開）預設收起 */
-  var collapsed = window.innerWidth < 900;
+  /* 收起／展開：每次打開教材都先收起，不擋畫面 */
+  var collapsed = true; /* 預設收起成一條，要用時再點「展開」 */
   function setCollapsed(c) {
     collapsed = c;
     panel.classList.toggle("collapsed", c);
@@ -464,6 +474,9 @@
 
   /* ---------- 抽籤 ---------- */
   var D = load("ctDraw", { max: 30, norep: true, drawn: [] });
+  /* 未到的號碼只算當天：隔天打開會自動清空 */
+  var TODAY = new Date().toDateString();
+  if (!D.absent || D.absentDay !== TODAY) { D.absent = []; D.absentDay = TODAY; }
   var dRange = el("div", "ct-range");
   dRange.appendChild(el("span", "", "座號 1 到"));
   var dDec = dRange.appendChild(btn("ct-b ct-step", "−", "減少"));
@@ -479,12 +492,33 @@
   var bDReset = dCtl2.appendChild(btn("ct-b", "重新開始"));
   var bBigD = dCtl2.appendChild(btn("ct-b", "放大"));
   var dHist = el("div", "ct-hist");
-  [dRange, dNum, dCtl, dCtl2, dHist].forEach(function (x) { secs.draw.appendChild(x); });
+  var bAbs = btn("ct-b abs", "未到");
+  var dAbsRow = el("div", "ct-row even"); dAbsRow.appendChild(bAbs);
+  var dAbs = el("div", "ct-abs");
+  dAbs.hidden = true;
+  dAbs.appendChild(el("p", "", "點選今天沒來的號碼，抽籤就不會抽到。再點一次可以取消。"));
+  var dAbsGrid = dAbs.appendChild(el("div", "ct-absgrid"));
+  dAbsGrid.setAttribute("role", "group");
+  dAbsGrid.setAttribute("aria-label", "未到的號碼");
+  var dAbsCtl = dAbs.appendChild(el("div", "ct-row even"));
+  var bAbsClr = dAbsCtl.appendChild(btn("ct-b sm", "全部到齊"));
+  var bAbsDone = dAbsCtl.appendChild(btn("ct-b sm fill", "完成"));
+  [dRange, dAbsRow, dAbs, dNum, dCtl, dCtl2, dHist].forEach(function (x) { secs.draw.appendChild(x); });
+  bAbs.addEventListener("click", function () { dAbs.hidden = !dAbs.hidden; renderD(); clampPos(); });
+  bAbsDone.addEventListener("click", function () { dAbs.hidden = true; renderD(); clampPos(); bAbs.focus(); });
+  bAbsClr.addEventListener("click", function () { D.absent = []; saveD(); renderD(); });
+  dAbsGrid.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-n]"); if (!b) return;
+    var n = +b.dataset.n, i = D.absent.indexOf(n);
+    if (i < 0) D.absent.push(n); else D.absent.splice(i, 1);
+    D.absent.sort(function (a, c) { return a - c; });
+    saveD(); renderD();
+  });
 
   var rolling = false, lastPick = null;
   function saveD() { save("ctDraw", D); }
-  function pool() { var a = []; for (var i = 1; i <= D.max; i++) if (!D.norep || D.drawn.indexOf(i) < 0) a.push(i); return a; }
-  function setMax(n) { n = Math.max(2, Math.min(99, Math.round(+n) || D.max)); D.max = n; D.drawn = D.drawn.filter(function (x) { return x <= n; }); saveD(); renderD(); }
+  function pool() { var a = []; for (var i = 1; i <= D.max; i++) if (D.absent.indexOf(i) < 0 && (!D.norep || D.drawn.indexOf(i) < 0)) a.push(i); return a; }
+  function setMax(n) { n = Math.max(2, Math.min(99, Math.round(+n) || D.max)); D.max = n; D.drawn = D.drawn.filter(function (x) { return x <= n; }); D.absent = D.absent.filter(function (x) { return x <= n; }); saveD(); renderD(); }
   dDec.addEventListener("click", function () { setMax(D.max - 1); });
   dInc.addEventListener("click", function () { setMax(D.max + 1); });
   dIn.addEventListener("change", function () { setMax(dIn.value); });
@@ -519,7 +553,16 @@
     bNorep.textContent = D.norep ? "不重複 ✓" : "可重複";
     bDraw.disabled = rolling || !p.length;
     bDraw.textContent = p.length ? "抽一個" : "全部抽完了";
-    dHist.textContent = D.drawn.length ? "已抽：" + D.drawn.join("、") + (D.norep ? "（還剩 " + p.length + " 個）" : "") : "還沒抽過，按「抽一個」開始。";
+    dHist.textContent = (D.drawn.length ? "已抽：" + D.drawn.join("、") + (D.norep ? "（還剩 " + p.length + " 個）" : "") : "還沒抽過，按「抽一個」開始。");
+    bAbs.textContent = dAbs.hidden ? (D.absent.length ? "未到：" + D.absent.join("、") + " 號（點這裡修改）" : "設定未到的號碼") : "設定未到的號碼";
+    bAbs.setAttribute("aria-expanded", dAbs.hidden ? "false" : "true");
+    if (!dAbs.hidden) {
+      if (dAbsGrid.childNodes.length !== D.max) {
+        dAbsGrid.innerHTML = "";
+        for (var i = 1; i <= D.max; i++) { var b = btn("", String(i), i + " 號"); b.dataset.n = i; dAbsGrid.appendChild(b); }
+      }
+      dAbsGrid.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", D.absent.indexOf(+b.dataset.n) >= 0 ? "true" : "false"); });
+    }
     if (bigMode === "draw") renderBig();
   }
 
@@ -553,7 +596,7 @@
       if (!rolling) bigV.textContent = lastPick != null ? lastPick : "?";
       bigV.className = "v draw";
       var p = pool();
-      bigCap.textContent = "座號 1～" + D.max + (D.norep ? "・還剩 " + p.length + " 個" : "");
+      bigCap.textContent = "座號 1～" + D.max + (D.absent.length ? "・未到 " + D.absent.length + " 人" : "") + (D.norep ? "・還剩 " + p.length + " 個" : "");
       var d = btn("fill", p.length ? "抽一個" : "全部抽完了");
       d.disabled = rolling || !p.length;
       d.addEventListener("click", doDraw);
@@ -744,9 +787,10 @@
   var penS = makeSurface(pen, true);
   penS.pen.c = "#D32F2F";
   var bPause = btn("ct-b", "點教材");
-  var bMove = btn("ct-b", "移到下面", "工具列移到畫面下方");
+  var bMove = btn("ct-b", "移到上面", "工具列移到畫面上方");
   var bPenClose = btn("ct-b fill", "收起畫筆");
   var penBar = makeBar(penS, { title: "畫筆", highlighter: true, extra: [el("span", "sep"), bPause, bMove, bPenClose], onRender: function () { renderPenTab(); } });
+  penBar.bar.classList.add("bottom"); /* 畫筆工具列預設在畫面下方 */
   pen.appendChild(penBar.bar);
   var penOn = false, penDrawing = false;
   function penSet(on, drawing) {
@@ -760,7 +804,7 @@
   }
   function penPause(p) { if (penOn) penSet(true, !p); }
   bPause.addEventListener("click", function () { penSet(true, !penDrawing); });
-  bMove.addEventListener("click", function () { var b = penBar.bar.classList.toggle("bottom"); bMove.textContent = b ? "移到上面" : "移到下面"; });
+  bMove.addEventListener("click", function () { var b = penBar.bar.classList.toggle("bottom"); bMove.textContent = b ? "移到上面" : "移到下面"; bMove.setAttribute("aria-label", b ? "工具列移到畫面上方" : "工具列移到畫面下方"); });
   bPenClose.addEventListener("click", function () { penSet(false, false); tabBtns.pen.focus(); });
   pen.addEventListener("keydown", function (e) {
     stop(e);
@@ -818,7 +862,7 @@
     renderD();
     renderBoardTab();
     renderPenTab();
-    if (!pos && !collapsed) { autoY = findFreeY(); clampPos(); }
+    if (!pos) { autoY = findFreeY(); clampPos(); }
   }
   if (document.body) init();
   else document.addEventListener("DOMContentLoaded", init);
