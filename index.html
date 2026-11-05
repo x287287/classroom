@@ -49,7 +49,7 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 
 .units{display:grid;gap:16px}
 .unit h2 .g{font-family:var(--body);font-size:13px;font-weight:500;color:var(--muted);border:1px solid var(--line);background:var(--card);border-radius:6px;padding:0 8px}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:14px;margin-top:12px}
 .card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;min-width:0;color:inherit;text-decoration:none}
 .chip{justify-self:start;font-size:12px;font-weight:700;letter-spacing:.06em;padding:2px 10px;border-radius:999px;color:var(--accent-ink)}
 .chip.pdf{background:var(--accent)}.chip.slide{background:var(--sky)}.chip.video{background:var(--plum)}.chip.quiz{background:var(--leaf)}.chip.other{background:var(--muted)}
@@ -75,7 +75,17 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 .card-link{display:grid;grid-template-rows:auto auto 1fr auto auto;gap:10px;padding:16px;height:100%;color:inherit;text-decoration:none;border-radius:14px}
 .card:hover{border-color:var(--ink)}
 .card .meta{font-size:13px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:2px 8px;justify-self:start;font-variant-numeric:tabular-nums}
-.done-btn{position:absolute;bottom:8px;right:10px;appearance:none;border:2px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:4px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}
+.acts{position:absolute;bottom:8px;right:10px;display:flex;gap:6px}
+.pin-btn{appearance:none;border:2px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:4px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}
+.pin-btn[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:#1E3A34;font-weight:700}
+.card.is-week{box-shadow:inset 0 4px 0 var(--sun)}
+.recent.week{border-color:var(--sun);border-style:solid;background:color-mix(in srgb,var(--sun) 9%,var(--card))}
+.recent.week .rc{background:var(--card)}
+.week .rc .meta{font-size:12px;color:var(--muted)}
+.week-btns{display:flex;gap:8px;flex-wrap:wrap}
+.view-btns{display:flex;gap:8px;flex-wrap:wrap}
+.wrap{zoom:var(--zoom,1)}
+.done-btn{appearance:none;border:2px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:4px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}
 .done-btn[aria-pressed="true"]{background:var(--leaf);border-color:var(--leaf);color:#fff;font-weight:700}
 .card.is-done{background:color-mix(in srgb,var(--leaf) 7%,var(--card));border-color:color-mix(in srgb,var(--leaf) 45%,var(--line))}
 .card.is-done h3{color:var(--muted)}
@@ -126,10 +136,13 @@ footer{color:var(--muted);font-size:13px;text-align:center}
         <option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option>
         <option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option>
       </select>
+      <div class="view-btns"><button class="mini" type="button" id="fontBtn">字：標準</button><button class="mini" type="button" id="fsBtn">⛶ 全螢幕</button></div>
     </div>
     <div class="tabs" role="group" aria-label="教材類型" id="tabs"></div>
     <div class="allbtns" id="allBtns"><button class="mini" type="button" id="expandAll">全部展開</button><button class="mini" type="button" id="collapseAll">全部收合</button><button class="mini" type="button" id="todoOnly" aria-pressed="false">只看還沒上過</button></div>
   </section>
+
+  <section class="recent week" id="week" aria-label="本週要用" hidden></section>
 
   <section class="recent" id="recent" aria-label="最近打開" hidden></section>
 
@@ -255,12 +268,23 @@ function card(i){
   const body=i.url
     ? `<a class="card-link" href="${esc(i.url)}" data-url="${esc(i.url)}">${inner}<span class="go">${i.type==="video"?"觀看":i.type==="game"?"開始玩":"打開"} →</span></a>`
     : `<div class="card-link">${inner}<span class="go none">連結待補</span></div>`;
-  return `<article class="card${isDone?" is-done":""}">${body}${i.url?`<button class="done-btn" type="button" data-done="${esc(i.url)}" aria-pressed="${isDone}" aria-label="${isDone?"取消已上過":"標記為已上過"}：${esc(i.title)}">${isDone?"✓ 已上過":"標記已上過"}</button>`:""}</article>`;
+  const isWeek=!!weekSet[i.url];
+  return `<article class="card${isDone?" is-done":""}${isWeek?" is-week":""}">${body}${i.url?`<div class="acts"><button class="pin-btn" type="button" data-week="${esc(i.url)}" aria-pressed="${isWeek}" aria-label="${isWeek?"從本週要用移除":"加到本週要用"}：${esc(i.title)}">${isWeek?"★ 本週":"☆ 本週"}</button><button class="done-btn" type="button" data-done="${esc(i.url)}" aria-pressed="${isDone}" aria-label="${isDone?"取消已上過":"標記為已上過"}：${esc(i.title)}">${isDone?"✓ 已上過":"標記已上過"}</button></div>`:""}</article>`;
 }
 /* 這台電腦的瀏覽器記住：已上過、最近打開（讀不到也沒關係） */
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||"null")||d}catch(e){return d}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 let doneSet=load("shelfDone",{}), recent=load("shelfRecent",[]), onlyTodo=false;
+/* 本週要用：老師在卡片上按「☆ 本週」釘選，置頂顯示；要換週時按「清空本週」 */
+let weekSet=load("shelfWeek",{});
+function renderWeek(){
+  const box=$("week"), items=MATERIALS.filter(m=>m.url&&weekSet[m.url]);
+  box.hidden=!items.length;
+  if(!items.length){box.innerHTML="";return;}
+  const mins=items.reduce((a,m)=>a+(m.mins||0),0);
+  box.innerHTML=`<div class="recent-h"><b>★ 本週要用</b><div class="week-btns"><span class="lesson" style="align-self:center">${items.length} 份${mins?`・約 ${mins} 分鐘`:""}</span><button class="mini" type="button" id="clearWeek">清空本週</button></div></div><div class="recent-list">${items.map(m=>`<a class="rc${doneSet[m.url]?" is-done":""}" href="${esc(m.url)}" data-url="${esc(m.url)}"><span class="chip ${esc(m.type)}">${TYPES[m.type]||""}</span><b>${doneSet[m.url]?"✓ ":""}${esc(m.title)}</b><small class="meta">${esc(((m.lesson||"").match(/^第\s*\d+\s*課/)||[m.type==="game"?"單元統整":(m.lesson||"")])[0])}${m.pages?`・課本 p.${esc(m.pages)}`:""}${m.mins?`・約 ${m.mins} 分鐘`:""}</small></a>`).join("")}</div>`;
+  $("clearWeek").addEventListener("click",()=>{weekSet={};save("shelfWeek",weekSet);render();});
+}
 function ago(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return"剛剛";if(m<60)return m+" 分鐘前";const h=Math.round(m/60);if(h<24)return h+" 小時前";const d=Math.round(h/24);return d+" 天前"}
 function renderRecent(){
   const box=$("recent"), items=recent.map(r=>({r,m:MATERIALS.find(x=>x.url===r.url)})).filter(x=>x.m).slice(0,4);
@@ -299,7 +323,7 @@ function render(){
       [...L.keys()].map(lk=>`<div class="lesson-group"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}">${esc(lk)}<span class="n">${L.get(lk).length} 份</span></h3><div class="cards">${L.get(lk).map(card).join("")}</div></div>`).join("")
     }</div></section>`;
   }).join("");
-  $("expandAll").hidden=$("collapseAll").hidden=filtering;renderRecent();
+  $("expandAll").hidden=$("collapseAll").hidden=filtering;renderRecent();renderWeek();
 }
 /* 展開狀態記在這台電腦的瀏覽器裡（下次打開保持一樣）；讀不到也沒關係，預設全部收合 */
 let openSet={};
@@ -312,10 +336,23 @@ $("units").addEventListener("click",e=>{
   if(!query.trim()&&curType==="all"&&curGrade==="all"&&!onlyTodo){ if(open)openSet[b.dataset.uk]=1; else delete openSet[b.dataset.uk]; saveOpen(); }
 });
 $("units").addEventListener("click",e=>{
+  const w=e.target.closest(".pin-btn"); if(w){const u=w.dataset.week; if(weekSet[u])delete weekSet[u]; else weekSet[u]=Date.now(); save("shelfWeek",weekSet); render(); const again=document.querySelector('.pin-btn[data-week="'+CSS.escape(u)+'"]'); if(again)again.focus(); return;}
   const d=e.target.closest(".done-btn"); if(d){const u=d.dataset.done; if(doneSet[u])delete doneSet[u]; else doneSet[u]=Date.now(); save("shelfDone",doneSet); render(); const again=document.querySelector('.done-btn[data-done="'+CSS.escape(u)+'"]'); if(again)again.focus(); return;}
   const a=e.target.closest("a[data-url]"); if(a)remember(a.dataset.url);
 });
 $("recent").addEventListener("click",e=>{const a=e.target.closest("a[data-url]");if(a)remember(a.dataset.url);});
+$("week").addEventListener("click",e=>{const a=e.target.closest("a[data-url]");if(a)remember(a.dataset.url);});
+/* 字級與全螢幕（字級記在這台電腦，教材頁的「上課工具」也用同一個設定） */
+const FONT_LV=[[1,"標準"],[1.15,"大"],[1.3,"特大"],[1.5,"超大"]];
+let fontI=Math.max(0,Math.min(FONT_LV.length-1,+load("clsFont",0)||0));
+function applyFont(){document.documentElement.style.setProperty("--zoom",FONT_LV[fontI][0]);$("fontBtn").textContent="字："+FONT_LV[fontI][1];$("fontBtn").setAttribute("aria-label","文字大小："+FONT_LV[fontI][1]+"（點一下換下一級）");}
+$("fontBtn").addEventListener("click",()=>{fontI=(fontI+1)%FONT_LV.length;save("clsFont",fontI);applyFont();});
+applyFont();
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+if(!(document.fullscreenEnabled||document.webkitFullscreenEnabled))$("fsBtn").hidden=true;
+$("fsBtn").addEventListener("click",()=>{try{if(fsEl())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const r=document.documentElement;(r.requestFullscreen||r.webkitRequestFullscreen).call(r);}}catch(e){}});
+const renderFs=()=>{$("fsBtn").textContent=fsEl()?"⛶ 結束全螢幕":"⛶ 全螢幕";};
+document.addEventListener("fullscreenchange",renderFs);document.addEventListener("webkitfullscreenchange",renderFs);
 function remember(u){recent=[{url:u,t:Date.now()}].concat(recent.filter(r=>r.url!==u)).slice(0,8);save("shelfRecent",recent);}
 $("todoOnly").addEventListener("click",e=>{onlyTodo=!onlyTodo;e.currentTarget.setAttribute("aria-pressed",onlyTodo);render();});
 $("expandAll").addEventListener("click",()=>{document.querySelectorAll(".unit-toggle").forEach(b=>openSet[b.dataset.uk]=1);saveOpen();render();});

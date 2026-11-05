@@ -34,6 +34,8 @@
     ".ct-mini{margin-left:auto;font:700 18px/1 " + FONT + ";font-variant-numeric:tabular-nums;color:#FFE08A}",
     ".ct-mini.alarm{color:#FF8A8A}",
     ".ct-tog{min-height:44px;min-width:64px;padding:0 14px;border-radius:999px;border:2px solid rgba(255,255,255,.5);background:transparent;color:#FFFFFF}",
+    ".ct-hb{min-width:44px;padding:0 10px}",
+    ".ct-hb[hidden]{display:none}",
     ".ct-panel.collapsed{width:auto;max-width:calc(100vw - 24px)}",
     ".ct-panel.collapsed .ct-head{border-radius:18px}",
     ".ct-panel.collapsed .ct-tabs,.ct-panel.collapsed .ct-body{display:none}",
@@ -150,8 +152,43 @@
   head.appendChild(el("span", "ct-grip", "⋮⋮")).setAttribute("aria-hidden", "true");
   head.appendChild(el("b", "", "上課工具"));
   var mini = head.appendChild(el("span", "ct-mini"));
+  var bFont = head.appendChild(btn("ct-tog ct-hb", "字"));
+  var bFs = head.appendChild(btn("ct-tog ct-hb", "⛶", "全螢幕"));
   var tog = head.appendChild(btn("ct-tog", "收起"));
   panel.appendChild(head);
+
+  /* ---------- 字級：放大教材文字，讓後排看得清楚（記在這台電腦，所有教材共用） ---------- */
+  var FONT_LV = [[1, "標準"], [1.15, "大"], [1.3, "特大"], [1.5, "超大"]];
+  var fontI = Math.max(0, Math.min(FONT_LV.length - 1, +load("clsFont", 0) || 0));
+  var fontSt = document.createElement("style");
+  function applyFont() {
+    fontSt.textContent = "";
+    var s = FONT_LV[fontI][0];
+    if (s !== 1) {
+      var base = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      fontSt.textContent = "html{font-size:" + (base * s).toFixed(2) + "px!important}";
+    }
+    bFont.textContent = "字" + (fontI ? " " + FONT_LV[fontI][1] : "");
+    bFont.setAttribute("aria-label", "文字大小：" + FONT_LV[fontI][1] + "（點一下換下一級）");
+  }
+  bFont.addEventListener("click", function () { fontI = (fontI + 1) % FONT_LV.length; save("clsFont", fontI); applyFont(); clampPos(); });
+  window.addEventListener("resize", applyFont);
+
+  /* ---------- 全螢幕 ---------- */
+  var fsOk = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  if (!fsOk) bFs.hidden = true;
+  function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement; }
+  bFs.addEventListener("click", function () {
+    try {
+      if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else { var r = document.documentElement; (r.requestFullscreen || r.webkitRequestFullscreen).call(r); }
+    } catch (e) {}
+  });
+  function renderFs() {
+    var on = !!fsEl();
+    bFs.textContent = on ? "⛶ 結束" : "⛶";
+    bFs.setAttribute("aria-label", on ? "離開全螢幕" : "全螢幕");
+  }
 
   var tabs = el("div", "ct-tabs");
   tabs.setAttribute("role", "tablist");
@@ -849,12 +886,15 @@
   function place() {
     var host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
     layers.forEach(function (x) { if (x.parentNode !== host) host.appendChild(x); });
+    renderFs();
     clampPos();
   }
   document.addEventListener("fullscreenchange", place);
   document.addEventListener("webkitfullscreenchange", place);
 
   function init() {
+    document.head.appendChild(fontSt);
+    applyFont();
     place();
     showTab(curTab);
     setCollapsed(collapsed);
