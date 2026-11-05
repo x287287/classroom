@@ -35,9 +35,19 @@
     ".ct-mini.alarm{color:#FF8A8A}",
     ".ct-tog{min-height:44px;min-width:64px;padding:0 14px;border-radius:999px;border:2px solid rgba(255,255,255,.5);background:transparent;color:#FFFFFF}",
     ".ct-hb{min-width:44px;padding:0 10px}",
+    ".ct-tog,.ct-mini{white-space:nowrap;flex:none}",
+    ".ct-head>b{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}",
+    ".ct-head{gap:6px}",
+    ".ct-head .ct-grip{flex:none}",
     ".ct-hb[hidden]{display:none}",
     ".ct-panel.collapsed{width:auto;max-width:calc(100vw - 24px)}",
-    ".ct-panel.collapsed .ct-head{border-radius:18px}",
+    /* 收起時縮成一顆小按鈕：只留「工具」（計時中會多顯示剩餘時間） */
+    ".ct-panel.collapsed{border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25)}",
+    ".ct-panel.collapsed .ct-head{border-radius:999px;padding:3px;min-height:0;gap:6px}",
+    ".ct-panel.collapsed .ct-grip,.ct-panel.collapsed .ct-head>b,.ct-panel.collapsed .ct-hb{display:none}",
+    ".ct-panel.collapsed .ct-mini{margin-left:10px;font-size:16px}",
+    ".ct-panel.collapsed .ct-mini:empty{display:none}",
+    ".ct-panel.collapsed .ct-tog{min-width:0;min-height:44px;padding:0 14px;border-color:transparent;font-size:15px}",
     ".ct-panel.collapsed .ct-tabs,.ct-panel.collapsed .ct-body{display:none}",
     ".ct-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 10px 0}",
     ".ct-tabs button{min-height:46px;padding:0 2px;border-radius:12px;border:2px solid #C9DBD3;background:#F4F8F6;color:#1E3A34}",
@@ -150,7 +160,7 @@
   panel.setAttribute("aria-label", "上課工具");
   var head = el("div", "ct-head");
   head.appendChild(el("span", "ct-grip", "⋮⋮")).setAttribute("aria-hidden", "true");
-  head.appendChild(el("b", "", "上課工具"));
+  head.appendChild(el("b", "", "工具"));
   var mini = head.appendChild(el("span", "ct-mini"));
   var bFont = head.appendChild(btn("ct-tog ct-hb", "字"));
   var bFs = head.appendChild(btn("ct-tog ct-hb", "⛶", "全螢幕"));
@@ -228,11 +238,13 @@
   function setCollapsed(c) {
     collapsed = c;
     panel.classList.toggle("collapsed", c);
-    tog.textContent = c ? "展開" : "收起";
+    tog.textContent = c ? "工具" : "收起";
+    tog.setAttribute("aria-label", c ? "展開上課工具" : "收起上課工具");
     tog.setAttribute("aria-expanded", c ? "false" : "true");
     clampPos();
   }
-  tog.addEventListener("click", function () { setCollapsed(!collapsed); });
+  var tapAt = 0; /* 收起時點一下（或拖曳）由 pointer 事件處理，避免 click 又觸發一次 */
+  tog.addEventListener("click", function () { if (Date.now() - tapAt < 400) { tapAt = 0; return; } setCollapsed(!collapsed); });
 
   /* 位置：每份教材各自記住老師拖到哪裡；沒拖過時，放在右上角、避開教材本身的按鈕 */
   var POS_KEY = "ctPos:" + (location.pathname.split("/").pop() || "index");
@@ -262,9 +274,10 @@
   }
   var drag = null;
   head.addEventListener("pointerdown", function (e) {
-    if (e.target.closest("button")) return;
+    var b = e.target.closest("button");
+    if (b && !(collapsed && b === tog)) return; /* 收起時整顆按鈕都可以拖曳 */
     var r = panel.getBoundingClientRect();
-    drag = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top, sx: e.clientX, sy: e.clientY, moved: false };
+    drag = { id: e.pointerId, dx: e.clientX - r.left, dy: e.clientY - r.top, sx: e.clientX, sy: e.clientY, moved: false, onTog: b === tog };
     try { head.setPointerCapture(e.pointerId); } catch (err) {}
   });
   head.addEventListener("pointermove", function (e) {
@@ -276,8 +289,8 @@
   });
   function endDrag(e) {
     if (!drag || drag.id !== e.pointerId) return;
-    if (drag.moved) { var r = panel.getBoundingClientRect(); pos = { x: r.left, y: r.top }; save(POS_KEY, pos); }
-    else if (collapsed) setCollapsed(false);
+    if (drag.moved) { var r = panel.getBoundingClientRect(); pos = { x: r.left, y: r.top }; save(POS_KEY, pos); if (drag.onTog) tapAt = Date.now(); }
+    else if (collapsed) { setCollapsed(false); if (drag.onTog) tapAt = Date.now(); }
     drag = null;
   }
   head.addEventListener("pointerup", endDrag);

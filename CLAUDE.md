@@ -7,7 +7,7 @@
 - `lessons/`：每份教材一個獨立的 HTML 檔。補充教材命名為 `u<單元>-<課><a,b,c…>-<英文代號>.html`，統整遊戲為 `u<單元>-game-<代號>.html`。
 - `lessons/data/`：統整遊戲的題庫／關卡（`u2-game-questions.js`、`u3-game-levels.js`），檔頭有格式說明；改題目只要改這裡。
 - `assets/home-fab.js`：共用的左下角懸浮按鈕：「⌂ 回書櫃」與「QR」（顯示這份教材網址的 QR Code，產生器是 `assets/vendor/qrcode.js`，MIT）。它也會自動載入 `assets/class-tools.js` 並註冊離線用的 `sw.js`。
-- `assets/class-tools.js`：「上課工具」懸浮視窗（計時器：拖拉轉盤設定，10／60 分鐘盤；抽籤；白板：全螢幕白板／格線／黑板；畫筆：直接畫在教材上、有螢光筆、可暫停去點教材、跟著頁面捲動），每份教材打開時先收起在右上角，點「展開」使用，可拖曳；畫筆工具列預設在畫面下方；抽籤可設定當天未到的號碼（`absent`，隔天自動清空）；位置依教材分別記在 localStorage（`ctPos:<檔名>`），計時器與抽籤紀錄（`ctTimer`、`ctDraw`）跨教材延續。抽籤只用座號，不放學生姓名。標題列另有「字」（文字大小：標準／大／特大／超大，放大教材的根字級 rem，記在 `clsFont`，首頁與所有教材共用）與「⛶」全螢幕按鈕。教材文字大小請用 rem，才會跟著放大。
+- `assets/class-tools.js`：「上課工具」懸浮視窗（計時器：拖拉轉盤設定，10／60 分鐘盤；抽籤；白板：全螢幕白板／格線／黑板；畫筆：直接畫在教材上、有螢光筆、可暫停去點教材、跟著頁面捲動），每份教材打開時先收起成右上角一顆小小的「工具」按鈕（計時中會顯示剩餘時間），點一下展開，收起時也能直接拖曳；畫筆工具列預設在畫面下方；抽籤可設定當天未到的號碼（`absent`，隔天自動清空）；位置依教材分別記在 localStorage（`ctPos:<檔名>`），計時器與抽籤紀錄（`ctTimer`、`ctDraw`）跨教材延續。抽籤只用座號，不放學生姓名。標題列另有「字」（文字大小：標準／大／特大／超大，放大教材的根字級 rem，記在 `clsFont`，首頁與所有教材共用）與「⛶」全螢幕按鈕。教材文字大小請用 rem，才會跟著放大。
 - `sw.js`：離線快取。首頁、所有教材（從 `MATERIALS` 讀取）、共用檔與 `-site` 字型會存到教室電腦；有網路時一律先抓最新版。新增共用檔時記得加到 `CORE`。
 - `assets/fonts.css`、`assets/fonts/`：自架字型（Huninn 粉圓、Noto Sans TC、霞鶩文楷 TC，皆 OFL，授權見 `assets/fonts/OFL.txt`），不連 Google Fonts。每份教材用 `<link rel="stylesheet" href="../assets/fonts.css">` 載入。由 `tools/build-fonts.py` 產生：`-site` 檔含網站目前用到的字，`-more` 檔含其他 Big5 常用字（用到才下載）。新教材若用了罕用字，重跑腳本。
 - `assets/kit.css`、`assets/kit.js`：補充教材共用的版面與互動元件（`KIT.quiz`、`KIT.ox`、`KIT.order`、`KIT.sort`、`KIT.stepper`）。`<body class="u2">` 或 `class="u3"` 套用單元主色。
