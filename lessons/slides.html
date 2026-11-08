@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>簡報｜教室小書櫃</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<style>
+/* 簡報播放器：一次一張投影片，像 PowerPoint 放映。
+   投影片是事先轉好的圖片（files/<deck>/01.webp…，縮圖 t01.webp…），每張只有幾十 KB，打開就看得到；
+   點右邊／左滑換下一張，點左邊／右滑回上一張，也可以用鍵盤方向鍵或簡報筆。
+   網址：slides.html?d=friendly/low-antibully&n=23&t=標題&l=分類（#5 表示第 5 張） */
+:root{--bg:#101614;--bar:#1B2522;--ink:#FFFFFF;--muted:#B9C9C3;--accent:#F5B521;--body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden}
+html body{padding-bottom:0}
+.app{position:fixed;inset:0;display:grid;grid-template-rows:1fr auto}
+.stage{position:relative;overflow:hidden;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none;cursor:pointer}
+.stage img{-webkit-user-drag:none;pointer-events:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .18s ease}
+.stage img.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.stage img{transition:none}}
+.hint{position:absolute;top:50%;transform:translateY(-50%);font-size:44px;line-height:1;color:#fff;opacity:0;pointer-events:none;transition:opacity .25s;text-shadow:0 2px 8px #000}
+.hint.l{left:18px}.hint.r{right:18px}
+.stage:active .hint{opacity:.35}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 252px;background:var(--bar);min-height:64px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+.ttl{flex:1 1 auto;min-width:0;display:grid;line-height:1.3}
+.ttl b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl small{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b{appearance:none;border:2px solid rgba(255,255,255,.35);background:transparent;color:var(--ink);border-radius:999px;min-height:48px;min-width:48px;padding:0 16px;font:700 17px/1 var(--body);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}
+.b.big{min-width:64px;font-size:24px}
+.b:disabled{opacity:.35;cursor:default}
+.b:active:not(:disabled){transform:scale(.96)}
+.cnt{font:700 18px/1 var(--body);font-variant-numeric:tabular-nums;min-width:76px;text-align:center}
+.prog{position:absolute;left:0;bottom:0;height:4px;background:var(--accent);transition:width .2s}
+/* 全部投影片 */
+.grid{position:fixed;inset:0;z-index:40;background:rgba(10,14,13,.96);overflow:auto;padding:16px 16px 100px}
+.grid[hidden]{display:none}
+.grid-h{display:flex;align-items:center;gap:12px;margin:0 auto 14px;max-width:1400px}
+.grid-h b{flex:1;font-size:20px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;max-width:1400px;margin:0 auto}
+.th{appearance:none;border:3px solid transparent;background:#000;padding:0;border-radius:10px;overflow:hidden;cursor:pointer;position:relative;aspect-ratio:16/9}
+.th img{width:100%;height:100%;object-fit:contain;display:block}
+.th span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.75);color:#fff;font:700 14px/1 var(--body);padding:5px 8px;border-radius:6px}
+.th.cur{border-color:var(--accent)}
+.resume{position:absolute;left:50%;top:16px;transform:translateX(-50%);z-index:5}
+.resume .b{background:rgba(0,0,0,.7);border-color:var(--accent)}
+.msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted);font-size:18px}
+@media (max-aspect-ratio:5/4),(max-width:700px){
+  .bar{padding-left:12px;flex-wrap:wrap;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .ttl{flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage" id="stage" aria-live="polite">
+    <img id="imA" alt="" draggable="false"><img id="imB" alt="" draggable="false">
+    <span class="hint l" aria-hidden="true">‹</span><span class="hint r" aria-hidden="true">›</span>
+    <div class="resume" id="resume" hidden><button class="b" type="button" id="resumeBtn"></button></div>
+    <div class="prog" id="prog"></div>
+  </div>
+  <div class="bar">
+    <div class="ttl"><b id="ttl">簡報</b><small id="sub"></small></div>
+    <button class="b big" type="button" id="prev" aria-label="上一張">‹</button>
+    <span class="cnt" id="cnt">1 / 1</span>
+    <button class="b big" type="button" id="next" aria-label="下一張">›</button>
+    <button class="b" type="button" id="gridBtn">▦ 全部</button>
+    <button class="b" type="button" id="fsBtn" aria-label="全螢幕">⛶</button>
+    <a class="b" id="pdfBtn" hidden download>PDF</a>
+  </div>
+</div>
+<div class="grid" id="grid" hidden role="dialog" aria-modal="true" aria-label="全部投影片">
+  <div class="grid-h"><b id="gridTtl">全部投影片</b><button class="b" type="button" id="gridClose">關閉</button></div>
+  <div class="thumbs" id="thumbs"></div>
+</div>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search);
+  var deck = qs.get("d") || "", N = Math.max(1, Math.min(300, parseInt(qs.get("n"), 10) || 1));
+  var $ = function (i) { return document.getElementById(i); };
+  var stage = $("stage"), A = $("imA"), B = $("imB");
+  if (!/^[\w-]+\/[\w-]+$/.test(deck)) { stage.innerHTML = '<div class="msg">找不到這份簡報。請按左下角「回書櫃」。</div>'; return; }
+  var base = "../files/" + deck + "/";
+  function pad(i) { return (i < 10 ? "0" : "") + i; }
+  function url(i) { return base + pad(i) + ".webp"; }
+  function turl(i) { return base + "t" + pad(i) + ".webp"; }
+
+  var title = qs.get("t") || "簡報", sub = qs.get("l") || "";
+  document.title = title + "｜教室小書櫃";
+  $("ttl").textContent = title; $("sub").textContent = sub; $("gridTtl").textContent = title + "（共 " + N + " 張）";
+  var pdf = $("pdfBtn"); pdf.href = "../files/" + deck + ".pdf"; pdf.setAttribute("download", title + ".pdf"); pdf.hidden = false;
+
+  /* 預先載入：目前這張前後，接著在背景把整份載完（之後換頁不用等） */
+  var cache = {};
+  function load(i) {
+    if (i < 1 || i > N) return null;
+    if (!cache[i]) { var im = new Image(); im.decoding = "async"; im.src = url(i); cache[i] = im; }
+    return cache[i];
+  }
+  function warm() {
+    var i = 1;
+    (function nxt() {
+      while (i <= N && cache[i]) i++;
+      if (i > N) return;
+      var im = load(i++);
+      var go = function () { setTimeout(nxt, 30); };
+      if (im.complete) go(); else { im.onload = go; im.onerror = go; }
+    })();
+  }
+
+  var cur = 0, front = A, back = B, KEY = "slidePos:" + deck;
+  function show(i, noSave) {
+    i = Math.max(1, Math.min(N, i));
+    if (i === cur) return;
+    cur = i;
+    var im = load(i); load(i + 1); load(i + 2); load(i - 1);
+    var target = back, src = url(i);
+    var swap = function () {
+      if (cur !== i) return;
+      target.src = src; target.alt = title + " 第 " + i + " 張";
+      var done = function () { if (cur !== i) return; target.classList.add("on"); front.classList.remove("on"); var t = front; front = target; back = t; };
+      if (target.decode) target.decode().then(done, done); else done();
+    };
+    if (im.complete) swap(); else { im.addEventListener("load", swap, { once: true }); im.addEventListener("error", swap, { once: true }); }
+    $("cnt").textContent = i + " / " + N;
+    $("prev").disabled = i <= 1; $("next").disabled = i >= N;
+    $("prog").style.width = (i / N * 100) + "%";
+    try { history.replaceState(null, "", "#" + i); } catch (e) {}
+    if (!noSave) { try { localStorage.setItem(KEY, String(i)); } catch (e) {} }
+    $("resume").hidden = true;
+  }
+  function next() { if (cur < N) show(cur + 1); }
+  function prev() { if (cur > 1) show(cur - 1); }
+
+  $("next").addEventListener("click", next);
+  $("prev").addEventListener("click", prev);
+
+  /* 點畫面：右邊 2/3 下一張，左邊 1/3 上一張；左右滑也可以換頁 */
+  var sx = null, sy = null, moved = false;
+  stage.addEventListener("pointerdown", function (e) { if (e.target.closest("button")) return; sx = e.clientX; sy = e.clientY; moved = false; });
+  stage.addEventListener("pointermove", function (e) { if (sx != null && Math.abs(e.clientX - sx) > 12) moved = true; });
+  stage.addEventListener("pointerup", function (e) {
+    if (sx == null) return;
+    var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { if (dx < 0) next(); else prev(); return; }
+    if (moved || Math.abs(dy) > 30) return;
+    var r = stage.getBoundingClientRect();
+    if (e.clientX - r.left < r.width / 3) prev(); else next();
+  });
+  stage.addEventListener("pointercancel", function () { sx = null; });
+  stage.addEventListener("dragstart", function (e) { e.preventDefault(); });
+
+  /* 鍵盤與簡報筆（簡報筆通常送 PageDown／PageUp） */
+  document.addEventListener("keydown", function (e) {
+    if (e.target.closest && e.target.closest("input,textarea,select,[contenteditable]")) return;
+    if (!$("grid").hidden) { if (e.key === "Escape") closeGrid(); return; }
+    var k = e.key;
+    if (k === "ArrowRight" || k === "ArrowDown" || k === "PageDown" || k === " " || k === "Enter") { e.preventDefault(); next(); }
+    else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp" || k === "Backspace") { e.preventDefault(); prev(); }
+    else if (k === "Home") { e.preventDefault(); show(1); }
+    else if (k === "End") { e.preventDefault(); show(N); }
+  });
+
+  /* 全部投影片（縮圖） */
+  var built = false;
+  function openGrid() {
+    if (!built) {
+      var h = "";
+      for (var i = 1; i <= N; i++) h += '<button class="th" type="button" data-i="' + i + '" aria-label="第 ' + i + ' 張"><img loading="lazy" alt="" src="' + turl(i) + '"><span>' + i + "</span></button>";
+      $("thumbs").innerHTML = h; built = true;
+    }
+    [].forEach.call($("thumbs").children, function (b) { b.classList.toggle("cur", +b.dataset.i === cur); });
+    $("grid").hidden = false;
+    var c = $("thumbs").children[cur - 1]; if (c) { c.scrollIntoView({ block: "center" }); c.focus({ preventScroll: true }); }
+  }
+  function closeGrid() { $("grid").hidden = true; $("gridBtn").focus(); }
+  $("gridBtn").addEventListener("click", openGrid);
+  $("gridClose").addEventListener("click", closeGrid);
+  $("thumbs").addEventListener("click", function (e) { var b = e.target.closest(".th"); if (!b) return; show(+b.dataset.i); closeGrid(); });
+
+  /* 全螢幕 */
+  var fsEl = function () { return document.fullscreenElement || document.webkitFullscreenElement; };
+  if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) $("fsBtn").hidden = true;
+  $("fsBtn").addEventListener("click", function () {
+    try { if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { var r = document.documentElement; (r.requestFullscreen || r.webkitRequestFullscreen).call(r); } } catch (e) {}
+  });
+  function renderFs() { $("fsBtn").textContent = fsEl() ? "⛶ 結束" : "⛶"; }
+  document.addEventListener("fullscreenchange", renderFs); document.addEventListener("webkitfullscreenchange", renderFs);
+
+  /* 開始：網址有 #張數就從那張開始；否則從第 1 張，並提示上次看到哪裡 */
+  var fromHash = parseInt(location.hash.slice(1), 10);
+  var last = 0; try { last = parseInt(localStorage.getItem(KEY), 10) || 0; } catch (e) {}
+  if (fromHash >= 1 && fromHash <= N) show(fromHash);
+  else {
+    show(1, true);
+    if (last > 1 && last <= N) {
+      $("resumeBtn").textContent = "上次看到第 " + last + " 張，從那裡繼續 ›";
+      $("resume").hidden = false;
+      $("resumeBtn").addEventListener("click", function () { show(last); });
+      setTimeout(function () { $("resume").hidden = true; }, 8000);
+    }
+  }
+  var startWarm = function () { warm(); };
+  if (cache[cur].complete) setTimeout(startWarm, 300); else cache[cur].addEventListener("load", function () { setTimeout(startWarm, 300); }, { once: true });
+})();
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

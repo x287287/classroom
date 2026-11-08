@@ -5,7 +5,7 @@
 const CACHE = "classroom-v1";  /* 改這個名字會清掉舊存檔，重新存一次 */
 const CORE = [
   "./", "index.html",
-  "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js", "assets/sync.js", "lessons/view.html",
+  "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js", "assets/sync.js", "lessons/view.html", "lessons/slides.html",
   "assets/vendor/qrcode.js",
   "lessons/data/u2-game-questions.js", "lessons/data/u3-game-levels.js"
 ];
@@ -19,6 +19,10 @@ async function precache() {
     lessons = [...html.matchAll(/url:\s*"(lessons\/[^"]+)"/g)].map(m => m[1]);
     /* 網站裡的 PDF（view.html?src=files/…）也一起存 */
     lessons = lessons.concat([...html.matchAll(/src=(files\/[^&"]+\.pdf)/g)].map(m => m[1]));
+    /* 簡報播放器（slides.html?d=…&n=張數）：每張投影片和縮圖都先存好 */
+    for (const m of html.matchAll(/slides\.html\?d=([\w-]+\/[\w-]+)&n=(\d+)/g)) {
+      for (let i = 1; i <= +m[2]; i++) { const p = String(i).padStart(2, "0"); lessons.push(`files/${m[1]}/${p}.webp`, `files/${m[1]}/t${p}.webp`); }
+    }
   } catch (e) {}
   try {
     const fcss = await (await fetch("assets/fonts.css", { cache: "no-cache" })).text();
