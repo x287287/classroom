@@ -5,7 +5,7 @@
 const CACHE = "classroom-v1";  /* 改這個名字會清掉舊存檔，重新存一次 */
 const CORE = [
   "./", "index.html",
-  "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js",
+  "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js", "assets/sync.js", "lessons/view.html",
   "assets/vendor/qrcode.js",
   "lessons/data/u2-game-questions.js", "lessons/data/u3-game-levels.js"
 ];
@@ -41,7 +41,18 @@ self.addEventListener("message", e => { if (e.data === "precache") e.waitUntil(p
 self.addEventListener("fetch", e => {
   const req = e.request;
   const url = new URL(req.url);
-  if (req.method !== "GET" || url.origin !== location.origin) return;
+  if (req.method !== "GET") return;
+
+  /* 老師上傳的 PDF／圖片（Supabase 公開檔案）：先抓最新版，沒網路時用存檔 */
+  if (url.origin !== location.origin) {
+    if (/\.supabase\.co$/.test(url.hostname) && url.pathname.indexOf("/storage/v1/object/public/") === 0) {
+      e.respondWith(fetch(req).then(r => {
+        if (r.ok) { const c = r.clone(); caches.open(CACHE).then(cache => cache.put(req.url, c)); }
+        return r;
+      }).catch(() => caches.match(req.url).then(hit => hit || Promise.reject(new Error("offline")))));
+    }
+    return;
+  }
 
   /* 字型網址帶有版本號（?v=…），同一個網址內容不會變：先用存檔 */
   if (url.pathname.endsWith(".woff2")) {

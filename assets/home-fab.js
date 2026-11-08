@@ -103,10 +103,20 @@
     if (ov.parentNode !== host) host.appendChild(ov);
   }
   /* 上課工具視窗（計時器、抽籤、小白板） */
+  /* 先載入雲端同步（assets/sync.js），再載入上課工具，讓工具的設定也會同步 */
   if (me && !window.__classTools) {
-    var t = document.createElement("script");
-    t.src = me.replace(/home-fab\.js(\?.*)?$/, "class-tools.js");
-    document.head.appendChild(t);
+    var loadTools = function () {
+      var t = document.createElement("script");
+      t.src = me.replace(/home-fab\.js(\?.*)?$/, "class-tools.js");
+      document.head.appendChild(t);
+    };
+    if (window.CLS) loadTools();
+    else {
+      var sy = document.createElement("script");
+      sy.src = me.replace(/home-fab\.js(\?.*)?$/, "sync.js");
+      sy.onload = sy.onerror = loadTools;
+      document.head.appendChild(sy);
+    }
   }
   /* 離線使用：讓這台電腦存一份教材（只在正式網站上執行） */
   if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost") && me) {

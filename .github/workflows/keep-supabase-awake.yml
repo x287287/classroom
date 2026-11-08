@@ -1,0 +1,17 @@
+# 讓 Supabase 免費專案不會因為「一週沒人用」被暫停：每 3 天自動戳一下資料庫。
+# 不需要任何密碼；用的是網站本來就公開的金鑰（assets/sync.js 裡的 SB_KEY）。
+name: Keep Supabase awake
+on:
+  schedule:
+    - cron: "17 3 */3 * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping database
+        run: |
+          curl -fsS -X POST "https://tsxbphngzuzpdddhadfw.supabase.co/rest/v1/rpc/ping" \
+            -H "apikey: sb_publishable_EOXrx2SRQbFRHACqHbUUig_4e-EkgkE" -H "Content-Type: application/json" -d '{}'
+          curl -fsS "https://tsxbphngzuzpdddhadfw.supabase.co/rest/v1/materials?select=id&limit=1" \
+            -H "apikey: sb_publishable_EOXrx2SRQbFRHACqHbUUig_4e-EkgkE" > /dev/null

@@ -917,6 +917,23 @@
     renderPenTab();
     if (!pos) { autoY = findFreeY(); clampPos(); }
   }
+  /* 雲端同步（assets/sync.js）：別台電腦改了設定，這裡跟著更新 */
+  window.addEventListener("cls-sync", function (e) {
+    var k = (e.detail && e.detail.keys) || [];
+    if (k.indexOf("clsFont") >= 0) { fontI = Math.max(0, Math.min(FONT_LV.length - 1, +load("clsFont", 0) || 0)); applyFont(); clampPos(); }
+    if (k.indexOf("ctDraw") >= 0 && !rolling) {
+      var nd = load("ctDraw", D);
+      if (!nd.absent || nd.absentDay !== TODAY) { nd.absent = []; nd.absentDay = TODAY; }
+      D = nd; if (lastPick != null && D.drawn.indexOf(lastPick) < 0) lastPick = null; renderD();
+      if (bigMode === "draw") renderBig(false);
+    }
+    if (k.indexOf("ctTimer") >= 0 && !alarmOn) {
+      var nt = load("ctTimer", T);
+      if (nt.end && nt.end <= Date.now()) { nt.left = 0; nt.end = null; }
+      T = nt; renderT();
+    }
+  });
+
   if (document.body) init();
   else document.addEventListener("DOMContentLoaded", init);
 })();

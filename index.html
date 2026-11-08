@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>教室小書櫃</title>
 <link rel="stylesheet" href="assets/fonts.css">
+<script src="assets/sync.js"></script>
 <style>
 /* Layout: 方格簿 grid paper; a slim cover band, a toolbar (search + filters), then materials grouped by 單元 as index cards. */
 :root{
@@ -112,6 +113,46 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 .empty b{font-family:var(--display);font-size:20px;color:var(--ink)}
 footer{color:var(--muted);font-size:13px;text-align:center}
 
+/* 老師登入、雲端同步、上傳教材 */
+.mini.acct{display:inline-flex;align-items:center;gap:6px}
+.mini.acct[data-s="ok"]{border-color:var(--leaf);color:var(--leaf);font-weight:700}
+.mini.acct[data-s="offline"],.mini.acct[data-s="error"]{border-color:var(--accent);color:var(--accent);font-weight:700}
+.mini.hot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.edit-btn{appearance:none;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}
+.up-tag{font-size:12px;color:var(--muted)}
+.dlg{position:fixed;inset:0;z-index:2147483000;background:rgba(10,20,18,.55);display:grid;place-items:center;padding:16px;overflow:auto}
+.dlg[hidden]{display:none}
+.dlg-box{background:var(--card);color:var(--ink);border-radius:18px;width:min(640px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:22px;display:grid;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.dlg-box.sm{width:min(420px,100%)}
+.dlg-box h2{font-size:24px}
+.dlg-box p.hint{font-size:14px;color:var(--muted);line-height:1.6}
+.fld{display:grid;gap:6px;min-width:0}
+.fld>span{font-size:14px;font-weight:700}
+.fld>span small{font-weight:400;color:var(--muted)}
+.fld input,.fld select,.fld textarea{font:inherit;font-size:17px;background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:10px 12px;min-height:48px;width:100%;min-width:0}
+.fld textarea{min-height:84px;resize:vertical}
+.fld-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{flex:1 1 140px}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:700}
+.drop{display:grid;place-items:center;gap:6px;text-align:center;border:2.5px dashed var(--line);border-radius:14px;padding:22px 14px;cursor:pointer;background:var(--paper);min-height:120px}
+.drop.over{border-color:var(--leaf);background:color-mix(in srgb,var(--leaf) 10%,var(--paper))}
+.drop b{font-size:18px}.drop small{color:var(--muted);font-size:13px}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.dlg-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.dlg-acts .grow{margin-right:auto}
+.btn{appearance:none;font:inherit;font-size:17px;font-weight:700;border-radius:999px;padding:8px 22px;min-height:48px;cursor:pointer;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.btn.pri{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.btn.del{border-color:var(--accent);color:var(--accent)}
+.btn.del.armed{background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.55;cursor:default}
+.msg{font-size:15px;font-weight:700;min-height:1.4em}
+.msg.err{color:var(--accent)}.msg.ok{color:var(--leaf)}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--leaf);transition:width .2s}
+.acct-info{display:grid;gap:4px;background:var(--paper);border-radius:12px;padding:12px 14px;font-size:15px}
+.acct-info b{font-size:17px;overflow-wrap:anywhere}
+
 @media (prefers-reduced-motion:no-preference){.card{transition:transform .15s ease,border-color .15s}.card:hover{transform:translateY(-2px)}}
 </style>
 </head>
@@ -136,7 +177,7 @@ footer{color:var(--muted);font-size:13px;text-align:center}
         <option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option>
         <option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option>
       </select>
-      <div class="view-btns"><button class="mini" type="button" id="fontBtn">字：標準</button><button class="mini" type="button" id="fsBtn">⛶ 全螢幕</button></div>
+      <div class="view-btns"><button class="mini hot" type="button" id="addBtn" hidden>＋ 新增教材</button><button class="mini acct" type="button" id="acctBtn" data-s="off">☁ 老師登入</button><button class="mini" type="button" id="fontBtn">字：標準</button><button class="mini" type="button" id="fsBtn">⛶ 全螢幕</button></div>
     </div>
     <div class="tabs" role="group" aria-label="教材類型" id="tabs"></div>
     <div class="allbtns" id="allBtns"><button class="mini" type="button" id="expandAll">全部展開</button><button class="mini" type="button" id="collapseAll">全部收合</button><button class="mini" type="button" id="todoOnly" aria-pressed="false">只看還沒上過</button></div>
@@ -150,6 +191,66 @@ footer{color:var(--muted);font-size:13px;text-align:center}
 
   <footer>教室小書櫃<span id="offline"></span></footer>
 </div>
+
+<!-- 老師登入 -->
+<div class="dlg" id="loginDlg" hidden role="dialog" aria-modal="true" aria-labelledby="loginH">
+  <form class="dlg-box sm" id="loginForm" novalidate>
+    <h2 id="loginH">老師登入</h2>
+    <p class="hint">登入後，「已上過」、「本週要用」、文字大小、抽籤設定等，會在所有登入的電腦同步；也可以上傳自己的教材。每台電腦只要登入一次。</p>
+    <label class="fld"><span>Email</span><input id="lgEmail" type="email" autocomplete="username" required></label>
+    <label class="fld"><span>密碼</span><input id="lgPw" type="password" autocomplete="current-password" required></label>
+    <div class="msg err" id="lgMsg" aria-live="polite"></div>
+    <div class="dlg-acts"><button class="btn" type="button" data-close>取消</button><button class="btn pri" type="submit" id="lgGo">登入</button></div>
+  </form>
+</div>
+
+<!-- 帳號與同步 -->
+<div class="dlg" id="acctDlg" hidden role="dialog" aria-modal="true" aria-labelledby="acctH">
+  <div class="dlg-box sm">
+    <h2 id="acctH">雲端同步</h2>
+    <div class="acct-info"><span>登入帳號</span><b id="acEmail"></b><span id="acState"></span></div>
+    <div class="dlg-acts" style="justify-content:flex-start"><button class="btn" type="button" id="acSync">立即同步</button></div>
+    <form id="pwForm" class="fld" novalidate>
+      <span>更改密碼 <small>（至少 8 個字，混合英文和數字）</small></span>
+      <input id="pwNew" type="password" autocomplete="new-password" minlength="8" aria-label="新密碼">
+      <div class="dlg-acts" style="justify-content:flex-start"><button class="btn" type="submit">更改密碼</button></div>
+    </form>
+    <div class="msg" id="acMsg" aria-live="polite"></div>
+    <div class="dlg-acts"><button class="btn del grow" type="button" id="acOut">登出這台電腦</button><button class="btn pri" type="button" data-close>完成</button></div>
+  </div>
+</div>
+
+<!-- 新增／編輯教材 -->
+<div class="dlg" id="upDlg" hidden role="dialog" aria-modal="true" aria-labelledby="upH">
+  <form class="dlg-box" id="upForm" novalidate>
+    <h2 id="upH">新增教材</h2>
+    <div class="seg" role="group" aria-label="教材來源"><button class="mini" type="button" data-src="file" aria-pressed="true">📄 上傳檔案</button><button class="mini" type="button" data-src="link" aria-pressed="false">🔗 網址連結</button></div>
+    <label class="drop" id="upDrop">
+      <input id="upFile" type="file" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.ppt,.pptx,.odt,.odp">
+      <b id="upFileName">點這裡選擇檔案，或把檔案拖進來</b>
+      <small>PDF、Word、PowerPoint、圖片，每個檔案 50 MB 以內</small>
+    </label>
+    <label class="fld" id="upLinkF" hidden><span>網址 <small>（YouTube、Google 簡報、其他網站）</small></span><input id="upUrl" type="url" inputmode="url" placeholder="https://"></label>
+    <label class="fld"><span>標題</span><input id="upTitle" maxlength="120" required></label>
+    <div class="fld-row">
+      <label class="fld"><span>單元</span><input id="upUnit" list="unitList" autocomplete="off"></label>
+      <label class="fld"><span>課次</span><input id="upLesson" list="lessonList" autocomplete="off" placeholder="例：第 2 課 酒精的真相"></label>
+    </div>
+    <div class="fld-row">
+      <label class="fld"><span>類型</span><select id="upType"></select></label>
+      <label class="fld"><span>年級</span><select id="upGrade"><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option></select></label>
+      <label class="fld"><span>課本頁碼</span><input id="upPages" placeholder="例：40–41"></label>
+      <label class="fld"><span>建議分鐘</span><input id="upMins" type="number" min="1" max="200" inputmode="numeric"></label>
+    </div>
+    <label class="fld"><span>課本小標題 <small>（可不填）</small></span><input id="upTopic"></label>
+    <label class="fld"><span>說明 <small>（可不填）</small></span><textarea id="upNote" maxlength="400"></textarea></label>
+    <p class="hint">網站是公開的，請不要上傳學生姓名、照片或成績。</p>
+    <div class="bar" id="upBar" hidden><i></i></div>
+    <div class="msg" id="upMsg" aria-live="polite"></div>
+    <div class="dlg-acts"><button class="btn del grow" type="button" id="upDel" hidden>刪除</button><button class="btn" type="button" data-close>取消</button><button class="btn pri" type="submit" id="upGo">儲存</button></div>
+  </form>
+</div>
+<datalist id="unitList"></datalist><datalist id="lessonList"></datalist>
 
 <script>
 /* ============================================================
@@ -264,12 +365,12 @@ function filtered(){
 function card(i){
   const meta=[i.pages?`課本 p.${esc(i.pages)}`:"",i.mins?`約 ${i.mins} 分鐘`:""].filter(Boolean).join("・");
   const isDone=!!doneSet[i.url];
-  const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.topic?`<span class="lesson">課本小標題：${esc(i.topic)}</span>`:"<span></span>"}<div><h3>${esc(i.title).split("：").map((t,k,a)=>`<span class="tw">${t}${k<a.length-1?"：":""}</span>`).join("")}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>${meta?`<span class="meta">${meta}</span>`:"<span></span>"}`;
+  const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.topic?`<span class="lesson">課本小標題：${esc(i.topic)}</span>`:i.up?`<span class="up-tag">老師上傳</span>`:"<span></span>"}<div><h3>${esc(i.title).split("：").map((t,k,a)=>`<span class="tw">${t}${k<a.length-1?"：":""}</span>`).join("")}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>${meta?`<span class="meta">${meta}</span>`:"<span></span>"}`;
   const body=i.url
     ? `<a class="card-link" href="${esc(i.url)}" data-url="${esc(i.url)}">${inner}<span class="go">${i.type==="video"?"觀看":i.type==="game"?"開始玩":"打開"} →</span></a>`
     : `<div class="card-link">${inner}<span class="go none">連結待補</span></div>`;
   const isWeek=!!weekSet[i.url];
-  return `<article class="card${isDone?" is-done":""}${isWeek?" is-week":""}">${body}${i.url?`<div class="acts"><button class="pin-btn" type="button" data-week="${esc(i.url)}" aria-pressed="${isWeek}" aria-label="${isWeek?"從本週要用移除":"加到本週要用"}：${esc(i.title)}">${isWeek?"★ 本週":"☆ 本週"}</button><button class="done-btn" type="button" data-done="${esc(i.url)}" aria-pressed="${isDone}" aria-label="${isDone?"取消已上過":"標記為已上過"}：${esc(i.title)}">${isDone?"✓ 已上過":"標記已上過"}</button></div>`:""}</article>`;
+  return `<article class="card${isDone?" is-done":""}${isWeek?" is-week":""}">${body}${i.url?`<div class="acts"><button class="pin-btn" type="button" data-week="${esc(i.url)}" aria-pressed="${isWeek}" aria-label="${isWeek?"從本週要用移除":"加到本週要用"}：${esc(i.title)}">${isWeek?"★ 本週":"☆ 本週"}</button><button class="done-btn" type="button" data-done="${esc(i.url)}" aria-pressed="${isDone}" aria-label="${isDone?"取消已上過":"標記為已上過"}：${esc(i.title)}">${isDone?"✓ 已上過":"標記已上過"}</button>${i.up&&window.CLS&&CLS.isTeacher?`<button class="edit-btn" type="button" data-edit="${esc(i.up.id)}" aria-label="編輯：${esc(i.title)}">編輯</button>`:""}</div>`:""}</article>`;
 }
 /* 這台電腦的瀏覽器記住：已上過、最近打開（讀不到也沒關係） */
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||"null")||d}catch(e){return d}}
@@ -360,7 +461,230 @@ $("collapseAll").addEventListener("click",()=>{openSet={};saveOpen();render();})
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;curType=b.dataset.t;render();});
 $("gradeSel").addEventListener("change",e=>{curGrade=e.target.value;render();});
 $("q").addEventListener("input",e=>{query=e.target.value;render();});
+
+/* ============================================================
+   老師上傳的教材（存在 Supabase，公開可讀；只有老師能新增／修改）
+   清單也存一份在這台電腦（clsUploads），沒網路時照樣顯示。
+   ============================================================ */
+const BASE_N=MATERIALS.length;
+const STORE_PUB=()=>CLS.url+"/storage/v1/object/public/materials/";
+let uploads=load("clsUploads",[]);
+const isImg=m=>/^image\//.test(m||""), isPdf=m=>m==="application/pdf";
+function applyUploads(){
+  MATERIALS.splice(BASE_N);
+  uploads.slice().sort((a,b)=>a.sort-b.sort).forEach(r=>MATERIALS.push({
+    unit:r.unit||"老師上傳的教材", lesson:r.lesson||"", topic:r.topic||"", title:r.title, type:r.type||"other",
+    grade:r.grade||0, pages:r.pages||"", mins:r.mins||0, note:r.note||"", url:"lessons/view.html?id="+r.id, up:r
+  }));
+}
+function fetchUploads(){
+  if(!window.CLS)return Promise.resolve();
+  return CLS.api("rest/v1/materials?select=*&order=sort.asc").then(r=>r.ok?r.json():Promise.reject(r)).then(rows=>{
+    const changed=JSON.stringify(rows)!==JSON.stringify(uploads);
+    uploads=rows; try{localStorage.setItem("clsUploads",JSON.stringify(rows))}catch(e){}
+    if(changed){applyUploads();render();}
+    cacheUploadFiles();
+  }).catch(()=>{});
+}
+/* PDF 與圖片也存到這台電腦，網路斷線時一樣打得開 */
+async function cacheUploadFiles(){
+  if(!("caches" in window))return;
+  try{
+    const c=await caches.open("classroom-v1");
+    for(const r of uploads){ if(r.kind!=="file"||!(isPdf(r.mime)||isImg(r.mime)))continue;
+      const u=STORE_PUB()+r.path; if(!(await c.match(u))) await c.add(u).catch(()=>{}); }
+  }catch(e){}
+}
+applyUploads();
+
+/* ---------- 對話框共用 ---------- */
+let lastFocus=null;
+function openDlg(id,focusSel){lastFocus=document.activeElement;const d=$(id);d.hidden=false;const f=d.querySelector(focusSel||"input,button");if(f)f.focus();}
+function closeDlg(id){$(id).hidden=true;if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+document.querySelectorAll(".dlg").forEach(d=>{
+  d.addEventListener("click",e=>{if(e.target===d||e.target.closest("[data-close]"))closeDlg(d.id);});
+  d.addEventListener("keydown",e=>{if(e.key==="Escape")closeDlg(d.id);});
+});
+function msg(id,t,kind){const m=$(id);m.textContent=t||"";m.className="msg"+(kind?" "+kind:"");}
+
+/* ---------- 登入與同步狀態 ---------- */
+const ST={off:"☁ 老師登入",syncing:"☁ 同步中…",ok:"☁ 已同步",offline:"☁ 離線中",error:"☁ 同步失敗"};
+const STL={syncing:"正在同步…",ok:"已同步：這台電腦的標記和設定都是最新的。",offline:"目前沒有網路。這段時間的修改會先存在這台電腦，連上網路後自動同步。",error:"同步失敗，稍後會自動再試一次。"};
+function renderAcct(){
+  if(!window.CLS)return;
+  const s=CLS.status, b=$("acctBtn");
+  b.textContent=ST[s]||ST.off; b.dataset.s=s;
+  b.setAttribute("aria-label",s==="off"?"老師登入":"雲端同步："+(STL[s]||""));
+  $("addBtn").hidden=!CLS.isTeacher;
+  $("acEmail").textContent=CLS.user?CLS.user.email:""; $("acState").textContent=CLS.user&&!CLS.isTeacher?"這個帳號不是老師帳號，無法同步或上傳。":(STL[s]||"");
+}
+window.addEventListener("cls-status",()=>{renderAcct();if(CLS.status==="ok")fetchUploads();render();});
+/* 別台電腦改了標記或設定：重新讀取並更新畫面 */
+window.addEventListener("cls-sync",e=>{
+  const k=(e.detail&&e.detail.keys)||[];
+  doneSet=load("shelfDone",{}); weekSet=load("shelfWeek",{}); recent=load("shelfRecent",[]);
+  try{openSet=JSON.parse(localStorage.getItem("shelfOpen")||"{}")||{}}catch(x){}
+  if(k.includes("clsFont")){fontI=Math.max(0,Math.min(FONT_LV.length-1,+load("clsFont",0)||0));applyFont();}
+  render();
+});
+$("acctBtn").addEventListener("click",()=>{
+  if(!window.CLS)return;
+  if(CLS.user){msg("acMsg","");$("pwNew").value="";renderAcct();openDlg("acctDlg","#acSync");}
+  else{msg("lgMsg","");openDlg("loginDlg","#lgEmail");}
+});
+$("loginForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const em=$("lgEmail").value.trim(), pw=$("lgPw").value;
+  if(!em||!pw){msg("lgMsg","請輸入 Email 和密碼","err");return;}
+  if(navigator.onLine===false){msg("lgMsg","目前沒有網路，連上網路後再登入","err");return;}
+  $("lgGo").disabled=true; msg("lgMsg","登入中…");
+  CLS.login(em,pw).then(()=>{$("lgPw").value="";closeDlg("loginDlg");renderAcct();fetchUploads();render();})
+    .catch(err=>msg("lgMsg",err&&err.message&&!/fetch/i.test(err.message)?err.message:"連不上伺服器，請確認網路後再試","err"))
+    .finally(()=>{$("lgGo").disabled=false;});
+});
+$("acSync").addEventListener("click",()=>{CLS.syncNow();fetchUploads();});
+$("acOut").addEventListener("click",()=>{CLS.logout();closeDlg("acctDlg");renderAcct();render();});
+$("pwForm").addEventListener("submit",e=>{
+  e.preventDefault(); const pw=$("pwNew").value;
+  if(pw.length<8){msg("acMsg","新密碼至少要 8 個字","err");return;}
+  msg("acMsg","更改中…");
+  CLS.changePassword(pw).then(()=>{$("pwNew").value="";msg("acMsg","密碼已更改，下次登入請用新密碼","ok");}).catch(err=>msg("acMsg",err.message,"err"));
+});
+
+/* ---------- 新增／編輯教材 ---------- */
+const EXT_MIME={pdf:"application/pdf",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",
+  doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ppt:"application/vnd.ms-powerpoint",pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  odt:"application/vnd.oasis.opendocument.text",odp:"application/vnd.oasis.opendocument.presentation"};
+const MAX_MB=50;
+let upSrc="file", upFile=null, editing=null, delArmed=false;
+$("upType").innerHTML=Object.entries(TYPES).filter(([k])=>k!=="all").map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+function fillLists(){
+  const units=[...new Set(MATERIALS.map(m=>m.unit).filter(Boolean))];
+  $("unitList").innerHTML=units.map(u=>`<option value="${esc(u)}">`).join("");
+  const u=$("upUnit").value.trim();
+  const ls=[...new Set(MATERIALS.filter(m=>!u||m.unit===u).map(m=>m.lesson).filter(Boolean))];
+  $("lessonList").innerHTML=ls.map(l=>`<option value="${esc(l)}">`).join("");
+}
+$("upUnit").addEventListener("input",fillLists);
+function setSrc(s){
+  upSrc=s; document.querySelectorAll("#upForm [data-src]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.src===s));
+  $("upDrop").hidden=s!=="file"; $("upLinkF").hidden=s!=="link";
+}
+document.querySelectorAll("#upForm [data-src]").forEach(b=>b.addEventListener("click",()=>{setSrc(b.dataset.src);msg("upMsg","");}));
+function extOf(n){return (String(n).split(".").pop()||"").toLowerCase();}
+function guessType(mime,url){
+  if(url){ if(/youtu\.?be/.test(url))return"video"; if(/docs\.google\.com\/presentation|canva\.com/.test(url))return"slide"; if(/forms\.gle|docs\.google\.com\/forms|quizizz|kahoot|wordwall/.test(url))return"quiz"; return"other"; }
+  if(/presentation|powerpoint/.test(mime))return"slide"; if(isImg(mime))return"other"; return"pdf";
+}
+function pickFile(f){
+  if(!f)return;
+  const mime=f.type&&EXT_MIME[extOf(f.name)]?EXT_MIME[extOf(f.name)]:(f.type||EXT_MIME[extOf(f.name)]||"");
+  if(!Object.values(EXT_MIME).includes(mime)){msg("upMsg","這種檔案不能上傳。可以上傳 PDF、Word、PowerPoint 或圖片。","err");return;}
+  if(f.size>MAX_MB*1024*1024){msg("upMsg",`檔案太大（${(f.size/1048576).toFixed(1)} MB），請小於 ${MAX_MB} MB。影片請先放到 YouTube 再貼網址。`,"err");return;}
+  upFile={f,mime}; msg("upMsg","");
+  $("upFileName").textContent="✓ "+f.name+"（"+(f.size/1048576).toFixed(1)+" MB）";
+  if(!$("upTitle").value.trim())$("upTitle").value=f.name.replace(/\.[^.]+$/,"").replace(/[_]+/g," ").slice(0,120);
+  if(!editing)$("upType").value=guessType(mime);
+}
+$("upFile").addEventListener("change",e=>pickFile(e.target.files[0]));
+const drop=$("upDrop");
+["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>pickFile(e.dataTransfer.files[0]));
+$("upUrl").addEventListener("change",()=>{const u=$("upUrl").value.trim();if(u&&!editing)$("upType").value=guessType("",u);});
+
+function openUpload(row){
+  editing=row||null; upFile=null; delArmed=false;
+  $("upForm").reset(); $("upBar").hidden=true; msg("upMsg","");
+  $("upH").textContent=row?"編輯教材":"新增教材";
+  $("upDel").hidden=!row; $("upDel").textContent="刪除"; $("upDel").classList.remove("armed");
+  $("upFileName").textContent=row&&row.kind==="file"?"目前檔案已上傳；要換檔案再點這裡選擇":"點這裡選擇檔案，或把檔案拖進來";
+  const lastUnit=(MATERIALS[MATERIALS.length-1]||{}).unit||"";
+  const r=row||{kind:"file",unit:lastUnit,lesson:"",topic:"",title:"",type:"pdf",grade:curGrade!=="all"?+curGrade:4,pages:"",mins:"",note:""};
+  setSrc(r.kind);
+  $("upUrl").value=r.kind==="link"?r.url||"":"";
+  $("upTitle").value=r.title; $("upUnit").value=r.unit; $("upLesson").value=r.lesson; $("upTopic").value=r.topic||"";
+  $("upType").value=r.type||"other"; $("upGrade").value=String(r.grade||4); $("upPages").value=r.pages||""; $("upMins").value=r.mins||""; $("upNote").value=r.note||"";
+  document.querySelectorAll("#upForm [data-src]").forEach(b=>b.disabled=!!row);
+  fillLists(); openDlg("upDlg","#upTitle");
+}
+$("addBtn").addEventListener("click",()=>openUpload(null));
+$("units").addEventListener("click",e=>{const b=e.target.closest(".edit-btn");if(!b)return;const r=uploads.find(x=>x.id===b.dataset.edit);if(r)openUpload(r);});
+
+function uploadFile(file,mime,path,onProg){
+  return CLS.token().then(t=>new Promise((res,rej)=>{
+    if(!t){rej(new Error("登入已過期，請重新登入"));return;}
+    const x=new XMLHttpRequest();
+    x.open("POST",CLS.url+"/storage/v1/object/materials/"+path);
+    x.setRequestHeader("apikey",CLS.key); x.setRequestHeader("Authorization","Bearer "+t);
+    x.setRequestHeader("Content-Type",mime); x.setRequestHeader("x-upsert","false"); x.setRequestHeader("cache-control","max-age=31536000");
+    x.upload.onprogress=e=>{if(e.lengthComputable)onProg(e.loaded/e.total);};
+    x.onload=()=>x.status<300?res():rej(new Error("檔案上傳失敗（"+x.status+"）"));
+    x.onerror=()=>rej(new Error("網路中斷，檔案沒有上傳成功"));
+    x.send(file);
+  }));
+}
+function removeFile(path){
+  if(!path)return Promise.resolve();
+  return CLS.api("storage/v1/object/materials",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({prefixes:[path]})}).catch(()=>{});
+}
+$("upForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!CLS.isTeacher){msg("upMsg","請先用老師帳號登入","err");return;}
+  if(navigator.onLine===false){msg("upMsg","目前沒有網路，連上網路後再上傳","err");return;}
+  const title=$("upTitle").value.trim();
+  const url=$("upUrl").value.trim();
+  if(upSrc==="file"&&!editing&&!upFile){msg("upMsg","請先選擇要上傳的檔案","err");return;}
+  if(upSrc==="link"&&!/^https?:\/\/\S+\.\S+/.test(url)){msg("upMsg","請貼上完整的網址（https:// 開頭）","err");return;}
+  if(!title){msg("upMsg","請輸入標題","err");$("upTitle").focus();return;}
+  const row={title,unit:$("upUnit").value.trim(),lesson:$("upLesson").value.trim(),topic:$("upTopic").value.trim(),
+    type:$("upType").value,grade:+$("upGrade").value||4,pages:$("upPages").value.trim(),mins:Math.round(+$("upMins").value)||null,note:$("upNote").value.trim()};
+  $("upGo").disabled=true;
+  try{
+    let oldPath=null;
+    if(upSrc==="link"){row.kind="link";row.url=url;}
+    if(upFile){
+      const path="u/"+new Date().getFullYear()+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+"."+extOf(upFile.f.name);
+      $("upBar").hidden=false; $("upBar").firstElementChild.style.width="0%"; msg("upMsg","上傳檔案中…");
+      await uploadFile(upFile.f,upFile.mime,path,p=>{$("upBar").firstElementChild.style.width=Math.round(p*100)+"%";msg("upMsg","上傳檔案中… "+Math.round(p*100)+"%");});
+      Object.assign(row,{kind:"file",path,mime:upFile.mime,size:upFile.f.size,url:null});
+      if(editing&&editing.path)oldPath=editing.path;
+    }
+    msg("upMsg","儲存中…");
+    const r=editing
+      ? await CLS.api("rest/v1/materials?id=eq."+editing.id,{method:"PATCH",headers:{"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(Object.assign(row,{updated_at:new Date().toISOString()}))})
+      : await CLS.api("rest/v1/materials",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(row)});
+    if(!r.ok){ if(upFile&&row.path)removeFile(row.path); throw new Error("儲存失敗（"+r.status+"），請重新登入後再試"); }
+    if(oldPath)removeFile(oldPath);
+    await fetchUploads();
+    closeDlg("upDlg");
+    const saved=(await r.json())[0];
+    if(saved){const uk=(saved.grade||0)+"|"+(saved.unit||"老師上傳的教材");openSet[uk]=1;saveOpen();render();
+      const c=document.querySelector('.edit-btn[data-edit="'+saved.id+'"]');if(c){c.closest(".card").scrollIntoView({block:"center",behavior:"smooth"});c.focus({preventScroll:true});}}
+  }catch(err){msg("upMsg",err.message||"發生錯誤，請再試一次","err");}
+  finally{$("upGo").disabled=false;}
+});
+$("upDel").addEventListener("click",async()=>{
+  if(!editing)return;
+  if(!delArmed){delArmed=true;$("upDel").textContent="再按一次確定刪除";$("upDel").classList.add("armed");return;}
+  $("upDel").disabled=true; msg("upMsg","刪除中…");
+  try{
+    const r=await CLS.api("rest/v1/materials?id=eq."+editing.id,{method:"DELETE"});
+    if(!r.ok)throw new Error("刪除失敗（"+r.status+"）");
+    removeFile(editing.path);
+    const u="lessons/view.html?id="+editing.id;
+    if(doneSet[u]){delete doneSet[u];save("shelfDone",doneSet);} if(weekSet[u]){delete weekSet[u];save("shelfWeek",weekSet);}
+    await fetchUploads(); closeDlg("upDlg"); render();
+  }catch(err){msg("upMsg",err.message,"err");}
+  finally{$("upDel").disabled=false;}
+});
+
+renderAcct();
 render();
+fetchUploads();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)fetchUploads();});
+setInterval(()=>{if(!document.hidden)fetchUploads();},60000);
 /* 離線使用：把教材存到這台電腦（只在正式網站上執行） */
 (function(){
   if(!("serviceWorker" in navigator)||(location.protocol!=="https:"&&location.hostname!=="localhost"))return;
@@ -368,7 +692,7 @@ render();
   const el=$("offline");let tries=0;
   async function check(){
     try{
-      const urls=MATERIALS.map(m=>m.url).filter(Boolean);let n=0;
+      const urls=MATERIALS.filter(m=>!m.up).map(m=>m.url).filter(Boolean);let n=0;
       for(const u of urls){if(await caches.match(u))n++;}
       el.textContent=n>=urls.length?"・已存到這台電腦，網路斷線也能用":"・正在存到這台電腦（"+n+" / "+urls.length+"）";
       if(n<urls.length&&++tries<40)setTimeout(check,3000);

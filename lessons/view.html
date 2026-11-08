@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>教材｜教室小書櫃</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<script src="../assets/sync.js"></script>
+<style>
+/* 老師上傳教材的檢視頁：PDF、圖片直接顯示；Word／PowerPoint 用 Microsoft 線上檢視；網址連結能嵌入就嵌入，不能嵌入就給一個大按鈕。 */
+:root{
+  --paper:#F4F8F6;--ink:#1E3A34;--muted:#5C7770;--card:#FFFFFF;--line:#C9DBD3;--leaf:#23784B;--accent:#C4501E;--bar:#1E3A34;--bar-ink:#FFFFFF;
+  --display:"LXGW WenKai TC","Kaiti TC","DFKai-SB",serif;--body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#14201D;--ink:#E6F0EC;--muted:#9DB6AE;--card:#1B2925;--line:#2C433C;--leaf:#5CC28A;--accent:#FF8452;--bar:#0E1714;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#14201D;--ink:#E6F0EC;--muted:#9DB6AE;--card:#1B2925;--line:#2C433C;--leaf:#5CC28A;--accent:#FF8452;--bar:#0E1714;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font:400 1rem/1.6 var(--body);display:flex;flex-direction:column;min-height:100dvh}
+.top{background:var(--bar);color:var(--bar-ink);display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+.top h1{margin:0;font:400 clamp(1.3rem,2.6vw,2rem)/1.25 var(--display);flex:1 1 300px;min-width:0;overflow-wrap:anywhere}
+.top small{display:block;font:400 .85rem/1.4 var(--body);opacity:.8;margin-top:2px}
+.tbtn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;border:2px solid rgba(255,255,255,.45);background:transparent;color:inherit;font:700 1rem/1 var(--body);text-decoration:none;cursor:pointer;white-space:nowrap}
+main{flex:1 1 auto;display:flex;min-height:0;position:relative}
+.frame{flex:1;border:0;width:100%;min-height:calc(100dvh - 160px);background:#fff}
+.img-wrap{flex:1;display:grid;place-items:center;overflow:auto;padding:12px;cursor:zoom-in}
+.img-wrap img{max-width:100%;max-height:calc(100dvh - 180px);object-fit:contain;border-radius:8px;background:#fff}
+.img-wrap.full{place-items:start;cursor:zoom-out}
+.img-wrap.full img{max-width:none;max-height:none}
+.note{flex:1;display:grid;place-items:center;padding:24px;text-align:center}
+.note .box{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:28px;max-width:620px;display:grid;gap:14px;justify-items:center}
+.note h2{margin:0;font:400 1.6rem/1.3 var(--display)}
+.note p{margin:0;color:var(--muted)}
+.note .host{font-size:1.1rem;color:var(--ink);font-weight:700;overflow-wrap:anywhere}
+.big{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 32px;border-radius:999px;border:0;background:var(--leaf);color:#fff;font:700 1.2rem/1 var(--body);text-decoration:none;cursor:pointer}
+.desc{padding:10px 16px;background:var(--card);border-bottom:1.5px solid var(--line);font-size:.95rem;color:var(--muted)}
+.desc:empty{display:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="title">教材載入中…<small id="meta"></small></h1>
+  <a class="tbtn" id="openBtn" hidden target="_blank" rel="noopener">在新分頁打開 ↗</a>
+</header>
+<div class="desc" id="desc"></div>
+<main id="main"><div class="note"><div class="box"><p>教材載入中…</p></div></div></main>
+
+<script>
+(function () {
+  var id = new URLSearchParams(location.search).get("id") || "";
+  var $ = function (i) { return document.getElementById(i); };
+  var main = $("main");
+  var PUB = CLS.url + "/storage/v1/object/public/materials/";
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function cached() { try { return (JSON.parse(localStorage.getItem("clsUploads") || "[]") || []).filter(function (r) { return r.id === id; })[0] || null; } catch (e) { return null; } }
+  function note(h, p, btn) {
+    main.innerHTML = '<div class="note"><div class="box"><h2>' + esc(h) + "</h2>" + (p ? "<p>" + p + "</p>" : "") + (btn || "") + "</div></div>";
+  }
+
+  /* 網址連結：能嵌入的網站轉成嵌入網址 */
+  function embedUrl(u) {
+    var m;
+    try { var url = new URL(u); } catch (e) { return null; }
+    var h = url.hostname.replace(/^www\.|^m\./, "");
+    if (h === "youtu.be") return "https://www.youtube-nocookie.com/embed/" + url.pathname.slice(1).split("/")[0] + "?rel=0";
+    if (h === "youtube.com" || h === "youtube-nocookie.com") {
+      var v = url.searchParams.get("v");
+      if (!v && (m = url.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]+)/))) v = m[1];
+      if (v) { var t = parseInt(url.searchParams.get("t") || url.searchParams.get("start") || "0", 10); return "https://www.youtube-nocookie.com/embed/" + v + "?rel=0" + (t ? "&start=" + t : ""); }
+    }
+    if (h === "docs.google.com" && (m = url.pathname.match(/^\/(presentation|document|spreadsheets|forms)\/d\/(e\/)?([\w-]+)/))) {
+      var base = "https://docs.google.com/" + m[1] + "/d/" + (m[2] || "") + m[3];
+      if (m[1] === "presentation") return base + (m[2] ? "/embed" : "/embed?start=false&loop=false");
+      if (m[1] === "forms") return base + "/viewform?embedded=true";
+      return base + (m[2] ? "/pubhtml?widget=true" : "/preview");
+    }
+    if (h === "drive.google.com" && (m = url.pathname.match(/^\/file\/d\/([\w-]+)/))) return "https://drive.google.com/file/d/" + m[1] + "/preview";
+    if (h === "canva.com" && /^\/design\//.test(url.pathname)) return "https://www.canva.com" + url.pathname.replace(/\/(edit|watch)$/, "/view") + "?embed";
+    if (h === "wordwall.net" && (m = url.pathname.match(/\/resource\/(\d+)/))) return "https://wordwall.net/embed/resource/" + m[1];
+    return null;
+  }
+  function frame(src, title) {
+    main.innerHTML = "";
+    var f = document.createElement("iframe");
+    f.className = "frame"; f.src = src; f.title = title;
+    f.allow = "autoplay; fullscreen; encrypted-media; picture-in-picture";
+    f.setAttribute("allowfullscreen", "");
+    main.appendChild(f);
+  }
+
+  function show(r) {
+    if (!r) { note("找不到這份教材", "可能已經被刪除了。請按左下角的「回書櫃」回到首頁。"); $("title").firstChild.textContent = "找不到教材"; return; }
+    document.title = r.title + "｜教室小書櫃";
+    $("title").firstChild.textContent = r.title;
+    $("meta").textContent = [r.lesson, r.pages ? "課本 p." + r.pages : "", r.mins ? "約 " + r.mins + " 分鐘" : ""].filter(Boolean).join("・");
+    $("desc").textContent = r.note || "";
+    var ob = $("openBtn");
+    if (r.kind === "link") {
+      ob.href = r.url; ob.hidden = false;
+      var e = embedUrl(r.url);
+      if (e) frame(e, r.title);
+      else {
+        var host = ""; try { host = new URL(r.url).hostname.replace(/^www\./, ""); } catch (x) {}
+        ob.hidden = true;
+        note(r.title, '<span class="host">' + esc(host) + "</span><br>這個網站不能直接放在書櫃裡，請點下面的按鈕打開（會開新分頁，看完關掉分頁就回到這裡）。",
+          '<a class="big" href="' + esc(r.url) + '" target="_blank" rel="noopener">打開網站 ↗</a>');
+      }
+      return;
+    }
+    var pub = PUB + r.path;
+    ob.href = pub; ob.hidden = false;
+    if (r.mime === "application/pdf" || /^image\//.test(r.mime || "")) {
+      ob.textContent = "下載 ↓"; ob.setAttribute("download", r.title);
+      /* 先抓成 blob：這樣網路斷線時也能從這台電腦的存檔打開 */
+      fetch(pub).then(function (res) { if (!res.ok) throw 0; return res.blob(); }).then(function (b) {
+        var u = URL.createObjectURL(b.type ? b : new Blob([b], { type: r.mime }));
+        if (r.mime === "application/pdf") frame(u + "#view=FitH", r.title);
+        else {
+          main.innerHTML = '<div class="img-wrap" id="iw"><img alt="' + esc(r.title) + '"></div>';
+          var iw = $("iw"); iw.firstChild.src = u;
+          iw.addEventListener("click", function () { iw.classList.toggle("full"); });
+        }
+      }).catch(function () {
+        note("打不開這份教材", navigator.onLine === false ? "目前沒有網路，而且這份教材還沒存到這台電腦。連上網路後再試一次。" : "檔案讀取失敗，請稍後再試。");
+      });
+      return;
+    }
+    /* Word／PowerPoint：用 Microsoft 的線上檢視（需要網路） */
+    ob.textContent = "下載原始檔 ↓"; ob.setAttribute("download", r.title);
+    if (navigator.onLine === false) { note("需要網路才能打開", "Word 和 PowerPoint 檔要連上網路才能顯示。"); return; }
+    frame("https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(pub), r.title);
+  }
+
+  var c = cached();
+  if (c) show(c);
+  CLS.api("rest/v1/materials?select=*&id=eq." + encodeURIComponent(id)).then(function (res) { return res.ok ? res.json() : Promise.reject(); }).then(function (rows) {
+    var r = rows[0] || null;
+    if (!c || !r || JSON.stringify(r) !== JSON.stringify(c)) show(r);
+  }).catch(function () { if (!c) note("打不開這份教材", "目前連不上網路，而且這台電腦還沒存過這份教材。"); });
+})();
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
