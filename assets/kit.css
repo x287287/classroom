@@ -25,9 +25,11 @@
 /* 單元主色：<body class="u2"> 拒菸拒酒拒檳榔（青綠）、<body class="u3"> 熱與火的危機（火橘） */
 body.u2{--accent:#2A7563;--accent-soft:#E0F0EA;--accent-ink:#FFFFFF}
 body.u3{--accent:#B44216;--accent-soft:#FCE8DD;--accent-ink:#FFFFFF}
+body.fc{--accent:#4A4A8A;--accent-soft:#E9E8F7;--accent-ink:#FFFFFF} /* 友善校園（靛藍） */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) body.u2{--accent:#5CC9A9;--accent-soft:#17342B;--accent-ink:#0D1F19}
   :root:not([data-theme="light"]) body.u3{--accent:#FF8A5B;--accent-soft:#3A2218;--accent-ink:#1A0E08}
+  :root:not([data-theme="light"]) body.fc{--accent:#B3B1F2;--accent-soft:#24233D;--accent-ink:#17162E}
 }
 *{box-sizing:border-box}
 html{font-size:clamp(17px, .45vw + 13.5px, 24px);-webkit-text-size-adjust:100%}

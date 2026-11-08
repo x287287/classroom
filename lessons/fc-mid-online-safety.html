@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>網路安全小偵探</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 中年級網路安全：個資放大鏡（分類）→ 網友對話（逐句判斷）→ 網路霸凌不當幫兇（OX）→ 停想問（排序）→ 求助 */
+.chat{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1.4rem;align-items:start}
+@media (max-width:900px){.chat{grid-template-columns:minmax(0,1fr)}}
+.phone{background:var(--surface);border:1px solid var(--line);border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+.phone .top{background:var(--accent);color:var(--accent-ink);padding:.6rem 1rem;font-family:var(--font-display);display:flex;align-items:center;gap:.6rem}
+.phone .top .av{width:2rem;height:2rem;border-radius:50%;background:#F7C94F;display:grid;place-items:center;color:#1E1E3A;font-size:1rem}
+.log{padding:1rem;display:flex;flex-direction:column;gap:.6rem;min-height:280px;max-height:440px;overflow-y:auto;background:var(--sunk)}
+.b{max-width:85%;padding:.55rem .9rem;border-radius:16px;line-height:1.55}
+.b.them{background:var(--surface);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.b.me{background:var(--accent-soft);align-self:flex-end;border-bottom-right-radius:4px}
+.b.sys{align-self:center;font-size:.85rem;color:var(--muted);background:transparent;text-align:center}
+.reply{display:grid;gap:.5rem;padding:.8rem;border-top:1px solid var(--line)}
+.reply button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.55rem .9rem;text-align:left;cursor:pointer;min-height:3.2rem;font-size:1rem}
+.reply button:active{transform:scale(.98)}
+.clues{display:grid;gap:.5rem}
+.clues div{border:2px dashed var(--line);border-radius:12px;padding:.5rem .7rem;min-height:3rem;font-size:.95rem;color:var(--muted)}
+.clues div.got{border-style:solid;border-color:var(--bad);background:var(--bad-soft);color:var(--fg)}
+.clues div b{color:var(--bad)}
+.reveal{margin-top:1rem}
+.mask{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:center}
+@media (max-width:640px){.mask{grid-template-columns:minmax(0,1fr)}}
+.mask .card{text-align:center}
+.mask .card .em{font-size:3rem;line-height:1.2}
+.call{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}
+.call .card{flex:1 1 14rem}
+.call .num{font-family:var(--font-display);font-size:2rem;color:var(--accent);line-height:1.1;overflow-wrap:anywhere}
+</style>
+</head>
+<body class="fc">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">友善校園｜中年級（三、四年級）・網路安全</div>
+    <h1>網路安全小偵探：保護自己、友善上網</h1>
+    <p class="k-lede">平板、手機、線上遊戲，讓我們可以跟很多人聊天。可是螢幕另一邊是誰，我們看不到。今天當一位小偵探：守住自己的個人資料、認出可疑的網友、遇到網路霸凌不當幫兇。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#info"><span class="no">第 1 站</span><b>個資放大鏡</b><span>哪些不能說</span></a>
+      <a href="#chat"><span class="no">第 2 站</span><b>網友是誰？</b><span>找出可疑線索</span></a>
+      <a href="#bully"><span class="no">第 3 站</span><b>網路霸凌</b><span>不按讚、不轉傳</span></a>
+      <a href="#stop"><span class="no">第 4 站</span><b>停、想、問</b><span>遇到怪怪的事</span></a>
+      <a href="#help"><span class="no">第 5 站</span><b>找誰幫忙</b><span>信任的大人與專線</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="info">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>個資放大鏡：哪些可以說，哪些不能給陌生人？</h2></div>
+  <p class="big">「個人資料」就是可以讓別人<b>找到你、認出你、冒充你</b>的資料。</p>
+  <div id="sortBox" style="margin-top:1rem"></div>
+  <div class="think"><b>偵探小提醒：</b>照片也會洩漏資料！穿著制服、學校門口、家裡附近的招牌、公車站名，都可能讓陌生人知道你在哪裡。</div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="chat">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>線上遊戲裡，有人傳訊息給你……</h2></div>
+  <div class="chat">
+    <div class="phone">
+      <div class="top"><span class="av" aria-hidden="true">★</span><span>小星星（遊戲好友）</span></div>
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="reply" id="reply"></div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <h3>可疑線索收集</h3>
+        <div class="clues" id="clues" style="margin-top:.5rem"></div>
+      </div>
+      <button class="btn" type="button" id="restart">重新開始這段對話</button>
+    </div>
+  </div>
+  <div class="mask reveal" id="reveal" hidden>
+    <div class="card"><div class="em" aria-hidden="true">🧒</div><h3>網路上說的</h3><p>「我也是四年級，喜歡畫畫。」</p></div>
+    <div class="card warn"><div class="em" aria-hidden="true">❓</div><h3>真實的樣子</h3><p>可能是任何人：大人、冒充別人的人。<b>網路上的照片、年齡、名字都可以是假的。</b></p></div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="bully">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>網路霸凌：我不當幫兇（O 還是 X？）</h2></div>
+  <div class="cards" style="margin-top:0;margin-bottom:1.2rem">
+    <div class="card"><h3>什麼是網路霸凌？</h3><p>在群組、遊戲、留言裡，<b>一直</b>嘲笑、罵人、排擠別人，或傳別人的丟臉照片、散播謠言。</p></div>
+    <div class="card"><h3>按讚、轉傳也算一份</h3><p>每按一次讚、每轉傳一次，就讓更多人看到，被欺負的人會更難過。</p></div>
+  </div>
+  <div id="oxBox"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="stop">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>遇到怪怪的訊息：停、想、問</h2></div>
+  <div id="orderBox"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="help">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 5 站</span><h2>需要幫忙，先找信任的大人</h2></div>
+  <p class="big">爸爸媽媽、導師、輔導老師，都是你的後盾。說出來不會被罵，<b>你沒有做錯事</b>。必要時，大人可以陪你使用下面的求助管道：</p>
+  <div class="call">
+    <div class="card"><div class="num">1953</div><p><b>教育部反霸凌專線</b>：24 小時。被欺負或看到別人被欺負，都可以反映。</p></div>
+    <div class="card"><div class="num">113</div><p><b>保護專線</b>：24 小時、免付費。覺得自己不安全時撥打。</p></div>
+    <div class="card"><div class="num" style="font-size:1.4rem">iWIN</div><p><b>網路內容防護機構</b>：看到網路上傷害兒少的內容或網路霸凌，可以請大人幫忙申訴（電話 02-2577-5118）。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>本份是高年級「上網的分寸」「防制網路性剝削」的前導：中年級先建立個資保護、辨識可疑網友（索取個資、照片、約見面、要求保密）與網路霸凌旁觀者責任的觀念。</li>
+      <li>第 2 站模擬對話的可疑線索，對應常見的網路誘騙歷程：建立信任（說自己同年齡、有共同興趣）→ 索取個資 → 索取照片 → 要求保密 → 約見面。每一句都有安全、猶豫、危險三種回應可選，選到猶豫或危險的回應，畫面會說明為什麼，並提示更好的做法。</li>
+      <li>網路霸凌建議原則：不回應、不刪除（截圖保留時間與內容）、不轉傳、要求助。</li>
+      <li>1953 為教育部反霸凌專線（111 年 8 月 30 日起取代 0800-200-885，24 小時）；113 為衛生福利部 24 小時免付費保護專線；iWIN 網路內容防護機構受理網路有害兒少內容申訴（網站 i.win.org.tw，電話 02-2577-5118）。</li>
+      <li>若學生透露曾被網友索取照片或約見面，請保持冷靜、不責備，協助保存對話紀錄，並通知家長、學務處與輔導室；涉及兒少性剝削時依法通報。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>網路小偵探考考你</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>台灣英文新聞（2022/8/30）：教育部反霸凌專線改為 1953，24 小時提供服務。https://www.taiwannews.com.tw/zh/news/4641966</li>
+    <li>衛生福利部〈守護兒少安全 平安過好年！〉：113 保護專線為 24 小時免付費專線。https://www.mohw.gov.tw/cp-2641-21001-1.html</li>
+    <li>新竹縣國小校園霸凌防制宣導資料（pups.hc.edu.tw）：iWIN 網路內容防護機構申訴網址與電話、1953 專線說明。https://www.pups.hc.edu.tw/uploads/1675392434850dh5ZxGSA.pdf</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 第 1 站：個資分類 */
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'ok',t:'可以分享',d:'不會讓人找到我'},{id:'no',t:'不給陌生人',d:'會讓人找到我、冒充我'}],
+  items:[
+    {t:'我最喜歡的顏色',bin:'ok',e:'喜歡的東西不會讓人找到你，可以分享。'},
+    {t:'我最喜歡的卡通',bin:'ok',e:'可以聊，但不要順便說出學校和住址喔。'},
+    {t:'我的全名和學校、班級',bin:'no',e:'有了學校和班級，陌生人就可能找到你。'},
+    {t:'我家的地址',bin:'no',e:'住址絕對不能告訴陌生人。'},
+    {t:'我和爸媽的電話號碼',bin:'no',e:'電話可能被拿去騷擾或詐騙。'},
+    {t:'遊戲帳號的密碼',bin:'no',e:'密碼連好朋友都不能給，別人可能用你的帳號亂說話。'},
+    {t:'穿著學校制服的照片',bin:'no',e:'制服和校門會讓人知道你在哪所學校。'},
+    {t:'今天心情很好',bin:'ok',e:'分享心情沒關係。'}
+  ],
+  hint:'先點一張卡片，再點它屬於哪一邊。',
+  start:'選一張卡片，想一想：陌生人知道了，會不會找到我？',
+  done:'個資守住了！不確定能不能說的時候，先問爸媽或老師。'
+});
+
+/* 第 2 站：可疑網友對話 */
+(function(){
+  var R=[
+    {say:'嗨！我也是四年級，我也很喜歡畫畫耶，我們當好朋友好不好？😊',clue:'說自己跟你<b>一樣大、一樣喜歡的東西</b>，讓你很快相信他。',
+     opts:[{t:'我們在遊戲裡一起玩就好。',ok:1,f:'很好！在遊戲裡聊天可以，但不用急著相信。'},{t:'好呀！我們是好朋友了！',ok:0,f:'網路上很快說要當好朋友的人，你其實不知道他是誰。'},{t:'我叫○○○，讀○○國小四年三班！',ok:-1,f:'一下就說出全名和學校班級，陌生人就可能找到你。'}]},
+    {say:'你讀哪一間學校？住在哪裡？我們說不定很近！',clue:'問你的<b>學校、住址</b>。',
+     opts:[{t:'這是個人資料，我不能說。',ok:1,f:'答得好！個人資料不能告訴網友。'},{t:'嗯……我住在學校附近……',ok:0,f:'說一點點也可能被拼出來。直接說「我不能說」就好。'},{t:'我住在○○路○號！',ok:-1,f:'住址絕對不能說！'}]},
+    {say:'可以傳一張你的照片給我嗎？我想看看你長怎樣～',clue:'要你<b>傳照片</b>。',
+     opts:[{t:'不行，我不傳照片給網友。',ok:1,f:'很棒！照片傳出去就收不回來了。'},{t:'傳一張沒穿制服的應該沒關係吧……',ok:0,f:'照片傳出去就收不回來，也可能被拿去亂用。'},{t:'好，我拍一張給你。',ok:-1,f:'不能傳照片給網友！'}]},
+    {say:'這是我們兩個的秘密喔，不要告訴你爸媽，他們會不讓你玩。',clue:'要你<b>保密、不要告訴爸媽</b>。',
+     opts:[{t:'我要告訴爸媽。',ok:1,f:'對！要你保密，就是危險訊號。'},{t:'好吧……我不說。',ok:0,f:'會叫你對爸媽保密的人，通常是想做不好的事。'},{t:'我發誓絕對不說！',ok:-1,f:'這是壞秘密，一定要說出來！'}]},
+    {say:'週末我們約在公園見面好不好？我請你喝飲料！',clue:'約你<b>出來見面</b>，還用禮物吸引你。',
+     opts:[{t:'我不會跟網友見面。我要截圖給爸媽看。',ok:1,f:'太棒了！不見面、存證據、告訴大人。'},{t:'我問問看可不可以……',ok:0,f:'不跟網友單獨見面。先把對話給爸媽看。'},{t:'好！幾點？我自己去。',ok:-1,f:'絕對不能自己去見網友，很危險！'}]}
+  ];
+  var log=document.getElementById('log'), reply=document.getElementById('reply'), clues=document.getElementById('clues'), reveal=document.getElementById('reveal'), i, safe;
+  function add(cls,html){var b=document.createElement('div');b.className='b '+cls;b.innerHTML=html;log.appendChild(b);log.scrollTop=log.scrollHeight;}
+  function drawClues(){clues.innerHTML=R.map(function(r,k){return '<div class="'+(k<i?'got':'')+'">'+(k<i?'線索 '+(k+1)+'：'+r.clue:'線索 '+(k+1)+'：？')+'</div>';}).join('');}
+  function round(){
+    drawClues(); reply.innerHTML='';
+    if(i>=R.length){
+      add('sys','對話結束。你選了 '+safe+' / '+R.length+' 次最安全的回應。');
+      reveal.hidden=false; return;
+    }
+    add('them',R[i].say);
+    KIT.shuffle(R[i].opts).forEach(function(o){
+      var b=document.createElement('button');b.type='button';b.textContent=o.t;
+      b.addEventListener('click',function(){
+        add('me',o.t);
+        if(o.ok===1)safe++;
+        add('sys',(o.ok===1?'✅ ':o.ok===0?'⚠️ ':'⛔ ')+o.f+(o.ok!==1?'<br>更安全的回應：「'+R[i].opts.filter(function(x){return x.ok===1;})[0].t+'」':''));
+        i++; setTimeout(round,600);
+      });
+      reply.appendChild(b);
+    });
+  }
+  function start(){i=0;safe=0;log.innerHTML='';reveal.hidden=true;add('sys','小星星傳了訊息給你');round();}
+  document.getElementById('restart').addEventListener('click',start);
+  start();
+})();
+
+/* 第 3 站：網路霸凌 OX */
+KIT.ox(document.getElementById('oxBox'),[
+  {s:'群組裡有人貼同學的丟臉照片，我只是按讚，沒有關係。',a:false,e:'按讚會讓更多人看到，被欺負的人會更難過。'},
+  {s:'看到同學在網路上被罵，我可以截圖存下來，告訴老師或爸媽。',a:true,e:'保存證據、告訴大人，是幫助同學最好的方法。'},
+  {s:'轉傳別人的丟臉照片只是分享，不算欺負。',a:false,e:'轉傳就是幫忙散播，也是在傷害別人。'},
+  {s:'被別人在網路上罵，馬上罵回去最好。',a:false,e:'罵回去會讓衝突更大。先不回應、截圖、告訴大人。'},
+  {s:'刪掉的留言，還是可能已經被別人截圖存起來。',a:true,e:'網路會留下痕跡，傳出去之前要先想一想。'},
+  {s:'私訊被欺負的同學：「我陪你，我們一起告訴老師。」',a:true,e:'陪伴就是很大的力量，讓他不孤單。'}
+]);
+
+/* 第 4 站：停想問 */
+KIT.order(document.getElementById('orderBox'),{
+  steps:[
+    {t:'停',d:'先不要回覆、不要點連結、不要下載，也不要傳照片。'},
+    {t:'想',d:'想一想：他是誰？他要我的什麼？我有沒有覺得怪怪的、害怕？'},
+    {t:'存',d:'把訊息截圖存下來（要看得到時間和內容），不要刪掉。'},
+    {t:'問',d:'拿給爸媽或老師看，問大人該怎麼做。'}
+  ],
+  hint:'依照正確順序，點下面的卡片。',
+  start:'收到怪怪的訊息，第一步要做什麼？',
+  done:'停 → 想 → 存 → 問！遇到網路上的怪事，不用自己一個人處理。'
+});
+
+/* 挑戰 */
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'下面哪一個可以告訴網路上的陌生人？',o:['家裡地址','最喜歡的顏色','學校和班級'],a:1,e:'喜歡的東西不會讓人找到你；地址、學校班級都是個資。'},
+  {q:'網友說「我也是四年級」，這代表什麼？',o:['他一定是四年級','不一定，網路上的年齡可以是假的','他是我的好朋友'],a:1,e:'網路上的照片、年齡、名字都可能是假的。'},
+  {q:'網友說「這是我們的秘密，不要告訴爸媽」，你應該？',o:['保守秘密','告訴爸媽','封鎖就好，不用說'],a:1,e:'要你對爸媽保密，就是危險訊號，一定要告訴大人。'},
+  {q:'看到群組裡有人在嘲笑同學，最好的做法是？',o:['跟著按讚','轉傳給別的群組','不按讚不轉傳，截圖告訴老師'],a:2,e:'不當幫兇，保存證據，請大人幫忙。'},
+  {q:'收到怪怪的訊息，正確順序是？',o:['停、想、存、問','回、刪、忘、玩','點、看、傳、笑'],a:0,e:'停下來、想一想、截圖存證、問大人。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
