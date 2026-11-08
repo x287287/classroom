@@ -502,10 +502,19 @@ applyUploads();
 /* ---------- 對話框共用 ---------- */
 let lastFocus=null;
 function openDlg(id,focusSel){lastFocus=document.activeElement;const d=$(id);d.hidden=false;const f=d.querySelector(focusSel||"input,button");if(f)f.focus();}
-function closeDlg(id){$(id).hidden=true;if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+function closeDlg(id,byCancel){if(id==="upDlg"&&byCancel)clearDraft();$(id).hidden=true;if(lastFocus&&lastFocus.focus)lastFocus.focus();}
 document.querySelectorAll(".dlg").forEach(d=>{
-  d.addEventListener("click",e=>{if(e.target===d||e.target.closest("[data-close]"))closeDlg(d.id);});
-  d.addEventListener("keydown",e=>{if(e.key==="Escape")closeDlg(d.id);});
+  /* 點視窗外面關閉：按下和放開都要在外面才算（在輸入框裡拖曳選字、放開在外面，不會關掉）。
+     新增教材的視窗不會因為點外面而關閉，只能按「取消」或「儲存」。 */
+  let downOut=false;
+  d.addEventListener("pointerdown",e=>{downOut=e.target===d;});
+  d.addEventListener("click",e=>{
+    if(e.target.closest("[data-close]")){closeDlg(d.id,true);return;}
+    if(e.target===d&&downOut&&d.id!=="upDlg")closeDlg(d.id);
+    downOut=false;
+  });
+  /* Esc：打注音選字時按的 Esc 不算；新增教材視窗不用 Esc 關閉 */
+  d.addEventListener("keydown",e=>{if(e.key==="Escape"&&!e.isComposing&&e.keyCode!==229&&d.id!=="upDlg")closeDlg(d.id);});
 });
 function msg(id,t,kind){const m=$(id);m.textContent=t||"";m.className="msg"+(kind?" "+kind:"");}
 
@@ -592,10 +601,11 @@ function pickFile(f){
   const mime=f.type&&EXT_MIME[extOf(f.name)]?EXT_MIME[extOf(f.name)]:(f.type||EXT_MIME[extOf(f.name)]||"");
   if(!Object.values(EXT_MIME).includes(mime)){msg("upMsg","這種檔案不能上傳。可以上傳 PDF、Word、PowerPoint 或圖片。","err");return;}
   if(f.size>MAX_MB*1024*1024){msg("upMsg",`檔案太大（${(f.size/1048576).toFixed(1)} MB），請小於 ${MAX_MB} MB。影片請先放到 YouTube 再貼網址。`,"err");return;}
-  upFile={f,mime}; msg("upMsg","");
+  upFile={f,mime}; if(!editing)keptFile=upFile; msg("upMsg","");
   $("upFileName").textContent="✓ "+f.name+"（"+(f.size/1048576).toFixed(1)+" MB）";
   if(!$("upTitle").value.trim())$("upTitle").value=f.name.replace(/\.[^.]+$/,"").replace(/[_]+/g," ").slice(0,120);
   if(!editing)$("upType").value=guessType(mime);
+  saveDraft();
 }
 $("upFile").addEventListener("change",e=>pickFile(e.target.files[0]));
 const drop=$("upDrop");
@@ -604,6 +614,18 @@ const drop=$("upDrop");
 drop.addEventListener("drop",e=>pickFile(e.dataTransfer.files[0]));
 $("upUrl").addEventListener("change",()=>{const u=$("upUrl").value.trim();if(u&&!editing)$("upType").value=guessType("",u);});
 
+/* 還沒存的內容自動保留（存在這個分頁，重新整理也還在）；按「取消」或儲存成功才清掉 */
+const DRAFT_F=["upUrl","upTitle","upUnit","upLesson","upTopic","upType","upGrade","upPages","upMins","upNote"];
+function draftKey(){return "clsUpDraft:"+(editing?editing.id:"new");}
+function saveDraft(){
+  if($("upDlg").hidden)return;
+  const d={src:upSrc}; DRAFT_F.forEach(f=>d[f]=$(f).value);
+  try{sessionStorage.setItem(draftKey(),JSON.stringify(d))}catch(e){}
+}
+function clearDraft(){try{sessionStorage.removeItem(draftKey())}catch(e){} keptFile=null;}
+let keptFile=null; /* 選好的檔案也先留著（同一個分頁內） */
+$("upForm").addEventListener("input",saveDraft);
+$("upForm").addEventListener("change",saveDraft);
 function openUpload(row){
   editing=row||null; upFile=null; delArmed=false;
   $("upForm").reset(); $("upBar").hidden=true; msg("upMsg","");
@@ -617,6 +639,11 @@ function openUpload(row){
   $("upTitle").value=r.title; $("upUnit").value=r.unit; $("upLesson").value=r.lesson; $("upTopic").value=r.topic||"";
   $("upType").value=r.type||"other"; $("upGrade").value=String(r.grade||4); $("upPages").value=r.pages||""; $("upMins").value=r.mins||""; $("upNote").value=r.note||"";
   document.querySelectorAll("#upForm [data-src]").forEach(b=>b.disabled=!!row);
+  /* 恢復上次沒存的內容 */
+  let d=null; try{d=JSON.parse(sessionStorage.getItem(draftKey())||"null")}catch(e){}
+  if(d){ if(!row)setSrc(d.src||"file"); DRAFT_F.forEach(f=>{if(d[f]!=null)$(f).value=d[f];}); }
+  if(!row&&keptFile){upFile=keptFile;$("upFileName").textContent="✓ "+keptFile.f.name+"（"+(keptFile.f.size/1048576).toFixed(1)+" MB）";}
+  if(d||(!row&&keptFile))msg("upMsg","已恢復剛才還沒儲存的內容。","ok");
   fillLists(); openDlg("upDlg","#upTitle");
 }
 $("addBtn").addEventListener("click",()=>openUpload(null));
@@ -667,6 +694,7 @@ $("upForm").addEventListener("submit",async e=>{
       : await CLS.api("rest/v1/materials",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=representation"},body:JSON.stringify(row)});
     if(!r.ok){ if(upFile&&row.path)removeFile(row.path); throw new Error("儲存失敗（"+r.status+"），請重新登入後再試"); }
     if(oldPath)removeFile(oldPath);
+    clearDraft();
     await fetchUploads();
     closeDlg("upDlg");
     const saved=(await r.json())[0];
@@ -685,7 +713,7 @@ $("upDel").addEventListener("click",async()=>{
     removeFile(editing.path);
     const u="lessons/view.html?id="+editing.id;
     if(doneSet[u]){delete doneSet[u];save("shelfDone",doneSet);} if(weekSet[u]){delete weekSet[u];save("shelfWeek",weekSet);}
-    await fetchUploads(); closeDlg("upDlg"); render();
+    clearDraft(); await fetchUploads(); closeDlg("upDlg"); render();
   }catch(err){msg("upMsg",err.message,"err");}
   finally{$("upDel").disabled=false;}
 });
