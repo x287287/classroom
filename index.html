@@ -356,6 +356,8 @@ const TYPES={all:"全部",web:"互動教材",slide:"動畫簡報",game:"統整�
 const gradeName=g=>("一二三四五六"[g-1]||"")+"年級";
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $=id=>document.getElementById(id);
+/* 只有內容真的改變時才更新畫面，避免同步時整頁重畫、打斷正在點的動作 */
+function setHTML(el,html){if(el.__html===html)return false;el.__html=html;el.innerHTML=html;return true;}
 let curType="all", curGrade="all", query="";
 
 function filtered(){
@@ -381,9 +383,9 @@ let weekSet=load("shelfWeek",{});
 function renderWeek(){
   const box=$("week"), items=MATERIALS.filter(m=>m.url&&weekSet[m.url]);
   box.hidden=!items.length;
-  if(!items.length){box.innerHTML="";return;}
+  if(!items.length){setHTML(box,"");return;}
   const mins=items.reduce((a,m)=>a+(m.mins||0),0);
-  box.innerHTML=`<div class="recent-h"><b>★ 本週要用</b><div class="week-btns"><span class="lesson" style="align-self:center">${items.length} 份${mins?`・約 ${mins} 分鐘`:""}</span><button class="mini" type="button" id="clearWeek">清空本週</button></div></div><div class="recent-list">${items.map(m=>`<a class="rc${doneSet[m.url]?" is-done":""}" href="${esc(m.url)}" data-url="${esc(m.url)}"><span class="chip ${esc(m.type)}">${TYPES[m.type]||""}</span><b>${doneSet[m.url]?"✓ ":""}${esc(m.title)}</b><small class="meta">${esc(((m.lesson||"").match(/^第\s*\d+\s*課/)||[m.type==="game"?"單元統整":(m.lesson||"")])[0])}${m.pages?`・課本 p.${esc(m.pages)}`:""}${m.mins?`・約 ${m.mins} 分鐘`:""}</small></a>`).join("")}</div>`;
+  if(!setHTML(box,`<div class="recent-h"><b>★ 本週要用</b><div class="week-btns"><span class="lesson" style="align-self:center">${items.length} 份${mins?`・約 ${mins} 分鐘`:""}</span><button class="mini" type="button" id="clearWeek">清空本週</button></div></div><div class="recent-list">${items.map(m=>`<a class="rc${doneSet[m.url]?" is-done":""}" href="${esc(m.url)}" data-url="${esc(m.url)}"><span class="chip ${esc(m.type)}">${TYPES[m.type]||""}</span><b>${doneSet[m.url]?"✓ ":""}${esc(m.title)}</b><small class="meta">${esc(((m.lesson||"").match(/^第\s*\d+\s*課/)||[m.type==="game"?"單元統整":(m.lesson||"")])[0])}${m.pages?`・課本 p.${esc(m.pages)}`:""}${m.mins?`・約 ${m.mins} 分鐘`:""}</small></a>`).join("")}</div>`))return;
   $("clearWeek").addEventListener("click",()=>{weekSet={};save("shelfWeek",weekSet);render();});
 }
 function ago(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return"剛剛";if(m<60)return m+" 分鐘前";const h=Math.round(m/60);if(h<24)return h+" 小時前";const d=Math.round(h/24);return d+" 天前"}
@@ -391,21 +393,21 @@ function renderRecent(){
   const box=$("recent"), items=recent.map(r=>({r,m:MATERIALS.find(x=>x.url===r.url)})).filter(x=>x.m).slice(0,4);
   box.hidden=!items.length;
   if(!items.length)return;
-  box.innerHTML=`<div class="recent-h"><b>最近打開</b><button class="mini" type="button" id="clearRecent">清除紀錄</button></div><div class="recent-list">${items.map(({r,m})=>`<a class="rc" href="${esc(m.url)}" data-url="${esc(m.url)}"><span class="chip ${esc(m.type)}">${TYPES[m.type]||""}</span><b>${esc(m.title)}</b><small>${esc(m.unit.split(" ")[0].replace("康軒健康四上　",""))}・${ago(r.t)}</small></a>`).join("")}</div>`;
+  if(!setHTML(box,`<div class="recent-h"><b>最近打開</b><button class="mini" type="button" id="clearRecent">清除紀錄</button></div><div class="recent-list">${items.map(({r,m})=>`<a class="rc" href="${esc(m.url)}" data-url="${esc(m.url)}"><span class="chip ${esc(m.type)}">${TYPES[m.type]||""}</span><b>${esc(m.title)}</b><small>${esc(m.unit.split(" ")[0].replace("康軒健康四上　",""))}・${ago(r.t)}</small></a>`).join("")}</div>`))return;
   $("clearRecent").addEventListener("click",()=>{recent=[];save("shelfRecent",recent);renderRecent();});
 }
 function render(){
   const base=filtered();
-  $("tabs").innerHTML=Object.entries(TYPES).map(([k,v])=>{
+  setHTML($("tabs"),Object.entries(TYPES).map(([k,v])=>{
     const n=k==="all"?base.length:base.filter(i=>i.type===k).length;
     if(k!=="all"&&!MATERIALS.some(i=>i.type===k)) return "";
     return `<button class="tab" type="button" data-t="${k}" aria-pressed="${k===curType}">${v}<span class="n">${n}</span></button>`;
-  }).join("");
+  }).join(""));
   $("sTotal").textContent=MATERIALS.length;
   $("sUnits").textContent=new Set(MATERIALS.map(i=>i.unit||"未分單元")).size;
 
   const list=base.filter(i=>curType==="all"||i.type===curType);
-  if(!list.length){$("units").innerHTML=`<div class="empty"><b>找不到符合的教材</b><span>換個關鍵字、年級或類型看看。</span></div>`;return;}
+  if(!list.length){setHTML($("units"),`<div class="empty"><b>找不到符合的教材</b><span>換個關鍵字、年級或類型看看。</span></div>`);$("expandAll").hidden=$("collapseAll").hidden=true;renderRecent();renderWeek();return;}
   const units=new Map();
   list.forEach(i=>{
     const uk=(i.grade||0)+"|"+(i.unit||"未分單元");
@@ -414,7 +416,7 @@ function render(){
     const L=units.get(uk); if(!L.has(lk))L.set(lk,[]); L.get(lk).push(i);
   });
   const filtering=!!query.trim()||curType!=="all"||curGrade!=="all"||onlyTodo;
-  $("units").innerHTML=[...units.keys()].map((uk,ui)=>{
+  setHTML($("units"),[...units.keys()].map((uk,ui)=>{
     const[g,u]=uk.split("|"); const L=units.get(uk);
     const total=[...L.values()].reduce((a,x)=>a+x.length,0);
     const allU=MATERIALS.filter(x=>(x.grade||0)+"|"+(x.unit||"未分單元")===uk), doneU=allU.filter(x=>doneSet[x.url]).length;
@@ -423,7 +425,7 @@ function render(){
     return `<section class="unit${isOpen?" open":""}"><h2><button class="unit-toggle" type="button" aria-expanded="${isOpen}" aria-controls="ub${ui}" data-uk="${esc(uk)}"><span class="chev" aria-hidden="true"></span><span class="ut">${esc(u)}</span>${+g?`<span class="g">${gradeName(+g)}</span>`:""}<span class="cnt">${lessons} 課・${total} 份教材${hasGame?"・含統整遊戲":""}</span><span class="prog" aria-label="已上過 ${doneU} / ${allU.length} 份"><i style="width:${allU.length?doneU/allU.length*100:0}%"></i></span><span class="pt">已上過 ${doneU} / ${allU.length}</span></button></h2><div class="unit-body" id="ub${ui}"${isOpen?"":" hidden"}>${
       [...L.keys()].map(lk=>`<div class="lesson-group"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}">${esc(lk)}<span class="n">${L.get(lk).length} 份</span></h3><div class="cards">${L.get(lk).map(card).join("")}</div></div>`).join("")
     }</div></section>`;
-  }).join("");
+  }).join(""));
   $("expandAll").hidden=$("collapseAll").hidden=filtering;renderRecent();renderWeek();
 }
 /* 展開狀態記在這台電腦的瀏覽器裡（下次打開保持一樣）；讀不到也沒關係，預設全部收合 */
@@ -512,13 +514,21 @@ const ST={off:"☁ 老師登入",syncing:"☁ 同步中…",ok:"☁ 已同步",o
 const STL={syncing:"正在同步…",ok:"已同步：這台電腦的標記和設定都是最新的。",offline:"目前沒有網路。這段時間的修改會先存在這台電腦，連上網路後自動同步。",error:"同步失敗，稍後會自動再試一次。"};
 function renderAcct(){
   if(!window.CLS)return;
-  const s=CLS.status, b=$("acctBtn");
+  const b=$("acctBtn");
+  /* 背景定時同步時不要閃「同步中…」：已同步過就維持「已同步」，按鈕寬度才不會一直變 */
+  let s=CLS.status; if(s==="syncing"&&(b.dataset.s==="ok"))s="ok";
   b.textContent=ST[s]||ST.off; b.dataset.s=s;
   b.setAttribute("aria-label",s==="off"?"老師登入":"雲端同步："+(STL[s]||""));
   $("addBtn").hidden=!CLS.isTeacher;
   $("acEmail").textContent=CLS.user?CLS.user.email:""; $("acState").textContent=CLS.user&&!CLS.isTeacher?"這個帳號不是老師帳號，無法同步或上傳。":(STL[s]||"");
 }
-window.addEventListener("cls-status",()=>{renderAcct();if(CLS.status==="ok")fetchUploads();render();});
+let wasTeacher=window.CLS&&CLS.isTeacher, lastSt=window.CLS&&CLS.status;
+window.addEventListener("cls-status",()=>{
+  renderAcct();
+  if(CLS.isTeacher!==wasTeacher){wasTeacher=CLS.isTeacher;render();}   /* 登入／登出：卡片上的「編輯」按鈕要更新 */
+  if(CLS.status==="ok"&&lastSt!=="ok"&&lastSt!=="syncing")fetchUploads(); /* 從離線恢復時才重新抓上傳清單 */
+  lastSt=CLS.status;
+});
 /* 別台電腦改了標記或設定：重新讀取並更新畫面 */
 window.addEventListener("cls-sync",e=>{
   const k=(e.detail&&e.detail.keys)||[];

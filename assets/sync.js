@@ -86,14 +86,28 @@
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.__status = r.status; return j; }); });
   }
   var refreshing = null;
+  /* 同一台電腦開了好幾個分頁時，別的分頁可能已經更新過憑證：先讀最新的那份 */
+  function adoptStored() {
+    var st = readJSON(AUTH_KEY, null);
+    if (st && session && st.refresh_token !== session.refresh_token && st.expires_at >= session.expires_at) {
+      session = st; CLS.user = st.user || null; CLS.isTeacher = !!st.teacher; return true;
+    }
+    if (!st && session) { session = null; CLS.user = null; CLS.isTeacher = false; setStatus("off"); }
+    return false;
+  }
   function token() {
+    adoptStored();
     if (!session) return Promise.resolve(null);
     if (session.expires_at - 90 > Date.now() / 1000) return Promise.resolve(session.access_token);
     if (!refreshing) {
       refreshing = authFetch("token?grant_type=refresh_token", { refresh_token: session.refresh_token }).then(function (d) {
         refreshing = null;
         if (d.access_token) { saveSession(fromToken(d, session)); return session.access_token; }
-        if (d.__status >= 400 && d.__status < 500) { saveSession(null); setStatus("off"); return null; } /* 憑證失效：要重新登入 */
+        if (d.__status >= 400 && d.__status < 500) {
+          /* 可能是別的分頁剛好先更新了憑證：用它的，不要登出 */
+          if (adoptStored() && session.expires_at - 90 > Date.now() / 1000) return session.access_token;
+          saveSession(null); setStatus("off"); return null; /* 憑證真的失效：要重新登入 */
+        }
         throw new Error("refresh");
       }, function (e) { refreshing = null; throw e; });
     }
