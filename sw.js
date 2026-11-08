@@ -17,6 +17,8 @@ async function precache() {
   try {
     const html = await (await fetch("index.html", { cache: "no-cache" })).text();
     lessons = [...html.matchAll(/url:\s*"(lessons\/[^"]+)"/g)].map(m => m[1]);
+    /* 網站裡的 PDF（view.html?src=files/…）也一起存 */
+    lessons = lessons.concat([...html.matchAll(/src=(files\/[^&"]+\.pdf)/g)].map(m => m[1]));
   } catch (e) {}
   try {
     const fcss = await (await fetch("assets/fonts.css", { cache: "no-cache" })).text();

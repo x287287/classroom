@@ -115,7 +115,7 @@ main{flex:1 1 auto;display:flex;min-height:0;position:relative}
       /* 先抓成 blob：這樣網路斷線時也能從這台電腦的存檔打開 */
       fetch(pub).then(function (res) { if (!res.ok) throw 0; return res.blob(); }).then(function (b) {
         var u = URL.createObjectURL(b.type ? b : new Blob([b], { type: r.mime }));
-        if (r.mime === "application/pdf") frame(u + "#view=FitH", r.title);
+        if (r.mime === "application/pdf") frame(u + (r.slides || r.type === "ppt" ? "#view=Fit&navpanes=0" : "#view=FitH&navpanes=0"), r.title);
         else {
           main.innerHTML = '<div class="img-wrap" id="iw"><img alt="' + esc(r.title) + '"></div>';
           var iw = $("iw"); iw.firstChild.src = u;
@@ -132,6 +132,15 @@ main{flex:1 1 auto;display:flex;min-height:0;position:relative}
     frame("https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(pub), r.title);
   }
 
+  /* 網站裡的檔案（例如友善校園的 PDF）：view.html?src=files/…pdf&t=標題&l=分類 */
+  var qs = new URLSearchParams(location.search), src = qs.get("src");
+  if (src) {
+    if (!/^files\/[\w\/.-]+\.pdf$/.test(src) || src.indexOf("..") >= 0) { show(null); return; }
+    var st = { kind: "file", mime: "application/pdf", slides: true, title: qs.get("t") || "教材", lesson: qs.get("l") || "", url: "../" + src };
+    PUB = ""; st.path = "../" + src;
+    show(st);
+    return;
+  }
   var c = cached();
   if (c) show(c);
   CLS.api("rest/v1/materials?select=*&id=eq." + encodeURIComponent(id)).then(function (res) { return res.ok ? res.json() : Promise.reject(); }).then(function (rows) {

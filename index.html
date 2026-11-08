@@ -108,7 +108,7 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 .lesson-h{font-family:var(--body);font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:2px dashed var(--line)}
 .lesson-h .n{font-size:12px;font-weight:500;color:var(--muted)}
 .lesson-h.game{color:var(--accent)}
-.chip.web{background:var(--leaf)}.chip.game{background:var(--accent)}
+.chip.ppt{background:var(--sky)}.chip.web{background:var(--leaf)}.chip.game{background:var(--accent)}
 .empty{background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted);display:grid;gap:8px;justify-items:center}
 .empty b{font-family:var(--display);font-size:20px;color:var(--ink)}
 footer{color:var(--muted);font-size:13px;text-align:center}
@@ -238,7 +238,7 @@ footer{color:var(--muted);font-size:13px;text-align:center}
     </div>
     <div class="fld-row">
       <label class="fld"><span>類型</span><select id="upType"></select></label>
-      <label class="fld"><span>年級</span><select id="upGrade"><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option></select></label>
+      <label class="fld"><span>年級</span><select id="upGrade"><option value="1,2">低年級（一、二）</option><option value="3,4">中年級（三、四）</option><option value="5,6">高年級（五、六）</option><option value="1,2,3,4,5,6">全年級</option><option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option><option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option></select></label>
       <label class="fld"><span>課本頁碼</span><input id="upPages" placeholder="例：40–41"></label>
       <label class="fld"><span>建議分鐘</span><input id="upMins" type="number" min="1" max="200" inputmode="numeric"></label>
     </div>
@@ -349,10 +349,36 @@ const MATERIALS = [
     note:"停躺滾互動、煙層與姿勢模擬，判斷什麼情況該用哪一招。", url:"lessons/u3-3e-stop-drop-roll.html" },
   { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"單元統整", topic:"單元 3 全部",
     title:"小豬消防隊", type:"game", grade:4, pages:"54–81", mins:30,
-    note:"情境闖關：跟著小豬三兄弟通過燙傷、用電、油鍋、半夜警報、百貨公司五大關，領取證書。", url:"lessons/u3-game-pig-firefighters.html" }
+    note:"情境闖關：跟著小豬三兄弟通過燙傷、用電、油鍋、半夜警報、百貨公司五大關，領取證書。", url:"lessons/u3-game-pig-firefighters.html" },
+
+  /* ---------- 友善校園（宣導簡報，依低、中、高年級分組；grades 是適用年級） ---------- */
+  { unit:"友善校園", lesson:"低年級（一、二年級）", topic:"", grades:[1,2], grade:0,
+    title:"友善校園暨反霸凌宣導", type:"ppt", pages:"", mins:30,
+    note:"23 張投影片。認識同學與朋友、什麼是霸凌、六種霸凌、如何拒絕霸凌、可以找誰幫忙。", url:"lessons/view.html?src=files/friendly/low-antibully.pdf&t=%E5%8F%8B%E5%96%84%E6%A0%A1%E5%9C%92%E6%9A%A8%E5%8F%8D%E9%9C%B8%E5%87%8C%E5%AE%A3%E5%B0%8E&l=%E4%BD%8E%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%B8%80%E3%80%81%E4%BA%8C%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"低年級（一、二年級）", topic:"", grades:[1,2], grade:0,
+    title:"維護兒權，霸凌不來！反霸凌小天使特訓班", type:"ppt", pages:"", mins:25,
+    note:"11 張投影片。三種霸凌、錯誤行為找一找、兒童權利盾牌（平等、表意、發展）、六大社交超能力、被欺負與看到別人被欺負時怎麼辦、反霸凌專線 1953。", url:"lessons/view.html?src=files/friendly/low-child-rights.pdf&t=%E7%B6%AD%E8%AD%B7%E5%85%92%E6%AC%8A%EF%BC%8C%E9%9C%B8%E5%87%8C%E4%B8%8D%E4%BE%86%EF%BC%81%E5%8F%8D%E9%9C%B8%E5%87%8C%E5%B0%8F%E5%A4%A9%E4%BD%BF%E7%89%B9%E8%A8%93%E7%8F%AD&l=%E4%BD%8E%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%B8%80%E3%80%81%E4%BA%8C%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"中年級（三、四年級）", topic:"", grades:[3,4], grade:0,
+    title:"友善校園暨反霸凌宣導", type:"ppt", pages:"", mins:30,
+    note:"23 張投影片。認識同學與朋友、什麼是霸凌、六種霸凌、如何拒絕霸凌、可以找誰幫忙。", url:"lessons/view.html?src=files/friendly/mid-antibully.pdf&t=%E5%8F%8B%E5%96%84%E6%A0%A1%E5%9C%92%E6%9A%A8%E5%8F%8D%E9%9C%B8%E5%87%8C%E5%AE%A3%E5%B0%8E&l=%E4%B8%AD%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%B8%89%E3%80%81%E5%9B%9B%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"中年級（三、四年級）", topic:"", grades:[3,4], grade:0,
+    title:"勇敢說不、積極同意：反霸凌入班宣導", type:"ppt", pages:"", mins:30,
+    note:"11 張投影片。玩笑還是傷人、勇敢說「不」、積極同意（先問再做）、小遊戲與三個小組討論情境、反霸凌專線 1953。", url:"lessons/view.html?src=files/friendly/mid-say-no.pdf&t=%E5%8B%87%E6%95%A2%E8%AA%AA%E4%B8%8D%E3%80%81%E7%A9%8D%E6%A5%B5%E5%90%8C%E6%84%8F%EF%BC%9A%E5%8F%8D%E9%9C%B8%E5%87%8C%E5%85%A5%E7%8F%AD%E5%AE%A3%E5%B0%8E&l=%E4%B8%AD%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%B8%89%E3%80%81%E5%9B%9B%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"高年級（五、六年級）", topic:"", grades:[5,6], grade:0,
+    title:"友善校園暨反霸凌宣導", type:"ppt", pages:"", mins:35,
+    note:"26 張投影片。六種霸凌、如何拒絕霸凌、可以找誰幫忙，以及學校處理霸凌事件的流程（調和與調查程序）。", url:"lessons/view.html?src=files/friendly/high-antibully.pdf&t=%E5%8F%8B%E5%96%84%E6%A0%A1%E5%9C%92%E6%9A%A8%E5%8F%8D%E9%9C%B8%E5%87%8C%E5%AE%A3%E5%B0%8E&l=%E9%AB%98%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%BA%94%E3%80%81%E5%85%AD%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"高年級（五、六年級）", topic:"", grades:[5,6], grade:0,
+    title:"反霸凌案例宣導：這樣是霸凌嗎？", type:"ppt", pages:"", mins:30,
+    note:"17 張投影片。五個情境案例：開玩笑、不跟你好、網路留言、說實話、不指名的影射，逐一討論是不是霸凌。", url:"lessons/view.html?src=files/friendly/high-cases.pdf&t=%E5%8F%8D%E9%9C%B8%E5%87%8C%E6%A1%88%E4%BE%8B%E5%AE%A3%E5%B0%8E%EF%BC%9A%E9%80%99%E6%A8%A3%E6%98%AF%E9%9C%B8%E5%87%8C%E5%97%8E%EF%BC%9F&l=%E9%AB%98%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%BA%94%E3%80%81%E5%85%AD%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"高年級（五、六年級）", topic:"", grades:[5,6], grade:0,
+    title:"友善校園之防制網路性剝削", type:"ppt", pages:"", mins:15,
+    note:"6 張投影片。網路性剝削的類型、警示徵兆、自我保護步驟、如何應對與求助（113 保護專線）、陪伴與支持。", url:"lessons/view.html?src=files/friendly/high-sextortion.pdf&t=%E5%8F%8B%E5%96%84%E6%A0%A1%E5%9C%92%E4%B9%8B%E9%98%B2%E5%88%B6%E7%B6%B2%E8%B7%AF%E6%80%A7%E5%89%9D%E5%89%8A&l=%E9%AB%98%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%BA%94%E3%80%81%E5%85%AD%E5%B9%B4%E7%B4%9A%EF%BC%89" },
+  { unit:"友善校園", lesson:"高年級（五、六年級）", topic:"", grades:[5,6], grade:0,
+    title:"上網的分寸：看什麼、說什麼", type:"ppt", pages:"", mins:40,
+    note:"14 張投影片。網路內容分級與界線、遇到不適當內容怎麼做、傳訊息前三問、被攻擊時「三不一要」，含六個小組討論情境。", url:"lessons/view.html?src=files/friendly/high-online-manners.pdf&t=%E4%B8%8A%E7%B6%B2%E7%9A%84%E5%88%86%E5%AF%B8%EF%BC%9A%E7%9C%8B%E4%BB%80%E9%BA%BC%E3%80%81%E8%AA%AA%E4%BB%80%E9%BA%BC&l=%E9%AB%98%E5%B9%B4%E7%B4%9A%EF%BC%88%E4%BA%94%E3%80%81%E5%85%AD%E5%B9%B4%E7%B4%9A%EF%BC%89" }
 ];
 
-const TYPES={all:"全部",web:"互動教材",slide:"動畫簡報",game:"統整遊戲",pdf:"講義",video:"影片",quiz:"練習題",other:"其他"};
+const TYPES={all:"全部",web:"互動教材",slide:"動畫簡報",ppt:"簡報",game:"統整遊戲",pdf:"講義",video:"影片",quiz:"練習題",other:"其他"};
 const gradeName=g=>("一二三四五六"[g-1]||"")+"年級";
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const $=id=>document.getElementById(id);
@@ -362,7 +388,7 @@ let curType="all", curGrade="all", query="";
 
 function filtered(){
   const q=query.trim().toLowerCase();
-  return MATERIALS.filter(i=>(!onlyTodo||!doneSet[i.url])&&(curGrade==="all"||String(i.grade)===curGrade)&&(!q||[i.title,i.unit,i.lesson,i.topic,i.note].join(" ").toLowerCase().includes(q)));
+  return MATERIALS.filter(i=>(!onlyTodo||!doneSet[i.url])&&(curGrade==="all"||String(i.grade)===curGrade||(i.grades||[]).includes(+curGrade))&&(!q||[i.title,i.unit,i.lesson,i.topic,i.note].join(" ").toLowerCase().includes(q)));
 }
 function card(i){
   const meta=[i.pages?`課本 p.${esc(i.pages)}`:"",i.mins?`約 ${i.mins} 分鐘`:""].filter(Boolean).join("・");
@@ -422,7 +448,7 @@ function render(){
     const allU=MATERIALS.filter(x=>(x.grade||0)+"|"+(x.unit||"未分單元")===uk), doneU=allU.filter(x=>doneSet[x.url]).length;
     const isOpen=filtering||!!openSet[uk];
     const lessons=[...L.keys()].filter(k=>k!=="單元統整遊戲").length, hasGame=L.has("單元統整遊戲");
-    return `<section class="unit${isOpen?" open":""}"><h2><button class="unit-toggle" type="button" aria-expanded="${isOpen}" aria-controls="ub${ui}" data-uk="${esc(uk)}"><span class="chev" aria-hidden="true"></span><span class="ut">${esc(u)}</span>${+g?`<span class="g">${gradeName(+g)}</span>`:""}<span class="cnt">${lessons} 課・${total} 份教材${hasGame?"・含統整遊戲":""}</span><span class="prog" aria-label="已上過 ${doneU} / ${allU.length} 份"><i style="width:${allU.length?doneU/allU.length*100:0}%"></i></span><span class="pt">已上過 ${doneU} / ${allU.length}</span></button></h2><div class="unit-body" id="ub${ui}"${isOpen?"":" hidden"}>${
+    return `<section class="unit${isOpen?" open":""}"><h2><button class="unit-toggle" type="button" aria-expanded="${isOpen}" aria-controls="ub${ui}" data-uk="${esc(uk)}"><span class="chev" aria-hidden="true"></span><span class="ut">${esc(u)}</span>${+g?`<span class="g">${gradeName(+g)}</span>`:""}<span class="cnt">${lessons} ${[...L.keys()].every(k=>/年級/.test(k))?"個年級":"課"}・${total} 份教材${hasGame?"・含統整遊戲":""}</span><span class="prog" aria-label="已上過 ${doneU} / ${allU.length} 份"><i style="width:${allU.length?doneU/allU.length*100:0}%"></i></span><span class="pt">已上過 ${doneU} / ${allU.length}</span></button></h2><div class="unit-body" id="ub${ui}"${isOpen?"":" hidden"}>${
       [...L.keys()].map(lk=>`<div class="lesson-group"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}">${esc(lk)}<span class="n">${L.get(lk).length} 份</span></h3><div class="cards">${L.get(lk).map(card).join("")}</div></div>`).join("")
     }</div></section>`;
   }).join(""));
@@ -476,7 +502,7 @@ function applyUploads(){
   MATERIALS.splice(BASE_N);
   uploads.slice().sort((a,b)=>a.sort-b.sort).forEach(r=>MATERIALS.push({
     unit:r.unit||"老師上傳的教材", lesson:r.lesson||"", topic:r.topic||"", title:r.title, type:r.type||"other",
-    grade:r.grade||0, pages:r.pages||"", mins:r.mins||0, note:r.note||"", url:"lessons/view.html?id="+r.id, up:r
+    grade:r.grades&&r.grades.length>1?0:(r.grade||0), grades:r.grades||[], pages:r.pages||"", mins:r.mins||0, note:r.note||"", url:"lessons/view.html?id="+r.id, up:r
   }));
 }
 function fetchUploads(){
@@ -593,8 +619,8 @@ function setSrc(s){
 document.querySelectorAll("#upForm [data-src]").forEach(b=>b.addEventListener("click",()=>{setSrc(b.dataset.src);msg("upMsg","");}));
 function extOf(n){return (String(n).split(".").pop()||"").toLowerCase();}
 function guessType(mime,url){
-  if(url){ if(/youtu\.?be/.test(url))return"video"; if(/docs\.google\.com\/presentation|canva\.com/.test(url))return"slide"; if(/forms\.gle|docs\.google\.com\/forms|quizizz|kahoot|wordwall/.test(url))return"quiz"; return"other"; }
-  if(/presentation|powerpoint/.test(mime))return"slide"; if(isImg(mime))return"other"; return"pdf";
+  if(url){ if(/youtu\.?be/.test(url))return"video"; if(/docs\.google\.com\/presentation|canva\.com/.test(url))return"ppt"; if(/forms\.gle|docs\.google\.com\/forms|quizizz|kahoot|wordwall/.test(url))return"quiz"; return"other"; }
+  if(/presentation|powerpoint/.test(mime))return"ppt"; if(isImg(mime))return"other"; return"pdf";
 }
 function pickFile(f){
   if(!f)return;
@@ -633,11 +659,11 @@ function openUpload(row){
   $("upDel").hidden=!row; $("upDel").textContent="刪除"; $("upDel").classList.remove("armed");
   $("upFileName").textContent=row&&row.kind==="file"?"目前檔案已上傳；要換檔案再點這裡選擇":"點這裡選擇檔案，或把檔案拖進來";
   const lastUnit=(MATERIALS[MATERIALS.length-1]||{}).unit||"";
-  const r=row||{kind:"file",unit:lastUnit,lesson:"",topic:"",title:"",type:"pdf",grade:curGrade!=="all"?+curGrade:4,pages:"",mins:"",note:""};
+  const r=row||{kind:"file",unit:lastUnit,lesson:"",topic:"",title:"",type:"pdf",grade:curGrade!=="all"?+curGrade:4,grades:[],pages:"",mins:"",note:""};
   setSrc(r.kind);
   $("upUrl").value=r.kind==="link"?r.url||"":"";
   $("upTitle").value=r.title; $("upUnit").value=r.unit; $("upLesson").value=r.lesson; $("upTopic").value=r.topic||"";
-  $("upType").value=r.type||"other"; $("upGrade").value=String(r.grade||4); $("upPages").value=r.pages||""; $("upMins").value=r.mins||""; $("upNote").value=r.note||"";
+  $("upType").value=r.type||"other"; $("upGrade").value=(r.grades&&r.grades.length?r.grades:[r.grade||4]).join(","); $("upPages").value=r.pages||""; $("upMins").value=r.mins||""; $("upNote").value=r.note||"";
   document.querySelectorAll("#upForm [data-src]").forEach(b=>b.disabled=!!row);
   /* 恢復上次沒存的內容 */
   let d=null; try{d=JSON.parse(sessionStorage.getItem(draftKey())||"null")}catch(e){}
@@ -676,7 +702,7 @@ $("upForm").addEventListener("submit",async e=>{
   if(upSrc==="link"&&!/^https?:\/\/\S+\.\S+/.test(url)){msg("upMsg","請貼上完整的網址（https:// 開頭）","err");return;}
   if(!title){msg("upMsg","請輸入標題","err");$("upTitle").focus();return;}
   const row={title,unit:$("upUnit").value.trim(),lesson:$("upLesson").value.trim(),topic:$("upTopic").value.trim(),
-    type:$("upType").value,grade:+$("upGrade").value||4,pages:$("upPages").value.trim(),mins:Math.round(+$("upMins").value)||null,note:$("upNote").value.trim()};
+    type:$("upType").value,grades:$("upGrade").value.split(",").map(Number),grade:$("upGrade").value.includes(",")?0:+$("upGrade").value,pages:$("upPages").value.trim(),mins:Math.round(+$("upMins").value)||null,note:$("upNote").value.trim()};
   $("upGo").disabled=true;
   try{
     let oldPath=null;
