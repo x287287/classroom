@@ -76,25 +76,30 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background-ima
 .foot button:disabled{background:#3A4766;color:#8E9AB8;box-shadow:none;cursor:default}
 .overlay{position:fixed;inset:0;background:rgba(12,18,34,.88);display:grid;place-items:center;z-index:50;padding:1rem}
 .overlay[hidden]{display:none}
-.panel2{background:#fff;color:var(--ink);border-radius:26px;padding:clamp(18px,3vh,36px);max-width:760px;width:100%;display:grid;gap:1rem;text-align:center;max-height:94vh;overflow:auto}
-.panel2 h2{font-size:clamp(1.8rem,5vh,3rem);color:#C2410C}
+.panel2{background:#fff;color:var(--ink);border-radius:26px;padding:clamp(16px,2.6vh,34px) clamp(16px,2.6vw,36px);max-width:820px;width:100%;display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(.6rem,1.8vh,1rem);text-align:center;max-height:96vh;max-height:96dvh;overflow-y:auto;overflow-x:hidden}
+.panel2 h2{font-size:clamp(1.7rem,4.6vh,3rem);color:#C2410C}
 .panel2 p{color:var(--ink)}
-.panel2 .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.panel2 .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(.6rem,1.6vw,1.2rem)}
+@media (max-width:560px){.panel2 .row{grid-template-columns:minmax(0,1fr)}}
+.panel2 .opt{display:grid;gap:.4rem;align-content:start}
 .panel2 label{display:grid;gap:.3rem;text-align:left;font-weight:700;color:var(--ink)}
-.panel2 input{font-size:1.3rem;padding:.5rem .8rem;border-radius:12px;border:2px solid #C9D2CC;background:#fff;color:var(--ink)}
+.panel2 input{font-size:1.3rem;padding:.5rem .8rem;border-radius:12px;border:2px solid #C9D2CC;background:#fff;color:var(--ink);width:100%;min-width:0;box-sizing:border-box}
 .panel2 .chips{justify-content:center}
 .panel2 .chip{background:#F4F6F3;color:var(--ink);border:2px solid #C9D2CC;font-size:1.05rem;min-height:3rem;padding:.3rem 1.2rem}
 .panel2 .chip[aria-pressed="true"]{background:#2E7D6B;border-color:#2E7D6B;color:#fff}
 .panel2 .btn.fill{background:#2E7D6B;border-color:#2E7D6B;color:#fff}
-.beam{position:fixed;height:14px;border-radius:99px;z-index:40;pointer-events:none;transform-origin:left center;animation:beam .55s ease-out forwards;box-shadow:0 0 18px currentColor}
-@keyframes beam{from{opacity:1;transform:scaleX(0)}70%{opacity:1;transform:scaleX(1)}to{opacity:0;transform:scaleX(1)}}
+/* 攻擊光束：從答對那一隊射向惡魔。旋轉角度放在 --a，動畫只改長度，方向才不會被蓋掉 */
+.beam{position:fixed;height:16px;margin-top:-8px;border-radius:99px;z-index:40;pointer-events:none;transform-origin:0 50%;transform:rotate(var(--a)) scaleX(0);animation:beam .5s cubic-bezier(.2,.7,.3,1) forwards;box-shadow:0 0 18px currentColor,0 0 4px #fff inset}
+@keyframes beam{0%{opacity:1;transform:rotate(var(--a)) scaleX(0)}70%{opacity:1;transform:rotate(var(--a)) scaleX(1)}100%{opacity:0;transform:rotate(var(--a)) scaleX(1)}}
+.boom{position:fixed;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;z-index:41;pointer-events:none;background:radial-gradient(circle,#fff 0 18%,currentColor 19% 42%,transparent 43%);opacity:0;animation:boom .45s ease-out .35s forwards}
+@keyframes boom{0%{opacity:1;transform:scale(.2)}100%{opacity:0;transform:scale(1.4)}}
 @media (max-width:900px),(max-height:560px){
   body{overflow:auto}.app{height:auto;min-height:100%}
   .main{grid-template-columns:1fr 1fr}.center{grid-column:1/-1;order:-1}
   .battle{grid-template-columns:minmax(0,1fr)}.show svg.big{max-width:150px}
   .team .sc{font-size:3rem}
 }
-@media (prefers-reduced-motion:reduce){.beam{display:none}.show.hit svg.big,.show.hit::after,.team.turn .yt{animation:none}}
+@media (prefers-reduced-motion:reduce){.beam,.boom{display:none}.show.hit svg.big,.show.hit::after,.team.turn .yt{animation:none}}
 </style>
 </head>
 <body class="u2">
@@ -129,8 +134,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background-ima
       <label for="inRed">紅隊名稱<input id="inRed" value="紅隊" maxlength="8"></label>
       <label for="inBlue">藍隊名稱<input id="inBlue" value="藍隊" maxlength="8"></label>
     </div>
-    <div><b>每題時間</b><div class="chips" id="tChips" style="margin-top:.4rem"><button class="chip" type="button" data-t="0" aria-pressed="true">不計時</button><button class="chip" type="button" data-t="20">20 秒</button><button class="chip" type="button" data-t="30">30 秒</button></div></div>
-    <div><b>每隻惡魔的血量</b><div class="chips" id="hChips" style="margin-top:.4rem"><button class="chip" type="button" data-h="3">3（短）</button><button class="chip" type="button" data-h="4" aria-pressed="true">4</button><button class="chip" type="button" data-h="6">6（長）</button></div></div>
+    <div class="row">
+    <div class="opt"><b>每題時間</b><div class="chips" id="tChips"><button class="chip" type="button" data-t="0" aria-pressed="true">不計時</button><button class="chip" type="button" data-t="20">20 秒</button><button class="chip" type="button" data-t="30">30 秒</button></div></div>
+    <div class="opt"><b>每隻惡魔的血量</b><div class="chips" id="hChips"><button class="chip" type="button" data-h="3">3（短）</button><button class="chip" type="button" data-h="4" aria-pressed="true">4</button><button class="chip" type="button" data-h="6">6（長）</button></div></div>
+    </div>
     <div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bStart" style="font-size:1.3rem;min-height:3.4rem;padding:0 2rem">開始對戰</button><button class="btn" type="button" id="bTeach2" style="min-height:3.4rem">老師說明</button></div>
   </div>
 </div>
@@ -185,7 +192,8 @@ function afterWrong(){}
 function attack(){
   var from=$(S.team?'tBlue':'tRed').getBoundingClientRect(),to=$('showcase').getBoundingClientRect();
   var x1=from.left+from.width/2,y1=from.top+from.height/2,x2=to.left+to.width/2,y2=to.top+to.height/2;
-  var bm=document.createElement('div');bm.className='beam';bm.style.background=S.team?'#9CC4FF':'#FF9E95';bm.style.color=S.team?'#9CC4FF':'#FF9E95';bm.style.left=x1+'px';bm.style.top=y1+'px';bm.style.width=Math.hypot(x2-x1,y2-y1)+'px';bm.style.transform='rotate('+Math.atan2(y2-y1,x2-x1)+'rad)';document.body.appendChild(bm);setTimeout(function(){bm.remove()},600);
+  var bm=document.createElement('div');bm.className='beam';bm.style.background=S.team?'#9CC4FF':'#FF9E95';bm.style.color=S.team?'#9CC4FF':'#FF9E95';bm.style.left=x1+'px';bm.style.top=y1+'px';bm.style.width=Math.hypot(x2-x1,y2-y1)+'px';bm.style.setProperty('--a',Math.atan2(y2-y1,x2-x1)+'rad');document.body.appendChild(bm);setTimeout(function(){bm.remove()},600);
+  var bo=document.createElement('div');bo.className='boom';bo.style.color=bm.style.color;bo.style.left=x2+'px';bo.style.top=y2+'px';document.body.appendChild(bo);setTimeout(function(){bo.remove()},900);
   setTimeout(function(){S.dhp[S.dmi]--;var sc=$('showcase');sc.classList.remove('hit');void sc.offsetWidth;sc.classList.add('hit');var wasDmi=S.dmi;drawDemons();drawTeams();
     if(S.dhp[S.dmi]<=0){$('fb').textContent+='　'+DM[S.dmi].n+'被趕走了！';if(S.dmi>=DM.length-1){S.dmi++;setTimeout(end,1200);return}setTimeout(function(){S.dmi++;drawDemons();$('bNext').disabled=false},1100);return}
     $('bNext').disabled=false},450);
