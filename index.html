@@ -120,6 +120,11 @@ footer{color:var(--muted);font-size:13px;text-align:center}
 .mini.hot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
 .edit-btn{appearance:none;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 12px;min-height:44px;font:inherit;font-size:13px;cursor:pointer}
 .up-tag{font-size:12px;color:var(--muted)}
+.card.is-hidden{opacity:.6;border-style:dashed}
+.hid-tag{font-size:12px;font-weight:700;color:var(--accent)}
+.chk{display:flex;align-items:center;gap:12px;min-height:48px;font-weight:700;cursor:pointer}
+.chk input{width:28px;height:28px;accent-color:var(--accent);flex:none}
+.chk small{font-weight:400;color:var(--muted)}
 .dlg{position:fixed;inset:0;z-index:2147483000;background:rgba(10,20,18,.55);display:grid;place-items:center;padding:16px;overflow:auto}
 .dlg[hidden]{display:none}
 .dlg-box{background:var(--card);color:var(--ink);border-radius:18px;width:min(640px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:22px;display:grid;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
@@ -244,10 +249,11 @@ footer{color:var(--muted);font-size:13px;text-align:center}
     </div>
     <label class="fld"><span>課本小標題 <small>（可不填）</small></span><input id="upTopic"></label>
     <label class="fld"><span>說明 <small>（可不填）</small></span><textarea id="upNote" maxlength="400"></textarea></label>
-    <p class="hint">網站是公開的，請不要上傳學生姓名、照片或成績。</p>
+    <label class="chk" id="upHideF" hidden><input type="checkbox" id="upHide"><span>隱藏這份教材 <small>（只有登入的老師看得到，學生和沒登入的電腦看不到）</small></span></label>
+    <p class="hint" id="upHint">網站是公開的，請不要上傳學生姓名、照片或成績。</p>
     <div class="bar" id="upBar" hidden><i></i></div>
     <div class="msg" id="upMsg" aria-live="polite"></div>
-    <div class="dlg-acts"><button class="btn del grow" type="button" id="upDel" hidden>刪除</button><button class="btn" type="button" data-close>取消</button><button class="btn pri" type="submit" id="upGo">儲存</button></div>
+    <div class="dlg-acts"><button class="btn del grow" type="button" id="upDel" hidden>刪除</button><button class="btn del grow" type="button" id="upReset" hidden>還原成原本的資料</button><button class="btn" type="button" data-close>取消</button><button class="btn pri" type="submit" id="upGo">儲存</button></div>
   </form>
 </div>
 <datalist id="unitList"></datalist><datalist id="lessonList"></datalist>
@@ -392,19 +398,21 @@ const $=id=>document.getElementById(id);
 function setHTML(el,html){if(el.__html===html)return false;el.__html=html;el.innerHTML=html;return true;}
 let curType="all", curGrade="all", query="";
 
+/* 隱藏的教材：只有登入的老師看得到 */
+const visible=i=>!i.hidden||(window.CLS&&CLS.isTeacher);
 function filtered(){
   const q=query.trim().toLowerCase();
-  return MATERIALS.filter(i=>(!onlyTodo||!doneSet[i.url])&&(curGrade==="all"||String(i.grade)===curGrade||(i.grades||[]).includes(+curGrade))&&(!q||[i.title,i.unit,i.lesson,i.topic,i.note].join(" ").toLowerCase().includes(q)));
+  return MATERIALS.filter(i=>visible(i)&&(!onlyTodo||!doneSet[i.url])&&(curGrade==="all"||String(i.grade)===curGrade||(i.grades||[]).includes(+curGrade))&&(!q||[i.title,i.unit,i.lesson,i.topic,i.note].join(" ").toLowerCase().includes(q)));
 }
 function card(i){
   const meta=[i.pages?`課本 p.${esc(i.pages)}`:"",i.mins?`約 ${i.mins} 分鐘`:""].filter(Boolean).join("・");
   const isDone=!!doneSet[i.url];
-  const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.topic?`<span class="lesson">課本小標題：${esc(i.topic)}</span>`:i.up?`<span class="up-tag">老師上傳</span>`:"<span></span>"}<div><h3>${esc(i.title).split("：").map((t,k,a)=>`<span class="tw">${t}${k<a.length-1?"：":""}</span>`).join("")}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>${meta?`<span class="meta">${meta}</span>`:"<span></span>"}`;
+  const inner=`<span class="chip ${esc(i.type)}">${TYPES[i.type]||"其他"}</span>${i.topic?`<span class="lesson">課本小標題：${esc(i.topic)}</span>`:i.up?`<span class="up-tag">老師上傳</span>`:"<span></span>"}${i.hidden?`<span class="hid-tag">已隱藏（學生看不到）</span>`:""}<div><h3>${esc(i.title).split("：").map((t,k,a)=>`<span class="tw">${t}${k<a.length-1?"：":""}</span>`).join("")}</h3>${i.note?`<p>${esc(i.note)}</p>`:""}</div>${meta?`<span class="meta">${meta}</span>`:"<span></span>"}`;
   const body=i.url
     ? `<a class="card-link" href="${esc(i.url)}" data-url="${esc(i.url)}">${inner}<span class="go">${i.type==="video"?"觀看":i.type==="game"?"開始玩":"打開"} →</span></a>`
     : `<div class="card-link">${inner}<span class="go none">連結待補</span></div>`;
   const isWeek=!!weekSet[i.url];
-  return `<article class="card${isDone?" is-done":""}${isWeek?" is-week":""}">${body}${i.url?`<div class="acts"><button class="pin-btn" type="button" data-week="${esc(i.url)}" aria-pressed="${isWeek}" aria-label="${isWeek?"從本週要用移除":"加到本週要用"}：${esc(i.title)}">${isWeek?"★ 本週":"☆ 本週"}</button><button class="done-btn" type="button" data-done="${esc(i.url)}" aria-pressed="${isDone}" aria-label="${isDone?"取消已上過":"標記為已上過"}：${esc(i.title)}">${isDone?"✓ 已上過":"標記已上過"}</button>${i.up&&window.CLS&&CLS.isTeacher?`<button class="edit-btn" type="button" data-edit="${esc(i.up.id)}" aria-label="編輯：${esc(i.title)}">編輯</button>`:""}</div>`:""}</article>`;
+  return `<article class="card${isDone?" is-done":""}${isWeek?" is-week":""}${i.hidden?" is-hidden":""}">${body}${i.url?`<div class="acts"><button class="pin-btn" type="button" data-week="${esc(i.url)}" aria-pressed="${isWeek}" aria-label="${isWeek?"從本週要用移除":"加到本週要用"}：${esc(i.title)}">${isWeek?"★ 本週":"☆ 本週"}</button><button class="done-btn" type="button" data-done="${esc(i.url)}" aria-pressed="${isDone}" aria-label="${isDone?"取消已上過":"標記為已上過"}：${esc(i.title)}">${isDone?"✓ 已上過":"標記已上過"}</button>${window.CLS&&CLS.isTeacher?`<button class="edit-btn" type="button" ${i.up?`data-edit="${esc(i.up.id)}"`:`data-card="${esc(i.url)}"`} aria-label="編輯：${esc(i.title)}">編輯</button>`:""}</div>`:""}</article>`;
 }
 /* 這台電腦的瀏覽器記住：已上過、最近打開（讀不到也沒關係） */
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||"null")||d}catch(e){return d}}
@@ -413,7 +421,7 @@ let doneSet=load("shelfDone",{}), recent=load("shelfRecent",[]), onlyTodo=false;
 /* 本週要用：老師在卡片上按「☆ 本週」釘選，置頂顯示；要換週時按「清空本週」 */
 let weekSet=load("shelfWeek",{});
 function renderWeek(){
-  const box=$("week"), items=MATERIALS.filter(m=>m.url&&weekSet[m.url]);
+  const box=$("week"), items=MATERIALS.filter(m=>m.url&&weekSet[m.url]&&visible(m));
   box.hidden=!items.length;
   if(!items.length){setHTML(box,"");return;}
   const mins=items.reduce((a,m)=>a+(m.mins||0),0);
@@ -422,7 +430,7 @@ function renderWeek(){
 }
 function ago(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return"剛剛";if(m<60)return m+" 分鐘前";const h=Math.round(m/60);if(h<24)return h+" 小時前";const d=Math.round(h/24);return d+" 天前"}
 function renderRecent(){
-  const box=$("recent"), items=recent.map(r=>({r,m:MATERIALS.find(x=>x.url===r.url)})).filter(x=>x.m).slice(0,4);
+  const box=$("recent"), items=recent.map(r=>({r,m:MATERIALS.find(x=>x.url===r.url)})).filter(x=>x.m&&visible(x.m)).slice(0,4);
   box.hidden=!items.length;
   if(!items.length)return;
   if(!setHTML(box,`<div class="recent-h"><b>最近打開</b><button class="mini" type="button" id="clearRecent">清除紀錄</button></div><div class="recent-list">${items.map(({r,m})=>`<a class="rc" href="${esc(m.url)}" data-url="${esc(m.url)}"><span class="chip ${esc(m.type)}">${TYPES[m.type]||""}</span><b>${esc(m.title)}</b><small>${esc(m.unit.split(" ")[0].replace("康軒健康四上　",""))}・${ago(r.t)}</small></a>`).join("")}</div>`))return;
@@ -435,8 +443,9 @@ function render(){
     if(k!=="all"&&!MATERIALS.some(i=>i.type===k)) return "";
     return `<button class="tab" type="button" data-t="${k}" aria-pressed="${k===curType}">${v}<span class="n">${n}</span></button>`;
   }).join(""));
-  $("sTotal").textContent=MATERIALS.length;
-  $("sUnits").textContent=new Set(MATERIALS.map(i=>i.unit||"未分單元")).size;
+  const vis=MATERIALS.filter(i=>!i.hidden);
+  $("sTotal").textContent=vis.length;
+  $("sUnits").textContent=new Set(vis.map(i=>i.unit||"未分單元")).size;
 
   const list=base.filter(i=>curType==="all"||i.type===curType);
   if(!list.length){setHTML($("units"),`<div class="empty"><b>找不到符合的教材</b><span>換個關鍵字、年級或類型看看。</span></div>`);$("expandAll").hidden=$("collapseAll").hidden=true;renderRecent();renderWeek();return;}
@@ -501,19 +510,32 @@ $("q").addEventListener("input",e=>{query=e.target.value;render();});
    清單也存一份在這台電腦（clsUploads），沒網路時照樣顯示。
    ============================================================ */
 const BASE_N=MATERIALS.length;
+/* 網站內建教材的原始資料；老師在網站上改的卡片資訊存在 Supabase 的 overrides（只存改過的欄位），也快取在 clsOverrides */
+const ORIG=MATERIALS.map(m=>Object.assign({},m));
+const CARD_F=["title","unit","lesson","topic","type","grade","grades","pages","mins","note"];
+let overrides=load("clsOverrides",{});
 const STORE_PUB=()=>CLS.url+"/storage/v1/object/public/materials/";
 let uploads=load("clsUploads",[]);
 const isImg=m=>/^image\//.test(m||""), isPdf=m=>m==="application/pdf";
 function applyUploads(){
-  MATERIALS.splice(BASE_N);
+  MATERIALS.splice(0);
+  ORIG.forEach(o=>{const v=overrides[o.url]; MATERIALS.push(v?Object.assign({},o,v.data||{},{hidden:!!v.hidden,edited:true}):Object.assign({},o));});
   uploads.slice().sort((a,b)=>a.sort-b.sort).forEach(r=>MATERIALS.push({
     unit:r.unit||"老師上傳的教材", lesson:r.lesson||"", topic:r.topic||"", title:r.title, type:r.type||"other",
     grade:r.grades&&r.grades.length>1?0:(r.grade||0), grades:r.grades||[], pages:r.pages||"", mins:r.mins||0, note:r.note||"", url:"lessons/view.html?id="+r.id, up:r
   }));
 }
+function fetchOverrides(){
+  return CLS.api("rest/v1/overrides?select=url,data,hidden").then(r=>r.ok?r.json():Promise.reject(r)).then(rows=>{
+    const o={}; rows.forEach(x=>o[x.url]={data:x.data||{},hidden:x.hidden});
+    const changed=JSON.stringify(o)!==JSON.stringify(overrides);
+    overrides=o; try{localStorage.setItem("clsOverrides",JSON.stringify(o))}catch(e){}
+    return changed;
+  }).catch(()=>false);
+}
 function fetchUploads(){
   if(!window.CLS)return Promise.resolve();
-  return CLS.api("rest/v1/materials?select=*&order=sort.asc").then(r=>r.ok?r.json():Promise.reject(r)).then(rows=>{
+  return fetchOverrides().then(ch=>{ if(ch){applyUploads();render();} }).then(()=>CLS.api("rest/v1/materials?select=*&order=sort.asc")).then(r=>r.ok?r.json():Promise.reject(r)).then(rows=>{
     const changed=JSON.stringify(rows)!==JSON.stringify(uploads);
     uploads=rows; try{localStorage.setItem("clsUploads",JSON.stringify(rows))}catch(e){}
     if(changed){applyUploads();render();}
@@ -648,18 +670,40 @@ $("upUrl").addEventListener("change",()=>{const u=$("upUrl").value.trim();if(u&&
 
 /* 還沒存的內容自動保留（存在這個分頁，重新整理也還在）；按「取消」或儲存成功才清掉 */
 const DRAFT_F=["upUrl","upTitle","upUnit","upLesson","upTopic","upType","upGrade","upPages","upMins","upNote"];
-function draftKey(){return "clsUpDraft:"+(editing?editing.id:"new");}
+function draftKey(){return "clsUpDraft:"+(editing?editing.id:cardItem?"card:"+cardItem.url:"new");}
 function saveDraft(){
   if($("upDlg").hidden)return;
-  const d={src:upSrc}; DRAFT_F.forEach(f=>d[f]=$(f).value);
+  const d={src:upSrc,hide:$("upHide").checked}; DRAFT_F.forEach(f=>d[f]=$(f).value);
   try{sessionStorage.setItem(draftKey(),JSON.stringify(d))}catch(e){}
 }
 function clearDraft(){try{sessionStorage.removeItem(draftKey())}catch(e){} keptFile=null;}
 let keptFile=null; /* 選好的檔案也先留著（同一個分頁內） */
 $("upForm").addEventListener("input",saveDraft);
 $("upForm").addEventListener("change",saveDraft);
+let cardItem=null, resetArmed=false;
+function setCardMode(on){
+  document.querySelector("#upForm .seg").hidden=on; $("upHideF").hidden=!on; $("upHint").hidden=on;
+  if(on){$("upDrop").hidden=true;$("upLinkF").hidden=true;}
+  $("upReset").hidden=true; $("upReset").textContent="還原成原本的資料"; $("upReset").classList.remove("armed"); resetArmed=false;
+}
+/* 編輯網站內建教材的卡片資訊 */
+function openCard(url){
+  const o=ORIG.find(x=>x.url===url), m=MATERIALS.find(x=>x.url===url); if(!o||!m)return;
+  editing=null; cardItem=o; upFile=null;
+  $("upForm").reset(); $("upBar").hidden=true; msg("upMsg","");
+  setCardMode(true);
+  $("upH").textContent="編輯卡片資訊"; $("upDel").hidden=true;
+  $("upTitle").value=m.title||""; $("upUnit").value=m.unit||""; $("upLesson").value=m.lesson||""; $("upTopic").value=m.topic||"";
+  $("upType").value=m.type||"other"; $("upGrade").value=(m.grades&&m.grades.length?m.grades:[m.grade||4]).join(",");
+  if(!$("upGrade").value)$("upGrade").value="4";
+  $("upPages").value=m.pages||""; $("upMins").value=m.mins||""; $("upNote").value=m.note||""; $("upHide").checked=!!m.hidden;
+  $("upReset").hidden=!overrides[url];
+  let d=null; try{d=JSON.parse(sessionStorage.getItem(draftKey())||"null")}catch(e){}
+  if(d){DRAFT_F.forEach(f=>{if(d[f]!=null&&f!=="upUrl")$(f).value=d[f];}); if(d.hide!=null)$("upHide").checked=d.hide; msg("upMsg","已恢復剛才還沒儲存的內容。","ok");}
+  fillLists(); openDlg("upDlg","#upTitle");
+}
 function openUpload(row){
-  editing=row||null; upFile=null; delArmed=false;
+  editing=row||null; cardItem=null; upFile=null; delArmed=false; setCardMode(false);
   $("upForm").reset(); $("upBar").hidden=true; msg("upMsg","");
   $("upH").textContent=row?"編輯教材":"新增教材";
   $("upDel").hidden=!row; $("upDel").textContent="刪除"; $("upDel").classList.remove("armed");
@@ -679,7 +723,7 @@ function openUpload(row){
   fillLists(); openDlg("upDlg","#upTitle");
 }
 $("addBtn").addEventListener("click",()=>openUpload(null));
-$("units").addEventListener("click",e=>{const b=e.target.closest(".edit-btn");if(!b)return;const r=uploads.find(x=>x.id===b.dataset.edit);if(r)openUpload(r);});
+$("units").addEventListener("click",e=>{const b=e.target.closest(".edit-btn");if(!b)return;if(b.dataset.card){openCard(b.dataset.card);return;}const r=uploads.find(x=>x.id===b.dataset.edit);if(r)openUpload(r);});
 
 function uploadFile(file,mime,path,onProg){
   return CLS.token().then(t=>new Promise((res,rej)=>{
@@ -703,6 +747,7 @@ $("upForm").addEventListener("submit",async e=>{
   if(!CLS.isTeacher){msg("upMsg","請先用老師帳號登入","err");return;}
   if(navigator.onLine===false){msg("upMsg","目前沒有網路，連上網路後再上傳","err");return;}
   const title=$("upTitle").value.trim();
+  if(cardItem){ await saveCard(title); return; }
   const url=$("upUrl").value.trim();
   if(upSrc==="file"&&!editing&&!upFile){msg("upMsg","請先選擇要上傳的檔案","err");return;}
   if(upSrc==="link"&&!/^https?:\/\/\S+\.\S+/.test(url)){msg("upMsg","請貼上完整的網址（https:// 開頭）","err");return;}
@@ -734,6 +779,46 @@ $("upForm").addEventListener("submit",async e=>{
       const c=document.querySelector('.edit-btn[data-edit="'+saved.id+'"]');if(c){c.closest(".card").scrollIntoView({block:"center",behavior:"smooth"});c.focus({preventScroll:true});}}
   }catch(err){msg("upMsg",err.message||"發生錯誤，請再試一次","err");}
   finally{$("upGo").disabled=false;}
+});
+/* 存卡片資訊：只存跟原本不一樣的欄位 */
+async function saveCard(title){
+  if(!title){msg("upMsg","請輸入標題","err");$("upTitle").focus();return;}
+  const gv=$("upGrade").value, gs=gv.split(",").map(Number);
+  const now={title,unit:$("upUnit").value.trim(),lesson:$("upLesson").value.trim(),topic:$("upTopic").value.trim(),type:$("upType").value,
+    grade:gv.includes(",")?0:+gv,grades:gs,pages:$("upPages").value.trim(),mins:Math.round(+$("upMins").value)||0,note:$("upNote").value.trim()};
+  const o=cardItem, og={grade:o.grade||0,grades:o.grades&&o.grades.length?o.grades:[o.grade||0]};
+  const data={};
+  CARD_F.forEach(k=>{
+    const a=k==="grades"?og.grades:k==="grade"?og.grade:(o[k]==null?(k==="mins"?0:""):o[k]);
+    if(JSON.stringify(a)!==JSON.stringify(now[k]))data[k]=now[k];
+  });
+  if(("grades" in data)&&!("grade" in data))data.grade=now.grade;
+  if(("grade" in data)&&!("grades" in data))data.grades=now.grades;
+  const hidden=$("upHide").checked;
+  $("upGo").disabled=true; msg("upMsg","儲存中…");
+  try{
+    const r=(!Object.keys(data).length&&!hidden)
+      ? await CLS.api("rest/v1/overrides?url=eq."+encodeURIComponent(o.url),{method:"DELETE"})
+      : await CLS.api("rest/v1/overrides?on_conflict=url",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
+          body:JSON.stringify({url:o.url,data,hidden,updated_at:new Date().toISOString()})});
+    if(!r.ok)throw new Error("儲存失敗（"+r.status+"），請重新登入後再試");
+    clearDraft(); await fetchOverrides(); applyUploads(); closeDlg("upDlg");
+    const m=MATERIALS.find(x=>x.url===o.url); if(m){openSet[(m.grade||0)+"|"+(m.unit||"未分單元")]=1;saveOpen();}
+    render();
+    const c=document.querySelector('.edit-btn[data-card="'+CSS.escape(o.url)+'"]');if(c){c.closest(".card").scrollIntoView({block:"center",behavior:"smooth"});c.focus({preventScroll:true});}
+  }catch(err){msg("upMsg",err.message||"發生錯誤，請再試一次","err");}
+  finally{$("upGo").disabled=false;}
+}
+$("upReset").addEventListener("click",async()=>{
+  if(!cardItem)return;
+  if(!resetArmed){resetArmed=true;$("upReset").textContent="再按一次確定還原";$("upReset").classList.add("armed");return;}
+  $("upReset").disabled=true; msg("upMsg","還原中…");
+  try{
+    const r=await CLS.api("rest/v1/overrides?url=eq."+encodeURIComponent(cardItem.url),{method:"DELETE"});
+    if(!r.ok)throw new Error("還原失敗（"+r.status+"）");
+    clearDraft(); await fetchOverrides(); applyUploads(); closeDlg("upDlg"); render();
+  }catch(err){msg("upMsg",err.message,"err");}
+  finally{$("upReset").disabled=false;}
 });
 $("upDel").addEventListener("click",async()=>{
   if(!editing)return;
