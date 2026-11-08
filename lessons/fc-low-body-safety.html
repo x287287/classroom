@@ -21,9 +21,9 @@
 .light b{font-family:var(--font-display);font-weight:400;font-size:1.25rem;display:flex;align-items:center;gap:.5rem}
 .light i{display:inline-block;width:1.3rem;height:1.3rem;border-radius:50%}
 .light.g i{background:#2E9E5B}.light.y i{background:#E3A11B}.light.r i{background:#D2414B}
-.swim{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:1.2rem;align-items:center}
-@media (max-width:640px){.swim{grid-template-columns:minmax(0,1fr)}}
-.swim svg{width:100%;max-width:220px;height:auto;margin:0 auto;display:block}
+.swim{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:1.2rem;align-items:center}
+@media (max-width:760px){.swim{grid-template-columns:minmax(0,1fr)}}
+.swim svg{width:100%;max-width:320px;color:var(--fg);height:auto;margin:0 auto;display:block}
 .hand{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:1.4rem;align-items:center}
 @media (max-width:700px){.hand{grid-template-columns:minmax(0,1fr)}}
 .hand svg{width:100%;max-width:260px;height:auto;margin:0 auto;display:block}
@@ -93,16 +93,43 @@
  <div class="wrap">
   <div class="k-sec-head"><span class="no">第 2 站</span><h2>泳衣規則：泳衣蓋住的地方，是我的隱私部位</h2></div>
   <div class="swim">
-    <figure class="fig"><svg viewBox="0 0 200 260" aria-hidden="true">
-      <circle cx="100" cy="46" r="30" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/>
-      <circle cx="90" cy="42" r="3.5" fill="#333"/><circle cx="110" cy="42" r="3.5" fill="#333"/>
-      <path d="M88 58 Q100 68 112 58" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <path d="M62 86 Q100 74 138 86 L146 150 L54 150 Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="3"/>
-      <path d="M62 86 L30 140 M138 86 L170 140" stroke="var(--skin-line)" stroke-width="14" stroke-linecap="round"/>
-      <path d="M62 86 L30 140 M138 86 L170 140" stroke="var(--skin)" stroke-width="9" stroke-linecap="round"/>
-      <path d="M66 96 Q100 108 134 96 L142 176 Q100 196 58 176 Z" fill="#4A4A8A"/>
-      <path d="M74 176 L70 244 M126 176 L130 244" stroke="var(--skin-line)" stroke-width="18" stroke-linecap="round"/>
-      <path d="M74 176 L70 244 M126 176 L130 244" stroke="var(--skin)" stroke-width="13" stroke-linecap="round"/>
+    <figure class="fig"><svg viewBox="0 0 300 260" role="img" aria-label="穿泳褲的男生和穿連身泳衣的女生，泳衣蓋住的地方是隱私部位">
+      <path d="M65 150 L63 228" stroke="var(--skin-line)" stroke-width="19" stroke-linecap="round"/>
+      <path d="M65 150 L63 228" stroke="var(--skin)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M91 150 L93 228" stroke="var(--skin-line)" stroke-width="19" stroke-linecap="round"/>
+      <path d="M91 150 L93 228" stroke="var(--skin)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M52 92 Q38 118 34 150" stroke="var(--skin-line)" stroke-width="17" stroke-linecap="round" fill="none"/>
+      <path d="M52 92 Q38 118 34 150" stroke="var(--skin)" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <path d="M104 92 Q118 118 122 150" stroke="var(--skin-line)" stroke-width="17" stroke-linecap="round" fill="none"/>
+      <path d="M104 92 Q118 118 122 150" stroke="var(--skin)" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <rect x="71" y="70" width="14" height="16" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2.5"/>
+      <path d="M48 96 Q48 82 62 82 L94 82 Q108 82 108 96 L106 160 L50 160 Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2.5"/>
+      <path d="M49 136 L107 136 L108 168 L81 168 L78 156 L75 168 L48 168 Z" fill="#2C6FAD"/>
+      <path d="M49 140 L107 140" stroke="#FFFFFF" stroke-opacity=".6" stroke-width="3"/>
+      <circle cx="78" cy="50" r="25" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2.5"/>
+      <path d="M53 46 Q54 22 78 23 Q102 22 103 46 Q90 34 78 36 Q66 34 53 46 Z" fill="#2B2B2B"/>
+      <circle cx="69" cy="51" r="3" fill="#333"/><circle cx="87" cy="51" r="3" fill="#333"/>
+      <path d="M69 61 Q78 68 87 61" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M209 150 L207 228" stroke="var(--skin-line)" stroke-width="19" stroke-linecap="round"/>
+      <path d="M209 150 L207 228" stroke="var(--skin)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M235 150 L237 228" stroke="var(--skin-line)" stroke-width="19" stroke-linecap="round"/>
+      <path d="M235 150 L237 228" stroke="var(--skin)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M196 92 Q182 118 178 150" stroke="var(--skin-line)" stroke-width="17" stroke-linecap="round" fill="none"/>
+      <path d="M196 92 Q182 118 178 150" stroke="var(--skin)" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <path d="M248 92 Q262 118 266 150" stroke="var(--skin-line)" stroke-width="17" stroke-linecap="round" fill="none"/>
+      <path d="M248 92 Q262 118 266 150" stroke="var(--skin)" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <rect x="215" y="70" width="14" height="16" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2.5"/>
+      <path d="M192 96 Q192 82 206 82 L238 82 Q252 82 252 96 L250 160 L194 160 Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2.5"/>
+      <path d="M205 82 L205 96 M239 82 L239 96" stroke="#D2416E" stroke-width="5" stroke-linecap="round"/>
+      <path d="M195 98 Q222 92 249 98 L250 158 Q238 166 231 172 L213 172 Q206 166 194 158 Z" fill="#D2416E"/>
+      <path d="M200 120 Q222 126 244 120" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="3" fill="none"/>
+      <circle cx="222" cy="50" r="25" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="2.5"/>
+      <path d="M196 52 Q194 20 222 22 Q250 20 248 52 Q242 34 222 34 Q202 34 196 52 Z" fill="#4A3020"/>
+      <path d="M246 40 Q262 52 256 74" stroke="#4A3020" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <circle cx="213" cy="51" r="3" fill="#333"/><circle cx="231" cy="51" r="3" fill="#333"/>
+      <path d="M213 61 Q222 68 231 61" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <text x="78" y="252" text-anchor="middle" font-size="15" fill="currentColor" font-family="sans-serif">泳褲蓋住的地方</text>
+      <text x="222" y="252" text-anchor="middle" font-size="15" fill="currentColor" font-family="sans-serif">泳衣蓋住的地方</text>
     </svg></figure>
     <div class="stack">
       <div class="panel big">

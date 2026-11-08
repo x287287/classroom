@@ -917,6 +917,16 @@
     renderPenTab();
     if (!pos) { autoY = findFreeY(); clampPos(); }
   }
+  /* 教材分站換頁（assets/kit.js 發出 kit-page）：畫筆筆跡依每一站分開保存，換站時換成那一站的筆跡 */
+  var penByPage = {}, penPage = "";
+  window.addEventListener("kit-page", function (e) {
+    var id = (e.detail && e.detail.id) || "";
+    penByPage[penPage] = penS.strokes;
+    penPage = id;
+    penS.strokes = penByPage[id] || [];
+    penS.redraw(); penBar.render();
+  });
+
   /* 雲端同步（assets/sync.js）：別台電腦改了設定，這裡跟著更新 */
   window.addEventListener("cls-sync", function (e) {
     var k = (e.detail && e.detail.keys) || [];
