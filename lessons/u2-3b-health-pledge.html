@@ -12,10 +12,26 @@
 @media (max-width:900px){.studio{grid-template-columns:minmax(0,1fr)}}
 .opt{display:grid;gap:.4rem}
 .opt h3{font-size:1.05rem;color:var(--muted)}
-.icons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
+.icons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem}
+@media (max-width:520px){.icons{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .icons button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.4rem;cursor:pointer;min-height:4.6rem}
 .icons button svg{width:100%;height:3.4rem}
 .icons button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+/* 自己畫：畫板 */
+.pad{display:grid;gap:.6rem;background:var(--sunk);border:2px dashed var(--accent);border-radius:16px;padding:.8rem}
+.pad[hidden]{display:none}
+.pad-tip{font-size:.95rem;color:var(--muted);margin:0}
+.pad-svg{width:100%;max-width:420px;justify-self:center;aspect-ratio:1;background:#fff;border:2px solid var(--line);border-radius:14px;touch-action:none;display:block;cursor:crosshair;-webkit-user-select:none;user-select:none}
+.pad-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.pad-ink{appearance:none;width:2.75rem;height:2.75rem;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.pad-ink[aria-pressed="true"]{box-shadow:0 0 0 4px var(--fg)}
+.pad-btn{appearance:none;font:inherit;font-weight:700;min-height:2.75rem;padding:0 .9rem;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:inline-flex;align-items:center;gap:.35rem}
+.pad-btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pad-btn:disabled{opacity:.45;cursor:default}
+.pad-w{display:inline-block;background:var(--fg);border-radius:999px;width:1.4rem}
+.pad-msg{font-weight:700;color:var(--bad);font-size:.95rem;margin:0}
+.pad-msg:empty{display:none}
+@media (min-width:901px){.studio>.stack:last-child{position:sticky;top:5.5rem}}
 .swatch{display:flex;gap:.5rem;flex-wrap:wrap}
 .swatch button{appearance:none;width:3rem;height:3rem;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 2px var(--line);cursor:pointer}
 .swatch button[aria-pressed="true"]{box-shadow:0 0 0 4px var(--fg)}
@@ -64,7 +80,15 @@
   <div class="k-sec-head"><span class="no">第 2 站</span><h2>設計我的標誌</h2></div>
   <div class="studio">
     <div class="stack">
-      <div class="opt"><h3>1. 選擇要禁止的東西</h3><div class="icons" id="icons"></div></div>
+      <div class="opt"><h3>1. 選擇要禁止的東西</h3><div class="icons" id="icons"></div>
+        <div class="pad" id="pad" hidden>
+          <p class="pad-tip">✏️ 用手指在白色畫板上畫出你要禁止的東西（例如電子菸、含糖飲料……）。畫在圓圈裡面，右邊的標誌會跟著變。</p>
+          <svg class="pad-svg" id="padSvg" viewBox="-200 -200 400 400" role="img" aria-label="自己畫的畫板"></svg>
+          <div class="pad-row" id="padInk" aria-label="筆的顏色"></div>
+          <div class="pad-row" id="padTools"></div>
+          <p class="pad-msg" id="padMsg" aria-live="polite"></p>
+          <label style="display:grid;gap:.3rem;font-weight:700">我畫的是什麼？<input class="txt" id="padName" maxlength="8" placeholder="例如：電子菸"></label>
+        </div></div>
       <div class="opt"><h3>2. 選擇主色</h3><div class="swatch" id="sw"></div></div>
       <div class="opt"><h3>3. 選一句標語，或自己寫（8 個字以內最好）</h3><div class="chips" id="slogans"></div><input class="txt" id="slogan" maxlength="14" aria-label="標語"></div>
       <div class="opt"><h3>4. 寫上設計者</h3><input class="txt" id="by" maxlength="12" placeholder="例如：四年三班 小明" aria-label="設計者"><p class="muted" style="font-size:.85rem;margin-top:.3rem">交給老師時，設計者會自動換成班級和座號，不會傳出名字。</p></div>
@@ -120,13 +144,64 @@ var IC={
   smoke:{n:'菸',d:function(c){return '<rect x="-110" y="-16" width="170" height="32" rx="4" fill="#fff" stroke="#333" stroke-width="6"/><rect x="60" y="-16" width="40" height="32" rx="4" fill="#E0A060" stroke="#333" stroke-width="6"/><rect x="-118" y="-16" width="14" height="32" fill="#FF7043"/><path d="M-120 -30 q-10 -24 4 -44 M-104 -34 q-8 -20 6 -38" stroke="#90A4AE" stroke-width="6" fill="none"/>'}},
   wine:{n:'酒',d:function(){return '<path d="M-40 -90 h80 l-10 70 q-30 30 -60 0 z" fill="#F48FB1" stroke="#333" stroke-width="6"/><path d="M0 -10 v70 M-34 64 h68" stroke="#333" stroke-width="8" stroke-linecap="round"/>'}},
   betel:{n:'檳榔',d:function(){return '<ellipse cx="0" cy="0" rx="46" ry="66" fill="#66BB6A" stroke="#333" stroke-width="6"/><path d="M0 -66 v-26" stroke="#5D4037" stroke-width="8"/><ellipse cx="-14" cy="-14" rx="10" ry="18" fill="#A5D6A7" opacity=".8"/>'}},
-  all:{n:'三種都禁',d:function(){return '<g transform="translate(-58,-30) scale(.42)">'+IC.smoke.d()+'</g><g transform="translate(58,-30) scale(.5)">'+IC.wine.d()+'</g><g transform="translate(0,50) scale(.5)">'+IC.betel.d()+'</g>'}}
+  all:{n:'三種都禁',d:function(){return '<g transform="translate(-58,-30) scale(.42)">'+IC.smoke.d()+'</g><g transform="translate(58,-30) scale(.5)">'+IC.wine.d()+'</g><g transform="translate(0,50) scale(.5)">'+IC.betel.d()+'</g>'}},
+  draw:{n:'自己畫',d:function(){return PAD.svg()||'<text x="0" y="-8" text-anchor="middle" font-size="30" font-family="Huninn, Noto Sans TC, sans-serif" fill="#90A4AE">在畫板上</text><text x="0" y="34" text-anchor="middle" font-size="30" font-family="Huninn, Noto Sans TC, sans-serif" fill="#90A4AE">畫出你的圖</text>'}}
 };
+/* 自己畫：筆跡存成 [{c:顏色,w:粗細,p:[[x,y],…]}]，座標和標誌中心對齊（標誌的圓圈半徑 190） */
+var PAD=(function(){
+  var KEY='logoDraw',MAX=5000;
+  var INK={'#263238':'黑','#6D4C41':'棕','#78909C':'灰','#E53935':'紅','#EC407A':'粉','#FB8C00':'橘','#FDD835':'黃','#43A047':'綠','#1E88E5':'藍','#8E24AA':'紫'};
+  var W={8:'細',14:'中',24:'粗'};
+  var d={s:[],name:''};try{var v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&Array.isArray(v.s))d=v}catch(e){}
+  var ink='#263238',w=14,cur=null,pid=null;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+  function total(){return d.s.reduce(function(n,k){return n+k.p.length},0)}
+  function path(k){var p=k.p;if(p.length===1)return 'M'+p[0][0]+' '+p[0][1]+'h.1';
+    var s='M'+p[0][0]+' '+p[0][1];
+    for(var i=1;i<p.length-1;i++){s+='Q'+p[i][0]+' '+p[i][1]+' '+((p[i][0]+p[i+1][0])/2)+' '+((p[i][1]+p[i+1][1])/2)}
+    var l=p[p.length-1];return s+'L'+l[0]+' '+l[1]}
+  function one(k){return '<path d="'+path(k)+'" fill="none" stroke="'+k.c+'" stroke-width="'+k.w+'" stroke-linecap="round" stroke-linejoin="round"/>'}
+  function svg(){return d.s.length?d.s.map(one).join(''):''}
+  var box=document.getElementById('pad'),el=document.getElementById('padSvg'),msg=document.getElementById('padMsg'),nm=document.getElementById('padName');
+  function guide(){return '<circle r="190" fill="none" stroke="'+st.col+'" stroke-opacity=".22" stroke-width="34"/>'}
+  function slash(){return '<line x1="-134" y1="-134" x2="134" y2="134" stroke="'+st.col+'" stroke-opacity=".22" stroke-width="34" stroke-linecap="round" pointer-events="none"/>'}
+  function paint(){el.innerHTML=guide()+'<g id="padInkG">'+svg()+'</g>'+slash();undo.disabled=clr.disabled=!d.s.length}
+  var live=0;function changed(){if(live)return;live=requestAnimationFrame(function(){live=0;document.getElementById('sign').innerHTML=signSvg(st.by?'設計：'+st.by:'')})}
+  function pt(e){var m=el.getScreenCTM();if(!m)return null;var q=el.createSVGPoint();q.x=e.clientX;q.y=e.clientY;q=q.matrixTransform(m.inverse());
+    return [Math.round(Math.max(-200,Math.min(200,q.x))),Math.round(Math.max(-200,Math.min(200,q.y)))]}
+  el.addEventListener('pointerdown',function(e){if(pid!==null)return;
+    if(total()>=MAX){msg.textContent='畫板滿了！可以按「復原」或「全部清除」再畫。';return}
+    var p=pt(e);if(!p)return;e.preventDefault();pid=e.pointerId;try{el.setPointerCapture(pid)}catch(x){}
+    cur={c:ink,w:w,p:[p]};d.s.push(cur);msg.textContent='';
+    var g=document.getElementById('padInkG');g.insertAdjacentHTML('beforeend',one(cur));changed()});
+  el.addEventListener('pointermove',function(e){if(e.pointerId!==pid||!cur)return;e.preventDefault();
+    var p=pt(e),l=cur.p[cur.p.length-1];if(!p||Math.abs(p[0]-l[0])+Math.abs(p[1]-l[1])<3)return;
+    if(total()>=MAX){end();msg.textContent='畫板滿了！可以按「復原」或「全部清除」再畫。';return}
+    cur.p.push(p);var g=document.getElementById('padInkG');g.lastChild.setAttribute('d',path(cur));changed()});
+  function end(){if(pid===null)return;try{el.releasePointerCapture(pid)}catch(x){}pid=null;cur=null;save();paint();draw()}
+  el.addEventListener('pointerup',function(e){if(e.pointerId===pid)end()});
+  el.addEventListener('pointercancel',function(e){if(e.pointerId===pid)end()});
+  var inkRow=document.getElementById('padInk');
+  Object.keys(INK).forEach(function(c){var b=document.createElement('button');b.type='button';b.className='pad-ink';b.style.background=c;b.setAttribute('aria-label',INK[c]+'色的筆');b.addEventListener('click',function(){ink=c;tools()});b.dataset.c=c;inkRow.appendChild(b)});
+  var tl=document.getElementById('padTools');
+  Object.keys(W).forEach(function(k){var b=document.createElement('button');b.type='button';b.className='pad-btn';b.dataset.w=k;b.innerHTML='<span class="pad-w" style="height:'+(k/5)+'px"></span>'+W[k];b.addEventListener('click',function(){w=+k;tools()});tl.appendChild(b)});
+  var undo=document.createElement('button');undo.type='button';undo.className='pad-btn';undo.textContent='↶ 復原';undo.addEventListener('click',function(){d.s.pop();msg.textContent='';save();paint();draw()});tl.appendChild(undo);
+  var clr=document.createElement('button');clr.type='button';clr.className='pad-btn';clr.textContent='🗑 全部清除';
+  var armed=0;clr.addEventListener('click',function(){if(!armed){armed=1;clr.textContent='再按一次清除';setTimeout(function(){armed=0;clr.textContent='🗑 全部清除'},3000);return}
+    armed=0;clr.textContent='🗑 全部清除';d.s=[];msg.textContent='';save();paint();draw()});tl.appendChild(clr);
+  function tools(){inkRow.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===ink?'true':'false')});
+    tl.querySelectorAll('[data-w]').forEach(function(b){b.setAttribute('aria-pressed',+b.dataset.w===w?'true':'false')})}
+  nm.value=d.name||'';nm.addEventListener('input',function(){d.name=nm.value.trim();save();if(window.SUB)SUB.refresh()});
+  tools();
+  return {svg:svg,empty:function(){return !d.s.length},name:function(){return d.name},
+    show:function(on){box.hidden=!on;if(on)paint()}};
+})();
 var COL={'#D32F2F':'紅','#2E7D6B':'綠','#1565C0':'藍','#EF6C00':'橘'};
 var SL=['無菸家庭，健康滿分','拒菸拒酒拒檳榔','我家不吸菸','愛家人，不吸菸','健康從我家開始'];
 var st={icon:'smoke',col:'#D32F2F',sl:SL[0],by:''};
 var icons=document.getElementById('icons');
-Object.keys(IC).forEach(function(k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label',IC[k].n);b.innerHTML='<svg viewBox="-140 -110 280 220">'+IC[k].d()+'</svg>';b.addEventListener('click',function(){st.icon=k;draw()});b.dataset.k=k;icons.appendChild(b)});
+var PENCIL='<g transform="translate(0,-22) scale(.8) rotate(45)"><rect x="-22" y="-95" width="44" height="130" rx="6" fill="#FFCA28" stroke="#333" stroke-width="6"/><rect x="-22" y="-95" width="44" height="26" rx="6" fill="#F48FB1" stroke="#333" stroke-width="6"/><path d="M-22 35 L0 80 L22 35 z" fill="#FFE0B2" stroke="#333" stroke-width="6" stroke-linejoin="round"/><path d="M-8 64 L0 80 L8 64 z" fill="#333"/></g><text x="0" y="100" text-anchor="middle" font-size="54" font-weight="700" font-family="Huninn, Noto Sans TC, sans-serif" fill="#333">自己畫</text>';
+Object.keys(IC).forEach(function(k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label',IC[k].n);b.innerHTML='<svg viewBox="-140 -110 280 220">'+(k==='draw'?PENCIL:IC[k].d())+'</svg>';b.addEventListener('click',function(){st.icon=k;draw()});b.dataset.k=k;icons.appendChild(b)});
 var sw=document.getElementById('sw');Object.keys(COL).forEach(function(c){var b=document.createElement('button');b.type='button';b.style.background=c;b.dataset.c=c;b.setAttribute('aria-label',COL[c]+'色');b.addEventListener('click',function(){st.col=c;draw()});sw.appendChild(b)});
 var sls=document.getElementById('slogans');SL.forEach(function(t){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;b.addEventListener('click',function(){st.sl=t;document.getElementById('slogan').value=t;draw()});sls.appendChild(b)});
 var inp=document.getElementById('slogan');inp.value=st.sl;inp.addEventListener('input',function(){st.sl=inp.value;draw()});
@@ -134,6 +209,7 @@ document.getElementById('by').addEventListener('input',function(e){st.by=e.targe
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function draw(){
   icons.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===st.icon?'true':'false')});
+  PAD.show(st.icon==='draw');
   sw.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===st.col?'true':'false')});
   sls.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',b.textContent===st.sl?'true':'false')});
   document.getElementById('sign').innerHTML=signSvg(st.by?'設計：'+st.by:'');
@@ -165,14 +241,16 @@ function pickedPledges(){return Object.keys(on).sort().map(function(k){return PL
 var SUB=SUBMIT.mount(document.getElementById('submitBox'),{
   assignment:'u2-3b-logo',
   collect:function(who){
+    if(st.icon==='draw'&&PAD.empty())return null;
     var by=who.seat?who.cls+' '+who.seat+' 號':'';
     return {
       title:'無菸家庭標誌＋健康宣言',
       svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 624 664">'+signSvg(by?'設計：'+by:'')+'</svg>',
-      lines:['標語：'+(st.sl||'（沒有寫）'),'禁止：'+IC[st.icon].n,'健康宣言：'].concat(pickedPledges().map(function(t,i){return (i+1)+'. '+t}))
+      lines:['標語：'+(st.sl||'（沒有寫）'),'禁止：'+(st.icon==='draw'?(PAD.name()||'自己畫的圖')+'（自己畫）':IC[st.icon].n),'健康宣言：'].concat(pickedPledges().map(function(t,i){return (i+1)+'. '+t}))
     };
   },
   preview:function(d){
+    if(!d)return '<b style="color:var(--bad)">你選了「自己畫」，請先在第 2 站的畫板上畫出你要禁止的東西。</b>';
     return '<div style="display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);gap:1rem;align-items:center"><img alt="我的標誌" style="width:100%;border-radius:10px" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(d.svg)+'"><div><b>要交出去的內容</b><ul style="margin:.4rem 0 0;padding-left:1.2em">'+d.lines.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul></div></div>';
   }
 });
