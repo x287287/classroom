@@ -20,7 +20,7 @@ SRC = sys.argv[1]
 OUT = os.path.join(ROOT, "assets", "fonts")
 os.makedirs(OUT, exist_ok=True)
 
-files = [os.path.join(ROOT, "index.html")] + glob.glob(os.path.join(ROOT, "lessons", "*.html")) \
+files = [os.path.join(ROOT, "index.html"), os.path.join(ROOT, "teacher.html")] + glob.glob(os.path.join(ROOT, "lessons", "*.html")) \
       + glob.glob(os.path.join(ROOT, "lessons", "data", "*.js")) + glob.glob(os.path.join(ROOT, "assets", "*.js"))
 site = set()
 for f in files:

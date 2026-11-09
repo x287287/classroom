@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>學生作品後台｜教室小書櫃</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<script src="assets/sync.js"></script>
+<style>
+/* 老師後台：開放／關閉作業繳交、設定班級座號、看學生交來的作品（作品牆、未交名單、全螢幕展示、精選、刪除）。
+   只有登入的老師帳號讀得到作品（Supabase RLS）。學生端是 assets/submit.js。 */
+:root{
+  --paper:#F4F8F6;--ink:#1E3A34;--muted:#5C7770;--card:#FFFFFF;--line:#C9DBD3;--leaf:#23784B;--accent:#C4501E;--accent-ink:#FFFFFF;--sun:#F5B521;--soft:#E7F2EC;
+  --display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;--body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#14201D;--ink:#E6F0EC;--muted:#9DB6AE;--card:#1B2925;--line:#2C433C;--leaf:#5CC28A;--accent:#FF8452;--accent-ink:#1A0E08;--soft:#1F302A;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#14201D;--ink:#E6F0EC;--muted:#9DB6AE;--card:#1B2925;--line:#2C433C;--leaf:#5CC28A;--accent:#FF8452;--accent-ink:#1A0E08;--soft:#1F302A;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--body)}
+.wrap{max-width:1280px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 110px}
+header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex:1 1 auto}
+.b{appearance:none;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;min-height:46px;padding:0 18px;font:inherit;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}
+.b.pri{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.b.del{border-color:var(--accent);color:var(--accent)}
+.b.del.armed{background:var(--accent);color:var(--accent-ink)}
+.b:disabled{opacity:.5;cursor:default}
+.b.sm{min-height:40px;padding:0 12px;font-size:14px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:18px}
+.msg{font-weight:700;min-height:1.4em}.msg.err{color:var(--accent)}.msg.ok{color:var(--leaf)}
+.login{max-width:440px;margin:40px auto;display:grid;gap:12px}
+.fld{display:grid;gap:4px;font-weight:700}
+.fld input,.fld select{font:inherit;font-size:17px;min-height:48px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:0 12px;width:100%}
+.asg{display:grid;gap:14px}
+.a-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}
+@media (max-width:760px){.a-card{grid-template-columns:minmax(0,1fr)}}
+.a-card h2{font:400 1.35rem/1.3 var(--display);margin:0 0 4px}
+.a-card .meta{color:var(--muted);font-size:14px}
+.a-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.sw{display:inline-flex;align-items:center;gap:10px;font-weight:700;cursor:pointer;min-height:46px}
+.sw input{appearance:none;width:58px;height:32px;border-radius:99px;background:#B9C6C0;position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px #0004}
+.sw input:checked{background:var(--leaf)}.sw input:checked::after{left:29px}
+.chipc{display:inline-flex;align-items:center;gap:4px;background:var(--soft);border:1.5px solid var(--line);border-radius:999px;padding:2px 4px 2px 12px;font-weight:700}
+.chipc button{appearance:none;border:0;background:transparent;color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px}
+.addcls{display:flex;gap:6px}
+.addcls input{font:inherit;min-height:40px;border-radius:10px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:0 10px;width:9em}
+.counts{font-size:14px;color:var(--muted)}
+.qrbox{display:grid;justify-items:center;gap:6px;text-align:center}
+.qrbox svg{width:140px;height:140px;background:#fff;border-radius:10px;padding:4px}
+.qrbox small{color:var(--muted);font-size:12px;max-width:180px;overflow-wrap:anywhere}
+/* 作品 */
+.view-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:24px 0 12px}
+.view-h h2{font:400 1.5rem/1.2 var(--display);margin:0;flex:1 1 auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.stat{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:10px 0}
+.stat .big{font:400 1.6rem/1 var(--display)}
+.missing{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.missing span{display:inline-grid;place-items:center;min-width:38px;height:34px;border-radius:8px;border:1.5px dashed var(--accent);color:var(--accent);font-weight:700;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:14px}
+.w{background:var(--card);border:1.5px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.w.star{border-color:var(--sun);box-shadow:0 0 0 3px #F5B52155}
+.w.new{animation:pop 1.2s}
+@keyframes pop{0%{box-shadow:0 0 0 6px #23784B88}100%{box-shadow:none}}
+.w .img{background:#fff;aspect-ratio:15/16;display:grid;place-items:center;cursor:zoom-in;border:0;padding:0;width:100%}
+.w .img img{width:100%;height:100%;object-fit:contain}
+.w .body{padding:10px 12px;display:grid;gap:4px;font-size:14px;flex:1}
+.w .who{font:400 1.15rem/1.2 var(--display)}
+.w .lines{margin:0;padding:0;list-style:none;color:var(--muted)}
+.w .lines li{overflow-wrap:anywhere}
+.w .acts{display:flex;gap:6px;padding:0 10px 10px;flex-wrap:wrap}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+/* 展示 */
+.show{position:fixed;inset:0;z-index:100;background:#0E1513;color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.show[hidden]{display:none}
+.show .sh-top{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.show .sh-top b{font:400 1.5rem/1.2 var(--display);flex:1}
+.show .sh-main{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:0 10px;min-height:0}
+.show .sh-art{height:100%;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:center;min-height:0}
+@media (max-aspect-ratio:1/1){.show .sh-art{grid-template-columns:minmax(0,1fr)}}
+.show img{width:100%;height:100%;max-height:calc(100dvh - 160px);object-fit:contain;background:#fff;border-radius:16px}
+.show ul{list-style:none;margin:0;padding:0;font-size:clamp(1.1rem,2.2vw,1.7rem);line-height:1.6}
+.show .nav{appearance:none;border:2px solid #ffffff55;background:#ffffff14;color:#fff;width:64px;height:110px;border-radius:999px;font-size:2.6rem;cursor:pointer}
+.show .nav:disabled{opacity:.25}
+.show .sh-foot{padding:10px 14px;display:flex;justify-content:center;gap:10px}
+.show .b{background:#ffffff14;color:#fff;border-color:#ffffff55}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>📥 學生作品後台</h1>
+    <a class="b" href="./">⌂ 回書櫃</a>
+    <button class="b" type="button" id="outBtn" hidden>登出</button>
+  </header>
+
+  <form class="card login" id="login" hidden novalidate>
+    <h2 style="margin:0;font:400 1.4rem var(--display)">老師登入</h2>
+    <p class="counts" style="margin:0">學生交來的作品只有老師看得到。</p>
+    <label class="fld">Email<input id="em" type="email" autocomplete="username"></label>
+    <label class="fld">密碼<input id="pw" type="password" autocomplete="current-password"></label>
+    <div class="msg err" id="lgMsg" aria-live="polite"></div>
+    <button class="b pri" type="submit" id="lgGo">登入</button>
+  </form>
+
+  <div id="app" hidden>
+    <p class="counts" style="margin:0 0 12px">上課時打開作業的「開放繳交」，學生在平板上就能交作品；下課記得關掉。學生只填班級和座號，不會傳出名字。</p>
+    <div class="asg" id="asg"></div>
+    <section id="view" hidden>
+      <div class="view-h"><h2 id="vTitle"></h2><button class="b" type="button" id="showBtn">▶ 全螢幕展示</button><button class="b" type="button" id="closeView">關閉</button></div>
+      <div class="tabs" id="tabs" role="group" aria-label="班級"></div>
+      <div class="stat" id="stat"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+  </div>
+</div>
+
+<div class="show" id="show" hidden role="dialog" aria-modal="true" aria-label="作品展示">
+  <div class="sh-top"><b id="shWho"></b><label class="sw" style="color:#fff"><input type="checkbox" id="shStar">只看精選</label><button class="b" type="button" id="shClose">關閉</button></div>
+  <div class="sh-main"><button class="nav" type="button" id="shPrev" aria-label="上一件">‹</button><div class="sh-art"><img id="shImg" alt=""><ul id="shLines"></ul></div><button class="nav" type="button" id="shNext" aria-label="下一件">›</button></div>
+  <div class="sh-foot"><span id="shCnt"></span></div>
+</div>
+
+<script src="assets/vendor/qrcode.js"></script>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function J(r){if(!r.ok)return r.text().then(function(t){var e=new Error(t||('HTTP '+r.status));e.status=r.status;throw e});return r.text().then(function(t){return t?JSON.parse(t):null})}
+var SITE=location.href.replace(/teacher\.html.*$/,'');
+var A=[], counts={}, cur=null, subs=[], cls='', seen={}, timer=null;
+
+/* ---------- 登入 ---------- */
+function gate(){
+  var ok=CLS.user&&CLS.isTeacher;
+  $('login').hidden=!!ok; $('app').hidden=!ok; $('outBtn').hidden=!CLS.user;
+  if(CLS.user&&!CLS.isTeacher){$('lgMsg').textContent='這個帳號不是老師帳號。';$('login').hidden=false;}
+  if(ok)loadAsg();
+}
+$('login').addEventListener('submit',function(e){
+  e.preventDefault(); $('lgGo').disabled=true; $('lgMsg').textContent='登入中…';
+  CLS.login($('em').value,$('pw').value).then(function(){$('pw').value='';$('lgMsg').textContent='';gate();})
+    .catch(function(err){$('lgMsg').textContent=err.message&&!/fetch/i.test(err.message)?err.message:'連不上伺服器，請確認網路';})
+    .then(function(){$('lgGo').disabled=false;});
+});
+$('outBtn').addEventListener('click',function(){CLS.logout();location.reload();});
+
+/* ---------- 作業清單 ---------- */
+function loadAsg(){
+  return Promise.all([
+    CLS.api('rest/v1/assignments?select=*&order=created_at.asc').then(J),
+    CLS.api('rest/v1/submissions?select=assignment_id,class_name').then(J)
+  ]).then(function(r){
+    A=r[0]||[]; counts={};
+    (r[1]||[]).forEach(function(s){var c=counts[s.assignment_id]=counts[s.assignment_id]||{all:0};c.all++;c[s.class_name]=(c[s.class_name]||0)+1;});
+    drawAsg();
+  }).catch(function(e){$('asg').innerHTML='<div class="card msg err">讀取失敗（'+esc(e.status||'')+'），請重新整理或重新登入。</div>';});
+}
+function patchAsg(a,data){
+  data.updated_at=new Date().toISOString();
+  return CLS.api('rest/v1/assignments?id=eq.'+encodeURIComponent(a.id),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(data)}).then(J)
+    .then(function(rows){if(rows&&rows[0]){Object.assign(a,rows[0]);} drawAsg();})
+    .catch(function(){alertMsg(a,'儲存失敗，請重新登入後再試');});
+}
+function alertMsg(a,t){var m=document.querySelector('[data-msg="'+a.id+'"]');if(m){m.className='msg err';m.textContent=t;}}
+function drawAsg(){
+  var box=$('asg'); box.innerHTML='';
+  if(!A.length){box.innerHTML='<div class="card empty">還沒有可以繳交的作業。</div>';return;}
+  A.forEach(function(a){
+    var c=counts[a.id]||{all:0}, url=SITE+a.lesson_url+'#send';
+    var d=document.createElement('div'); d.className='card a-card';
+    d.innerHTML='<div><h2></h2><div class="meta"></div>'+
+      '<div class="a-row"><label class="sw"><input type="checkbox" class="open"><span class="ot"></span></label></div>'+
+      '<div class="a-row"><b>班級：</b><span class="cls"></span><span class="addcls"><input placeholder="例如：四年三班" maxlength="20" aria-label="新增班級"><button class="b sm" type="button">＋ 新增</button></span></div>'+
+      '<div class="a-row"><label class="fld" style="display:flex;align-items:center;gap:8px;font-weight:700">座號到<select class="seats" style="width:auto;min-height:40px"></select>號</label></div>'+
+      '<div class="a-row"><button class="b pri see" type="button"></button><a class="b sm" target="_blank" rel="noopener">打開教材 ↗</a></div>'+
+      '<div class="msg" data-msg="'+esc(a.id)+'"></div></div>'+
+      '<div class="qrbox"><div class="qr"></div><b>學生掃這裡</b><small></small></div>';
+    d.querySelector('h2').textContent=a.title;
+    d.querySelector('.meta').textContent='已收到 '+c.all+' 件作品';
+    var op=d.querySelector('.open'); op.checked=a.open; d.querySelector('.ot').textContent=a.open?'開放繳交中（學生現在可以交）':'未開放繳交';
+    op.addEventListener('change',function(){
+      if(op.checked&&!(a.classes||[]).length){op.checked=false;alertMsg(a,'請先新增班級，再開放繳交。');return;}
+      patchAsg(a,{open:op.checked});
+    });
+    var cs=d.querySelector('.cls');
+    (a.classes||[]).forEach(function(k){
+      var ch=document.createElement('span');ch.className='chipc';ch.innerHTML='<span></span><button type="button" aria-label="移除班級">×</button>';
+      ch.firstChild.textContent=k+'（'+(c[k]||0)+'）';
+      ch.lastChild.addEventListener('click',function(){
+        if(c[k]){ if(!ch.dataset.armed){ch.dataset.armed=1;ch.firstChild.textContent='再按 × 移除（作品不會刪除）';return;} }
+        patchAsg(a,{classes:a.classes.filter(function(x){return x!==k})});
+      });
+      cs.appendChild(ch);
+    });
+    var ai=d.querySelector('.addcls input'), ab=d.querySelector('.addcls button');
+    function add(){var v=ai.value.trim();if(!v)return;if((a.classes||[]).indexOf(v)>=0){ai.value='';return;}patchAsg(a,{classes:(a.classes||[]).concat([v])});}
+    ab.addEventListener('click',add); ai.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();add();}});
+    var se=d.querySelector('.seats'); for(var i=10;i<=40;i++){var o=document.createElement('option');o.value=i;o.textContent=i;se.appendChild(o);} se.value=a.seats;
+    se.addEventListener('change',function(){patchAsg(a,{seats:+se.value});});
+    var see=d.querySelector('.see'); see.textContent='看作品（'+c.all+'）'; see.addEventListener('click',function(){openView(a);});
+    var lk=d.querySelector('a.b'); lk.href=a.lesson_url;
+    d.querySelector('.qrbox small').textContent=url.replace(/^https?:\/\//,'');
+    try{var q=qrcode(0,'M');q.addData(url);q.make();d.querySelector('.qr').innerHTML=q.createSvgTag({cellSize:6,margin:1,scalable:true});}catch(e){}
+    box.appendChild(d);
+  });
+}
+
+/* ---------- 作品 ---------- */
+function openView(a){cur=a;cls='';seen={};$('view').hidden=false;$('vTitle').textContent=a.title;loadSubs(true).then(function(){$('view').scrollIntoView({behavior:'smooth'});});poll();}
+$('closeView').addEventListener('click',function(){cur=null;$('view').hidden=true;clearTimeout(timer);loadAsg();});
+function poll(){clearTimeout(timer);timer=setTimeout(function(){if(cur&&!document.hidden&&$('show').hidden)loadSubs(false).then(poll,poll);else poll();},8000);}
+function loadSubs(first){
+  return CLS.api('rest/v1/submissions?select=*&assignment_id=eq.'+encodeURIComponent(cur.id)+'&order=class_name.asc,seat.asc').then(J).then(function(rows){
+    var fresh={}; rows.forEach(function(r){var k=r.id+'@'+r.updated_at; if(!first&&!seen[k])fresh[r.id]=1; seen[k]=1;});
+    subs=rows; drawView(fresh);
+  }).catch(function(){});
+}
+function list(){return subs.filter(function(s){return !cls||s.class_name===cls});}
+function svgSrc(svg){return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg||'');}
+function drawView(fresh){
+  var classes=(cur.classes||[]).slice(); subs.forEach(function(s){if(classes.indexOf(s.class_name)<0)classes.push(s.class_name)});
+  if(cls&&classes.indexOf(cls)<0)cls='';
+  if(!cls&&classes.length===1)cls=classes[0];
+  var t=$('tabs'); t.innerHTML='';
+  [''].concat(classes).forEach(function(k){var b=document.createElement('button');b.className='b sm';b.type='button';b.textContent=k||'全部班級';b.setAttribute('aria-pressed',k===cls?'true':'false');b.addEventListener('click',function(){cls=k;drawView({});});t.appendChild(b);});
+  var L=list(), st=$('stat');
+  if(cls){
+    var have={}; L.forEach(function(s){have[s.seat]=1}); var miss=[]; for(var i=1;i<=cur.seats;i++)if(!have[i])miss.push(i);
+    st.innerHTML='<span class="big">'+L.length+' / '+cur.seats+'</span><span>已交</span><div class="missing"><b>還沒交：</b>'+(miss.length?miss.map(function(n){return '<span>'+n+'</span>'}).join(''):'<b style="color:var(--leaf)">全部都交了！</b>')+'</div>';
+  } else st.innerHTML='<span class="big">'+L.length+'</span><span>件作品（選一個班級可以看還沒交的座號）</span>';
+  var g=$('grid'); g.innerHTML='';
+  if(!L.length){g.innerHTML='<div class="card empty">還沒有作品。打開「開放繳交」，請學生用平板掃 QR Code 繳交。</div>';return;}
+  L.forEach(function(s,idx){
+    var d=s.data||{}, w=document.createElement('article'); w.className='w'+(s.star?' star':'')+(fresh[s.id]?' new':'');
+    w.innerHTML=(d.svg?'<button class="img" type="button" aria-label="放大展示"><img alt=""></button>':'')+
+      '<div class="body"><div class="who"></div><ul class="lines"></ul><div class="counts"></div></div>'+
+      '<div class="acts"><button class="b sm st" type="button"></button>'+(d.svg?'<a class="b sm dl">下載</a>':'')+'<button class="b sm del" type="button">刪除</button></div>';
+    w.querySelector('.who').textContent=(cls?'':s.class_name+' ')+s.seat+' 號'+(s.star?' ⭐':'');
+    if(d.svg){w.querySelector('img').src=svgSrc(d.svg);w.querySelector('.img').addEventListener('click',function(){openShow(idx);});
+      var dl=w.querySelector('.dl');dl.href=svgSrc(d.svg);dl.setAttribute('download',cur.title+'-'+s.class_name+'-'+s.seat+'號.svg');}
+    var ul=w.querySelector('.lines'); (d.lines||[]).forEach(function(l){var li=document.createElement('li');li.textContent=l;ul.appendChild(li);});
+    if(d.text){var li=document.createElement('li');li.textContent=d.text;ul.appendChild(li);}
+    var t=new Date(s.updated_at), tt=isNaN(t)?'':(t.getMonth()+1)+'/'+t.getDate()+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'); w.querySelector('.counts').textContent=tt+(s.times>1?(tt?'・':'')+'交了 '+s.times+' 次':'');
+    var sb=w.querySelector('.st'); sb.textContent=s.star?'取消精選':'⭐ 精選';
+    sb.addEventListener('click',function(){CLS.api('rest/v1/submissions?id=eq.'+s.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({star:!s.star})}).then(J).then(function(){s.star=!s.star;drawView({});});});
+    var del=w.querySelector('.del');
+    del.addEventListener('click',function(){
+      if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='再按一次刪除';setTimeout(function(){del.classList.remove('armed');del.textContent='刪除';},4000);return;}
+      CLS.api('rest/v1/submissions?id=eq.'+s.id,{method:'DELETE'}).then(J).then(function(){subs=subs.filter(function(x){return x.id!==s.id});drawView({});});
+    });
+    g.appendChild(w);
+  });
+}
+
+/* ---------- 全螢幕展示 ---------- */
+var si=0;
+function showList(){return list().filter(function(s){return s.data&&s.data.svg&&(!$('shStar').checked||s.star)});}
+function openShow(idx){var L=list(), target=L[idx]; var S=showList(); si=Math.max(0,target?S.indexOf(target):0); $('show').hidden=false; drawShow();
+  try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(function(){});}catch(e){} }
+function drawShow(){
+  var S=showList();
+  if(!S.length){$('shWho').textContent=$('shStar').checked?'還沒有精選作品':'沒有作品';$('shImg').removeAttribute('src');$('shLines').innerHTML='';$('shCnt').textContent='';$('shPrev').disabled=$('shNext').disabled=true;return;}
+  si=Math.max(0,Math.min(S.length-1,si)); var s=S[si], d=s.data||{};
+  $('shWho').textContent=s.class_name+' '+s.seat+' 號'+(s.star?' ⭐':'');
+  $('shImg').src=svgSrc(d.svg); $('shImg').alt=s.class_name+' '+s.seat+' 號的作品';
+  var ul=$('shLines'); ul.innerHTML=''; (d.lines||[]).forEach(function(l){var li=document.createElement('li');li.textContent=l;ul.appendChild(li);});
+  $('shCnt').textContent=(si+1)+' / '+S.length; $('shPrev').disabled=si<=0; $('shNext').disabled=si>=S.length-1;
+}
+$('showBtn').addEventListener('click',function(){openShow(0)});
+$('shPrev').addEventListener('click',function(){si--;drawShow();});
+$('shNext').addEventListener('click',function(){si++;drawShow();});
+$('shStar').addEventListener('change',function(){si=0;drawShow();});
+function closeShow(){$('show').hidden=true;try{if(document.fullscreenElement)document.exitFullscreen();}catch(e){}}
+$('shClose').addEventListener('click',closeShow);
+document.addEventListener('keydown',function(e){if($('show').hidden)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();if(!$('shNext').disabled){si++;drawShow();}}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();if(!$('shPrev').disabled){si--;drawShow();}}
+  else if(e.key==='Escape')closeShow();});
+
+window.addEventListener('cls-status',function(){if(CLS.status==='off')gate();});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&cur)loadSubs(false);});
+gate();
+})();
+</script>
+</body>
+</html>

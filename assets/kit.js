@@ -330,6 +330,12 @@
       else if (e.key === "PageUp" || e.key === "ArrowLeft") { if (cur > 0) { e.preventDefault(); go(cur - 1); } }
     });
 
+    /* 網址的 #站 改變（例如按瀏覽器的上一頁）時，跟著換站 */
+    window.addEventListener("hashchange", function () {
+      var id = decodeURIComponent(location.hash.slice(1)), k = -1;
+      pages.forEach(function (p, i) { if (p.id === id) k = i; });
+      if (k >= 0 && k !== cur) go(k); else if (!id && cur >= 0) cover();
+    });
     var hid = decodeURIComponent(location.hash.slice(1)), at = -1;
     pages.forEach(function (p, i) { if (p.id === hid) at = i; });
     if (at >= 0) {

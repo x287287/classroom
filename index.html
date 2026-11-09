@@ -182,7 +182,7 @@ footer{color:var(--muted);font-size:13px;text-align:center}
         <option value="1">一年級</option><option value="2">二年級</option><option value="3">三年級</option>
         <option value="4">四年級</option><option value="5">五年級</option><option value="6">六年級</option>
       </select>
-      <div class="view-btns"><button class="mini hot" type="button" id="addBtn" hidden>＋ 新增教材</button><button class="mini acct" type="button" id="acctBtn" data-s="off">☁ 老師登入</button><button class="mini" type="button" id="fontBtn">字：標準</button><button class="mini" type="button" id="fsBtn">⛶ 全螢幕</button></div>
+      <div class="view-btns"><button class="mini hot" type="button" id="addBtn" hidden>＋ 新增教材</button><a class="mini" href="teacher.html" id="workBtn" hidden style="display:inline-flex;align-items:center;text-decoration:none">📥 學生作品</a><button class="mini acct" type="button" id="acctBtn" data-s="off">☁ 老師登入</button><button class="mini" type="button" id="fontBtn">字：標準</button><button class="mini" type="button" id="fsBtn">⛶ 全螢幕</button></div>
     </div>
     <div class="tabs" role="group" aria-label="教材類型" id="tabs"></div>
     <div class="allbtns" id="allBtns"><button class="mini" type="button" id="expandAll">全部展開</button><button class="mini" type="button" id="collapseAll">全部收合</button><button class="mini" type="button" id="todoOnly" aria-pressed="false">只看還沒上過</button></div>
@@ -214,7 +214,7 @@ footer{color:var(--muted);font-size:13px;text-align:center}
   <div class="dlg-box sm">
     <h2 id="acctH">雲端同步</h2>
     <div class="acct-info"><span>登入帳號</span><b id="acEmail"></b><span id="acState"></span></div>
-    <div class="dlg-acts" style="justify-content:flex-start"><button class="btn" type="button" id="acSync">立即同步</button></div>
+    <div class="dlg-acts" style="justify-content:flex-start"><button class="btn" type="button" id="acSync">立即同步</button><a class="btn" href="teacher.html" style="display:inline-flex;align-items:center;text-decoration:none">📥 學生作品後台</a></div>
     <form id="pwForm" class="fld" novalidate>
       <span>更改密碼 <small>（至少 8 個字，混合英文和數字）</small></span>
       <input id="pwNew" type="password" autocomplete="new-password" minlength="8" aria-label="新密碼">
@@ -582,7 +582,7 @@ function renderAcct(){
   let s=CLS.status; if(s==="syncing"&&(b.dataset.s==="ok"))s="ok";
   b.textContent=ST[s]||ST.off; b.dataset.s=s;
   b.setAttribute("aria-label",s==="off"?"老師登入":"雲端同步："+(STL[s]||""));
-  $("addBtn").hidden=!CLS.isTeacher;
+  $("addBtn").hidden=!CLS.isTeacher; $("workBtn").hidden=!CLS.isTeacher;
   $("acEmail").textContent=CLS.user?CLS.user.email:""; $("acState").textContent=CLS.user&&!CLS.isTeacher?"這個帳號不是老師帳號，無法同步或上傳。":(STL[s]||"");
 }
 let wasTeacher=window.CLS&&CLS.isTeacher, lastSt=window.CLS&&CLS.status;

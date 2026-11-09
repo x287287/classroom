@@ -5,7 +5,7 @@
 const CACHE = "classroom-v1";  /* 改這個名字會清掉舊存檔，重新存一次 */
 const CORE = [
   "./", "index.html",
-  "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js", "assets/sync.js", "lessons/view.html", "lessons/slides.html",
+  "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js", "assets/sync.js", "assets/submit.js", "lessons/view.html", "lessons/slides.html",
   "assets/vendor/qrcode.js",
   "lessons/data/u2-game-questions.js", "lessons/data/u3-game-levels.js"
 ];

@@ -42,6 +42,7 @@
       <a href="#tips"><span class="no">第 1 站</span><b>好標誌的祕密</b><span>三個設計原則</span></a>
       <a href="#studio"><span class="no">第 2 站</span><b>設計我的標誌</b><span>選圖、配色、寫標語</span></a>
       <a href="#pledge"><span class="no">第 3 站</span><b>我的健康宣言</b><span>寫下決心</span></a>
+      <a href="#send"><span class="no">第 4 站</span><b>交給老師</b><span>選班級座號繳交</span></a>
     </nav>
   </div>
 </header>
@@ -66,7 +67,7 @@
       <div class="opt"><h3>1. 選擇要禁止的東西</h3><div class="icons" id="icons"></div></div>
       <div class="opt"><h3>2. 選擇主色</h3><div class="swatch" id="sw"></div></div>
       <div class="opt"><h3>3. 選一句標語，或自己寫（8 個字以內最好）</h3><div class="chips" id="slogans"></div><input class="txt" id="slogan" maxlength="14" aria-label="標語"></div>
-      <div class="opt"><h3>4. 寫上設計者</h3><input class="txt" id="by" maxlength="12" placeholder="例如：四年三班 小明" aria-label="設計者"></div>
+      <div class="opt"><h3>4. 寫上設計者</h3><input class="txt" id="by" maxlength="12" placeholder="例如：四年三班 小明" aria-label="設計者"><p class="muted" style="font-size:.85rem;margin-top:.3rem">交給老師時，設計者會自動換成班級和座號，不會傳出名字。</p></div>
     </div>
     <div class="stack">
       <div class="preview" id="preview"><svg viewBox="0 0 600 640" id="sign" role="img" aria-label="標誌預覽"></svg></div>
@@ -99,12 +100,21 @@
  </div>
 </section>
 
+<section class="k-sec alt" id="send">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>把作品交給老師</h2></div>
+  <p class="big">設計好標誌、寫好宣言以後，選你的班級和座號，按「繳交給老師」。老師會在大螢幕上展示大家的作品！</p>
+  <div id="submitBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
 <footer class="k-foot wrap">
   <b>資料來源</b>
   <ol><li>國小健康與體育四上課本 單元 2 第 3 課〈實踐健康信念〉。</li><li>World Health Organization, World No Tobacco Day.</li></ol>
 </footer>
 
 <script src="../assets/kit.js"></script>
+<script src="../assets/submit.js"></script>
 <script>
 var IC={
   smoke:{n:'菸',d:function(c){return '<rect x="-110" y="-16" width="170" height="32" rx="4" fill="#fff" stroke="#333" stroke-width="6"/><rect x="60" y="-16" width="40" height="32" rx="4" fill="#E0A060" stroke="#333" stroke-width="6"/><rect x="-118" y="-16" width="14" height="32" fill="#FF7043"/><path d="M-120 -30 q-10 -24 4 -44 M-104 -34 q-8 -20 6 -38" stroke="#90A4AE" stroke-width="6" fill="none"/>'}},
@@ -126,13 +136,18 @@ function draw(){
   icons.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===st.icon?'true':'false')});
   sw.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===st.col?'true':'false')});
   sls.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',b.textContent===st.sl?'true':'false')});
+  document.getElementById('sign').innerHTML=signSvg(st.by?'設計：'+st.by:'');
+  if(window.SUB)SUB.refresh();
+}
+/* 標誌的 SVG 內容；byline 是最下面的小字（繳交時換成班級座號） */
+function signSvg(byline){
   var c=st.col,s='<rect width="600" height="640" rx="30" fill="#fff" stroke="'+c+'" stroke-width="14"/>';
   s+='<g transform="translate(300,270)">'+IC[st.icon].d()+'</g>';
   s+='<circle cx="300" cy="270" r="190" fill="none" stroke="'+c+'" stroke-width="34"/><line x1="166" y1="136" x2="434" y2="404" stroke="'+c+'" stroke-width="34" stroke-linecap="round"/>';
   var t=esc(st.sl||''),fsz=t.length<=8?62:t.length<=11?48:40;
   s+='<text x="300" y="545" text-anchor="middle" font-size="'+fsz+'" font-family="Huninn, Noto Sans TC, sans-serif" fill="'+c+'">'+t+'</text>';
-  if(st.by)s+='<text x="300" y="605" text-anchor="middle" font-size="22" font-family="Noto Sans TC, sans-serif" fill="#78909C">設計：'+esc(st.by)+'</text>';
-  document.getElementById('sign').innerHTML=s;
+  if(byline)s+='<text x="300" y="605" text-anchor="middle" font-size="22" font-family="Noto Sans TC, sans-serif" fill="#78909C">'+esc(byline)+'</text>';
+  return s;
 }
 document.getElementById('fs').addEventListener('click',function(){var p=document.getElementById('preview');try{if(document.fullscreenElement)document.exitFullscreen();else if(p.requestFullscreen)p.requestFullscreen().catch(function(){})}catch(e){}});
 draw();
@@ -144,6 +159,24 @@ document.getElementById('pname').addEventListener('input',pledge);
 function pledge(){var n=esc(document.getElementById('pname').value||'＿＿＿＿');var list=Object.keys(on).map(function(k){return '<li>'+PL[k]+'</li>'}).join('');
   document.getElementById('pledgeOut').innerHTML='<h3>我的健康宣言</h3><p>我 <b>'+n+'</b> 了解吸菸、飲酒、嚼檳榔會對自己和他人的健康造成危害，所以我承諾：</p><ol style="margin:.3rem 0 .6rem;padding-left:1.4em">'+(list||'<li style="color:#B9AE90">（從左邊選擇你的承諾）</li>')+'</ol><p style="text-align:right">宣言人：'+n+'</p>'}
 pledge();
+
+/* 第 4 站：繳交給老師（assets/submit.js） */
+function pickedPledges(){return Object.keys(on).sort().map(function(k){return PL[k]});}
+var SUB=SUBMIT.mount(document.getElementById('submitBox'),{
+  assignment:'u2-3b-logo',
+  collect:function(who){
+    var by=who.seat?who.cls+' '+who.seat+' 號':'';
+    return {
+      title:'無菸家庭標誌＋健康宣言',
+      svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 624 664">'+signSvg(by?'設計：'+by:'')+'</svg>',
+      lines:['標語：'+(st.sl||'（沒有寫）'),'禁止：'+IC[st.icon].n,'健康宣言：'].concat(pickedPledges().map(function(t,i){return (i+1)+'. '+t}))
+    };
+  },
+  preview:function(d){
+    return '<div style="display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);gap:1rem;align-items:center"><img alt="我的標誌" style="width:100%;border-radius:10px" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(d.svg)+'"><div><b>要交出去的內容</b><ul style="margin:.4rem 0 0;padding-left:1.2em">'+d.lines.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul></div></div>';
+  }
+});
+document.getElementById('checks').addEventListener('change',function(){SUB.refresh()});
 </script>
 <script src="../assets/home-fab.js"></script>
 </body>
