@@ -1,9 +1,9 @@
-# 讓 Supabase 免費專案不會因為「一週沒人用」被暫停：每 3 天自動戳一下資料庫。
+# 讓 Supabase 免費專案不會因為「一週沒人用」被暫停：每 2 天自動戳一下資料庫。
 # 不需要任何密碼；用的是網站本來就公開的金鑰（assets/sync.js 裡的 SB_KEY）。
 name: Keep Supabase awake
 on:
   schedule:
-    - cron: "17 3 */3 * *"
+    - cron: "17 3 */2 * *"
   workflow_dispatch:
 jobs:
   ping:
