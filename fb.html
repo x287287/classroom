@@ -6,8 +6,9 @@
 <title>寫下我的想法</title>
 <link rel="stylesheet" href="assets/fonts.css">
 <!-- 學生回饋：老師在上課工具「回饋」分頁開題目後，學生掃 QR Code 打開這頁（fb.html?b=代碼）。
-     選座號、寫想法（每台平板最多 3 則），看全班的想法（匿名），幫最好的想法按讚（每台平板最多 3 個）。
-     只呼叫 Supabase RPC：fb_list、fb_post、fb_like；不會傳出姓名，同學看不到座號。 -->
+     一打開先選座號（每個題目各記一次：fbSeat:<代碼>），再寫想法：每個座號只能有 1 則，要寫新的要先刪掉原本那則。
+     看全班的想法（匿名），幫最好的想法按讚（每個座號最多 3 個）。身分＝這台平板的代碼＋座號。
+     只呼叫 Supabase RPC：fb_list、fb_post、fb_delete、fb_like；不會傳出姓名，同學看不到座號。 -->
 <style>
 :root{--bg:#F3F1EA;--card:#FFFFFF;--ink:#1F2A27;--muted:#4A5A55;--line:#C9DBD3;--accent:#1E3A34;--good:#1E7A4F;--bad:#B3261E;--heart:#C2185B;
   --font:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
@@ -45,6 +46,16 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
 .like.own{border-style:dashed}
 .empty{color:var(--muted);text-align:center;padding:16px}
 .note{font-size:14px;color:var(--muted);margin:0}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.seats button{min-height:64px;padding:0;font-size:24px;background:#fff;color:var(--accent)}
+.seats button:active{background:var(--accent);color:#fff}
+.me{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-weight:700;font-size:20px}
+.me button{min-height:44px;font-size:16px;padding:0 14px;background:#fff;color:var(--accent)}
+.mypost{border:2px solid var(--good);background:#E7F4EC;border-radius:16px;padding:12px 14px;display:grid;gap:10px}
+.mypost p{margin:0;font-size:19px;overflow-wrap:anywhere;white-space:pre-wrap}
+.del{background:#fff;color:var(--bad);border-color:var(--bad);justify-self:start}
+.del.armed{background:var(--bad);color:#fff}
+.warn{background:#FFF3C4;border:2px solid #E0A100;border-radius:14px;padding:10px 12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -52,17 +63,28 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   <header><div class="k">💬 全班想法牆</div><h1 id="title">讀取中…</h1></header>
   <div id="state" class="state wait" hidden></div>
 
-  <section class="box" id="writeBox" hidden>
-    <h2>✏️ 寫下我的想法</h2>
-    <label>我的座號<select id="seat"><option value="">請選擇</option></select></label>
-    <label>我的想法<textarea id="body" maxlength="200" placeholder="寫下你的想法（最多 200 字）"></textarea></label>
-    <div class="cnt"><span id="cnt">0</span> / 200</div>
-    <button type="button" id="send">送出想法</button>
-    <div class="msg" id="msg" aria-live="polite"></div>
-    <p class="note">同學看不到你的名字和座號。每台平板最多送出 3 則想法，請寫友善、跟題目有關的內容。</p>
+  <section class="box" id="seatBox" hidden>
+    <h2>👋 先選你的座號</h2>
+    <p class="note">同學看不到你的座號，只有老師看得到。</p>
+    <div class="seats" id="seats"></div>
   </section>
 
-  <section class="box">
+  <div id="mainBox" hidden>
+  <div class="me" id="me"></div>
+
+  <section class="box" id="writeBox" hidden style="margin-top:16px">
+    <h2>✏️ 寫下我的想法</h2>
+    <div id="mine" hidden></div>
+    <div id="form">
+      <label>我的想法<textarea id="body" maxlength="200" placeholder="寫下你的想法（最多 200 字）"></textarea></label>
+      <div class="cnt"><span id="cnt">0</span> / 200</div>
+      <button type="button" id="send">送出想法</button>
+    </div>
+    <div class="msg" id="msg" aria-live="polite"></div>
+    <p class="note">每個人只能送出 1 則想法。想改的話，要先刪掉原本那則再重寫。請寫友善、跟題目有關的內容。</p>
+  </section>
+
+  <section class="box" style="margin-top:16px">
     <div class="bar">
       <h2>全班的想法</h2>
       <div class="sort"><button type="button" data-s="new" aria-pressed="true">最新</button><button type="button" data-s="likes" aria-pressed="false">最多讚</button></div>
@@ -70,6 +92,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
     <div class="left" id="left" aria-live="polite"></div>
     <div class="list" id="list"><div class="empty">讀取中…</div></div>
   </section>
+  </div>
 </div>
 <script>
 (function(){
@@ -78,29 +101,62 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   function $(id){return document.getElementById(id);}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   function load(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
-  function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function save(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
   var device=load("fbDevice",null);
   if(!device){device="d"+Math.random().toString(36).slice(2,10)+Date.now().toString(36);save("fbDevice",device);}
   function rpc(fn,args){return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(args),cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();});}
 
-  var seat=$("seat");
-  for(var i=1;i<=40;i++){var o=document.createElement("option");o.value=i;o.textContent=i+" 號";seat.appendChild(o);}
-  seat.value=load("fbSeat","")||"";
-  seat.addEventListener("change",function(){save("fbSeat",seat.value);});
+  var SEAT_KEY="fbSeat:"+board, seat=+load(SEAT_KEY,0)||0;
+  var data=null, sortBy="new", busy=false, armed=null;
+
+  /* 第一步：選座號 */
+  var seats=$("seats");
+  for(var i=1;i<=40;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");seats.appendChild(b);}
+  seats.addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;seat=+b.dataset.s;save(SEAT_KEY,seat);$("msg").textContent="";showMain();pull();});
+  function showSeat(){$("seatBox").hidden=false;$("mainBox").hidden=true;}
+  function showMain(){
+    $("seatBox").hidden=true;$("mainBox").hidden=false;
+    $("me").innerHTML='<span>我是 '+seat+' 號</span>';
+    var c=document.createElement("button");c.type="button";c.textContent="選錯了，換座號";
+    c.addEventListener("click",function(){seat=0;save(SEAT_KEY,null);data=null;showSeat();});
+    $("me").appendChild(c);
+  }
   $("body").addEventListener("input",function(){$("cnt").textContent=$("body").value.length;});
 
-  var data=null, sortBy="new", busy=false;
   function render(){
-    if(!data){return;}
+    if(!data)return;
     $("title").textContent=data.title;
     document.title=data.title+"｜寫下我的想法";
     var st=$("state");
     if(!data.open){st.hidden=false;st.className="state closed";st.textContent="老師已經關閉回饋，現在不能送出想法或按讚。";}
     else st.hidden=true;
+    if(!seat){showSeat();return;}
+    if($("mainBox").hidden)showMain();
     $("writeBox").hidden=!data.open;
-    var mineN=data.posts.filter(function(p){return p.mine;}).length;
-    $("send").disabled=!data.open||mineN>=3;
-    if(mineN>=3&&data.open&&!$("msg").textContent)$("msg").textContent="你已經送出 3 則想法了，去幫同學按讚吧！";
+    var mine=data.posts.filter(function(p){return p.mine;})[0];
+    var mb=$("mine");
+    if(mine){
+      mb.hidden=false;$("form").hidden=true;
+      mb.innerHTML='<div class="mypost"><b>✅ 你送出的想法</b><p>'+esc(mine.body)+'</p><span class="note">得到 ♥ '+mine.likes+' 個讚</span><button type="button" class="del'+(armed===mine.id?' armed':'')+'" id="delBtn">'+(armed===mine.id?'確定刪除？再按一次':'🗑 刪除這則，重新寫')+'</button></div>';
+      $("delBtn").addEventListener("click",function(){
+        if(armed!==mine.id){armed=mine.id;render();setTimeout(function(){if(armed===mine.id){armed=null;render();}},4000);return;}
+        armed=null;busy=true;
+        rpc("fb_delete",{p_post:mine.id,p_device:device,p_seat:seat}).then(function(r){
+          busy=false;var m=$("msg");
+          m.className="msg "+(r==="ok"?"ok":"err");
+          m.textContent=r==="ok"?"已經刪除，可以重新寫了。":r==="closed"?"老師已經關閉回饋。":"刪除失敗，請再試一次。";
+          return pull();
+        }).catch(function(){busy=false;});
+      });
+    }else{
+      mb.hidden=true;mb.innerHTML="";$("form").hidden=false;
+      if(data.seat_used){
+        mb.hidden=false;
+        mb.innerHTML='<div class="warn">'+seat+' 號已經在別的平板寫過想法了。如果你選錯座號，請按上面的「選錯了，換座號」。</div>';
+        $("form").hidden=true;
+      }
+    }
+    $("send").disabled=!data.open;
     $("left").textContent=data.open?("❤️ 你還可以按 "+data.left+" 個讚（點一下愛心按讚，再點一下收回）"):"";
     var list=data.posts.slice();
     if(sortBy==="likes")list.sort(function(a,b){return b.likes-a.likes;}); else list.reverse();
@@ -109,20 +165,21 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
         '<button type="button" class="like'+(p.mine?' own':'')+'" data-id="'+esc(p.id)+'" aria-pressed="'+(p.liked?'true':'false')+'" aria-label="按讚，目前 '+p.likes+' 個讚"'+(p.mine||!data.open?' disabled':'')+'>♥ '+p.likes+'</button></div>';
     }).join(""):'<div class="empty">還沒有人寫，當第一個吧！</div>';
   }
+  function notFound(t){$("title").textContent="找不到這個討論";$("state").hidden=false;$("state").className="state closed";$("state").textContent=t;$("seatBox").hidden=true;$("mainBox").hidden=true;data=null;}
   function pull(){
-    if(!board){$("title").textContent="找不到這個討論";$("state").hidden=false;$("state").textContent="請重新掃描老師螢幕上的 QR Code。";$("list").innerHTML="";return Promise.resolve();}
-    return rpc("fb_list",{p_board:board,p_device:device}).then(function(d){
-      if(!d){$("title").textContent="找不到這個討論";$("state").hidden=false;$("state").className="state closed";$("state").textContent="這個討論已經被刪除，或 QR Code 不正確。";$("writeBox").hidden=true;$("list").innerHTML="";data=null;return;}
+    if(!board){notFound("請重新掃描老師螢幕上的 QR Code。");return Promise.resolve();}
+    return rpc("fb_list",{p_board:board,p_device:device,p_seat:seat||0}).then(function(d){
+      if(!d){notFound("這個討論已經被刪除，或 QR Code 不正確。");return;}
       if(!busy){data=d;render();}
     }).catch(function(){$("left").textContent="連線不穩定，重新連線中…";});
   }
   $("send").addEventListener("click",function(){
     var m=$("msg"), t=$("body").value.trim();
-    if(!seat.value){m.className="msg err";m.textContent="請先選擇你的座號。";seat.focus();return;}
+    if(!seat){showSeat();return;}
     if(!t){m.className="msg err";m.textContent="請先寫下你的想法。";$("body").focus();return;}
     $("send").disabled=true;m.className="msg";m.textContent="送出中…";
-    rpc("fb_post",{p_board:board,p_seat:+seat.value,p_device:device,p_body:t}).then(function(r){
-      var M={ok:"✅ 送出了！你的想法已經在大螢幕上。",closed:"老師已經關閉回饋。",limit:"每台平板最多送出 3 則想法。",too_long:"想法太長了，最多 200 字。",empty:"請先寫下你的想法。",full:"想法已經太多了，請告訴老師。",bad_seat:"座號不正確。",no_board:"找不到這個討論。"};
+    rpc("fb_post",{p_board:board,p_seat:seat,p_device:device,p_body:t}).then(function(r){
+      var M={ok:"✅ 送出了！你的想法已經在大螢幕上。",closed:"老師已經關閉回饋。",already:"你已經送出 1 則想法了，要先刪掉才能重寫。",seat_used:seat+" 號已經在別的平板寫過了。選錯座號的話，請按「選錯了，換座號」。",too_long:"想法太長了，最多 200 字。",empty:"請先寫下你的想法。",full:"想法已經太多了，請告訴老師。",bad_seat:"座號不正確。",no_board:"找不到這個討論。"};
       m.className="msg "+(r==="ok"?"ok":"err");m.textContent=M[r]||"送出失敗，請再試一次。";
       if(r==="ok"){$("body").value="";$("cnt").textContent="0";}
       return pull();
@@ -131,9 +188,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   $("list").addEventListener("click",function(e){
     var b=e.target.closest(".like");if(!b||b.disabled)return;
     b.disabled=true;busy=true;
-    rpc("fb_like",{p_post:b.dataset.id,p_device:device}).then(function(r){
+    rpc("fb_like",{p_post:b.dataset.id,p_device:device,p_seat:seat}).then(function(r){
       busy=false;
-      if(r==="limit"){$("left").textContent="❤️ 你的 3 個讚已經用完了。想換一個？先點已經按讚的愛心收回。";}
       return pull().then(function(){if(r==="limit")$("left").textContent="❤️ 你的 3 個讚已經用完了。想換一個？先點已經按讚的愛心收回。";});
     }).catch(function(){busy=false;b.disabled=false;});
   });
@@ -141,6 +197,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
     var b=e.target.closest("button[data-s]");if(!b)return;sortBy=b.dataset.s;
     [].forEach.call(this.children,function(x){x.setAttribute("aria-pressed",String(x===b));});render();
   });
+  if(seat)showMain();else if(board)showSeat();
   pull();
   setInterval(function(){if(!document.hidden)pull();},4000);
 })();
