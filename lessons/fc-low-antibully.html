@@ -68,6 +68,10 @@
     <h3>配對挑戰：把霸凌的種類和說明配起來</h3>
     <div id="matchTypes"></div>
   </div>
+  <div class="panel" style="margin-top:1.4rem">
+    <h3>情境分類：這是哪一種霸凌？</h3>
+    <div id="sortTypes" style="margin-top:.5rem"></div>
+  </div>
  </div>
 </section>
 
@@ -93,6 +97,9 @@
     <div class="card"><h3>可以找……</h3><ol style="margin:.4rem 0 0;padding-left:1.4rem;font-size:1.15rem;line-height:1.8"><li>班導師</li><li>學務主任 / 生教組長</li><li>輔導主任 / 專輔老師</li><li>學校任何一位老師</li></ol></div>
     <div class="card"><h3>怎麼找……</h3><ol style="margin:.4rem 0 0;padding-left:1.4rem;font-size:1.15rem;line-height:1.8"><li>到辦公室</li><li>寫紙條</li><li>寫封信</li><li>打電話</li></ol></div>
   </div>
+  <div class="cards call">
+    <div class="card"><h3>📞 教育部反霸凌專線</h3><div class="num">1953</div><p>24 小時都有人接。被欺負或看到別人被欺負，都可以請大人陪你一起打。</p></div>
+  </div>
  </div>
 </section>
 
@@ -104,10 +111,19 @@
   <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
     <ul>
       <li>這份是學務處〈友善校園暨反霸凌宣導〉簡報（23 張）的互動版，文字與原簡報相同，只是改成網站的版面並加上互動：朋友的 8 個樣子、霸凌的四個重點、六種霸凌、拒絕霸凌的四個方法都改成翻翻卡；第 3 站加了種類配對、第 4 站加了說出拒絕的練習、第 5 站把「可以找誰／怎麼找」做成分類遊戲。最後的兩句話可以點選打勾。</li>
-      <li>圖片取自原簡報。</li>
+      <li>圖片取自原簡報。原簡報以外新增的內容：「找誰幫忙」的 1953 專線、第 3 站的情境分類、第 2 站卡片背面的白話說明、最後的「挑戰」小測驗。</li>
+      <li>建議上課流程（約 30 分鐘）：第 1 站 3 分鐘、第 2 站 4 分鐘、第 3 站 8 分鐘（翻卡→配對→情境分類，可用抽籤請學生上台點）、第 4 站 5 分鐘（全班一起說出拒絕的話）、第 5 站 4 分鐘、挑戰 4 分鐘、Q&amp;A 2 分鐘。</li>
+      <li>1953 為教育部反霸凌專線（111 年 8 月 30 日起取代 0800-200-885，24 小時）。</li>
       <li>原簡報仍保留在書櫃（同一分類的「友善校園暨反霸凌宣導」），也可以下載 PDF：<a href="../files/friendly/low-antibully.pdf" target="_blank" rel="noopener">low-antibully.pdf</a>。</li>
     </ul>
   </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>反霸凌小測驗</h2></div>
+  <div id="quizBox"></div>
  </div>
 </section>
 
@@ -115,6 +131,7 @@
   <b>資料來源</b>
   <ol>
     <li>公埔國小學務處（生教訓育組長 張奕軒老師）：〈友善校園暨反霸凌宣導〉簡報。</li>
+    <li>台灣英文新聞（2022/8/30）：教育部反霸凌專線改為 1953，24 小時提供服務。https://www.taiwannews.com.tw/zh/news/4641966</li>
   </ol>
 </footer>
 
@@ -135,12 +152,13 @@ FC.flips(document.getElementById('flipFriend'),[
 ],{cols:4});
 
 /* 第 2 站：霸凌的四個重點 */
-FC.flips(document.getElementById('flipWhat'),[
-  {em:'1',c:'c1',back:'個人或集體行為'},
-  {em:'2',c:'c2',back:'持續性或單一嚴重事件'},
-  {em:'3',c:'c3',back:'直接或間接'},
-  {em:'4',c:'c4',back:'使他人感到不舒服或影響正常學習'}
-].map(function(x){x.bt='';return x;}),{cols:4});
+var WHAT=[
+  {em:'1',c:'c1',back:'個人或集體行為',plain:'一個人做，或是一群人一起做。'},
+  {em:'2',c:'c2',back:'持續性或單一嚴重事件',plain:'一直重複發生；或是只有一次，但是非常嚴重。'},
+  {em:'3',c:'c3',back:'直接或間接',plain:'直接：當面打人、罵人。間接：在背後說壞話、叫別人不要跟他玩。'},
+  {em:'4',c:'c4',back:'使他人感到不舒服或影響正常學習',plain:'讓人害怕、難過，不想上學、沒辦法專心上課。'}
+];
+FC.flips(document.getElementById('flipWhat'),WHAT.map(function(x){x.bt='';x.back='<b style="font-size:1.3rem">'+x.back+'</b><br><span style="font-size:.95em">'+x.plain+'</span>';return x;}),{cols:4});
 
 /* 第 3 站：六種霸凌 */
 var TYPES=[
@@ -156,6 +174,20 @@ FC.match(document.getElementById('matchTypes'),{
   pairs:TYPES.map(function(x){return {k:x.t,v:x.back};}),
   start:'先蓋起卡片，再點左邊的種類、右邊的說明。',
   done:'六種霸凌：肢體、言語、關係、網路、性、反擊型。'
+});
+KIT.sort(document.getElementById('sortTypes'),{
+  bins:[{id:'b',t:'肢體霸凌'},{id:'w',t:'言語霸凌'},{id:'r',t:'關係霸凌'},{id:'i',t:'網路霸凌'},{id:'s',t:'性霸凌'},{id:'f',t:'反擊型霸凌'}],
+  items:[
+    {t:'下課時故意推同學，還搶走他的鉛筆盒',bin:'b',e:'踢、打、搶東西，是肢體霸凌。'},
+    {t:'一直叫同學難聽的綽號，還嘲笑他',bin:'w',e:'取綽號、用話刺傷人，是言語霸凌。'},
+    {t:'叫全班都不要跟某個同學玩',bin:'r',e:'排擠別人，是關係霸凌。'},
+    {t:'在通訊軟體群組裡罵同學、傳他的謠言',bin:'i',e:'用網路散播辱罵和謠言，是網路霸凌。'},
+    {t:'一直取笑同學的身體，說他「不像男生」',bin:'s',e:'拿身體、性別取笑別人，是性霸凌。'},
+    {t:'被欺負的同學，轉去欺負比他更小的同學',bin:'f',e:'被欺負的人去欺負更弱勢的人，是反擊型霸凌。'}
+  ],
+  hint:'先點一張情境卡，再點它是哪一種霸凌。',
+  start:'選一張情境卡開始。',
+  done:'六種霸凌都認出來了！'
 });
 
 /* 第 4 站：拒絕霸凌 */
@@ -185,6 +217,14 @@ KIT.sort(document.getElementById('sortHelp'),{
   done:'遇到霸凌不要怕，找老師幫忙！'
 });
 
+/* 挑戰 */
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'下面哪一個是「關係霸凌」？',o:['踢打同學','排擠同學、散播謠言','取難聽的綽號'],a:1,e:'排擠弱勢同儕、散播不實謠言中傷某人，是關係霸凌。'},
+  {q:'用通訊軟體、社群媒體散播辱罵的話，是哪一種霸凌？',o:['網路霸凌','肢體霸凌','反擊型霸凌'],a:0,e:'用電子郵件、通訊軟體、社群媒體散播威脅辱罵的言語，是網路霸凌。'},
+  {q:'對方的舉動讓你不舒服，怎麼拒絕最好？',o:['大聲罵回去','忍耐不說','溫和且堅定地說：「我不喜歡這樣，請你停止」'],a:2,e:'要溫和且堅定地拒絕對方。'},
+  {q:'好朋友都在嘲笑某個同學，我應該？',o:['跟著一起笑','不要因為別人都做就跟著做','假裝沒看到就好'],a:1,e:'不要因為其他人或好朋友都做，就只好跟著做。'},
+  {q:'遇到霸凌，可以找誰幫忙？',o:['只能找班導師','學校任何一位老師都可以','不能告訴大人'],a:1,e:'班導師、學務處、輔導室，學校任何一位老師都可以找。'}
+]);
 /* 最後：兩句話 */
 FC.pledge(document.getElementById('pledgeBox'),['朋友、同學之間彼此尊重','不喜歡勇敢說「不」']);
 </script>

@@ -51,6 +51,11 @@
     <img src="../files/friendly/high-sextortion/img/warning.webp" alt="">
   </div>
   <div id="flipSigns"></div>
+  <div class="panel" style="margin-top:1.4rem">
+    <h3>練習：網友傳來這些訊息，有沒有問題？</h3>
+    <p class="muted" style="margin-top:.3rem">先想一想是哪一個警示徵兆，再點開答案。</p>
+    <div id="chatSigns"></div>
+  </div>
  </div>
 </section>
 
@@ -87,12 +92,16 @@
     <img src="../files/friendly/high-sextortion/img/support.webp" alt="">
   </div>
   <div id="flipSupport"></div>
+  <div class="key">法律提醒：未滿 18 歲的人的性影像，不論是傳到群組、私訊給別人，或上傳到網路，都是違法的。看到了不要轉傳，馬上告訴大人。</div>
   <div class="panel" style="margin-top:1.4rem"><h3>配對挑戰：做法和說明配起來</h3><div id="matchSupport1"></div></div>
   <div class="panel" style="margin-top:1rem"><div id="matchSupport2"></div></div>
   <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
     <ul>
       <li>這份是學務處〈友善校園之防制網路性剝削〉簡報（6 張）的互動版，文字與原簡報相同，圖片取自原簡報。</li>
       <li>互動設計：類型、警示徵兆、自我保護步驟、陪伴與支持改成翻翻卡；類型與陪伴做法加了配對；「如何應對與求助」依原簡報「請依序採取行動」做成排順序遊戲。</li>
+      <li>原簡報以外新增的內容：第 2 站的「網友訊息」練習（六則訊息對應簡報的警示徵兆）、第 5 站的法律提醒、最後的「挑戰」小測驗。</li>
+      <li>法律提醒依《兒童及少年性剝削防制條例》第 38 條：散布、播送、交付、公然陳列或以他法供人觀覽兒少性影像，處 1 年以上 7 年以下有期徒刑；無正當理由持有也有罰則（第 39 條）。課堂上只需讓學生知道「轉傳就違法」，不必說明刑度。</li>
+      <li>建議上課流程（約 25 分鐘）：第 1 站 4 分鐘、第 2 站 6 分鐘（點亮警示燈＋網友訊息練習）、第 3 站 4 分鐘、第 4 站 4 分鐘（排順序）、第 5 站 4 分鐘、挑戰 3 分鐘。</li>
       <li>113 為衛生福利部 24 小時免付費保護專線；iWIN 網路內容防護機構受理網路有害兒少內容申訴（網站 i.win.org.tw）。</li>
       <li>若學生透露曾被索取照片或遭威脅，請保持冷靜、不責備，協助保存證據，並通知家長、學務處與輔導室；涉及兒少性剝削時依法通報。</li>
       <li>原簡報仍保留在書櫃（同一分類的「友善校園之防制網路性剝削」），也可以下載 PDF：<a href="../files/friendly/high-sextortion.pdf" target="_blank" rel="noopener">high-sextortion.pdf</a>。</li>
@@ -100,11 +109,18 @@
   </div></details>
  </div>
 </section>
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>防制網路性剝削小測驗</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
 
 <footer class="k-foot wrap">
   <b>資料來源</b>
   <ol>
     <li>公埔國小學務處（生教訓育組 張奕軒老師）：〈友善校園之防制網路性剝削〉簡報。</li>
+    <li>法律百科（legis-pedia.com）：將未成年人的性影像傳到群組、私訊或上傳網路都違法（兒童及少年性剝削防制條例第 38 條）。https://legis-pedia.com/article/1198</li>
     <li>衛生福利部〈守護兒少安全 平安過好年！〉：113 保護專線為 24 小時免付費專線。https://www.mohw.gov.tw/cp-2641-21001-1.html</li>
   </ol>
 </footer>
@@ -143,6 +159,14 @@ KIT.order(document.getElementById('orderRespond'),{
   start:'遇到網路性勒索，第一步要做什麼？',
   done:'先顧好安全 → 不付錢不屈服 → 截圖存證 → 封鎖檢舉 → 告訴大人 → 報警或打專線。不要獨自面對！'
 });
+FC.reveal(document.getElementById('chatSigns'),[
+  {q:'「嗨，我也是六年級，我們興趣好像，交個朋友吧！」',a:'<b>⚠️ 冒充他人建立親密關係</b><br>網路上的年齡、照片、身分都可能是假的，不要很快就相信。'},
+  {q:'「我們改用另一個聊天 App 聊吧，這裡不方便。」',a:'<b>⚠️ 誘導轉往私密平台</b><br>換到別人看不到的地方，就是想避開大人。'},
+  {q:'「傳一張你的照片給我好不好？只給我看。」',a:'<b>⚠️ 陌生人索取私密影像</b><br>不拍攝、不傳送私密影像，立即拒絕並停止對話。'},
+  {q:'「你傳給我，我就送你遊戲點數。」',a:'<b>⚠️ 以禮物或金錢交換影像</b><br>再好的禮物都不值得，拒絕並告訴大人。'},
+  {q:'「我們聊的事，不要跟你爸媽說喔。」',a:'<b>⚠️ 要求對互動內容保密</b><br>要你保密，就是危險訊號，一定要告訴信任的大人。'},
+  {q:'「不再傳的話，我就把你的照片公開給全校看。」',a:'<b>⚠️ 威脅公開私密影像</b><br>不要屈服、不要付錢；截圖保存證據、封鎖檢舉，馬上告訴大人，也可以撥打 113。'}
+],{btn:'看答案'});
 var SUP=[
   {em:'👂',t:'相信並傾聽',back:'不質疑、不否定受害者的感受'},
   {em:'🤲',t:'不責備受害者',back:'避免說「你為什麼要這樣做」'},
@@ -155,6 +179,13 @@ var SUP=[
 ];
 FC.flips(document.getElementById('flipSupport'),SUP.map(function(x,i){x.c=['c1','c2','c3','c4'][i%4];return x;}),{cols:4});
 FC.match(document.getElementById('matchSupport1'),{pairs:SUP.slice(0,4).map(function(x){return {k:x.t,v:x.back};}),start:'第一組：先點左邊的做法，再點右邊的說明。',done:'第一組完成！'});
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'網友說「傳照片給我，就送你遊戲點數」，這是哪一種警示徵兆？',o:['以禮物或金錢交換影像','要求對互動內容保密','誘導轉往私密平台'],a:0,e:'用禮物或金錢交換影像，是警示徵兆。'},
+  {q:'有人威脅要公開你的私密照片，第一件不能做的事是？',o:['截圖保存證據','支付金錢或屈服於勒索','告訴信任的大人'],a:1,e:'不要支付金錢或屈服於勒索。'},
+  {q:'收到同學私密影像的轉傳，你應該？',o:['再傳給好朋友','存起來','不轉傳，告訴大人'],a:2,e:'避免轉傳影像，散布只會加深傷害，而且違法。'},
+  {q:'朋友說他被網友威脅了，你第一句話最好說？',o:['「你為什麼要這樣做？」','「我相信你，我陪你去找大人。」','「這是你自己的問題。」'],a:1,e:'相信並傾聽、不責備，陪同求助。'},
+  {q:'遇到網路性剝削，可以撥打哪支保護專線？',o:['113','119','104'],a:0,e:'113 保護專線，24 小時、免付費。'}
+]);
 FC.match(document.getElementById('matchSupport2'),{pairs:SUP.slice(4).map(function(x){return {k:x.t,v:x.back};}),start:'第二組：先點左邊的做法，再點右邊的說明。',done:'第二組完成！你知道怎麼陪伴和支持了。'});
 
 </script>
