@@ -65,6 +65,18 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .opts.ox.done2 button{padding-bottom:34px}
 .freeze{text-align:center;font-weight:700;color:#7A1520}
 .nextbtn{width:100%}
+.orow{display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:stretch}
+.opts .orow .say{padding:0;min-height:58px;width:58px;font-size:24px;background:#F1EDF6;color:#4A2B5E;text-align:center;border-radius:16px;opacity:1;box-shadow:none;outline:0}
+.opts .orow .say:focus-visible{outline:3px solid var(--gold)}
+.sayrow{display:flex;gap:8px;flex-wrap:wrap}
+.sayrow button{background:#F1EDF6;color:#4A2B5E;min-height:48px;font-size:17px;padding:0 16px}
+.sayrow button[aria-pressed="true"]{background:#7A2E8E;color:#fff}
+.opts button.tried{background:#6B6478;opacity:.6;padding-right:104px}
+.opts button.tried::after{content:"✗ 選過了";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;background:#fff;color:var(--no);border-radius:999px;padding:2px 10px}
+.opts.ox button.tried{padding:10px 10px 34px}
+.opts.ox button.tried::after{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap}
+.pot{border-radius:14px;padding:8px 12px;font-weight:700;font-size:17px;background:#FFF4D6;color:#6A4A00}
+.pot.p1{background:#EAF2FF;color:#163F80}.pot.p0{background:#F1EDF6;color:#4A2B5E}
 </style>
 </head>
 <body>
@@ -80,7 +92,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 
   <section class="card" id="sSeat" hidden>
     <h2>👋 選你的座號</h2>
-    <p class="muted">大螢幕只會顯示全班答對幾個人，不會顯示你的座號和成績。</p>
+    <p class="muted">大螢幕不會顯示名字。「各自搶攻」的排行榜只顯示座號和答對題數。</p>
     <div class="msg" id="seatMsg" aria-live="polite"></div>
     <div class="seats" id="seats"></div>
   </section>
@@ -140,6 +152,33 @@ var DM=[
     $("me").appendChild(c);
   }
 
+  /* ---------- 語音唸題 ---------- */
+  var TTS=("speechSynthesis" in window)&&("SpeechSynthesisUtterance" in window), voice=null, auto=!!load("raidTTS",false), spoken="", cur=null;
+  function pickVoice(){try{var vs=speechSynthesis.getVoices();voice=vs.filter(function(v){return /zh[-_]TW/i.test(v.lang)})[0]||vs.filter(function(v){return /zh[-_](HK|Hant)/i.test(v.lang)})[0]||vs.filter(function(v){return /^(zh|cmn)/i.test(v.lang)})[0]||null}catch(e){}}
+  if(TTS){pickVoice();try{speechSynthesis.addEventListener("voiceschanged",pickVoice)}catch(e){}}
+  function stopSay(){if(TTS)try{speechSynthesis.cancel()}catch(e){}}
+  function speak(t){if(!TTS||!t)return;stopSay();setTimeout(function(){try{var u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:"zh-TW";if(voice)u.voice=voice;u.rate=0.85;speechSynthesis.speak(u)}catch(e){}},60)}
+  function clean(t){return String(t||"").replace(/[_＿]{2,}|（\s*）|\(\s*\)/g,"，什麼，")}
+  function readCur(){if(!cur)return;var t=clean(cur.q)+"。";
+    if(cur.ox)t+="對的請選 O，錯的請選 X。";
+    else cur.opts.forEach(function(o,i){if(cur.skip.indexOf(i)<0)t+=LABEL[i]+"，"+o+"。"});
+    speak(t)}
+  function sayBar(){return TTS?'<div class="sayrow"><button type="button" data-say="q">🔊 唸題目和選項</button><button type="button" data-say="auto" aria-pressed="'+auto+'">'+(auto?"自動唸：開":"自動唸：關")+'</button></div>':""}
+  function optBtns(){var o=$("opts");return o?[].slice.call(o.querySelectorAll("button[data-i]")):[]}
+  function optsHTML(opts,ox,cls,dis,extra){
+    return '<div class="opts'+(ox?" ox":"")+(extra||"")+'" id="opts">'+opts.map(function(t,i){
+      var b='<button type="button" class="c'+i+(cls(i)||"")+'" data-i="'+i+'"'+(dis(i)?" disabled":"")+'>'+(ox?"":"<b>"+LABEL[i]+"</b>")+esc(t)+'</button>';
+      return (ox||!TTS)?b:'<div class="orow">'+b+'<button type="button" class="say" data-say="o'+i+'" aria-label="唸選項 '+LABEL[i]+'">🔊</button></div>'}).join("")+'</div>'}
+  $("body").addEventListener("click",function(e){
+    var s=e.target.closest("[data-say]");if(!s)return;
+    if(F.res)clearTimeout(F.timer);
+    var k=s.dataset.say;
+    if(k==="auto"){auto=!auto;save("raidTTS",auto);s.setAttribute("aria-pressed",auto);s.textContent=auto?"自動唸：開":"自動唸：關";if(auto)readCur();else stopSay();return}
+    if(k==="q")readCur();
+    else if(k==="e"){if(cur)speak(cur.e)}
+    else if(k.charAt(0)==="o"&&cur){var i=+k.slice(1);speak(LABEL[i]+"，"+cur.opts[i])}
+  });
+
   /* 狀態 */
   function poll(){
     if(!room)return;
@@ -162,11 +201,11 @@ var DM=[
       var lt=$("leftT");if(lt&&st.left!=null){lt.textContent="⏱ 剩 "+st.left+" 秒";lt.className="left"+(st.left<=5?" hot":"")}
     }
     if(key===sig)return; sig=key;
-    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div>'+(st.mode==="free"?'<p class="muted" style="text-align:center">這一場是「⚡ 各自搶攻」：開始後題目會出現在你的平板上，答完自動換下一題。答錯會被定身 3 秒，要仔細看題目喔！</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
+    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div>'+(st.mode==="free"?'<p class="muted" style="text-align:center">這一場是「⚡ 各自搶攻」：開始後題目會出現在你的平板上，一次就答對打 2 點、第 2 次才答對打 1 點；答錯不會換題，會被定身 3 秒，再選一次。看不懂題目可以按「🔊 唸題目」。</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
     if(st.status==="end"){
       var win=st.result==="win";
       b.innerHTML='<div class="big">'+(win?"🎉":"💪")+'</div><div class="wait">'+(win?"全班合力打倒大魔王！":(st.result==="cancel"?"老師取消了這場遊戲":"魔王逃走了，下次再挑戰！"))+'</div>'+
-        (seat?'<div class="rv na">你答對了 <b>'+st.my_right+'</b> / '+st.my_total+' 題，打了魔王 '+st.my_right+' 下！</div>':'');
+        (seat?(st.mode==="free"?'<div class="rv na">你在 2 次內答對 <b>'+st.my_right+'</b> 題，打掉魔王 <b>'+(st.my_dmg||0)+'</b> 點血！</div>':'<div class="rv na">你答對了 <b>'+st.my_right+'</b> / '+st.my_total+' 題，打了魔王 '+st.my_right+' 下！</div>'):'');
       return;
     }
     var q=st.question||{};
@@ -174,13 +213,18 @@ var DM=[
     var h='<div class="meta"><span>第 '+st.round+' / '+st.rounds+' 題</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div><div class="qt">'+esc(q.q)+'</div>';
     var mine=st.my_choice;
     if(st.status==="question"){
-      h+='<div class="opts'+(q.ox?" ox":"")+(st.answered?" done":"")+'" id="opts">'+opts.map(function(t,i){return '<button type="button" class="c'+i+(st.answered&&mine===i?" pick":"")+'" data-i="'+i+'"'+(st.answered?" disabled":"")+'>'+(q.ox?"":"<b>"+LABEL[i]+"</b>")+esc(t)+'</button>'}).join("")+'</div>';
+      cur={q:q.q,opts:opts,ox:q.ox,skip:[],e:""};
+      if(!st.answered)h+=sayBar();
+      h+=optsHTML(opts,q.ox,function(i){return st.answered&&mine===i?" pick":""},function(){return st.answered},st.answered?" done":"");
+      if(!st.answered&&auto&&spoken!=="s"+st.round){spoken="s"+st.round;setTimeout(readCur,300)}
       h+=st.answered?'<div class="wait">✓ 已送出！看大螢幕等老師公布答案</div>':'<div class="msg" id="ansMsg"></div>';
     }else{
       var a=st.answer||{},right=opts[a.a];
       if(!st.answered)h+='<div class="rv na">這題你沒有作答。<br>正確答案：<b>'+esc(right)+'</b><br>'+esc(a.e)+'</div>';
       else if(st.my_correct)h+='<div class="big">⚔️</div><div class="rv ok"><b>答對了！</b>你打了魔王一下！<br>'+esc(a.e)+'</div>';
       else h+='<div class="rv no"><b>差一點！</b>正確答案是「'+esc(right)+'」。<br>'+esc(a.e)+'</div>';
+      cur={q:q.q,opts:opts,ox:q.ox,skip:[],e:"正確答案是："+(q.ox?(a.a===0?"O，對":"X，錯"):right)+"。"+(a.e||"")};
+      if(TTS)h+='<div class="sayrow"><button type="button" data-say="e">🔊 唸答案和說明</button></div>';
       h+='<p class="muted" style="text-align:center">看大螢幕，等老師出下一題</p>';
     }
     b.innerHTML=h;
@@ -188,75 +232,89 @@ var DM=[
     if(o&&!st.answered)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||sending)return;answer(+btn.dataset.i)});
   }
   function answer(i){
-    sending=true;
-    [].forEach.call($("opts").children,function(x){x.disabled=true});
+    sending=true;stopSay();
+    optBtns().forEach(function(x){x.disabled=true});
     rpc("raid_answer",{p_room:room,p_round:st.round,p_seat:seat,p_device:device,p_choice:i}).then(function(r){
       sending=false;
       if(r==="ok"||r==="already"){st.answered=true;st.my_choice=i;sig="";render();return}
       var m={closed:"這題已經結束了。",late:"時間到了，來不及送出。",not_joined:"請重新選座號。"}[r]||"送出失敗，請再按一次。";
       var am=$("ansMsg");if(am)am.textContent=m;
       if(r==="not_joined"){join(seat)}
-      [].forEach.call($("opts").children,function(x){x.disabled=false});
+      optBtns().forEach(function(x){x.disabled=false});
       poll();
-    }).catch(function(){sending=false;var am=$("ansMsg");if(am)am.textContent="網路不穩，請再按一次。";[].forEach.call($("opts").children,function(x){x.disabled=false})});
+    }).catch(function(){sending=false;var am=$("ansMsg");if(am)am.textContent="網路不穩，請再按一次。";optBtns().forEach(function(x){x.disabled=false})});
   }
 
   /* ---------- 各自搶攻 ---------- */
-  var F={on:false,q:null,busy:false,res:null,timer:null};
+  // 答錯不換題：第 1 次就答對打 2 點、第 2 次答對打 1 點（O／X 題第 2 次只剩一個選項，打 0 點）、再之後 0 點
+  var F={on:false,q:null,busy:false,res:null,timer:null,hit:false,frozen:false};
   function fmt(L){L=Math.max(0,L|0);return Math.floor(L/60)+":"+(L%60<10?"0":"")+(L%60)}
+  function pot(q){return q.tries===0?2:(q.tries===1&&!q.ox?1:0)}
   function freeHeader(){
     var c=$("fClk");if(c&&st.left!=null){c.textContent="⏱ "+fmt(st.left);c.className="clk"+(st.left<=30?" hot":"")}
-    var m=$("fMine");if(m)m.textContent="我答對 "+st.my_right+" / "+st.my_total+" 題";
+    var m=$("fMine");if(m)m.textContent="我答對 "+(st.my_right||0)+" 題・打了 "+(st.my_dmg||0)+" 點";
   }
   function freeTick(){
     if(!F.on){F.on=true;sig="";F.q=null;F.res=null;loadQ();return}
     freeHeader();
   }
   function loadQ(){
-    if(F.busy)return;F.busy=true;
+    if(F.busy)return;F.busy=true;clearTimeout(F.timer);
     rpc("raid_free_q",{p_room:room,p_seat:seat,p_device:device}).then(function(q){
       F.busy=false;
       if(q.err){ if(q.err==="not_joined"){join(seat)} F.on=false; poll(); return; }
-      F.q=q;F.res=null;drawFree();
-      if(q.wait>0)freezeThen(q.wait,function(){drawFree()});
+      q.wrong=q.wrong||[];q.tries=q.tries||0;
+      F.q=q;F.res=null;F.hit=q.tries>0;F.frozen=q.wait>0;drawFree();
+      if(auto&&spoken!=="f"+q.qid){spoken="f"+q.qid;stopSay();if(!F.frozen)setTimeout(readCur,300)}
+      if(F.frozen)freezeThen(q.wait);
     }).catch(function(){F.busy=false;setTimeout(loadQ,1500)});
   }
   function drawFree(){
     var q=F.q,b=$("body");if(!q)return;
-    var opts=q.o||[],r=F.res;
-    var h='<div class="fbar"><span class="clk" id="fClk"></span><span class="stk" id="fStk">'+(q.streak>=2&&!r?"🔥 連續答對 "+q.streak+" 題":"")+'</span></div>'+
+    var opts=q.o||[],r=F.res,wrong=q.wrong||[],p=pot(q);
+    cur={q:q.q,opts:opts,ox:q.ox,skip:wrong,e:r?((r.dmg>0?"答對了！":"答對了。")+"答案是："+(q.ox?(r.answer==="O"?"O，對":"X，錯"):r.answer)+"。"+(r.e||"")):""};
+    var h='<div class="fbar"><span class="clk" id="fClk"></span><span class="stk">'+(q.streak>=2&&!r&&!q.tries?"🔥 連續一次答對 "+q.streak+" 題":"")+'</span></div>'+
       '<div class="meta"><span id="fMine"></span><span>'+({smoke:"菸惡魔",wine:"酒惡魔",betel:"檳榔惡魔"}[q.d]||"")+'</span></div>'+
-      '<div class="qt">'+esc(q.q)+'</div>'+
-      '<div class="opts'+(q.ox?" ox":"")+(r?" done2":"")+'" id="opts">'+opts.map(function(t,i){
-        var cls="c"+i+(r&&t===r.answer?" right":"")+(r&&i===r.pick?" pick":"");
-        return '<button type="button" class="'+cls+'" data-i="'+i+'"'+(r?" disabled":"")+'>'+(q.ox?"":"<b>"+"ABCD"[i]+"</b>")+esc(t)+'</button>'}).join("")+'</div>';
+      '<div class="qt">'+esc(q.q)+'</div>'+sayBar();
+    if(!r)h+='<div class="pot p'+p+'">'+(p===2?"⚔️⚔️ 這題一次就答對：打 2 點":p===1?"⚔️ 這題現在答對：打 1 點":"這題現在答對不會打到魔王，但還是要找出正確答案！")+'</div>';
+    h+=optsHTML(opts,q.ox,function(i){return (wrong.indexOf(i)>=0?" tried":"")+(r&&opts[i]===r.answer?" right":"")},
+      function(i){return !!r||F.frozen||wrong.indexOf(i)>=0},r?" done2":"");
     if(r){
-      if(r.correct)h+='<div class="rv ok"><b>⚔️ 答對了！</b>打掉魔王 '+r.dmg+' 點血'+(r.dmg>1?"（連擊！）":"")+'<br>'+esc(r.e)+'</div>';
-      else h+='<div class="rv no"><b>被魔王打中了！</b>正確答案是「'+esc(r.answer)+'」。<br>'+esc(r.e)+'</div><div class="freeze" id="frz"></div>';
-      h+='<button type="button" class="nextbtn" id="fNext"'+(r.correct?"":" disabled")+'>下一題 →</button>';
-    }else h+='<div class="msg" id="ansMsg"></div>';
+      var msg=r.attempt===1?'<b>⚔️ 一次就答對！</b>打掉魔王 '+r.dmg+' 點血'+(r.dmg>2?"（連續一次答對 "+r.streak+" 題，多打 1 點！）":"")
+        :r.dmg>0?'<b>⚔️ 答對了！</b>第 '+r.attempt+' 次答對，打掉魔王 '+r.dmg+' 點血'
+        :'<b>✓ 答對了！</b>這次沒有打到魔王，下一題試試一次就答對！';
+      h+='<div class="rv ok">'+msg+'<br>'+esc(r.e)+'</div>';
+      if(TTS)h+='<div class="sayrow"><button type="button" data-say="e">🔊 唸答案和說明</button></div>';
+      h+='<button type="button" class="nextbtn" id="fNext">下一題 →</button>';
+    }else if(F.hit)h+='<div class="rv no"><b>被魔王打中了！</b>這個答案不對。'+(F.frozen?"定身結束後再選一次。":"再想想看，選一次！")+'</div><div class="freeze" id="frz"></div>';
+    else h+='<div class="msg" id="ansMsg"></div>';
     b.innerHTML=h;freeHeader();
     var o=$("opts");
-    if(!r)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||F.busy)return;freeAnswer(+btn.dataset.i)});
-    var nb=$("fNext");if(nb)nb.addEventListener("click",function(){if(!nb.disabled){clearTimeout(F.timer);loadQ()}});
+    if(!r)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||btn.disabled||F.busy||F.frozen)return;freeAnswer(+btn.dataset.i)});
+    var nb=$("fNext");if(nb)nb.addEventListener("click",function(){stopSay();loadQ()});
   }
-  function freezeThen(sec,cb){
-    var left=sec;var tick=function(){var z=$("frz");if(z)z.textContent=left>0?"😵 定身中…… "+left+" 秒":"";
-      if(left<=0){var nb=$("fNext");if(nb){nb.disabled=false;nb.focus()}if(cb)cb();return}left--;F.timer=setTimeout(tick,1000)};tick();
+  function freezeThen(sec){
+    var left=sec;clearTimeout(F.timer);
+    var tick=function(){var z=$("frz");if(z)z.textContent=left>0?"😵 定身中…… "+left+" 秒":"";
+      if(left<=0){F.frozen=false;drawFree();if(auto)readCur();return}left--;F.timer=setTimeout(tick,1000)};tick();
   }
   function freeAnswer(i){
-    F.busy=true;[].forEach.call($("opts").children,function(x){x.disabled=true});
+    F.busy=true;stopSay();optBtns().forEach(function(x){x.disabled=true});
     rpc("raid_free_answer",{p_room:room,p_seat:seat,p_device:device,p_qid:F.q.qid,p_choice:i}).then(function(r){
       F.busy=false;
       if(r.err){
-        if(r.err==="wait"){[].forEach.call($("opts").children,function(x){x.disabled=false});$("ansMsg").textContent="還在定身中，等一下再按！";return}
+        if(r.err==="wait"||r.err==="bad_choice"){drawFree();var m=$("ansMsg");if(m)m.textContent=r.err==="wait"?"還在定身中，等一下再按！":"這個選項已經選過了。";return}
         if(r.err==="stale"){loadQ();return}
         F.on=false;poll();return;
       }
-      r.pick=i;F.res=r;st.hp=r.hp;st.max_hp=r.max_hp;st.my_total++;if(r.correct)st.my_right++;hp();
-      F.q.streak=r.streak;drawFree();
-      if(r.correct){F.timer=setTimeout(loadQ,1600)}else freezeThen(r.wait||3);
-    }).catch(function(){F.busy=false;[].forEach.call($("opts").children,function(x){x.disabled=false});var m=$("ansMsg");if(m)m.textContent="網路不穩，請再按一次。"});
+      st.hp=r.hp;st.max_hp=r.max_hp;hp();
+      if(r.correct){
+        F.res=r;F.q.streak=r.streak;if(r.dmg>0)st.my_right=(st.my_right||0)+1;st.my_dmg=(st.my_dmg||0)+r.dmg;drawFree();
+        if(auto)speak(cur.e);else F.timer=setTimeout(loadQ,2500);
+      }else{
+        F.q.wrong.push(i);F.q.tries=r.attempt;F.q.streak=0;F.hit=true;F.frozen=true;drawFree();freezeThen(r.wait||3);
+      }
+    }).catch(function(){F.busy=false;drawFree();var m=$("ansMsg");if(m)m.textContent="網路不穩，請再按一次。"});
   }
 
   if(room.length===6)goRoom(room);else show("sCode");
