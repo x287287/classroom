@@ -18,6 +18,41 @@
 .card .em{font-size:2.6rem;line-height:1.1;margin-bottom:.3rem}
 .ex{margin-top:1.3rem;font-size:1.15rem}
 .key{margin-top:1.4rem;padding:1rem 1.2rem;border-radius:var(--r);background:var(--warn-soft);border:1px solid var(--warn);font-size:1.2rem;font-weight:700}
+/* 翻翻卡 */
+.flips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1rem;margin-top:1.1rem}
+.flips.two{grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr))}
+.flip{appearance:none;border:0;padding:0;background:none;cursor:pointer;perspective:1200px;min-height:13rem;font:inherit;color:inherit;text-align:center}
+.flip .in{position:relative;display:grid;width:100%;height:100%;min-height:13rem;transition:transform .55s;transform-style:preserve-3d}
+.flip[aria-pressed="true"] .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{grid-area:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;padding:1rem 1.2rem;border-radius:var(--r);backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--line);background:var(--surface)}
+.flip .f{border-top:8px solid var(--accent)}
+.flip .f .em{font-size:3.2rem;line-height:1.1}
+.flip .f b{font-family:var(--font-display);font-weight:400;font-size:1.7rem}
+.flip .f small{color:var(--muted);font-size:.95rem}
+.flip .b{transform:rotateY(180deg);background:var(--accent-soft);border-color:var(--accent);font-size:1.25rem;line-height:1.65}
+.flip .b b{font-family:var(--font-display);font-weight:400;color:var(--accent);font-size:1.3rem}
+.flip.c1 .f{border-top-color:#2F6FB5}.flip.c2 .f{border-top-color:var(--good)}.flip.c3 .f{border-top-color:var(--warn)}
+.flip.good .b{background:var(--good-soft);border-color:var(--good)}.flip.good .b b{color:var(--good)}
+.flip.bad .b{background:var(--bad-soft);border-color:var(--bad)}.flip.bad .b b{color:var(--bad)}
+.flip:focus-visible .in{outline:3px solid var(--accent);outline-offset:4px;border-radius:var(--r)}
+.fliprow{margin-top:.8rem}
+/* 配對 */
+.match{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:.8rem 1.4rem;margin-top:.9rem}
+@media (max-width:640px){.match{grid-template-columns:minmax(0,1fr)}}
+.match .col{display:grid;gap:.7rem;align-content:start}
+.match button{appearance:none;border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:.7rem 1rem;min-height:3.6rem;font:inherit;font-size:1.15rem;line-height:1.5;text-align:left;cursor:pointer;display:flex;gap:.6rem;align-items:center}
+.match .col.k button{font-family:var(--font-display);font-size:1.3rem}
+.match button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.match button.done{border-color:var(--good);background:var(--good-soft);cursor:default}
+.match button .tick{flex:none;width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;font-size:1rem;background:var(--sunk);color:var(--muted)}
+.match button.done .tick{background:var(--good);color:#fff}
+.match button.no{border-color:var(--bad);background:var(--bad-soft);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.mmsg{margin-top:.9rem}
+/* 大聲說 */
+.shout{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.7rem}
+.shout button{appearance:none;border:2px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:999px;padding:.6rem 1.4rem;min-height:3.4rem;font-family:var(--font-display);font-size:1.4rem;cursor:pointer;transition:transform .2s}
+.shout button.go{background:var(--accent);color:var(--accent-ink);transform:scale(1.12)}
 /* 小遊戲 */
 .game{display:grid;gap:1rem;margin-top:1.2rem}
 .gq{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.2rem}
@@ -72,21 +107,24 @@
 <section class="k-sec" id="what">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">第 1 站</span><h2>什麼是霸凌？</h2></div>
-  <div class="cards trio">
-    <div class="card top c1"><div class="em" aria-hidden="true">🎯</div><h3>故意</h3><p>明明知道會讓人難過，還是做。</p></div>
-    <div class="card top c2"><div class="em" aria-hidden="true">🔁</div><h3>一再發生</h3><p>不是一次，而是常常。</p></div>
-    <div class="card top c3"><div class="em" aria-hidden="true">💔</div><h3>讓人受傷或害怕</h3><p>身體痛、心裡難過、不敢來學校。</p></div>
-  </div>
+  <p class="big">霸凌有三個特點。點一下卡片，翻過來看說明。</p>
+  <div class="flips" data-flips="what"></div>
   <p class="ex"><b>例如：</b>亂取綽號、推打、排擠不讓人加入、在群組罵人、傳別人的糗照。</p>
+  <div class="panel" style="margin-top:1.4rem">
+    <h3>配對挑戰：把特點和說明配起來</h3>
+    <div id="matchWhat"></div>
+  </div>
  </div>
 </section>
 
 <section class="k-sec alt" id="joke">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">第 2 站</span><h2>是玩笑，還是傷人？</h2></div>
-  <div class="cards trio">
-    <div class="card good"><div class="em" aria-hidden="true">😄</div><h3>玩笑</h3><p>大家都在笑，包括被開玩笑的人。對方說「不要」，馬上就停。</p></div>
-    <div class="card warn"><div class="em" aria-hidden="true">😢</div><h3>傷人</h3><p>只有一個人在笑，另一個人難過、想躲。就算說「只是開玩笑」，也一樣會痛。</p></div>
+  <p class="big">先猜猜看，再點卡片翻面。</p>
+  <div class="flips two" data-flips="joke"></div>
+  <div class="panel" style="margin-top:1.4rem">
+    <h3>分一分：這是玩笑，還是傷人？</h3>
+    <div id="sortJoke"></div>
   </div>
   <div class="key">判斷方法：對方的感覺最重要，不是我覺得好不好笑。</div>
  </div>
@@ -95,24 +133,30 @@
 <section class="k-sec" id="no">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">第 3 站</span><h2>勇敢說「不」</h2></div>
-  <div class="cards trio">
-    <div class="card top c1"><div class="em" aria-hidden="true">✋</div><h3>被欺負時</h3><p>大聲說：「不要這樣！我不喜歡！」然後走開，告訴大人。</p></div>
-    <div class="card top c2"><div class="em" aria-hidden="true">👀</div><h3>看到別人被欺負</h3><p>不笑、不看熱鬧、不轉傳。說：「這樣不好，停！」</p></div>
-    <div class="card top c3"><div class="em" aria-hidden="true">🤝</div><h3>害怕出面時</h3><p>陪被欺負的同學走開，或馬上去找老師。這也是勇敢。</p></div>
-  </div>
+  <p class="big">遇到不同的情況，可以怎麼做？先點左邊的情況，再點右邊的做法。</p>
+  <div id="matchNo"></div>
   <div class="key">說「不」不是沒禮貌，是保護自己和同學。</div>
+  <div class="panel" style="margin-top:1.4rem">
+    <h3>一起練習大聲說</h3>
+    <p style="margin-top:.4rem">點一下句子，全班一起大聲唸出來！</p>
+    <div class="shout" id="shout">
+      <button type="button">「不要這樣！我不喜歡！」</button>
+      <button type="button">「這樣不好，停！」</button>
+    </div>
+  </div>
  </div>
 </section>
 
 <section class="k-sec alt" id="consent">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">第 4 站</span><h2>積極同意：先問，大家都願意才玩</h2></div>
-  <div class="cards trio">
-    <div class="card top c1"><div class="em" aria-hidden="true">❓</div><h3>先問再做</h3><p>取綽號、拍照、借東西、加入遊戲前，先問：「可以嗎？」</p></div>
-    <div class="card top c2"><div class="em" aria-hidden="true">🤐</div><h3>沒說好，就不是同意</h3><p>不說話、低頭、勉強笑，都不是同意。對方隨時可以改變主意。</p></div>
-    <div class="card top c3"><div class="em" aria-hidden="true">👍</div><h3>也要積極說「好」</h3><p>對友善的事說：「好，我跟你玩！」「我來幫忙！」</p></div>
-  </div>
+  <p class="big">點一下卡片，翻過來看說明。</p>
+  <div class="flips" data-flips="consent"></div>
   <div class="key">同意要清楚、自願，也要看對方的表情和反應。</div>
+  <div class="panel" style="margin-top:1.4rem">
+    <h3>這樣算同意嗎？（O 還是 X）</h3>
+    <div id="oxConsent" style="margin-top:.6rem"></div>
+  </div>
  </div>
 </section>
 
@@ -150,7 +194,7 @@
   </div>
   <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
     <ul>
-      <li>這份是學務處入班宣導簡報〈勇敢說不、積極同意〉（11 張）的互動版，文字內容與原簡報相同，只是改成網站的版面：原第 6、7 張「小遊戲」與「參考答案」合成第 5 站，三題可以一題一題點開答案；原第 8～10 張三個小組討論情境合成第 6 站，可切換情境 A、B、C。最後一站的三句話改成可以點選打勾。</li>
+      <li>這份是學務處入班宣導簡報〈勇敢說不、積極同意〉（11 張）的互動版，文字內容與原簡報相同，只是改成網站的版面：原第 6、7 張「小遊戲」與「參考答案」合成第 5 站，三題可以一題一題點開答案；原第 8～10 張三個小組討論情境合成第 6 站，可切換情境 A、B、C。第 1、2、4 站的卡片改成可以翻面；第 1、3 站加了配對、第 2 站加了「玩笑還是傷人」分類、第 3 站加了大聲說練習、第 4 站加了「這樣算同意嗎」O／X（句子都取自原簡報同一頁）。最後一站的三句話改成可以點選打勾。</li>
       <li>小組討論時可以用右上角「工具」裡的計時器限時討論，用抽籤請小組發表。</li>
       <li>原簡報仍保留在書櫃（同一分類的「勇敢說不、積極同意：反霸凌入班宣導」），也可以下載 PDF：<a href="../files/friendly/mid-say-no.pdf" target="_blank" rel="noopener">mid-say-no.pdf</a>。</li>
       <li>1953 為教育部反霸凌專線（111 年 8 月 30 日起取代 0800-200-885，24 小時）。</li>
@@ -169,6 +213,144 @@
 
 <script src="../assets/kit.js"></script>
 <script>
+/* 翻翻卡：data-flips 對應的卡片（文字與原簡報相同） */
+(function(){
+  var F={
+    what:[
+      {c:'c1',em:'🎯',t:'故意',back:'明明知道會讓人難過，還是做。'},
+      {c:'c2',em:'🔁',t:'一再發生',back:'不是一次，而是常常。'},
+      {c:'c3',em:'💔',t:'讓人受傷或害怕',back:'身體痛、心裡難過、不敢來學校。'}
+    ],
+    joke:[
+      {c:'good',em:'😄',t:'玩笑',back:'大家都在笑，包括被開玩笑的人。對方說「不要」，馬上就停。'},
+      {c:'bad',em:'😢',t:'傷人',back:'只有一個人在笑，另一個人難過、想躲。就算說「只是開玩笑」，也一樣會痛。'}
+    ],
+    consent:[
+      {c:'c1',em:'❓',t:'先問再做',back:'取綽號、拍照、借東西、加入遊戲前，先問：「可以嗎？」'},
+      {c:'c2',em:'🤐',t:'沒說好，就不是同意',back:'不說話、低頭、勉強笑，都不是同意。對方隨時可以改變主意。'},
+      {c:'c3',em:'👍',t:'也要積極說「好」',back:'對友善的事說：「好，我跟你玩！」「我來幫忙！」'}
+    ]
+  };
+  [].forEach.call(document.querySelectorAll('[data-flips]'),function(box){
+    var list=F[box.getAttribute('data-flips')], btns=[];
+    list.forEach(function(x){
+      var b=document.createElement('button');b.type='button';b.className='flip '+x.c;b.setAttribute('aria-pressed','false');
+      b.innerHTML='<span class="in"><span class="f"><span class="em" aria-hidden="true">'+x.em+'</span><b>'+x.t+'</b><small>點我翻面</small></span>'+
+        '<span class="b" aria-hidden="true"><b>'+x.t+'</b><span>'+x.back+'</span></span></span>';
+      b.addEventListener('click',function(){
+        var on=b.getAttribute('aria-pressed')!=='true';
+        b.setAttribute('aria-pressed',String(on));
+        b.querySelector('.f').setAttribute('aria-hidden',String(on));
+        b.querySelector('.b').setAttribute('aria-hidden',String(!on));
+      });
+      btns.push(b);box.appendChild(b);
+    });
+    var row=document.createElement('div');row.className='btnrow fliprow';
+    row.innerHTML='<button class="btn" type="button">全部翻開</button><button class="btn" type="button">全部蓋起來</button>';
+    var rb=row.querySelectorAll('button');
+    function setAll(on){btns.forEach(function(b){if((b.getAttribute('aria-pressed')==='true')!==on)b.click();});}
+    rb[0].addEventListener('click',function(){setAll(true);});
+    rb[1].addEventListener('click',function(){setAll(false);});
+    box.parentNode.insertBefore(row,box.nextSibling);
+  });
+})();
+
+/* 配對：先點左邊，再點右邊（也可以先點右邊） */
+function matchGame(el,cfg){
+  function build(){
+    el.innerHTML='';
+    var g=document.createElement('div');g.className='match';
+    var L=document.createElement('div');L.className='col k';var R=document.createElement('div');R.className='col v';
+    g.appendChild(L);g.appendChild(R);el.appendChild(g);
+    var msg=document.createElement('div');msg.className='say mmsg';msg.setAttribute('aria-live','polite');
+    msg.innerHTML='<div class="t">提示</div><p>'+(cfg.start||'先點左邊的一張，再點右邊配對的那一張。')+'</p>';el.appendChild(msg);
+    var pick={k:null,v:null},left=cfg.pairs.length;
+    function mk(col,text,i,side){
+      var b=document.createElement('button');b.type='button';b.setAttribute('aria-pressed','false');
+      b.innerHTML='<span class="tick" aria-hidden="true">'+(side==='k'?'?':'')+'</span><span>'+text+'</span>';
+      b.dataset.i=i;b.dataset.side=side;
+      b.addEventListener('click',function(){
+        if(b.classList.contains('done'))return;
+        [].forEach.call(col.children,function(z){z.setAttribute('aria-pressed','false');});
+        b.setAttribute('aria-pressed','true');pick[side]=b;
+        if(pick.k&&pick.v)check();
+      });
+      col.appendChild(b);return b;
+    }
+    function check(){
+      var k=pick.k,v=pick.v;pick={k:null,v:null};
+      k.setAttribute('aria-pressed','false');v.setAttribute('aria-pressed','false');
+      var p=cfg.pairs[+k.dataset.i];
+      if(k.dataset.i===v.dataset.i){
+        left--;
+        var n=cfg.pairs.length-left;
+        [k,v].forEach(function(b){b.classList.add('done');b.querySelector('.tick').textContent='✓';});
+        msg.className='say mmsg good';
+        msg.innerHTML='<div class="t">配對成功</div><p><b>'+p.k+'</b>：'+p.v+'</p>';
+        if(!left){
+          msg.innerHTML+='<p style="margin-top:.5rem"><b>'+(cfg.done||'全部配對完成！')+'</b></p>';
+          var again=document.createElement('button');again.type='button';again.className='btn fill';again.textContent='再玩一次';
+          again.addEventListener('click',build);msg.appendChild(again);
+        }
+      }else{
+        [k,v].forEach(function(b){b.classList.remove('no');void b.offsetWidth;b.classList.add('no');setTimeout(function(){b.classList.remove('no');},500);});
+        msg.className='say mmsg bad';
+        msg.innerHTML='<div class="t">再想想</div><p>「'+p.k+'」不是配這一個喔，再試一次！</p>';
+      }
+    }
+    cfg.pairs.forEach(function(p,i){mk(L,p.k,i,'k');});
+    KIT.shuffle(cfg.pairs.map(function(p,i){return {v:p.v,i:i};})).forEach(function(o){mk(R,o.v,o.i,'v');});
+  }
+  build();
+}
+
+matchGame(document.getElementById('matchWhat'),{
+  pairs:[
+    {k:'🎯 故意',v:'明明知道會讓人難過，還是做。'},
+    {k:'🔁 一再發生',v:'不是一次，而是常常。'},
+    {k:'💔 讓人受傷或害怕',v:'身體痛、心裡難過、不敢來學校。'}
+  ],
+  start:'翻完卡片了嗎？蓋起來，看看你記住了沒有！',
+  done:'霸凌的三個特點：故意、一再發生、讓人受傷或害怕。'
+});
+
+/* 第 2 站：分一分（句子都出自原簡報的兩張卡片） */
+KIT.sort(document.getElementById('sortJoke'),{
+  bins:[{id:'joke',t:'😄 玩笑'},{id:'hurt',t:'😢 傷人'}],
+  items:[
+    {t:'大家都在笑，包括被開玩笑的人',bin:'joke',e:'連被開玩笑的人也在笑，才是玩笑。'},
+    {t:'對方說「不要」，馬上就停',bin:'joke',e:'聽到「不要」就停，是尊重對方。'},
+    {t:'只有一個人在笑',bin:'hurt',e:'只有一個人覺得好笑，就是傷人。'},
+    {t:'另一個人難過、想躲',bin:'hurt',e:'對方的感覺最重要。'},
+    {t:'就算說「只是開玩笑」，也一樣會痛',bin:'hurt',e:'說「只是開玩笑」，不會讓對方比較不痛。'}
+  ],
+  hint:'先點一張句子卡，再點它屬於「玩笑」還是「傷人」。',
+  start:'選一張句子卡開始。',
+  done:'判斷方法：對方的感覺最重要，不是我覺得好不好笑。'
+});
+
+/* 第 3 站：情況配做法 */
+matchGame(document.getElementById('matchNo'),{
+  pairs:[
+    {k:'✋ 被欺負時',v:'大聲說：「不要這樣！我不喜歡！」然後走開，告訴大人。'},
+    {k:'👀 看到別人被欺負',v:'不笑、不看熱鬧、不轉傳。說：「這樣不好，停！」'},
+    {k:'🤝 害怕出面時',v:'陪被欺負的同學走開，或馬上去找老師。這也是勇敢。'}
+  ],
+  done:'說「不」不是沒禮貌，是保護自己和同學。'
+});
+[].forEach.call(document.querySelectorAll('#shout button'),function(b){
+  b.addEventListener('click',function(){b.classList.remove('go');void b.offsetWidth;b.classList.add('go');setTimeout(function(){b.classList.remove('go');},900);});
+});
+
+/* 第 4 站：這樣算同意嗎（依原簡報「積極同意」頁的內容） */
+KIT.ox(document.getElementById('oxConsent'),[
+  {s:'借東西前，先問：「可以嗎？」',a:true,e:'先問再做！取綽號、拍照、借東西、加入遊戲前都要先問。'},
+  {s:'對方不說話，就是同意了。',a:false,e:'不說話不是同意。沒說好，就不是同意。'},
+  {s:'對方低頭、勉強笑，就是同意了。',a:false,e:'低頭、勉強笑，都不是同意。要看對方的表情和反應。'},
+  {s:'對方說好之後，還是可以改變主意。',a:true,e:'對方隨時可以改變主意。'},
+  {s:'同學說「我們一起玩」，我說：「好，我跟你玩！」',a:true,e:'對友善的事，也要積極說「好」！'}
+]);
+
 /* 第 5 站：小遊戲（原簡報第 6、7 張） */
 (function(){
   var G=[
