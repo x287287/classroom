@@ -142,10 +142,10 @@ var LV=window.GAME_LEVELS||[];
 var st={open:1,stars:[0,0,0,0,0],cur:0,step:0,miss:0};
 function $(id){return document.getElementById(id)}
 function drawMap(){var m=$('map');m.innerHTML='<h2>闖關地圖</h2>';LV.forEach(function(l,i){var b=document.createElement('button');b.type='button';b.className='lv'+(i<st.open?' open':'')+(st.stars[i]?' done':'')+(i===st.cur?' cur':'');b.disabled=i>=st.open;b.innerHTML='<span class="n">'+(i+1)+'</span><span><b>'+l.n+'</b>'+(st.stars[i]?'<small class="st">'+'★'.repeat(st.stars[i])+'☆'.repeat(3-st.stars[i])+'</small>':'<small>'+l.topic+'</small>')+'</span>';b.addEventListener('click',function(){begin(i)});m.appendChild(b)});var tot=st.stars.reduce(function(a,b){return a+b},0);$('totStars').textContent='★ '+tot+' / 15'}
-function begin(i){st.cur=i;st.step=0;st.miss=0;drawMap();show()}
+function begin(i){st.cur=i;st.step=0;st.miss=0;st.log=[];drawMap();show()}
 function art(step){var l=LV[st.cur],k=l.art,a=ART[k];var arg=step&&step.art2!=null?step.art2:step&&step.sm?1:undefined;$('art').innerHTML='<span class="cap">第 '+(st.cur+1)+' 關</span><svg viewBox="0 0 440 320" aria-hidden="true">'+a(arg)+'</svg>'}
 function show(){
-  var l=LV[st.cur],s=l.steps[st.step];art(s);
+  var l=LV[st.cur],s=l.steps[st.step];art(s);st.missAt=st.miss;
   var prog='<div class="prog">'+l.steps.map(function(_,i){return '<i class="'+(i<=st.step?'on':'')+'"></i>'}).join('')+'</div>';
   var qa=$('qa');qa.innerHTML=prog+'<div class="lvname">第 '+(st.cur+1)+' 關・'+l.n+'・第 '+(st.step+1)+' / '+l.steps.length+' 題</div>'+(st.step===0?'<p class="story">'+l.story+'</p>':'')+'<p class="qq">'+s.q+'</p><div class="chs" id="chs"></div><div class="say fb" id="fb" hidden></div>';
   var chs=$('chs'),fb=$('fb');
@@ -159,9 +159,10 @@ function show(){
   else if(s.t==='o'){var box=document.createElement('div');chs.appendChild(box);KIT.order(box,{steps:s.items.map(function(t){return {t:t}}),start:'第一步是什麼？',done:'順序正確！'});
     var watch=setInterval(function(){if(!document.body.contains(box)){clearInterval(watch);return}var filled=box.querySelectorAll('.slot.filled').length;var wrongNow=box.querySelector('.say.bad');if(wrongNow&&!box._m){box._m=1;st.miss++}if(!wrongNow)box._m=0;if(filled===s.items.length){clearInterval(watch);box.querySelectorAll('.btn').forEach(function(z){z.remove()});good()}},200)}
 }
-function good(){var l=LV[st.cur],fb=$('fb');fb.hidden=false;fb.className='say fb good';var last=st.step===l.steps.length-1;fb.innerHTML='<div class="t">答對了！</div>'+(last?'':'<button class="btn fill" type="button" id="goNext" style="margin-top:.4rem">繼續 →</button>');
+function good(){var l=LV[st.cur],fb=$('fb');(st.log=st.log||[]).push({q:String(l.steps[st.step].q).replace(/<[^>]*>/g,''),ok:st.miss===st.missAt,tries:st.miss-st.missAt+1});fb.hidden=false;fb.className='say fb good';var last=st.step===l.steps.length-1;fb.innerHTML='<div class="t">答對了！</div>'+(last?'':'<button class="btn fill" type="button" id="goNext" style="margin-top:.4rem">繼續 →</button>');
   if(last){setTimeout(win,500)}else{$('goNext').addEventListener('click',function(){st.step++;show()});$('goNext').focus()}}
-function win(){var s=Math.max(1,3-st.miss);if(s>st.stars[st.cur])st.stars[st.cur]=s;if(st.open<LV.length&&st.cur+1>=st.open)st.open=st.cur+2;drawMap();
+function win(){var s=Math.max(1,3-st.miss);
+  var lg=st.log||[];if(window.STATS)STATS.send('u3-pig',{title:'小豬消防隊・第 '+(st.cur+1)+' 關 '+LV[st.cur].n,data:{level:st.cur+1,right:lg.filter(function(x){return x.ok}).length,total:lg.length,stars:s,miss:st.miss,win:true,items:lg}});if(s>st.stars[st.cur])st.stars[st.cur]=s;if(st.open<LV.length&&st.cur+1>=st.open)st.open=st.cur+2;drawMap();
   $('winT').textContent='第 '+(st.cur+1)+' 關過關！';$('winS').textContent='★'.repeat(s)+'☆'.repeat(3-s);$('winP').textContent=st.miss?'錯了 '+st.miss+' 次。可以再挑戰一次，拿到三顆星！':'全部一次答對，太厲害了！';
   $('bNextLv').textContent=st.cur===LV.length-1?'領取證書':'下一關 →';$('ovWin').hidden=false}
 $('bNextLv').addEventListener('click',function(){$('ovWin').hidden=true;if(st.cur===LV.length-1){cert()}else begin(st.cur+1)});
@@ -183,6 +184,7 @@ begin(0);
     <li>題目有單選、複選和排順序。答錯會出現提示，可以再試一次。</li>
     <li>每關最多 3 顆星，答錯越少星星越多，全部 5 關共 15 顆星。</li>
     <li>五關都完成後會出現「小小消防員證書」，可以輸入班級或名字，只顯示在畫面上，不會存檔或上傳。</li>
+    <li>用大螢幕左下角「QR」（先選班級）讓學生用平板掃描時，學生要先選座號，每過一關會把星星、錯幾次和每一題是否一次答對傳到老師後台「🎮 遊戲作答統計」。老師在大螢幕帶全班玩不會記錄。</li>
   </ol>
   <h3>時間安排</h3>
   <ul><li>五關全部玩完約 30 分鐘；也可以每上完一課玩對應的 1～2 關。</li></ul>

@@ -168,6 +168,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
       <fieldset><legend>魔王強度</legend><div class="seg" data-k="lv"><button type="button" data-v="1">簡單</button><button type="button" data-v="2">普通</button><button type="button" data-v="3">困難</button></div></fieldset>
       <p class="note" id="freeEst" style="grid-column:1/-1;margin:0;font-size:1.05rem"></p>
     </div>
+    <fieldset class="clsset" style="margin-top:12px;border:2px solid #E3DDEB;border-radius:16px;padding:.6rem .8rem"><legend style="font-weight:700;padding:0 .3rem">班級（作答統計會記在這個班）</legend><div class="seg" id="clsSeg"><span class="note">讀取班級中…</span></div></fieldset>
     <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bCreate">開房間</button><span class="note" id="setMsg" style="margin:0"></span></div>
   </section>
 
@@ -243,6 +244,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
   <ul><li>平板只用座號加入，不輸入姓名；大螢幕不會顯示個人成績，只顯示全班答對人數。</li>
   <li>同一個座號只能在一台平板加入。如果學生選錯座號，請他按「換座號」重選。</li>
   <li>網路斷線的平板，重新連上後會自動回到目前的題目。</li>
+  <li>開房間前可以選班級；遊戲結束時，每個座號的作答結果（答對幾題、每一題對錯）會自動存到老師後台「🎮 遊戲作答統計」。</li>
   <li>題庫共 74 題（菸 25、酒 24、檳榔 25），選項順序每次隨機。想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js，各自搶攻模式另外存在資料庫，Claude 會一起更新）。</li></ul>
   <button type="button" class="close">關閉</button>
 </div></div>
@@ -302,12 +304,23 @@ paintSegs();paintMode();
 var authTries=0;
 function checkAuth(){
   if(G)return;
-  if(window.CLS&&window.CLS.isTeacher){show('scrSetup');return}
+  if(window.CLS&&window.CLS.isTeacher){show('scrSetup');loadCls();return}
   if(window.CLS&&authTries>12){show('scrLogin');return}
   authTries++;setTimeout(checkAuth,400);
 }
 window.addEventListener('cls-status',function(){if(!G)checkAuth()});
 checkAuth();
+
+/* 班級：和書櫃 QR 視窗共用 clsClass */
+var CLASS=(function(){try{return JSON.parse(localStorage.getItem('clsClass')||'""')}catch(e){return ''}})();
+function loadCls(){
+  window.CLS.api('rest/v1/class_list?select=name&order=sort.asc,name.asc').then(function(r){return r.json()}).then(function(list){
+    list=list||[];if(CLASS&&!list.some(function(c){return c.name===CLASS}))CLASS='';
+    var box=$('clsSeg');box.innerHTML='';
+    [{name:''}].concat(list).forEach(function(c){var b=document.createElement('button');b.type='button';b.textContent=c.name||'不指定';b.setAttribute('aria-pressed',String(c.name===CLASS));
+      b.addEventListener('click',function(){CLASS=c.name;try{localStorage.setItem('clsClass',JSON.stringify(CLASS))}catch(e){}[].forEach.call(box.children,function(x){x.setAttribute('aria-pressed',String(x===b))})});box.appendChild(b)});
+  }).catch(function(){$('clsSeg').innerHTML='<span class="note">班級讀取失敗，會記成「不指定」。</span>'});
+}
 
 /* 選題：三隻惡魔平均出題 */
 function pick(n){
@@ -320,7 +333,7 @@ function pick(n){
 $('bCreate').addEventListener('click',function(){
   var b=this;b.disabled=true;$('setMsg').textContent='建立中…';
   var free=SET.mode==='free';
-  api('rest/v1/raid_rooms',{game:'u2',rounds:free?40:SET.rounds,mode:free?'free':'sync'}).then(function(d){
+  api('rest/v1/raid_rooms',{game:'u2',rounds:free?40:SET.rounds,mode:free?'free':'sync',class_name:CLASS||null}).then(function(d){
     var room=d[0];
     G={room:room.id,mode:free?'free':'sync',rounds:SET.rounds,secs:SET.secs,mins:SET.mins,lv:SET.lv,list:free?[]:pick(SET.rounds),stats:[],seats:[],cur:null,phase:'lobby',hp:0,max:0,lastId:0};
     var url=new URL('../raid.html?r='+room.id,location.href).href;

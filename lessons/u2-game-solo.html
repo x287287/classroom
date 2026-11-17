@@ -150,7 +150,7 @@ body{color:#fff;background:radial-gradient(1200px 600px at 50% -10%,#33497F 0%,v
   <h3>時間安排</h3>
   <ul><li>完整挑戰約 20～25 題、10～15 分鐘。可以請先完成的同學看「錯題複習」，或再挑戰一次拿三顆星。</li></ul>
   <h3>小提醒</h3>
-  <ul><li>遊戲不會上傳任何資料，最佳紀錄只存在那台平板上。</li>
+  <ul><li>用大螢幕左下角「QR」（先選班級）讓學生掃描打開時，學生要先選座號，每次挑戰結束（過關或愛心用完）會把答對題數、星星和每一題對錯傳到老師後台「🎮 遊戲作答統計」；不傳姓名。老師自己從書櫃打開試玩不會記錄。最佳紀錄只存在那台平板上。</li>
   <li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js，兩個版本會一起更新）。</li></ul>
   <button type="button" class="close">關閉</button>
 </div></div>
@@ -199,7 +199,7 @@ showBest();
 $('bGo').addEventListener('click',function(){start([0,1,2])});
 
 function start(order){
-  S={order:order,si:0,lives:LIVES,hp:HP,combo:0,right:0,total:0,wrong:[],pool:{},cur:null,done:false,practice:order.length===1};
+  S={order:order,si:0,lives:LIVES,hp:HP,combo:0,right:0,total:0,wrong:[],log:[],pool:{},cur:null,done:false,practice:order.length===1};
   order.forEach(function(i){S.pool[DM[i].k]=shuf(Q.filter(function(q){return q.d===DM[i].k}))});
   $('startScr').hidden=true;$('endScr').hidden=true;$('game').hidden=false;
   drawHud();drawTrail();drawShow();ask();
@@ -245,6 +245,7 @@ function ask(){
 }
 function answer(btn,v){
   var q=S.cur,ok=(v===q.a);
+  S.log.push({q:q.q,ok:ok,d:q.d});
   [].forEach.call($('opts').querySelectorAll('button[data-v]'),function(b){b.disabled=true;if(b.dataset.v===String(q.a))b.classList.add('right')});
   var fb=$('fb'),show=$('show');
   var ans=q.ox?(q.a?'O':'X'):q.o[q.a];
@@ -287,6 +288,8 @@ function end(win){
   else h+='<p>全部答對，太厲害了！</p>';
   h+='<div class="btns"><button type="button" class="go" id="bAgain">再挑戰一次</button><button type="button" id="bHome">回到開始畫面</button></div>';
   e.innerHTML=h;
+  if(window.STATS)STATS.send('u2-solo',{title:'趕走三惡魔：個人挑戰'+(S.practice?'・只練'+DM[S.order[0]].n:''),
+    data:{right:S.right,total:S.total,stars:stars,win:win,lives:S.lives,practice:S.practice,items:S.log}});
   if(win&&!S.practice){var b=loadBest();if(!b||stars>b.stars||(stars===b.stars&&S.right/S.total>b.right/b.total))saveBest({stars:stars,right:S.right,total:S.total})}
   var order=S.order;
   $('bAgain').addEventListener('click',function(){start(order)});

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>學生作品後台｜教室小書櫃</title>
+<title>老師後台｜教室小書櫃</title>
 <link rel="stylesheet" href="assets/fonts.css">
 <script src="assets/sync.js"></script>
 <style>
@@ -74,6 +74,34 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
 .w .lines li{overflow-wrap:anywhere}
 .w .acts{display:flex;gap:6px;padding:0 10px 10px;flex-wrap:wrap}
 .empty{padding:30px;text-align:center;color:var(--muted)}
+/* 分頁 */
+.ptabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.ptabs button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+/* 遊戲作答統計 */
+.gs-f{display:grid;gap:10px;margin-bottom:14px}
+.gs-f button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.gs-f .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.gs-f .lab{font-weight:700;min-width:3.2em}
+.gs-f select{font:inherit;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:0 10px;max-width:100%}
+.gs-sum{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+.gs-sum div{background:var(--soft);border-radius:14px;padding:8px 14px}
+.gs-sum b{display:block;font:400 1.5rem/1.2 var(--display)}
+.gs-sum span{font-size:13px;color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-size:13px;color:var(--muted);font-weight:700;position:sticky;top:0;background:var(--card)}
+.tbl tr.click{cursor:pointer}.tbl tr.click:hover td{background:var(--soft)}
+.tbl .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tblw{overflow:auto;max-height:70vh;border:1.5px solid var(--line);border-radius:14px;background:var(--card)}
+.bar{display:inline-block;vertical-align:middle;width:90px;height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-right:6px}
+.bar i{display:block;height:100%;background:var(--leaf)}
+.bar.low i{background:var(--accent)}
+.pct-low{color:var(--accent);font-weight:700}
+.wrongs{margin:4px 0 0;padding-left:1.2em;color:var(--muted);font-size:14px}
+.det td{background:var(--soft)}
+.cls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.cls-row b{font:400 1.2rem var(--display);min-width:7em}
+.cls-row select,.cls-add input,.cls-add select{font:inherit;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:0 10px}
 /* 展示 */
 .show{position:fixed;inset:0;z-index:100;background:#0E1513;color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
 .show[hidden]{display:none}
@@ -93,7 +121,7 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
 <body>
 <div class="wrap">
   <header class="top">
-    <h1>📥 學生作品後台</h1>
+    <h1>📥 老師後台</h1>
     <a class="b" href="./">⌂ 回書櫃</a>
     <button class="b" type="button" id="outBtn" hidden>登出</button>
   </header>
@@ -108,6 +136,25 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
   </form>
 
   <div id="app" hidden>
+    <div class="ptabs" role="group" aria-label="後台分頁"><button class="b" type="button" data-p="pWork" aria-pressed="true">📥 學生作品</button><button class="b" type="button" data-p="pGame" aria-pressed="false">🎮 遊戲作答統計</button><button class="b" type="button" data-p="pCls" aria-pressed="false">🏫 班級名單</button></div>
+    <div id="pGame" hidden>
+      <p class="counts" style="margin:0 0 12px">學生用大螢幕左下角「QR」（先選班級）掃描打開遊戲、選好座號後，每玩完一次就會記在這裡。只記班級和座號，不記名字。老師自己在書櫃打開試玩不會記錄；大螢幕全班一起玩的遊戲沒有座號，會記成「大螢幕」。</p>
+      <div class="card gs-f">
+        <div class="row"><span class="lab">班級</span><span class="row" id="gsCls"></span></div>
+        <div class="row"><span class="lab">遊戲</span><select id="gsGame" aria-label="遊戲"></select></div>
+        <div class="row"><span class="lab">期間</span><span class="row" id="gsDays"></span><button class="b sm" type="button" id="gsReload">↻ 重新整理</button><button class="b sm" type="button" id="gsCsv">⬇ 下載 CSV</button></div>
+      </div>
+      <div class="gs-sum" id="gsSum"></div>
+      <div class="ptabs" role="group" aria-label="檢視方式" id="gsView"><button class="b sm" type="button" data-v="stu" aria-pressed="true">依座號</button><button class="b sm" type="button" data-v="q" aria-pressed="false">依題目（最常錯的在前）</button><button class="b sm" type="button" data-v="log" aria-pressed="false">每一筆紀錄</button></div>
+      <div id="gsBody"></div>
+    </div>
+    <div id="pCls" hidden>
+      <p class="counts" style="margin:0 0 12px">這裡的班級會出現在教材 QR 視窗與「全班共戰」開房間的選項；座號數決定學生選座號時有幾個按鈕。</p>
+      <div class="card"><div id="clsList"></div>
+        <div class="cls-add row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><input id="clsNew" maxlength="20" placeholder="例如：四年忠班" aria-label="新班級名稱"><select id="clsNewSeats" aria-label="座號數"></select><button class="b pri" type="button" id="clsAdd">＋ 新增班級</button></div>
+        <div class="msg" id="clsMsg" aria-live="polite"></div></div>
+    </div>
+    <div id="pWork">
     <p class="counts" style="margin:0 0 12px">上課時打開作業的「開放繳交」，學生在平板上就能交作品；下課記得關掉。學生只填班級和座號，不會傳出名字。</p>
     <div class="asg" id="asg"></div>
     <section id="view" hidden>
@@ -116,6 +163,7 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
       <div class="stat" id="stat"></div>
       <div class="grid" id="grid"></div>
     </section>
+    </div>
   </div>
 </div>
 
@@ -139,7 +187,7 @@ function gate(){
   var ok=CLS.user&&CLS.isTeacher;
   $('login').hidden=!!ok; $('app').hidden=!ok; $('outBtn').hidden=!CLS.user;
   if(CLS.user&&!CLS.isTeacher){$('lgMsg').textContent='這個帳號不是老師帳號。';$('login').hidden=false;}
-  if(ok)loadAsg();
+  if(ok){loadAsg();if(window.GS)GS.init();}
 }
 $('login').addEventListener('submit',function(e){
   e.preventDefault(); $('lgGo').disabled=true; $('lgMsg').textContent='登入中…';
@@ -171,7 +219,7 @@ function drawAsg(){
   var box=$('asg'); box.innerHTML='';
   if(!A.length){box.innerHTML='<div class="card empty">還沒有可以繳交的作業。</div>';return;}
   A.forEach(function(a){
-    var c=counts[a.id]||{all:0}, url=SITE+a.lesson_url+'#send';
+    var c=counts[a.id]||{all:0}, url=SITE+a.lesson_url+'?stu=1'+((a.classes||[]).length===1?'&c='+encodeURIComponent(a.classes[0]):'')+'#send';
     var d=document.createElement('div'); d.className='card a-card';
     d.innerHTML='<div><h2></h2><div class="meta"></div>'+
       '<div class="a-row"><label class="sw"><input type="checkbox" class="open"><span class="ot"></span></label></div>'+
@@ -285,6 +333,132 @@ document.addEventListener('keydown',function(e){if($('show').hidden)return;
 window.addEventListener('cls-status',function(){if(CLS.status==='off')gate();});
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&cur)loadSubs(false);});
 gate();
+})();
+</script>
+<script>
+/* ---------- 🎮 遊戲作答統計、🏫 班級名單 ---------- */
+(function(){
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function J(r){if(!r.ok)return r.text().then(function(t){var e=new Error(t||('HTTP '+r.status));e.status=r.status;throw e});return r.text().then(function(t){return t?JSON.parse(t):null})}
+var F={cls:'*',game:'',days:7,view:'stu'}, ROWS=[], CL=[], open={}, inited=false;
+var GNAME={'u2-solo':'趕走三惡魔：個人挑戰','u2-raid':'全班共戰：打倒大魔王','u2-demons':'趕走三惡魔（兩隊對戰）','u3-pig':'小豬消防隊'};
+function pct(a,b){return b?Math.round(a/b*100):0}
+function bar(p){return '<span class="bar'+(p<70?' low':'')+'"><i style="width:'+p+'%"></i></span><span class="'+(p<70?'pct-low':'')+'">'+p+'%</span>'}
+function when(t){var d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+function gname(r){return GNAME[r.game]||r.title||r.game}
+
+/* 頁面分頁 */
+[].forEach.call(document.querySelectorAll('.ptabs [data-p]'),function(b){b.addEventListener('click',function(){
+  [].forEach.call(document.querySelectorAll('.ptabs [data-p]'),function(x){x.setAttribute('aria-pressed',String(x===b));$(x.dataset.p).hidden=x!==b});
+  if(b.dataset.p==='pGame')load();if(b.dataset.p==='pCls')loadCls();
+})});
+
+function loadCls(){
+  return CLS.api('rest/v1/class_list?select=*&order=sort.asc,name.asc').then(J).then(function(l){CL=l||[];drawCls();drawFilters();return CL}).catch(function(){$('clsMsg').className='msg err';$('clsMsg').textContent='班級讀取失敗';});
+}
+function seatSel(v){var h='';for(var i=1;i<=40;i++)h+='<option value="'+i+'"'+(i===v?' selected':'')+'>'+i+' 號</option>';return h}
+function drawCls(){
+  var box=$('clsList');box.innerHTML=CL.length?'':'<p class="counts">還沒有班級。</p>';
+  CL.forEach(function(c){
+    var d=document.createElement('div');d.className='cls-row';
+    d.innerHTML='<b></b><label>座號到 <select aria-label="座號數">'+seatSel(c.seats)+'</select></label><button class="b sm del" type="button">刪除</button>';
+    d.querySelector('b').textContent=c.name;
+    d.querySelector('select').addEventListener('change',function(e){CLS.api('rest/v1/class_list?name=eq.'+encodeURIComponent(c.name),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({seats:+e.target.value})}).then(J).then(function(){c.seats=+e.target.value;$('clsMsg').className='msg ok';$('clsMsg').textContent='已儲存';}).catch(function(){$('clsMsg').className='msg err';$('clsMsg').textContent='儲存失敗';});});
+    var del=d.querySelector('.del');del.addEventListener('click',function(){
+      if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='再按一次刪除';setTimeout(function(){del.classList.remove('armed');del.textContent='刪除';},4000);return;}
+      CLS.api('rest/v1/class_list?name=eq.'+encodeURIComponent(c.name),{method:'DELETE'}).then(J).then(loadCls);});
+    box.appendChild(d);
+  });
+}
+$('clsNewSeats').innerHTML=seatSel(25);
+$('clsAdd').addEventListener('click',function(){var n=$('clsNew').value.trim();if(!n)return;
+  CLS.api('rest/v1/class_list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,seats:+$('clsNewSeats').value,sort:CL.length})}).then(J).then(function(){$('clsNew').value='';$('clsMsg').className='msg ok';$('clsMsg').textContent='已新增「'+n+'」';loadCls();})
+    .catch(function(e){$('clsMsg').className='msg err';$('clsMsg').textContent=/duplicate|23505/.test(e.message)?'已經有這個班級了':'新增失敗';});});
+
+function drawFilters(){
+  var cb=$('gsCls');cb.innerHTML='';
+  [['*','全部班級']].concat(CL.map(function(c){return [c.name,c.name]})).concat([['-','未指定班級']]).forEach(function(x){
+    var b=document.createElement('button');b.className='b sm';b.type='button';b.textContent=x[1];b.setAttribute('aria-pressed',String(F.cls===x[0]));
+    b.addEventListener('click',function(){F.cls=x[0];open={};drawFilters();draw();});cb.appendChild(b);});
+  var db=$('gsDays');db.innerHTML='';
+  [[1,'今天'],[7,'7 天'],[30,'30 天'],[0,'全部']].forEach(function(x){
+    var b=document.createElement('button');b.className='b sm';b.type='button';b.textContent=x[1];b.setAttribute('aria-pressed',String(F.days===x[0]));
+    b.addEventListener('click',function(){F.days=x[0];drawFilters();load();});db.appendChild(b);});
+}
+function load(){
+  if(!CL.length)loadCls();
+  var q='rest/v1/game_results?select=id,game,title,class_name,seat,session,data,created_at&order=created_at.desc&limit=3000';
+  if(F.days){var d=new Date();if(F.days===1)d.setHours(0,0,0,0);else d=new Date(Date.now()-F.days*864e5);q+='&created_at=gte.'+encodeURIComponent(d.toISOString());}
+  $('gsBody').innerHTML='<p class="counts">讀取中…</p>';
+  return CLS.api(q).then(J).then(function(r){ROWS=r||[];drawGames();draw();}).catch(function(e){$('gsBody').innerHTML='<div class="card msg err">讀取失敗（'+esc(e.status||'')+'），請重新整理或重新登入。</div>';});
+}
+function drawGames(){
+  var seen={},opts=[['','全部遊戲']];ROWS.forEach(function(r){if(!seen[r.game]){seen[r.game]=1;opts.push([r.game,gname(r)])}});
+  if(F.game&&!seen[F.game])opts.push([F.game,GNAME[F.game]||F.game]);
+  $('gsGame').innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===F.game?' selected':'')+'>'+esc(o[1])+'</option>'}).join('');
+}
+$('gsGame').addEventListener('change',function(e){F.game=e.target.value;open={};draw();});
+$('gsReload').addEventListener('click',load);
+[].forEach.call(document.querySelectorAll('#gsView [data-v]'),function(b){b.addEventListener('click',function(){F.view=b.dataset.v;[].forEach.call(document.querySelectorAll('#gsView [data-v]'),function(x){x.setAttribute('aria-pressed',String(x===b))});draw();})});
+function rows(){return ROWS.filter(function(r){
+  if(F.game&&r.game!==F.game)return false;
+  if(F.cls==='-')return !r.class_name; if(F.cls!=='*')return r.class_name===F.cls; return true;})}
+function who(r){return r.seat?(r.class_name?r.class_name+' ':'')+r.seat+' 號':(r.class_name?r.class_name+' ':'')+'大螢幕'}
+function score(r){var d=r.data||{};return (d.right!=null&&d.total!=null)?d.right+' / '+d.total:''}
+function extra(r){var d=r.data||{},t=[];if(d.stars!=null)t.push('★'.repeat(d.stars)+'☆'.repeat(Math.max(0,3-d.stars)));
+  if(d.win===true)t.push('過關');if(d.win===false)t.push('沒過關');if(d.result==='win')t.push('打倒魔王');if(d.result==='lose')t.push('魔王逃走');if(d.dmg!=null)t.push('傷害 '+d.dmg);
+  if(d.score)t.push((d.teams||['紅隊','藍隊'])[0]+' '+d.score[0]+'：'+d.score[1]+' '+(d.teams||['',''])[1]);return t.join('・')}
+function draw(){
+  var L=rows(),sumR=0,sumT=0,stus={};
+  L.forEach(function(r){var d=r.data||{};sumR+=+d.right||0;sumT+=+d.total||0;if(r.seat)stus[(r.class_name||'')+'#'+r.seat]=1;});
+  $('gsSum').innerHTML='<div><b>'+L.length+'</b><span>筆紀錄</span></div><div><b>'+Object.keys(stus).length+'</b><span>位學生</span></div><div><b>'+sumT+'</b><span>題作答</span></div><div><b>'+pct(sumR,sumT)+'%</b><span>第一次就答對</span></div>';
+  if(!L.length){$('gsBody').innerHTML='<div class="card empty">這個範圍還沒有紀錄。請學生用 QR Code 打開遊戲、選好座號後開始玩。</div>';return;}
+  ({stu:drawStu,q:drawQ,log:drawLog})[F.view](L);
+}
+function wrongList(rs,n){var m={};rs.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(it&&it.q&&!it.ok){m[it.q]=(m[it.q]||0)+1}})});
+  return Object.keys(m).sort(function(a,b){return m[b]-m[a]}).slice(0,n).map(function(q){return {q:q,n:m[q]}})}
+function drawStu(L){
+  var by={};L.filter(function(r){return r.seat}).forEach(function(r){var k=(r.class_name||'')+'#'+r.seat;(by[k]=by[k]||{cls:r.class_name,seat:r.seat,rs:[]}).rs.push(r)});
+  var keys=Object.keys(by).sort(function(a,b){var x=by[a],y=by[b];return (x.cls||'').localeCompare(y.cls||'')||x.seat-y.seat});
+  var h='';
+  if(F.cls!=='*'&&F.cls!=='-'){var c=CL.filter(function(x){return x.name===F.cls})[0];if(c){var miss=[];for(var i=1;i<=c.seats;i++)if(!by[F.cls+'#'+i])miss.push(i);
+    h+='<div class="stat"><span class="big">'+(c.seats-miss.length)+' / '+c.seats+'</span><span>位有紀錄</span><div class="missing"><b>還沒有紀錄：</b>'+(miss.length?miss.map(function(n){return '<span>'+n+'</span>'}).join(''):'<b style="color:var(--leaf)">全班都有！</b>')+'</div></div>';}}
+  h+='<div class="tblw"><table class="tbl"><thead><tr><th>座號</th><th>玩了幾次</th><th>第一次就答對</th><th>最近一次</th><th>最常錯的題目</th></tr></thead><tbody>';
+  keys.forEach(function(k){var g=by[k],R=0,T=0;g.rs.forEach(function(r){R+=+(r.data||{}).right||0;T+=+(r.data||{}).total||0});var last=g.rs[0],w=wrongList(g.rs,2);
+    h+='<tr class="click" data-k="'+esc(k)+'"><td><b>'+esc((F.cls==='*'&&g.cls?g.cls+' ':'')+g.seat+' 號')+'</b></td><td class="num">'+g.rs.length+'</td><td class="num">'+bar(pct(R,T))+' <small>('+R+'/'+T+')</small></td><td>'+esc(gname(last))+'<br><small>'+esc(when(last.created_at))+'・'+esc(score(last))+(extra(last)?'・'+esc(extra(last)):'')+'</small></td><td><small>'+w.map(function(x){return esc(x.q)+(x.n>1?'（錯 '+x.n+' 次）':'')}).join('<br>')+'</small></td></tr>';
+    if(open[k])h+='<tr class="det"><td colspan="5">'+g.rs.map(recHtml).join('')+'</td></tr>';});
+  h+='</tbody></table></div>';
+  var bs=L.filter(function(r){return !r.seat});if(bs.length)h+='<p class="counts" style="margin-top:10px">另有 '+bs.length+' 筆大螢幕全班遊戲的紀錄，請看「依題目」或「每一筆紀錄」。</p>';
+  $('gsBody').innerHTML=h;
+  [].forEach.call($('gsBody').querySelectorAll('tr.click'),function(tr){tr.addEventListener('click',function(){var k=tr.dataset.k;open[k]=!open[k];drawStu(L)})});
+}
+function recHtml(r){var d=r.data||{},it=(d.items||[]).filter(function(x){return x&&!x.ok});
+  return '<div style="padding:6px 0;border-bottom:1px dashed var(--line)"><b>'+esc(when(r.created_at))+'</b>　'+esc(r.title||gname(r))+'　'+esc(score(r))+(extra(r)?'・'+esc(extra(r)):'')+
+    (it.length?'<ul class="wrongs">'+it.map(function(x){return '<li>✗ '+esc(x.q)+(x.tries>1?'（試了 '+x.tries+' 次）':'')+(x.skip?'（沒作答）':'')+'</li>'}).join('')+'</ul>':'<div class="counts">全部第一次就答對</div>')+'</div>'}
+function drawQ(L){
+  var m={};L.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(!it||!it.q||it.skip)return;var k=it.q;var o=m[k]=m[k]||{q:k,n:0,ok:0,games:{}};o.n++;if(it.ok)o.ok++;o.games[gname(r)]=1;})});
+  var list=Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return a.ok/a.n-b.ok/b.n||b.n-a.n});
+  if(!list.length){$('gsBody').innerHTML='<div class="card empty">這些紀錄沒有逐題資料。</div>';return;}
+  $('gsBody').innerHTML='<div class="tblw"><table class="tbl"><thead><tr><th>題目</th><th>第一次就答對</th><th>作答次數</th><th>遊戲</th></tr></thead><tbody>'+
+    list.map(function(o){return '<tr><td>'+esc(o.q)+'</td><td class="num">'+bar(pct(o.ok,o.n))+'</td><td class="num">'+o.n+'</td><td><small>'+esc(Object.keys(o.games).join('、'))+'</small></td></tr>'}).join('')+'</tbody></table></div>';
+}
+function drawLog(L){
+  $('gsBody').innerHTML='<div class="tblw"><table class="tbl"><thead><tr><th>時間</th><th>遊戲</th><th>誰</th><th>答對</th><th>結果</th><th></th></tr></thead><tbody>'+
+    L.slice(0,500).map(function(r){return '<tr data-id="'+r.id+'"><td class="num">'+esc(when(r.created_at))+'</td><td>'+esc(r.title||gname(r))+'</td><td>'+esc(who(r))+'</td><td class="num">'+esc(score(r))+'</td><td><small>'+esc(extra(r))+'</small></td><td><button class="b sm del" type="button">刪除</button></td></tr>'}).join('')+'</tbody></table></div>'+(L.length>500?'<p class="counts">只列出最近 500 筆，下載 CSV 可以看全部。</p>':'');
+  [].forEach.call($('gsBody').querySelectorAll('.del'),function(del){del.addEventListener('click',function(){
+    var id=+del.closest('tr').dataset.id;
+    if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='再按一次';setTimeout(function(){del.classList.remove('armed');del.textContent='刪除';},4000);return;}
+    CLS.api('rest/v1/game_results?id=eq.'+id,{method:'DELETE'}).then(J).then(function(){ROWS=ROWS.filter(function(r){return r.id!==id});draw();});})});
+}
+$('gsCsv').addEventListener('click',function(){
+  var L=rows(),lines=[['時間','遊戲','班級','座號','答對','作答','結果','答錯的題目']];
+  L.forEach(function(r){var d=r.data||{};lines.push([new Date(r.created_at).toLocaleString('zh-TW'),r.title||gname(r),r.class_name||'',r.seat||'大螢幕',d.right!=null?d.right:'',d.total!=null?d.total:'',extra(r),(d.items||[]).filter(function(x){return x&&!x.ok}).map(function(x){return x.q}).join('｜')])});
+  var csv='﻿'+lines.map(function(l){return l.map(function(v){v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')}).join('\r\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='遊戲作答統計.csv';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+});
+window.GS={init:function(){if(inited)return;inited=true;loadCls();}};
+if(window.CLS&&CLS.user&&CLS.isTeacher)GS.init();
 })();
 </script>
 </body>

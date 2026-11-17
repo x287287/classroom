@@ -182,7 +182,8 @@ function showQ(){
 function reveal(btn){var q=S.cur;$('opts').querySelectorAll('button').forEach(function(z,i){var isAns=q.ox?((z.textContent==='O')===q.a):(+z.dataset.k===q.a);if(isAns)z.classList.add('right');else if(z===btn)z.classList.add('wrong');z.disabled=true})}
 function resolve(msg){S.resolved=true;reveal(null);var fb=$('fb');fb.className='fb no';fb.textContent=msg+'正確答案已標示。'+(S.cur.e||'');$('bSteal').hidden=true;$('bNext').textContent='下一題 →';$('bNext').disabled=false}
 function answer(ok,btn){
-  if(S.answered)return;S.answered=true;clearInterval(S.timerId);var fb=$('fb');
+  if(S.answered)return;S.answered=true;
+  if(S.loggedQ!==S.cur){S.loggedQ=S.cur;(S.log=S.log||[]).push({q:S.cur.q,ok:!!ok,team:names[S.team]})}clearInterval(S.timerId);var fb=$('fb');
   if(ok){S.resolved=true;reveal(btn);fb.className='fb ok';fb.textContent=(S.stealing?'搶答成功！':'答對了！')+(S.cur.e||'');S.score[S.team]++;$('bSteal').hidden=true;$('bNext').textContent='下一題 →';attack();return}
   if(btn){btn.classList.add('wrong');btn.disabled=true}
   if(S.stealing){resolve('搶答也答錯了。');return}
@@ -206,8 +207,9 @@ $('bSteal').addEventListener('click',function(){S.stealing=true;S.answered=false
   if(S.time){S.left=S.time;clearInterval(S.timerId);S.timerId=setInterval(function(){S.left-=.25;var bar=$('tBar');if(bar)bar.style.width=Math.max(0,S.left/S.time*100)+'%';$('tLeft').textContent=Math.ceil(Math.max(0,S.left))+' 秒';if(S.left<=0){clearInterval(S.timerId);if(!S.answered){S.answered=true;resolve('時間到！')}}},250)}
 });
 $('bSkip').addEventListener('click',advance);
-function end(){var a=S.score[0],b=S.score[1];$('endTitle').textContent='三惡魔全部被趕走了！';$('endText').innerHTML=a===b?'兩隊同分（'+a+' 比 '+b+'），全班一起合作成功！':'<b>'+(a>b?names[0]:names[1])+'</b> 攻擊最多次，獲勝！（'+names[0]+' '+a+'：'+b+' '+names[1]+'）<br>但最重要的是，全班一起趕走了三惡魔！';$('ovEnd').hidden=false}
-function start(){names=[$('inRed').value.trim()||'紅隊',$('inBlue').value.trim()||'藍隊'];S.score=[0,0];S.dmi=0;S.dhp=[S.hp,S.hp,S.hp];S.used={};S.team=0;$('ovSet').hidden=true;$('ovEnd').hidden=true;drawDemons();drawTeams();showQ()}
+function end(){var a=S.score[0],b=S.score[1];
+  var lg=S.log||[];if(window.STATS)STATS.send('u2-demons',{title:'趕走三惡魔（兩隊對戰）',board:true,data:{right:lg.filter(function(x){return x.ok}).length,total:lg.length,score:[a,b],teams:names,items:lg}});$('endTitle').textContent='三惡魔全部被趕走了！';$('endText').innerHTML=a===b?'兩隊同分（'+a+' 比 '+b+'），全班一起合作成功！':'<b>'+(a>b?names[0]:names[1])+'</b> 攻擊最多次，獲勝！（'+names[0]+' '+a+'：'+b+' '+names[1]+'）<br>但最重要的是，全班一起趕走了三惡魔！';$('ovEnd').hidden=false}
+function start(){names=[$('inRed').value.trim()||'紅隊',$('inBlue').value.trim()||'藍隊'];S.score=[0,0];S.log=[];S.loggedQ=null;S.dmi=0;S.dhp=[S.hp,S.hp,S.hp];S.used={};S.team=0;$('ovSet').hidden=true;$('ovEnd').hidden=true;drawDemons();drawTeams();showQ()}
 $('bStart').addEventListener('click',start);
 $('bAgain').addEventListener('click',function(){$('ovEnd').hidden=true;$('ovSet').hidden=false});
 $('bSet').addEventListener('click',function(){clearInterval(S.timerId);$('ovSet').hidden=false});
@@ -231,7 +233,7 @@ drawDemons();drawTeams();$('qcard').innerHTML='<div class="qt" style="text-align
   <h3>時間安排</h3>
   <ul><li>預設（血量 4、不計時）約 30 分鐘。只有 15～20 分鐘時，把血量改成 3、每題 20 秒。</li><li>每題公布答案後，可以停下來請學生說說「為什麼」，再按下一題。</li></ul>
   <h3>小提醒</h3>
-  <ul><li>可以讓上台的同學先和隊友討論 10 秒，讓每個人都參與。</li><li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js）。</li></ul>
+  <ul><li>可以讓上台的同學先和隊友討論 10 秒，讓每個人都參與。</li><li>遊戲結束時，全班每一題是否第一次就答對會存到老師後台「🎮 遊戲作答統計」（大螢幕遊戲沒有座號，班級用書櫃 QR 視窗最後選的班級）。</li><li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js）。</li></ul>
   <button type="button" class="close">關閉</button>
 </div></div>
 <style id="teach-dlg">

@@ -62,6 +62,15 @@
     box.appendChild(wrap);
 
     var A = null, me = load(WHO_KEY, {}), timer = null;
+    /* 學生模式（用老師的 QR Code 打開）：帶入班級與選好的座號（home-fab.js 存在 sessionStorage） */
+    function stuWho() {
+      try {
+        var su = JSON.parse(sessionStorage.getItem("clsStu") || "null"), se = JSON.parse(sessionStorage.getItem("clsSeat") || "null");
+        if (su && se && se.seat) me = { cls: su.cls || me.cls, seat: se.seat };
+      } catch (e) {}
+    }
+    stuWho();
+    window.addEventListener("cls-seat", function () { stuWho(); if (A) { fill(); } });
     function setState(open, text) {
       state.className = "sb-state " + (open ? "open" : "closed");
       state.lastChild.textContent = text;

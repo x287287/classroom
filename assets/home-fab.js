@@ -1,5 +1,9 @@
 /* 教室小書櫃：每份教材共用的左下角按鈕
-   「⌂ 回書櫃」回到首頁；「QR」顯示這份教材的 QR Code，學生用平板或手機掃描就能打開。
+   「⌂ 回書櫃」回到首頁；「QR」顯示這份教材的 QR Code（老師先選班級），學生用平板或手機掃描就能打開。
+   學生模式：用 QR Code 打開的網址帶 ?stu=1&c=班級。學生模式不顯示「回書櫃」、QR 和上課工具，
+   一打開先選座號（記在這個分頁的 sessionStorage clsSeat），左下角顯示「班級 座號」可以換。
+   window.CLS_STU = {on, cls, seat}；選好座號時發出 cls-seat 事件。
+   也會載入 assets/stats.js（遊戲作答統計 STATS.send），在它載入前呼叫的 STATS.send 會先排隊。
    用法：在教材 HTML 的 </body> 前加上
    <script src="../assets/home-fab.js"></script>              */
 (function () {
@@ -8,6 +12,38 @@
   var SITE = "https://x287287.github.io/classroom/";
   var me = document.currentScript && document.currentScript.src;
   var QR_LIB = me ? me.replace(/home-fab\.js(\?.*)?$/, "vendor/qrcode.js") : "../assets/vendor/qrcode.js";
+
+  var SB_URL = "https://tsxbphngzuzpdddhadfw.supabase.co";
+  var SB_KEY = "sb_publishable_EOXrx2SRQbFRHACqHbUUig_4e-EkgkE";
+  function sget(k) { try { return JSON.parse(sessionStorage.getItem(k) || "null"); } catch (e) { return null; } }
+  function sset(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function lget(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+  function lset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  /* 班級名單（class_list，公開可讀），快取在 clsClasses */
+  function getClasses(cb) {
+    var cache = lget("clsClasses", null);
+    if (cache) cb(cache);
+    fetch(SB_URL + "/rest/v1/class_list?select=name,seats&order=sort.asc,name.asc", { headers: { apikey: SB_KEY }, cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (list) { if (list) { var changed = JSON.stringify(list) !== JSON.stringify(cache); lset("clsClasses", list); if (changed || !cache) cb(list); } })
+      .catch(function () { if (!cache) cb([]); });
+  }
+
+  /* 學生模式 */
+  var qs = new URLSearchParams(location.search);
+  var stu = sget("clsStu");
+  if (qs.get("stu") === "1") {
+    var c0 = (qs.get("c") || "").slice(0, 20);
+    if (!stu || stu.cls !== c0) sset("clsSeat", null);
+    stu = { cls: c0 }; sset("clsStu", stu);
+  }
+  var seatRec = stu ? sget("clsSeat") : null;
+  window.CLS_STU = stu ? { on: true, cls: stu.cls || "", seat: seatRec && seatRec.seat || 0 } : { on: false, cls: "", seat: 0 };
+
+  /* 遊戲作答統計：先放一個排隊用的 STATS，stats.js 載入後會補送 */
+  if (!window.STATS) window.STATS = { _q: [], send: function (g, o) { this._q.push([g, o]); return true; } };
+  if (me) { var st = document.createElement("script"); st.src = me.replace(/home-fab\.js(\?.*)?$/, "stats.js"); document.head.appendChild(st); }
 
   var css =
     ".cls-fabs{position:fixed;z-index:2147483000;display:flex;gap:10px;align-items:center;" +
@@ -30,7 +66,24 @@
     ".cls-qr .code svg{width:min(70vh,72vw,420px);height:auto;display:block}" +
     ".cls-qr .url{font-size:14px;color:#4A5550;word-break:break-all;user-select:all}" +
     ".cls-qr button{appearance:none;justify-self:center;min-height:48px;padding:0 28px;border-radius:999px;border:2px solid #1E3A34;background:#1E3A34;color:#fff;font:700 18px/1 'Noto Sans TC',sans-serif;cursor:pointer}" +
-    "@media print{.cls-fabs,.cls-qr{display:none}}" +
+    ".cls-qr .cls-pick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}" +
+    ".cls-qr .cls-pick b{font-size:16px;color:#1E3A34}" +
+    ".cls-qr .cls-pick button{min-height:44px;padding:0 16px;font-size:16px;background:#fff;color:#1E3A34}" +
+    ".cls-qr .cls-pick button[aria-pressed=true]{background:#1E3A34;color:#fff}" +
+    ".cls-qr .cls-pick button.close-x{display:none}" +
+    ".cls-seat{position:fixed;inset:0;z-index:2147483002;background:linear-gradient(160deg,#1E3A34,#24524A);display:grid;place-items:center;padding:16px;overflow:auto}" +
+    ".cls-seat[hidden]{display:none}" +
+    ".cls-seat .box{background:#fff;color:#1F2A27;border-radius:24px;padding:22px clamp(14px,4vw,28px);width:min(640px,100%);display:grid;gap:14px;text-align:center;font:400 17px/1.6 'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}" +
+    ".cls-seat h2{margin:0;font:700 clamp(24px,6vw,32px)/1.3 'Huninn','Noto Sans TC',sans-serif;color:#1E3A34}" +
+    ".cls-seat .cl{font-weight:700;color:#2A7563;font-size:18px}" +
+    ".cls-seat .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}" +
+    ".cls-seat .grid button{appearance:none;min-height:64px;border-radius:16px;border:2px solid #C9D2CC;background:#F4F6F3;color:#1E3A34;font:700 26px/1 'Huninn','Noto Sans TC',sans-serif;cursor:pointer}" +
+    ".cls-seat .grid button[aria-pressed=true]{background:#1E3A34;color:#fff;border-color:#1E3A34}" +
+    ".cls-seat .grid button:active{transform:scale(.96)}" +
+    ".cls-seat .cancel{justify-self:center;appearance:none;min-height:48px;padding:0 24px;border-radius:999px;border:2px solid #1E3A34;background:#fff;color:#1E3A34;font:700 17px/1 'Noto Sans TC',sans-serif;cursor:pointer}" +
+    ".cls-fab.cls-me{background:#FFFFFF;color:#1E3A34;border-color:#1E3A34;font-size:17px;padding:0 16px}" +
+    ".cls-stats-toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:2147483003;background:#1E3A34;color:#fff;border-radius:999px;padding:10px 20px;font:700 17px/1.4 'Noto Sans TC',sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3)}" +
+    "@media print{.cls-fabs,.cls-qr,.cls-seat{display:none}}" +
     /* 頁面底部留空，最後幾行不會被按鈕蓋住；版面特殊的教材可自行覆寫 */
     "html body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}";
   var style = document.createElement("style");
@@ -39,6 +92,44 @@
 
   var wrap = document.createElement("div");
   wrap.className = "cls-fabs";
+
+  if (stu) {
+    /* ---------- 學生模式：只有「班級 座號」按鈕和選座號畫面 ---------- */
+    var meBtn = document.createElement("button");
+    meBtn.type = "button"; meBtn.className = "cls-fab cls-me";
+    wrap.appendChild(meBtn);
+    var seatOv = document.createElement("div");
+    seatOv.className = "cls-seat"; seatOv.setAttribute("role", "dialog"); seatOv.setAttribute("aria-modal", "true"); seatOv.setAttribute("aria-label", "選你的座號");
+    var nSeats = 25;
+    function paintMe() { var s = window.CLS_STU; meBtn.textContent = (s.cls ? s.cls + " " : "") + (s.seat ? s.seat + " 號" : "選座號"); meBtn.setAttribute("aria-label", "我是" + (s.cls || "") + (s.seat ? s.seat + "號" : "") + "，點一下換座號"); }
+    function drawSeats() {
+      var s = window.CLS_STU, h = "";
+      for (var i = 1; i <= nSeats; i++) h += '<button type="button" data-s="' + i + '" aria-pressed="' + (i === s.seat) + '" aria-label="' + i + ' 號">' + i + "</button>";
+      seatOv.innerHTML = '<div class="box"><h2>👋 選你的座號</h2>' + (s.cls ? '<div class="cl">' + esc(s.cls) + "</div>" : "") +
+        '<div class="grid">' + h + "</div>" + (s.seat ? '<button type="button" class="cancel">不用換，回去</button>' : '<p style="margin:0;color:#4A5550;font-size:15px">選好座號才能開始。</p>') + "</div>";
+    }
+    function openSeat() { drawSeats(); seatOv.hidden = false; var b = seatOv.querySelector("button"); if (b) b.focus(); }
+    seatOv.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      if (b.classList.contains("cancel")) { seatOv.hidden = true; return; }
+      var n = +b.dataset.s; if (!n) return;
+      window.CLS_STU.seat = n; sset("clsSeat", { seat: n }); seatOv.hidden = true; paintMe();
+      try { window.dispatchEvent(new CustomEvent("cls-seat", { detail: window.CLS_STU })); } catch (x) {}
+    });
+    meBtn.addEventListener("click", openSeat);
+    getClasses(function (list) { var c = (list || []).filter(function (x) { return x.name === window.CLS_STU.cls; })[0]; var n = c ? c.seats : 25; if (n !== nSeats) { nSeats = n; if (!seatOv.hidden) drawSeats(); } });
+    paintMe();
+    if (window.CLS_STU.seat) seatOv.hidden = true; else { seatOv.hidden = false; drawSeats(); }
+    var placeStu = function () {
+      var host = document.fullscreenElement || document.webkitFullscreenElement || document.body;
+      if (wrap.parentNode !== host) host.appendChild(wrap);
+      if (seatOv.parentNode !== host) host.appendChild(seatOv);
+    };
+    document.addEventListener("fullscreenchange", placeStu);
+    document.addEventListener("webkitfullscreenchange", placeStu);
+    if (document.body) placeStu(); else document.addEventListener("DOMContentLoaded", placeStu);
+    return;
+  }
 
   var a = document.createElement("a");
   a.className = "cls-fab cls-home-fab";
@@ -73,13 +164,25 @@
     s.onerror = function () { cb(new Error("load")); };
     document.head.appendChild(s);
   }
+  function qrUrl() { var c = lget("clsClass", ""); return pageUrl() + "?stu=1" + (c ? "&c=" + encodeURIComponent(c) : ""); }
+  function drawPick(list) {
+    var box = ov.querySelector(".cls-pick"); if (!box) return;
+    var cur = lget("clsClass", "");
+    if (cur && !(list || []).some(function (x) { return x.name === cur; })) { cur = ""; lset("clsClass", ""); }
+    box.innerHTML = "<b>班級：</b>" + [{ name: "" }].concat(list || []).map(function (c) { return '<button type="button" data-c="' + esc(c.name) + '" aria-pressed="' + (c.name === cur) + '">' + (c.name ? esc(c.name) : "不指定") + "</button>"; }).join("");
+  }
   function show() {
-    var url = pageUrl();
+    var url = qrUrl();
     var title = (document.querySelector("h1") || {}).textContent || document.title;
-    ov.innerHTML = '<div class="box"><h2></h2><p style="margin:0">用平板或手機的相機掃描，就能打開這份教材</p><div class="code" aria-hidden="true">產生中…</div><div class="url"></div><button type="button">關閉</button></div>';
+    ov.innerHTML = '<div class="box"><h2></h2><p style="margin:0">學生用平板掃描，選好座號就能開始（作答統計會傳到老師後台）</p><div class="cls-pick"></div><div class="code" aria-hidden="true">產生中…</div><div class="url"></div><button type="button">關閉</button></div>';
     ov.querySelector("h2").textContent = title.trim();
     ov.querySelector(".url").textContent = url;
-    ov.querySelector("button").addEventListener("click", hide);
+    ov.querySelector(".box > button").addEventListener("click", hide);
+    ov.querySelector(".cls-pick").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-c]"); if (!b) return;
+      lset("clsClass", b.getAttribute("data-c")); show();
+    });
+    getClasses(drawPick);
     ov.hidden = false;
     loadLib(function (err) {
       var box = ov.querySelector(".code");
@@ -89,7 +192,7 @@
       qr.make();
       box.innerHTML = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
     });
-    ov.querySelector("button").focus();
+    ov.querySelector(".box > button").focus();
   }
   function hide() { ov.hidden = true; q.focus(); }
   q.addEventListener("click", show);
