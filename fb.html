@@ -109,6 +109,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   function rpc(fn,args){return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(args),cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();});}
 
   var SEAT_KEY="fbSeat:"+board, seat=+load(SEAT_KEY,0)||0;
+  /* 從課堂房間跟過來的：沿用已經選好的座號（sessionStorage clsSeat） */
+  if(!seat){try{var cs=JSON.parse(sessionStorage.getItem("clsSeat")||"null");if(cs&&cs.seat>=1&&cs.seat<=25&&sessionStorage.getItem("clsSess")){seat=cs.seat;save(SEAT_KEY,seat);}}catch(e){}}
   var data=null, sortBy="new", busy=false, armed=null;
 
   /* 第一步：選座號 */
@@ -210,5 +212,6 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   setInterval(function(){if(!document.hidden)pull();},4000);
 })();
 </script>
+<script src="assets/live.js"></script>
 </body>
 </html>

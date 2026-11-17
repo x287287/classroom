@@ -26,6 +26,15 @@
 .mission button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .mission button .st{float:right;font-size:.85rem;color:var(--good);font-weight:700}
 </style>
+<style>
+/* 第 3／4 站「交給老師」的輸入欄 */
+.wk{display:grid;gap:.9rem;margin-top:1rem}
+.wk label{display:grid;gap:.35rem;font-weight:700}
+.wk .txt,.wk select{width:100%;font:inherit;font-size:1.2rem;padding:.55rem .8rem;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);min-height:3rem}
+.wk textarea.txt{min-height:5.2rem;resize:vertical;line-height:1.6}
+.wk .two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:.9rem}
+.wk .hint{font-weight:400;color:var(--muted);font-size:.95rem}
+</style>
 </head>
 <body class="u3">
 
@@ -37,6 +46,7 @@
     <nav class="k-nav" aria-label="章節">
       <a href="#plan"><span class="no">第 1 站</span><b>畫出逃生路線</b><span>依火點換路線</span></a>
       <a href="#meet"><span class="no">第 2 站</span><b>逃出來之後</b><span>集合點與演練</span></a>
+      <a href="#send"><span class="no">第 3 站</span><b>交給老師</b><span>我的逃生計畫</span></a>
     </nav>
   </div>
 </header>
@@ -87,7 +97,19 @@
  </div>
 </section>
 
-<section class="k-sec" id="quiz">
+<section class="k-sec" id="send">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>把我的逃生計畫交給老師</h2></div>
+  <p class="big">先在第 1 站完成「任務 1」，找到<b>兩個不同方向</b>的出口（其他任務做越多越好）。再寫下你家的集合點，選班級和座號繳交。</p>
+  <div class="wk">
+    <label>如果真的失火，我家的戶外集合點會約在：<input class="txt" id="meetAt" maxlength="20" placeholder="例如：對面的便利商店"></label>
+    <label><span>我要提醒家人的一件事：<span class="hint">（可以不寫）</span></span><input class="txt" id="remind" maxlength="30" placeholder="例如：鐵窗逃生口的鑰匙放在門邊"></label>
+  </div>
+  <div id="submitBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">挑戰</span><h2>逃生計畫測驗</h2></div>
   <div id="quizBox"></div>
@@ -100,6 +122,7 @@
 </footer>
 
 <script src="../assets/kit.js"></script>
+<script src="../assets/submit.js"></script>
 <script>
 var R={
   bal:{n:'陽臺',x:20,y:20,w:120,h:150,exit:1},
@@ -118,7 +141,7 @@ var M=[
   {t:'任務 3：客廳失火了！',fire:'liv'},
   {t:'任務 4：爸媽的臥室失火了！',fire:'bed2'}
 ];
-var cur=0,path=['me'],reached={},done={};
+var cur=0,path=['me'],reached={},done={},ROUTES={};
 function cen(k){var r=R[k];return [r.x+r.w/2,r.y+r.h/2]}
 function smoky(k){var f=M[cur].fire;return f&&ADJ[f].indexOf(k)>=0}
 function draw(){
@@ -153,11 +176,11 @@ function tap(k){
 function finish(k){
   var fire=M[cur].fire,usedSmoky=path.some(function(p){return smoky(p)});
   if(cur===0){
-    reached[k]=1;
+    reached[k]=1;ROUTES['m0'+k]=path.slice();
     if(Object.keys(reached).length>=2){done[0]=1;say('good','兩條路都找到了！','一條往<b>大門</b>、一條往<b>陽臺</b>。不管火從哪裡燒起來，至少還有另一條路。按下一個任務繼續。')}
     else{say('good','找到一個出口：'+R[k].n,'很好！現在按「重畫」，找<b>另一個方向</b>的出口。')}
   }else{
-    done[cur]=1;
+    done[cur]=1;ROUTES[cur]={p:path.slice(),smoky:usedSmoky};
     if(usedSmoky)say('','逃出來了，但是經過了濃煙區','這條路可以走，但經過火旁邊很危險。如果有另一條離火更遠的路，最好選那一條；真的要經過濃煙，就用<b>低姿勢</b>快速通過。');
     else say('good','安全逃出來了！','你選了一條<b>避開火和煙</b>的路線。到戶外集合點等家人。');
   }
@@ -181,6 +204,42 @@ KIT.order(document.getElementById('orderBox'),{
   start:'半夜聽到住警器響了，第一件事是？',
   done:'正確！先示警、再逃生、集合清點、最後報案。'
 });
+
+/* 第 3 站：交給老師（assets/submit.js） */
+function rname(p){return p.map(function(k){return R[k].n}).join(' → ')}
+function planSvg(by){
+  var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 470" font-family="Huninn,\'Noto Sans TC\',\'Microsoft JhengHei\',sans-serif"><rect width="600" height="470" fill="#FFFDF8"/>';
+  Object.keys(R).forEach(function(k){var r=R[k];s+='<rect x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.h+'" fill="'+(r.exit?'#E8F5E9':'#FFFFFF')+'" stroke="#5D4037" stroke-width="3"/>'});
+  [['m0door','#1D5FBF',-6],['m0bal','#C2410C',6]].forEach(function(z){var p=ROUTES[z[0]];if(!p)return;s+='<polyline fill="none" stroke="'+z[1]+'" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".7" points="'+p.map(function(k){var c=cen(k);return (c[0]+z[2])+','+(c[1]+z[2])}).join(' ')+'"/>'});
+  Object.keys(R).forEach(function(k){var r=R[k];s+='<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+7)+'" text-anchor="middle" font-size="20" fill="#1F2A27" stroke="#FFFFFF" stroke-width="5" paint-order="stroke">'+r.n+'</text>'+(r.exit?'<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+32)+'" text-anchor="middle" font-size="14" fill="#2E7D32" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">出口</text>':'')});
+  var c=cen('me');s+='<circle cx="'+(c[0]-60)+'" cy="'+(c[1]-30)+'" r="15" fill="#FFD54F" stroke="#8D6E63" stroke-width="2"/><text x="'+(c[0]-60)+'" y="'+(c[1]-24)+'" text-anchor="middle" font-size="15">我</text>';
+  s+='<rect x="20" y="398" width="22" height="8" fill="#1D5FBF"/><text x="50" y="408" font-size="17" fill="#1F2A27">往大門</text><rect x="130" y="398" width="22" height="8" fill="#C2410C"/><text x="160" y="408" font-size="17" fill="#1F2A27">往陽臺</text>';
+  var meet=document.getElementById('meetAt').value.trim();
+  s+='<text x="20" y="444" font-size="20" fill="#1F2A27">集合點：'+KIT_esc(meet)+'</text>';
+  if(by)s+='<text x="580" y="444" text-anchor="end" font-size="18" fill="#4A5550">'+KIT_esc(by)+'</text>';
+  return s+'</svg>';
+}
+function KIT_esc(t){return String(t||'').replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+var SUB=SUBMIT.mount(document.getElementById('submitBox'),{
+  assignment:'u3-2d-escape',
+  collect:function(who){
+    if(!ROUTES.m0door||!ROUTES.m0bal)return null;
+    var meet=document.getElementById('meetAt').value.trim();if(!meet)return null;
+    var by=who.seat?who.cls+' '+who.seat+' 號':'';
+    var lines=['往大門：'+rname(ROUTES.m0door),'往陽臺：'+rname(ROUTES.m0bal)];
+    [1,2,3].forEach(function(i){var r=ROUTES[i];lines.push(M[i].t.replace(/^任務 \d：/,'')+(r?rname(r.p)+(r.smoky?'（經過濃煙區）':''):'（沒有做）'))});
+    lines.push('集合點：'+meet);
+    var rm=document.getElementById('remind').value.trim();if(rm)lines.push('提醒家人：'+rm);
+    return {title:'我家的逃生計畫',svg:planSvg(by),lines:lines};
+  },
+  preview:function(d){
+    if(!d){var miss=[];if(!ROUTES.m0door||!ROUTES.m0bal)miss.push('回到第 1 站完成「任務 1」：找到大門和陽臺兩個出口');if(!document.getElementById('meetAt').value.trim())miss.push('寫下你家的集合點');
+      return '<b style="color:var(--bad)">還差一點：</b><ul style="margin:.3rem 0 0;padding-left:1.3em">'+miss.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul>'}
+    return '<div style="display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:1rem;align-items:center"><img alt="我的逃生計畫" style="width:100%;border-radius:10px" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(d.svg)+'"><div><b>要交出去的內容</b><ul style="margin:.3rem 0 0;padding-left:1.2em">'+d.lines.map(function(t){return '<li>'+KIT_esc(t)+'</li>'}).join('')+'</ul></div></div>';
+  }
+});
+['meetAt','remind'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){SUB.refresh()})});
+window.addEventListener('kit-page',function(){SUB.refresh()});
 
 KIT.quiz(document.getElementById('quizBox'),[
   {q:'家庭逃生計畫至少要規畫幾個出口？',o:['1 個','2 個以上，而且方向不同','不用規畫'],a:1,e:'一個出口被火擋住時，還有另一條路。'},

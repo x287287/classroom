@@ -81,7 +81,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 </head>
 <body>
 <div class="wrap">
-  <h1>⚔️ 全班共戰：打倒大魔王</h1>
+  <h1 id="h1">⚔️ 全班共戰：打倒大魔王</h1>
 
   <section class="card" id="sCode" hidden>
     <h2>輸入房號</h2>
@@ -122,13 +122,28 @@ var DM=[
   var seat=0, st=null, sig="", timer=null, sending=false;
   var LABEL=["A","B","C","D"];
 
-  var art=function(k){var d=DM.filter(function(x){return x.k===k})[0];return d.art(d.c)};
-  $("miniBoss").innerHTML='<g transform="translate(10 40) scale(1.25)">'+art("smoke")+'</g><g transform="translate(165 40) scale(1.25)">'+art("betel")+'</g><g transform="translate(80 18) scale(1.45)">'+art("wine")+'</g><path d="M110 22 h80 l-10 -22 l-15 12 l-15 -18 l-15 18 l-15 -12 z" fill="#FFD54F" stroke="#C79100" stroke-width="3"/>';
+  /* 第三單元的房間（raid_state.game='u3'）換成第三單元的怪物 */
+  var game="u2";
+  function setGame(g){
+    if(!/^u\d+$/.test(g||"")||g===game)return;game=g;
+    var sc=document.createElement("script");sc.src="lessons/data/"+g+"-game-questions.js";
+    sc.onload=function(){var pk=window.GAME_PACK;if(!pk||!pk.monsters)return;DM=pk.monsters;drawBoss();
+      document.title="全班共戰：打倒"+pk.boss;$("h1").textContent="⚔️ 全班共戰：打倒"+pk.boss;};
+    document.head.appendChild(sc);
+  }
+  function dname(k){var d=DM.filter(function(x){return x.k===k})[0];return d?d.n:""}
+  function drawBoss(){
+  var art=function(i){var d=DM[i];return d?d.art(d.c):""};
+  $("miniBoss").innerHTML='<g transform="translate(10 40) scale(1.25)">'+art(0)+'</g><g transform="translate(165 40) scale(1.25)">'+art(2)+'</g><g transform="translate(80 18) scale(1.45)">'+art(1)+'</g><path d="M110 22 h80 l-10 -22 l-15 12 l-15 -18 l-15 18 l-15 -12 z" fill="#FFD54F" stroke="#C79100" stroke-width="3"/>';
+  }
+  drawBoss();
 
   function show(id){["sCode","sSeat","sGame"].forEach(function(k){$(k).hidden=(k!==id)})}
 
   /* 房號 */
   function goRoom(code){room=code;history.replaceState(null,"","?r="+code);seat=+load("raidSeat:"+room,0)||0;
+    /* 從課堂房間跟過來的：沿用已經選好的座號（sessionStorage clsSeat） */
+    if(!seat){try{var cs=JSON.parse(sessionStorage.getItem("clsSeat")||"null");if(cs&&cs.seat>=1&&cs.seat<=40&&sessionStorage.getItem("clsSess")){seat=cs.seat;save("raidSeat:"+room,seat)}}catch(e){}}
     if(seat)join(seat);else{show("sSeat")}
     poll();if(!timer)timer=setInterval(function(){if(!document.hidden)poll()},1200);}
   $("codeGo").addEventListener("click",function(){var c=$("codeIn").value.replace(/\D/g,"");if(c.length!==6){$("codeMsg").textContent="請輸入 6 位數字的房號。";return}
@@ -184,7 +199,7 @@ var DM=[
     if(!room)return;
     rpc("raid_state",{p_room:room,p_seat:seat||0,p_device:device}).then(function(d){
       if(!d){show("sCode");$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}
-      st=d;
+      st=d;setGame(d.game);
       if(seat&&!d.joined&&d.status!=="end"){ join(seat); return; }
       if(!seat){ if(d.status==="end"){show("sGame");$("me").innerHTML="";render()} return; }
       show("sGame");render();
@@ -274,7 +289,7 @@ var DM=[
     var opts=q.o||[],r=F.res,wrong=q.wrong||[],p=pot(q);
     cur={q:q.q,opts:opts,ox:q.ox,skip:wrong,e:r?((r.dmg>0?"答對了！":"答對了。")+"答案是："+(q.ox?(r.answer==="O"?"O，對":"X，錯"):r.answer)+"。"+(r.e||"")):""};
     var h='<div class="fbar"><span class="clk" id="fClk"></span><span class="stk">'+(q.streak>=2&&!r&&!q.tries?"🔥 連續一次答對 "+q.streak+" 題":"")+'</span></div>'+
-      '<div class="meta"><span id="fMine"></span><span>'+({smoke:"菸惡魔",wine:"酒惡魔",betel:"檳榔惡魔"}[q.d]||"")+'</span></div>'+
+      '<div class="meta"><span id="fMine"></span><span>'+dname(q.d)+'</span></div>'+
       '<div class="qt">'+esc(q.q)+'</div>'+sayBar();
     if(!r)h+='<div class="pot p'+p+'">'+(p===2?"⚔️⚔️ 這題一次就答對：打 2 點":p===1?"⚔️ 這題現在答對：打 1 點":"這題現在答對不會打到魔王，但還是要找出正確答案！")+'</div>';
     h+=optsHTML(opts,q.ox,function(i){return (wrong.indexOf(i)>=0?" tried":"")+(r&&opts[i]===r.answer?" right":"")},
@@ -320,5 +335,6 @@ var DM=[
   if(room.length===6)goRoom(room);else show("sCode");
 })();
 </script>
+<script src="assets/live.js"></script>
 </body>
 </html>

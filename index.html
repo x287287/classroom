@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>教室小書櫃</title>
 <link rel="stylesheet" href="assets/fonts.css">
+<meta name="live" content="none">
 <script src="assets/sync.js"></script>
+<script src="assets/live.js"></script>
 <style>
 /* Layout: 方格簿 grid paper; a slim cover band, a toolbar (search + filters), then materials grouped by 單元 as index cards. */
 :root{
@@ -371,6 +373,12 @@ const MATERIALS = [
   { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"單元統整", topic:"單元 3 全部",
     title:"小豬消防隊", type:"game", grade:4, pages:"54–81", mins:30,
     note:"情境闖關：跟著小豬三兄弟通過燙傷、用電、油鍋、半夜警報、百貨公司五大關，領取證書。", url:"lessons/u3-game-pig-firefighters.html" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"單元統整", topic:"單元 3 全部",
+    title:"趕走火災三怪", type:"game", grade:4, pages:"54–81", mins:30,
+    note:"兩隊對戰：輪流答題攻擊燙燙壺怪（灼燙傷）、火焰怪（防火安全）、濃煙怪（火場應變），答錯可換對方搶答。題庫 84 題。", url:"lessons/u2-game-demons.html?u=3" },
+  { unit:"康軒健康四上　第三單元 熱與火的危機", lesson:"單元統整", topic:"單元 3 全部",
+    title:"全班共戰：打倒火災大魔王", type:"game", grade:4, pages:"54–81", mins:20,
+    note:"和第二單元的全班共戰玩法相同：同步作答（大螢幕出題、全班同時答）或各自搶攻（每人用自己的速度答，有即時戰力排行榜）。題庫 84 題，對應第 1～3 課。需要老師帳號開房間，學生掃 QR Code 選座號加入。", url:"lessons/u2-game-raid.html?u=3" },
 
   /* ---------- 友善校園（宣導簡報，依低、中、高年級分組；grades 是適用年級） ---------- */
   { unit:"友善校園", lesson:"低年級（一、二年級）", topic:"", grades:[1,2], grade:0,

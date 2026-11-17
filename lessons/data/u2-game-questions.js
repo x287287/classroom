@@ -82,3 +82,15 @@ window.GAME_QUESTIONS = [
   {d:'betel',q:'「你要不要和我一起去踢足球？」是哪一種拒絕法？',o:['轉移話題法','堅持拒絕法','反激將法'],a:0,e:'把話題轉到別的事情上。'},
   {d:'betel',q:'拒絕別人時，應該用什麼態度？',o:['誠懇有禮','嘻嘻哈哈','生氣大吼'],a:0,e:'真誠看著對方、語氣溫和堅定、態度誠懇有禮。'}
 ];
+
+/* 遊戲外觀與文字（三個版本共用；第三單元在 u3-game-questions.js） */
+window.GAME_PACK = {
+  code:'u2', unit:'第二單元', theme:'拒菸拒酒拒檳榔', pages:'30–53', cls:'u2',
+  boss:'三惡魔合體大魔王', trio:'三惡魔', motto:'不好奇、不嘗試、不接受！',
+  winLine:'菸、酒、檳榔惡魔都被趕走了，大家一起說「不」！',
+  monsters:[
+    {k:'smoke',n:'菸惡魔',c:'#9C8CB9',art:function(c){return '<circle cx="50" cy="55" r="34" fill="'+c+'"/><circle cx="28" cy="40" r="18" fill="'+c+'"/><circle cx="72" cy="40" r="18" fill="'+c+'"/><rect x="20" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(-20 25 23)"/><rect x="70" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(20 75 23)"/><rect x="18" y="6" width="10" height="6" fill="#FF7043" transform="rotate(-20 23 9)"/><rect x="72" y="6" width="10" height="6" fill="#FF7043" transform="rotate(20 77 9)"/><circle cx="40" cy="52" r="6" fill="#fff"/><circle cx="60" cy="52" r="6" fill="#fff"/><circle cx="41" cy="53" r="3" fill="#222"/><circle cx="61" cy="53" r="3" fill="#222"/><path d="M38 72 q12 -8 24 0" stroke="#222" stroke-width="3" fill="none"/>'}},
+    {k:'wine',n:'酒惡魔',c:'#D8708A',art:function(c){return '<rect x="38" y="6" width="24" height="22" rx="4" fill="'+c+'"/><path d="M30 28 h40 q8 10 8 22 v34 q0 8 -8 8 h-40 q-8 0 -8 -8 v-34 q0 -12 8 -22z" fill="'+c+'"/><rect x="30" y="56" width="40" height="18" fill="#fff" opacity=".85"/><path d="M26 32 l-10 -14 M74 32 l10 -14" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="44" r="5" fill="#fff"/><circle cx="58" cy="44" r="5" fill="#fff"/><circle cx="43" cy="45" r="2.5" fill="#222"/><circle cx="59" cy="45" r="2.5" fill="#222"/><text x="50" y="70" text-anchor="middle" font-size="11" fill="'+c+'">酒</text>'}},
+    {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
+  ]
+};

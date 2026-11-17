@@ -11,6 +11,7 @@
                                                  //   內容可用的欄位：svg（字串，後台會當圖片顯示）、title、lines（字串陣列）、text
        preview: function (data) { return '<html>' } // （可選）繳交前的預覽
      });
+   文字作品可以用 SUBMIT.card({title, by, color, rows:[{h,t}]}) 轉成 SVG 卡片放進 svg 欄位，作品牆才能全螢幕展示。
 */
 (function () {
   if (window.SUBMIT) return;
@@ -140,5 +141,25 @@
     });
     return { refresh: updPrev, check: check };
   }
-  window.SUBMIT = { mount: mount };
+  /* 文字作品轉成一張 SVG 卡片（後台作品牆和全螢幕展示都看得到）
+     SUBMIT.card({ title: '標題', by: '4年1班 5 號', color: '#2A7563', rows: [{ h: '小標題', t: '內容' }, …] }) → SVG 字串 */
+  function card(o) {
+    var W = 600, P = 28, PER = 19.5, LH = 34, y = 0, out = [];
+    function x(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+    function wrap(t) { var r = [], line = "", n = 0; Array.from(String(t || "")).forEach(function (ch) { var w = /[\x00-\xff]/.test(ch) ? 0.55 : 1; if (n + w > PER && "，。！？」）、：；,.!?)".indexOf(ch) >= 0) { line += ch; n += w; return; } if (n + w > PER || ch === "\n") { r.push(line); line = ""; n = 0; if (ch === "\n") return; } line += ch; n += w; }); if (line) r.push(line); return r.length ? r : [""]; }
+    var color = o.color || "#2A7563";
+    y = 96;
+    (o.rows || []).forEach(function (row) {
+      if (row.h) { out.push('<text x="' + P + '" y="' + (y + 6) + '" font-size="21" font-weight="700" fill="' + color + '">' + x(row.h) + "</text>"); y += 34; }
+      wrap(row.t).forEach(function (l) { out.push('<text x="' + P + '" y="' + (y + 4) + '" font-size="26" fill="#1F2A27">' + x(l) + "</text>"); y += LH; });
+      y += 14;
+    });
+    var H = Math.max(240, y + (o.by ? 46 : 10));
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + " " + H + '" font-family="Huninn,\'Noto Sans TC\',\'PingFang TC\',\'Microsoft JhengHei\',sans-serif">' +
+      '<rect width="' + W + '" height="' + H + '" rx="28" fill="#FFFDF8" stroke="' + color + '" stroke-width="6"/>' +
+      '<rect x="3" y="3" width="' + (W - 6) + '" height="68" rx="25" fill="' + color + '"/><rect x="3" y="44" width="' + (W - 6) + '" height="27" fill="' + color + '"/>' +
+      '<text x="' + W / 2 + '" y="48" text-anchor="middle" font-size="28" font-weight="700" fill="#FFFFFF">' + x(o.title) + "</text>" + out.join("") +
+      (o.by ? '<text x="' + (W - P) + '" y="' + (H - 20) + '" text-anchor="end" font-size="20" fill="#4A5550">' + x(o.by) + "</text>" : "") + "</svg>";
+  }
+  window.SUBMIT = { mount: mount, card: card };
 })();

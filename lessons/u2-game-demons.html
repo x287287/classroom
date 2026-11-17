@@ -2,6 +2,7 @@
 <html lang="zh-Hant" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta name="live" content="screen">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>趕走三惡魔</title>
 <link rel="stylesheet" href="../assets/fonts.css">
@@ -147,20 +148,17 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background-ima
     <h2 id="endTitle">三惡魔全部被趕走了！</h2>
     <p id="endText" style="font-size:1.3rem"></p>
     <svg viewBox="0 0 300 120" style="width:100%;max-width:360px;margin:0 auto" aria-hidden="true"><path d="M60 100 h180 l-20 -60 l-35 30 l-35 -50 l-35 50 l-35 -30 z" fill="#FFD54F" stroke="#C79100" stroke-width="4"/><circle cx="150" cy="18" r="8" fill="#FFD54F"/></svg>
-    <p>記住：<b>不好奇、不嘗試、不接受！</b></p>
+    <p>記住：<b id="motto">不好奇、不嘗試、不接受！</b></p>
     <div class="btnrow" style="justify-content:center"><button class="btn fill" type="button" id="bAgain">再玩一次</button></div>
   </div>
 </div>
 
 <script src="../assets/kit.js"></script>
-<script src="data/u2-game-questions.js"></script>
+<script>var UNIT=/[?&]u=3(&|$)/.test(location.search)?'u3':'u2';document.write('<script src="data/'+UNIT+'-game-questions.js"><\/script>')</script>
 <script>
 var Q=window.GAME_QUESTIONS||[];
-var DM=[
-  {k:'smoke',n:'菸惡魔',c:'#9C8CB9',art:function(c){return '<circle cx="50" cy="55" r="34" fill="'+c+'"/><circle cx="28" cy="40" r="18" fill="'+c+'"/><circle cx="72" cy="40" r="18" fill="'+c+'"/><rect x="20" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(-20 25 23)"/><rect x="70" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(20 75 23)"/><rect x="18" y="6" width="10" height="6" fill="#FF7043" transform="rotate(-20 23 9)"/><rect x="72" y="6" width="10" height="6" fill="#FF7043" transform="rotate(20 77 9)"/><circle cx="40" cy="52" r="6" fill="#fff"/><circle cx="60" cy="52" r="6" fill="#fff"/><circle cx="41" cy="53" r="3" fill="#222"/><circle cx="61" cy="53" r="3" fill="#222"/><path d="M38 72 q12 -8 24 0" stroke="#222" stroke-width="3" fill="none"/>'}},
-  {k:'wine',n:'酒惡魔',c:'#D8708A',art:function(c){return '<rect x="38" y="6" width="24" height="22" rx="4" fill="'+c+'"/><path d="M30 28 h40 q8 10 8 22 v34 q0 8 -8 8 h-40 q-8 0 -8 -8 v-34 q0 -12 8 -22z" fill="'+c+'"/><rect x="30" y="56" width="40" height="18" fill="#fff" opacity=".85"/><path d="M26 32 l-10 -14 M74 32 l10 -14" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="44" r="5" fill="#fff"/><circle cx="58" cy="44" r="5" fill="#fff"/><circle cx="43" cy="45" r="2.5" fill="#222"/><circle cx="59" cy="45" r="2.5" fill="#222"/><text x="50" y="70" text-anchor="middle" font-size="11" fill="'+c+'">酒</text>'}},
-  {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
-];
+var PK=window.GAME_PACK||{};
+var DM=PK.monsters||[];
 var S={hp:4,time:0,team:0,score:[0,0],dmi:0,dhp:[4,4,4],used:{},cur:null,answered:false,stealing:false,timerId:null,left:0};
 var names=['紅隊','藍隊'];
 function $(id){return document.getElementById(id)}
@@ -208,7 +206,7 @@ $('bSteal').addEventListener('click',function(){S.stealing=true;S.answered=false
 });
 $('bSkip').addEventListener('click',advance);
 function end(){var a=S.score[0],b=S.score[1];
-  var lg=S.log||[];if(window.STATS)STATS.send('u2-demons',{title:'趕走三惡魔（兩隊對戰）',board:true,data:{right:lg.filter(function(x){return x.ok}).length,total:lg.length,score:[a,b],teams:names,items:lg}});$('endTitle').textContent='三惡魔全部被趕走了！';$('endText').innerHTML=a===b?'兩隊同分（'+a+' 比 '+b+'），全班一起合作成功！':'<b>'+(a>b?names[0]:names[1])+'</b> 攻擊最多次，獲勝！（'+names[0]+' '+a+'：'+b+' '+names[1]+'）<br>但最重要的是，全班一起趕走了三惡魔！';$('ovEnd').hidden=false}
+  var lg=S.log||[];if(window.STATS)STATS.send((PK.code||'u2')+'-demons',{title:PK.code==='u3'?'趕走火災三怪（兩隊對戰）':'趕走三惡魔（兩隊對戰）',board:true,data:{right:lg.filter(function(x){return x.ok}).length,total:lg.length,score:[a,b],teams:names,items:lg}});$('endTitle').textContent=(PK.trio||'三惡魔')+'全部被趕走了！';$('endText').innerHTML=a===b?'兩隊同分（'+a+' 比 '+b+'），全班一起合作成功！':'<b>'+(a>b?names[0]:names[1])+'</b> 攻擊最多次，獲勝！（'+names[0]+' '+a+'：'+b+' '+names[1]+'）<br>但最重要的是，全班一起趕走了'+(PK.trio||'三惡魔')+'！';$('ovEnd').hidden=false}
 function start(){names=[$('inRed').value.trim()||'紅隊',$('inBlue').value.trim()||'藍隊'];S.score=[0,0];S.log=[];S.loggedQ=null;S.dmi=0;S.dhp=[S.hp,S.hp,S.hp];S.used={};S.team=0;$('ovSet').hidden=true;$('ovEnd').hidden=true;drawDemons();drawTeams();showQ()}
 $('bStart').addEventListener('click',start);
 $('bAgain').addEventListener('click',function(){$('ovEnd').hidden=true;$('ovSet').hidden=false});
@@ -217,23 +215,35 @@ document.querySelectorAll('#tChips .chip').forEach(function(b){b.addEventListene
 document.querySelectorAll('#hChips .chip').forEach(function(b){b.addEventListener('click',function(){S.hp=+b.dataset.h;$('hpTxt').textContent=S.hp;document.querySelectorAll('#hChips .chip').forEach(function(z){z.setAttribute('aria-pressed',z===b?'true':'false')})})});
 $('bFs').addEventListener('click',function(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(function(){})}catch(e){}});
 document.addEventListener('fullscreenchange',function(){$('bFs').textContent=document.fullscreenElement?'離開全螢幕':'全螢幕'});
+if(PK.code==='u3'){
+  document.title='趕走火災三怪';document.querySelector('.top h1').textContent='趕走火災三怪';
+  document.querySelector('.top .sub').textContent='健康與體育 四上｜單元 3 熱與火的危機・統整遊戲';
+  document.body.className='u3';
+  document.querySelector('#ovSet h2').textContent='趕走火災三怪';
+  document.querySelector('#ovSet p').innerHTML='全班分成兩隊，輪流派人上台作答。答對就能攻擊怪物！<br>燙燙壺怪、火焰怪、濃煙怪各有 <b id="hpTxt">'+S.hp+'</b> 點血，三隻都趕走就過關。';
+  $('motto').textContent=PK.motto;
+  document.addEventListener('DOMContentLoaded',function(){$('tT').textContent='老師說明：趕走火災三怪';$('tFile').textContent='u3';
+  var cnt={};Q.forEach(function(q){cnt[q.d]=(cnt[q.d]||0)+1});
+  $('tUnit').innerHTML='<li>單元 3〈熱與火的危機〉三課（課本 p.54–81）：燙燙壺怪＝第 1 課 小心灼燙傷、火焰怪＝第 2 課 防火安全檢查、濃煙怪＝第 3 課 火場應變。</li><li>題庫共 '+Q.length+' 題（'+DM.map(function(d){return d.n+' '+(cnt[d.k]||0)}).join('、')+'），和「全班共戰：打倒火災大魔王」共用；選項順序每次隨機，同一隻怪物的題目出完之前不會重複。</li>';
+  $('tEnd').textContent='燙燙壺怪、火焰怪、濃煙怪都被趕走就結束，攻擊次數多的隊伍獲勝。';});
+}
 drawDemons();drawTeams();$('qcard').innerHTML='<div class="qt" style="text-align:center">設定好隊名後，按「開始對戰」</div>';
 </script>
 <div class="tdlg" id="tDlg" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
   <h2 id="tT">老師說明：趕走三惡魔</h2>
   <h3>對應課本</h3>
-  <ul><li>單元 2〈拒菸拒酒拒檳榔〉三課（課本 p.30–53）：菸的危害、酒與檳榔、拒絕的技巧。</li><li>題庫共 74 題（菸 25、酒 24、檳榔 25），選項順序每次隨機，同一隻惡魔的題目出完之前不會重複。</li></ul>
+  <ul id="tUnit"><li>單元 2〈拒菸拒酒拒檳榔〉三課（課本 p.30–53）：菸的危害、酒與檳榔、拒絕的技巧。</li><li>題庫共 74 題（菸 25、酒 24、檳榔 25），選項順序每次隨機，同一隻惡魔的題目出完之前不會重複。</li></ul>
   <h3>玩法</h3>
   <ol>
     <li>全班分成紅、藍兩隊，按「設定」可以改隊名、每題時間和惡魔血量。</li>
     <li>兩隊輪流派一個人上台作答。答對就攻擊惡魔一次。</li>
     <li>答錯時，可以按「換對方搶答」。搶答也答錯就公布答案。</li>
-    <li>菸、酒、檳榔三隻惡魔都被趕走就結束，攻擊次數多的隊伍獲勝。</li>
+    <li id="tEnd">菸、酒、檳榔三隻惡魔都被趕走就結束，攻擊次數多的隊伍獲勝。</li>
   </ol>
   <h3>時間安排</h3>
   <ul><li>預設（血量 4、不計時）約 30 分鐘。只有 15～20 分鐘時，把血量改成 3、每題 20 秒。</li><li>每題公布答案後，可以停下來請學生說說「為什麼」，再按下一題。</li></ul>
   <h3>小提醒</h3>
-  <ul><li>可以讓上台的同學先和隊友討論 10 秒，讓每個人都參與。</li><li>遊戲結束時，全班每一題是否第一次就答對會存到老師後台「🎮 遊戲作答統計」（大螢幕遊戲沒有座號，班級用書櫃 QR 視窗最後選的班級）。</li><li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js）。</li></ul>
+  <ul><li>可以讓上台的同學先和隊友討論 10 秒，讓每個人都參與。</li><li>遊戲結束時，全班每一題是否第一次就答對會存到老師後台「🎮 遊戲作答統計」（大螢幕遊戲沒有座號，班級用書櫃 QR 視窗最後選的班級）。</li><li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/<span id="tFile">u2</span>-game-questions.js）。</li></ul>
   <button type="button" class="close">關閉</button>
 </div></div>
 <style id="teach-dlg">

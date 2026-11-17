@@ -2,6 +2,7 @@
 <html lang="zh-Hant" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta name="live" content="screen">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>全班共戰：打倒大魔王</title>
 <link rel="stylesheet" href="../assets/fonts.css">
@@ -153,7 +154,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 
   <section class="card" id="scrSetup" hidden>
     <h2>開一場全班共戰</h2>
-    <p class="note">「菸、酒、檳榔」三隻惡魔合體成大魔王！全班用平板一起作答，把魔王的血打到 0 就獲勝。</p>
+    <p class="note" id="setIntro">「菸、酒、檳榔」三隻惡魔合體成大魔王！全班用平板一起作答，把魔王的血打到 0 就獲勝。</p>
     <div class="modes" role="radiogroup" aria-label="遊戲模式">
       <button type="button" class="mode" data-mode="sync" role="radio"><b>🖥️ 同步作答</b><span>大螢幕出同一題，全班一起答、一起看答案。答對的人數就是傷害，全班 8 成答對還會暴擊。適合邊玩邊講解。</span></button>
       <button type="button" class="mode" data-mode="free" role="radio"><b>⚡ 各自搶攻</b><span>每個人在平板上用自己的速度一直答題，題目會自動換、題庫用完重新出。一次就答對打 2 點、第 2 次答對打 1 點；答錯不換題，定身 3 秒再選。大螢幕有即時戰力排行榜。</span></button>
@@ -188,7 +189,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
     <div class="battle">
       <div class="boss" id="boss">
         <svg class="bs" id="bossArt" viewBox="0 0 300 200" aria-hidden="true"></svg>
-        <div class="bn">三惡魔合體大魔王</div>
+        <div class="bn" data-pk="boss">三惡魔合體大魔王</div>
         <div class="hpw"><div class="hp" role="progressbar" aria-label="魔王血量" aria-valuemin="0" id="hpBar"><i id="hpFill"></i></div><div class="hpn"><span id="hpText"></span><span id="roundText"></span></div></div>
       </div>
       <div class="card qbox">
@@ -208,7 +209,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
     <div class="free">
       <div class="boss" id="fBoss">
         <svg class="bs" id="fBossArt" viewBox="0 0 300 200" aria-hidden="true"></svg>
-        <div class="bn">三惡魔合體大魔王</div>
+        <div class="bn" data-pk="boss">三惡魔合體大魔王</div>
         <div class="hpw"><div class="hp" role="progressbar" aria-label="魔王血量" aria-valuemin="0" id="fHpBar"><i id="fHpFill"></i></div><div class="hpn"><span id="fHpText"></span><span>⚡ 各自搶攻</span></div></div>
       </div>
       <div class="fside">
@@ -227,10 +228,10 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 <div class="tdlg" id="tDlg" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
   <h2 id="tT">老師說明：全班共戰打倒大魔王</h2>
   <h3>這是什麼</h3>
-  <ul><li>第二單元〈拒菸拒酒拒檳榔〉統整遊戲的全班合作版（課本 p.30–53）。題庫和「趕走三惡魔」兩個版本相同。</li>
+  <ul><li id="tUnit">第二單元〈拒菸拒酒拒檳榔〉統整遊戲的全班合作版（課本 p.30–53）。題庫和「趕走三惡魔」兩個版本相同。</li>
   <li>有兩種模式：</li></ul>
   <ul><li><b>同步作答</b>：大螢幕出同一題，全班同時作答，時間到或全班答完就公布答案和每個選項的人數。答對的人數就是傷害，全班 8 成以上答對再多打 50%（暴擊）。題目出完前把魔王打到 0 就獲勝。魔王血量＝人數 × 題數 × 強度（簡單 0.8、普通 1.0、困難 1.25）。例如 25 人、12 題、普通，魔王有 300 點血，全班平均要答對約 8 成並常常暴擊才打得倒。</li>
-  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，答對才換下一題（題庫用完會重新洗牌出題）。第 1 次就答對打 2 點、第 2 次才答對打 1 點、第 3 次以後答對 0 點（O／X 題答錯後只剩一個選項，所以第 2 次答對也是 0 點）；連續「一次就答對」第 5、10、15…題多打 1 點。答錯不會公布答案，被定身 3 秒後從剩下的選項再選一次。學生平板上每題都有「🔊 唸題目和選項」與每個選項旁的 🔊，也可以開「自動唸」（建議戴耳機）。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 5、普通 6、困難 8），例如 25 人、20 分鐘、普通＝3000 點；開房間前畫面上會顯示預估血量。學生大約每分鐘作答 3～5 次，20 分鐘會做 60～80 題，題庫 74 題，最後幾分鐘可能會遇到看過的題目。大螢幕即時顯示血量、時間、作答數、一次答對率和「戰力排行榜」（前 5 名，只顯示座號；依 2 次內答對的題數排名，同分比傷害）。如果不想讓排行榜造成壓力，可以提醒學生「排行是比誰認真讀題，不是比誰按得快」。</li></ul>
+  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，答對才換下一題（題庫用完會重新洗牌出題）。第 1 次就答對打 2 點、第 2 次才答對打 1 點、第 3 次以後答對 0 點（O／X 題答錯後只剩一個選項，所以第 2 次答對也是 0 點）；連續「一次就答對」第 5、10、15…題多打 1 點。答錯不會公布答案，被定身 3 秒後從剩下的選項再選一次。學生平板上每題都有「🔊 唸題目和選項」與每個選項旁的 🔊，也可以開「自動唸」（建議戴耳機）。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 5、普通 6、困難 8），例如 25 人、20 分鐘、普通＝3000 點；開房間前畫面上會顯示預估血量。學生大約每分鐘作答 3～5 次，20 分鐘會做 60～80 題，<span id="tCount">題庫 74 題</span>，最後幾分鐘可能會遇到看過的題目。大螢幕即時顯示血量、時間、作答數、一次答對率和「戰力排行榜」（前 5 名，只顯示座號；依 2 次內答對的題數排名，同分比傷害）。如果不想讓排行榜造成壓力，可以提醒學生「排行是比誰認真讀題，不是比誰按得快」。</li></ul>
   <h3>怎麼開始</h3>
   <ol><li>這台電腦要先在書櫃首頁登入老師帳號。</li>
   <li>選模式，再選題數／每題時間（同步作答）或遊戲時間（各自搶攻）與魔王強度，按「開房間」。</li>
@@ -245,18 +246,15 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
   <li>同一個座號只能在一台平板加入。如果學生選錯座號，請他按「換座號」重選。</li>
   <li>網路斷線的平板，重新連上後會自動回到目前的題目。</li>
   <li>開房間前可以選班級；遊戲結束時，每個座號的作答結果（答對幾題、每一題對錯）會自動存到老師後台「🎮 遊戲作答統計」。</li>
-  <li>題庫共 74 題（菸 25、酒 24、檳榔 25），選項順序每次隨機。想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js，各自搶攻模式另外存在資料庫，Claude 會一起更新）。</li></ul>
+  <li id="tBank">題庫共 74 題（菸 25、酒 24、檳榔 25），選項順序每次隨機。想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js，各自搶攻模式另外存在資料庫，Claude 會一起更新）。</li></ul>
   <button type="button" class="close">關閉</button>
 </div></div>
 
-<script src="data/u2-game-questions.js"></script>
+<script>var UNIT=/[?&]u=3(&|$)/.test(location.search)?'u3':'u2';document.write('<script src="data/'+UNIT+'-game-questions.js"><\/script>')</script>
 <script src="../assets/vendor/qrcode.js"></script>
 <script>
-var DM=[
-  {k:'smoke',n:'菸惡魔',c:'#9C8CB9',art:function(c){return '<circle cx="50" cy="55" r="34" fill="'+c+'"/><circle cx="28" cy="40" r="18" fill="'+c+'"/><circle cx="72" cy="40" r="18" fill="'+c+'"/><rect x="20" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(-20 25 23)"/><rect x="70" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(20 75 23)"/><rect x="18" y="6" width="10" height="6" fill="#FF7043" transform="rotate(-20 23 9)"/><rect x="72" y="6" width="10" height="6" fill="#FF7043" transform="rotate(20 77 9)"/><circle cx="40" cy="52" r="6" fill="#fff"/><circle cx="60" cy="52" r="6" fill="#fff"/><circle cx="41" cy="53" r="3" fill="#222"/><circle cx="61" cy="53" r="3" fill="#222"/><path d="M38 72 q12 -8 24 0" stroke="#222" stroke-width="3" fill="none"/>'}},
-  {k:'wine',n:'酒惡魔',c:'#D8708A',art:function(c){return '<rect x="38" y="6" width="24" height="22" rx="4" fill="'+c+'"/><path d="M30 28 h40 q8 10 8 22 v34 q0 8 -8 8 h-40 q-8 0 -8 -8 v-34 q0 -12 8 -22z" fill="'+c+'"/><rect x="30" y="56" width="40" height="18" fill="#fff" opacity=".85"/><path d="M26 32 l-10 -14 M74 32 l10 -14" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="44" r="5" fill="#fff"/><circle cx="58" cy="44" r="5" fill="#fff"/><circle cx="43" cy="45" r="2.5" fill="#222"/><circle cx="59" cy="45" r="2.5" fill="#222"/><text x="50" y="70" text-anchor="middle" font-size="11" fill="'+c+'">酒</text>'}},
-  {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
-];
+var PK=window.GAME_PACK||{};
+var DM=PK.monsters||[];
 var Q=window.GAME_QUESTIONS||[];
 var SET={mode:'sync',rounds:12,secs:20,lv:2,mins:20};
 var SYNC_K=[0.8,1.0,1.25], FREE_K=[5,6,8];
@@ -272,13 +270,24 @@ function api(path,body,method){
 }
 function rpc(fn,args){return api('rest/v1/rpc/'+fn,args)}
 var LABEL=['A','B','C','D'];
-var DNAME={smoke:'菸惡魔',wine:'酒惡魔',betel:'檳榔惡魔'};
+var DNAME={};DM.forEach(function(d){DNAME[d.k]=d.n});
 
-/* 合體大魔王：三隻惡魔疊在一起，戴著王冠 */
+/* 依單元換標題與說明（?u=3 是第三單元） */
 (function(){
-  var art=function(k){var d=DM.filter(function(x){return x.k===k})[0];return d.art(d.c)};
-  $('bossArt').innerHTML=$('fBossArt').innerHTML='<g transform="translate(10 40) scale(1.25)">'+art('smoke')+'</g><g transform="translate(165 40) scale(1.25)">'+art('betel')+'</g>'+
-    '<g transform="translate(80 18) scale(1.45)">'+art('wine')+'</g>'+
+  if(PK.code!=='u3')return;
+  var t='全班共戰：打倒'+PK.boss;document.title=t;document.querySelector('.top h1').textContent='⚔️ '+t;
+  [].forEach.call(document.querySelectorAll('[data-pk=boss]'),function(el){el.textContent=PK.boss});
+  $('setIntro').textContent='燙燙壺怪、火焰怪、濃煙怪合體成火災大魔王！全班用平板一起作答，把魔王的血打到 0 就獲勝。';
+  var cnt={};Q.forEach(function(q){cnt[q.d]=(cnt[q.d]||0)+1});
+  $('tUnit').innerHTML='第三單元〈熱與火的危機〉統整遊戲的全班合作版（課本 p.54–81）。題庫 '+Q.length+' 題：'+DM.map(function(d){return d.n+' '+(cnt[d.k]||0)}).join('、')+'（對應第 1～3 課），和「兩隊對戰：趕走火災三怪」共用。';
+  $('tBank').innerHTML='題庫共 '+Q.length+' 題，選項順序每次隨機。想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u3-game-questions.js，各自搶攻模式另外存在資料庫，Claude 會一起更新）。';
+  $('tCount').textContent='題庫 '+Q.length+' 題';
+})();
+/* 合體大魔王：三隻怪物疊在一起，戴著王冠 */
+(function(){
+  var art=function(i){var d=DM[i];return d?d.art(d.c):''};
+  $('bossArt').innerHTML=$('fBossArt').innerHTML='<g transform="translate(10 40) scale(1.25)">'+art(0)+'</g><g transform="translate(165 40) scale(1.25)">'+art(2)+'</g>'+
+    '<g transform="translate(80 18) scale(1.45)">'+art(1)+'</g>'+
     '<path d="M110 22 h80 l-10 -22 l-15 12 l-15 -18 l-15 18 l-15 -12 z" fill="#FFD54F" stroke="#C79100" stroke-width="3"/>';
 })();
 
@@ -324,22 +333,25 @@ function loadCls(){
 
 /* 選題：三隻惡魔平均出題 */
 function pick(n){
-  var by={smoke:shuf(Q.filter(function(q){return q.d==='smoke'})),wine:shuf(Q.filter(function(q){return q.d==='wine'})),betel:shuf(Q.filter(function(q){return q.d==='betel'}))};
-  var keys=['smoke','wine','betel'],out=[],i=0;
-  while(out.length<n&&(by.smoke.length||by.wine.length||by.betel.length)){var k=keys[i%3];if(by[k].length)out.push(by[k].shift());i++}
+  var keys=DM.map(function(d){return d.k}),by={},out=[],i=0;
+  keys.forEach(function(k){by[k]=shuf(Q.filter(function(q){return q.d===k}))});
+  function left(){return keys.some(function(k){return by[k].length})}
+  while(out.length<n&&left()){var k=keys[i%keys.length];if(by[k].length)out.push(by[k].shift());i++}
   return out;
 }
 
 $('bCreate').addEventListener('click',function(){
   var b=this;b.disabled=true;$('setMsg').textContent='建立中…';
   var free=SET.mode==='free';
-  api('rest/v1/raid_rooms',{game:'u2',rounds:free?40:SET.rounds,mode:free?'free':'sync',class_name:CLASS||null}).then(function(d){
+  api('rest/v1/raid_rooms',{game:PK.code||'u2',rounds:free?40:SET.rounds,mode:free?'free':'sync',class_name:CLASS||null}).then(function(d){
     var room=d[0];
     G={room:room.id,mode:free?'free':'sync',rounds:SET.rounds,secs:SET.secs,mins:SET.mins,lv:SET.lv,list:free?[]:pick(SET.rounds),stats:[],seats:[],cur:null,phase:'lobby',hp:0,max:0,lastId:0};
     var url=new URL('../raid.html?r='+room.id,location.href).href;
     $('roomCode').textContent=room.id;$('roomUrl').textContent=url;
     try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=$('fQr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
     $('fRoom').textContent=room.id;
+    /* 課堂房間：學生平板自動進這個房間 */
+    if(window.CLS_LIVE&&window.CLS_LIVE.push&&window.CLS_LIVE.id)window.CLS_LIVE.push('raid.html?r='+room.id,document.title);
     $('qrHint').textContent='還沒加入的同學：打開 raid.html，輸入房號 '+room.id;
     show('scrLobby');startPoll();
   }).catch(function(){b.disabled=false;$('setMsg').textContent='建立失敗，請確認網路與老師帳號後再試一次。'});
@@ -467,7 +479,7 @@ function finish(result){
   var pct=tot?Math.round(ok/tot*100):0;
   var hard=G.stats.map(function(s,i){return {i:i,p:s.n?s.ok/s.n:1,s:s}}).filter(function(x){return x.p<0.7}).sort(function(a,b){return a.p-b.p}).slice(0,5);
   var win=result==='win';
-  var h=(win?'<h2>🎉 全班合力打倒大魔王！</h2><p class="note" style="font-size:1.2rem">菸、酒、檳榔惡魔都被趕走了，大家一起說「不」！</p>'
+  var h=(win?'<h2>🎉 全班合力打倒'+esc(PK.boss||'大魔王')+'！</h2><p class="note" style="font-size:1.2rem">'+esc(PK.winLine||'')+'</p>'
           :'<h2>魔王逃走了……</h2><p class="note" style="font-size:1.2rem">魔王還剩 '+G.hp+' 點血。複習下面的題目，下次一定打得倒！</p>')+
     '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>'+
     '<div class="stat"><div><b>'+G.stats.length+'</b>題</div><div><b>'+pct+'%</b>全班答對率</div><div><b>'+(G.max-Math.max(0,G.hp))+'</b>總傷害</div><div><b>'+G.seats.length+'</b>位勇者</div></div>';
@@ -529,7 +541,7 @@ function finishFree(result){
     list=list||[];
     var hard=list.filter(function(x){return x.n>=2&&x.ok/x.n<0.7}).slice(0,6);
     var win=result==='win';
-    var h=(win?'<h2>🎉 全班合力打倒大魔王！</h2><p class="note" style="font-size:1.2rem">菸、酒、檳榔惡魔都被趕走了，大家一起說「不」！</p>'
+    var h=(win?'<h2>🎉 全班合力打倒'+esc(PK.boss||'大魔王')+'！</h2><p class="note" style="font-size:1.2rem">'+esc(PK.winLine||'')+'</p>'
             :'<h2>時間到，魔王逃走了……</h2><p class="note" style="font-size:1.2rem">魔王還剩 '+G.hp+' 點血。複習下面的題目，下次一定打得倒！</p>')+
       '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>'+
       '<div class="stat"><div><b>'+ans+'</b>全班作答題數</div><div><b>'+pct+'</b>一次答對率</div><div><b>'+(G.max-Math.max(0,G.hp))+'</b>總傷害</div><div><b>'+G.seats.length+'</b>位勇者</div></div>'+

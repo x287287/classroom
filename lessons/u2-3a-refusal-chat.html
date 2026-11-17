@@ -33,6 +33,15 @@
 .tog .row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
 .tog .row span.l{min-width:3.5em;font-weight:700}
 </style>
+<style>
+/* 第 3／4 站「交給老師」的輸入欄 */
+.wk{display:grid;gap:.9rem;margin-top:1rem}
+.wk label{display:grid;gap:.35rem;font-weight:700}
+.wk .txt,.wk select{width:100%;font:inherit;font-size:1.2rem;padding:.55rem .8rem;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);min-height:3rem}
+.wk textarea.txt{min-height:5.2rem;resize:vertical;line-height:1.6}
+.wk .two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:.9rem}
+.wk .hint{font-weight:400;color:var(--muted);font-size:.95rem}
+</style>
 </head>
 <body class="u2">
 
@@ -45,6 +54,7 @@
       <a href="#chat"><span class="no">第 1 站</span><b>模擬對話</b><span>收集八種方法</span></a>
       <a href="#tricks"><span class="no">第 2 站</span><b>常見的話術</b><span>對方會怎麼說</span></a>
       <a href="#pose"><span class="no">第 3 站</span><b>拒絕的樣子</b><span>眼神、語氣、態度</span></a>
+      <a href="#send"><span class="no">第 4 站</span><b>我的拒絕劇本</b><span>寫好交給老師</span></a>
     </nav>
   </div>
 </header>
@@ -107,7 +117,23 @@
  </div>
 </section>
 
-<section class="k-sec alt" id="quiz">
+<section class="k-sec alt" id="send">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>我的拒絕劇本</h2></div>
+  <p class="big">選一個你可能遇到的情境，挑<b>兩種</b>天龍八不的方法，用<b>自己的話</b>寫出你會怎麼說。寫好選班級和座號，交給老師！</p>
+  <div class="wk">
+    <label>情境<select id="wSitu"></select></label>
+    <label id="wOtherL" hidden>自己寫情境<input class="txt" id="wOther" maxlength="30" placeholder="例如：哥哥的朋友請我吃檳榔"></label>
+    <div class="two2">
+      <div class="wk" style="margin:0"><label>第一招<select id="wM1"></select></label><label>我會說：<textarea class="txt" id="wT1" maxlength="60" placeholder="用自己的話寫"></textarea></label></div>
+      <div class="wk" style="margin:0"><label>第二招<select id="wM2"></select></label><label>我會說：<textarea class="txt" id="wT2" maxlength="60" placeholder="用自己的話寫"></textarea></label></div>
+    </div>
+  </div>
+  <div id="submitBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">挑戰</span><h2>這是哪一種拒絕法？</h2></div>
   <div id="quizBox"></div>
@@ -120,6 +146,7 @@
 </footer>
 
 <script src="../assets/kit.js"></script>
+<script src="../assets/submit.js"></script>
 <script>
 var M=['堅持拒絕法','告知理由法','友誼勸服法','遠離現場法','自我解嘲法','轉移話題法','反說服法','反激將法'];
 var T={
@@ -180,6 +207,35 @@ function kid(){var s='<rect width="280" height="320" fill="var(--surface)"/>';
   else{m.className='say';m.innerHTML='<div class="t">看起來不太確定</div><p>'+(!P.eye?'眼睛看地上，對方會覺得你不是真的想拒絕。':'')+(!P.voice?'小聲猶豫的語氣，對方會覺得再拜託一下就好了。':'')+'</p>'}
 }
 document.querySelectorAll('.tog .chip').forEach(function(b){b.addEventListener('click',function(){P[b.dataset.g]=+b.dataset.v;kid()})});kid();
+
+/* 第 4 站：我的拒絕劇本（assets/submit.js） */
+(function(){
+  function $(id){return document.getElementById(id)}
+  var situ=$('wSitu');
+  Object.keys(T).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=T[k].who+'請我'+(k==='wine'?'喝':k==='betel'?'嚼':'試')+T[k].n;situ.appendChild(o)});
+  var oo=document.createElement('option');oo.value='other';oo.textContent='我自己寫一個情境';situ.appendChild(oo);
+  [$('wM1'),$('wM2')].forEach(function(sel,j){M.forEach(function(m,i){var o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+m;sel.appendChild(o)});sel.value=j?1:0});
+  function situText(){return situ.value==='other'?$('wOther').value.trim():situ.options[situ.selectedIndex].textContent}
+  situ.addEventListener('change',function(){$('wOtherL').hidden=situ.value!=='other';SUB.refresh()});
+  var SUB=SUBMIT.mount($('submitBox'),{
+    assignment:'u2-3a-script',
+    collect:function(who){
+      var s=situText(),t1=$('wT1').value.trim(),t2=$('wT2').value.trim(),m1=+$('wM1').value,m2=+$('wM2').value;
+      if(!s||t1.length<2||t2.length<2||m1===m2)return null;
+      var by=who.seat?who.cls+' '+who.seat+' 號':'';
+      return {title:'我的拒絕劇本',
+        svg:SUBMIT.card({title:'我的拒絕劇本',by:by,color:'#2A7563',rows:[{h:'情境',t:s},{h:'第一招：'+M[m1],t:'「'+t1+'」'},{h:'第二招：'+M[m2],t:'「'+t2+'」'}]}),
+        lines:['情境：'+s,M[m1]+'：「'+t1+'」',M[m2]+'：「'+t2+'」','對話收集冊：'+Object.keys(got).length+' / 8 種']};
+    },
+    preview:function(d){
+      if(!d){var miss=[];if(!situText())miss.push('寫下情境');if($('wM1').value===$('wM2').value)miss.push('兩招要選不同的方法');if($('wT1').value.trim().length<2||$('wT2').value.trim().length<2)miss.push('兩招都要寫出你會怎麼說');
+        return '<b style="color:var(--bad)">還差一點：</b><ul style="margin:.3rem 0 0;padding-left:1.3em">'+miss.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul>'}
+      return '<img alt="我的拒絕劇本" style="width:min(100%,420px);border-radius:10px;display:block;margin:0 auto" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(d.svg)+'">';
+    }
+  });
+  ['wOther','wT1','wT2'].forEach(function(id){$(id).addEventListener('input',function(){SUB.refresh()})});
+  ['wM1','wM2'].forEach(function(id){$(id).addEventListener('change',function(){SUB.refresh()})});
+})();
 
 KIT.quiz(document.getElementById('quizBox'),[
   {q:'「我想上廁所，我先離開了。」是哪一種方法？',o:['遠離現場法','反說服法','堅持拒絕法'],a:0,e:'找理由離開讓你為難的地方。'},

@@ -109,6 +109,8 @@
     top.appendChild(h); top.appendChild(meta); top.appendChild(bQR); top.appendChild(bSeat); top.appendChild(bSort); top.appendChild(bOpen); top.appendChild(bX);
     var main = el("div", "fb-main"), grid = el("div", "fb-grid"), qr = el("aside", "fb-qr");
     var url = studentUrl(board.id);
+    /* 課堂房間：學生平板自動打開這個想法牆 */
+    if (window.CLS_LIVE && window.CLS_LIVE.push && window.CLS_LIVE.id) window.CLS_LIVE.push("fb.html?b=" + encodeURIComponent(board.id), board.title);
     qr.innerHTML = '<b>用平板掃描</b><div class="code"></div><div class="url">' + esc(url) + "</div><span>寫下你的想法，幫最好的想法按讚！</span>";
     drawQR(qr.querySelector(".code"), url);
     main.appendChild(grid); main.appendChild(qr);
@@ -168,7 +170,7 @@
   }
   function closeWall() {
     if (wallTimer) clearInterval(wallTimer); wallTimer = null;
-    if (wall) wall.remove(); wall = null;
+    if (wall) { wall.remove(); wall = null; if (window.CLS_LIVE && window.CLS_LIVE.pushHere && window.CLS_LIVE.id) window.CLS_LIVE.pushHere(); }
     document.documentElement.classList.remove("ct-wb-open");
   }
 

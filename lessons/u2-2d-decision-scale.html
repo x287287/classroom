@@ -25,6 +25,15 @@
 .steps5 div.on{border-color:var(--accent);background:var(--accent-soft)}
 .steps5 b{display:block;font-family:var(--font-display);font-weight:400;font-size:1rem}
 </style>
+<style>
+/* 第 3／4 站「交給老師」的輸入欄 */
+.wk{display:grid;gap:.9rem;margin-top:1rem}
+.wk label{display:grid;gap:.35rem;font-weight:700}
+.wk .txt,.wk select{width:100%;font:inherit;font-size:1.2rem;padding:.55rem .8rem;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);min-height:3rem}
+.wk textarea.txt{min-height:5.2rem;resize:vertical;line-height:1.6}
+.wk .two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr));gap:.9rem}
+.wk .hint{font-weight:400;color:var(--muted);font-size:.95rem}
+</style>
 </head>
 <body class="u2">
 
@@ -36,6 +45,7 @@
     <nav class="k-nav" aria-label="章節">
       <a href="#scale"><span class="no">第 1 站</span><b>放上天秤</b><span>三個新情境</span></a>
       <a href="#first"><span class="no">第 2 站</span><b>第一口從哪裡來</b><span>小心身邊的邀請</span></a>
+      <a href="#send"><span class="no">第 3 站</span><b>我的決定單</b><span>寫好交給老師</span></a>
     </nav>
   </div>
 </header>
@@ -91,7 +101,19 @@
  </div>
 </section>
 
-<section class="k-sec" id="quiz">
+<section class="k-sec" id="send">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>我的決定單</h2></div>
+  <p class="big">在第 1 站放好天秤、按「我做好決定了」，這裡會自動帶入你的決定。再寫下<b>你會怎麼對邀請你的人說</b>，選班級和座號交給老師。</p>
+  <div class="panel" id="decSum" style="margin-top:1rem"></div>
+  <div class="wk">
+    <label>我會這樣對他說：<textarea class="txt" id="wSay" maxlength="60" placeholder="例如：謝謝你，但我不想喝，我們去吃蛋糕吧！"></textarea></label>
+  </div>
+  <div id="submitBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
  <div class="wrap">
   <div class="k-sec-head"><span class="no">挑戰</span><h2>做決定小測驗</h2></div>
   <div id="quizBox"></div>
@@ -104,6 +126,7 @@
 </footer>
 
 <script src="../assets/kit.js"></script>
+<script src="../assets/submit.js"></script>
 <script>
 var SC=[
   {n:'生日派對的水果酒',s:'同學的生日派對上，有人拿出粉紅色的水果酒說：「這甜甜的，跟果汁一樣，喝一點啦！」',L:'喝一口',R:'拒絕',
@@ -116,7 +139,7 @@ var SC=[
    l:['香香的，好像很好玩','表哥說沒有害','拒絕會很尷尬'],
    r:['電子煙在台灣全面禁止，使用違法','裡面有尼古丁，一樣會上癮','香味只是蓋住了有害物質','可以跟表哥說：「我們去打球啦！」']}
 ];
-var cur=0,W={};
+var cur=0,W={},DEC=null;
 function pick(){var p=document.getElementById('pick');p.innerHTML='';SC.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',i===cur?'true':'false');b.textContent='情境 '+(i+1)+'：'+s.n;b.addEventListener('click',function(){cur=i;W={};build()});p.appendChild(b)})}
 function stars(n){return n?'★'.repeat(n)+'<span style="opacity:.25">'+'★'.repeat(3-n)+'</span>':'<span style="opacity:.3">☆☆☆</span>'}
 function build(){
@@ -132,12 +155,46 @@ document.getElementById('decide').addEventListener('click',function(){
   var s=SC[cur],wl=0,wr=0;Object.keys(W).forEach(function(k){if(k[0]==='l')wl+=W[k];else wr+=W[k]});
   var m=document.getElementById('msg');document.querySelectorAll('#s5 div').forEach(function(d){d.classList.add('on')});
   if(wl+wr===0){m.className='say';m.innerHTML='<div class="t">先比較優缺點</div><p>點兩邊的理由卡，幫每個理由加上重要程度。</p>';document.querySelectorAll('#s5 div').forEach(function(d,i){d.classList.toggle('on',i<2)});return}
+  DEC={sc:cur,wl:wl,wr:wr,W:JSON.parse(JSON.stringify(W))};if(window.decSum)decSum();
   if(wr>wl){m.className='say good';m.innerHTML='<div class="t">決定：'+s.R+'</div><p>天秤倒向「'+s.R+'」。這個決定保護了你的健康，也遵守了法律，<b>是一個健康的好決定！</b>拒絕時記得：眼神真誠、語氣溫和堅定、態度有禮貌。</p>'}
   else if(wr===wl){m.className='say';m.innerHTML='<div class="t">天秤一樣重</div><p>再想一想：哪一邊的理由跟<b>健康和安全</b>有關？那些理由應該比較重要喔。</p>'}
   else{m.className='say bad';m.innerHTML='<div class="t">天秤倒向「'+s.L+'」</div><p>步驟 5 問自己：<b>這是一個健康的好決定嗎？</b>「怕尷尬」、「好奇」的理由，真的比健康和法律更重要嗎？試著重新評估看看。</p>'}
 });
 document.getElementById('clear').addEventListener('click',function(){W={};build();var m=document.getElementById('msg');m.className='say';m.innerHTML='<div class="t">開始</div><p>讀完情境，幫兩邊的理由加上重要程度。</p>'});
 document.getElementById('clear').click();
+
+/* 第 3 站：我的決定單（assets/submit.js） */
+function decInfo(){
+  if(!DEC)return null;var s=SC[DEC.sc],side=DEC.wr>DEC.wl?'r':DEC.wl>DEC.wr?'l':'';
+  var top=null;if(side)s[side].forEach(function(t,i){var w=DEC.W[side+i]||0;if(w&&(!top||w>top.w))top={t:t,w:w}});
+  return {s:s,side:side,choice:side==='r'?s.R:side==='l'?s.L:'還沒決定（天秤一樣重）',top:top};
+}
+function decSum(){
+  var b=document.getElementById('decSum'),d=decInfo();
+  if(!d){b.innerHTML='<p style="margin:0">還沒有決定。請到第 1 站放好天秤，按「我做好決定了」。</p>';return}
+  b.innerHTML='<p style="margin:0"><b>情境：</b>'+d.s.n+'</p><p style="margin:.3rem 0 0"><b>我的決定：</b>'+d.choice+'（天秤 '+DEC.wl+' : '+DEC.wr+'）</p>'+(d.top?'<p style="margin:.3rem 0 0"><b>最重要的理由：</b>'+d.top.t+'</p>':'');
+  if(window.SUBD)SUBD.refresh();
+}
+var SUBD=SUBMIT.mount(document.getElementById('submitBox'),{
+  assignment:'u2-2d-decision',
+  collect:function(who){
+    var d=decInfo(),say=document.getElementById('wSay').value.trim();
+    if(!d||!d.side||say.length<2)return null;
+    var by=who.seat?who.cls+' '+who.seat+' 號':'';
+    var rows=[{h:'情境',t:d.s.s},{h:'我的決定',t:d.choice+'（天秤 '+DEC.wl+' : '+DEC.wr+'）'}];
+    if(d.top)rows.push({h:'最重要的理由',t:d.top.t});
+    rows.push({h:'我會這樣說',t:'「'+say+'」'});
+    return {title:'我的決定單',svg:SUBMIT.card({title:'我的決定單：'+d.s.n,by:by,color:'#2A7563',rows:rows}),
+      lines:['情境：'+d.s.n,'決定：'+d.choice+'（'+DEC.wl+' : '+DEC.wr+'）'].concat(d.top?['最重要的理由：'+d.top.t]:[]).concat(['我會這樣說：「'+say+'」'])};
+  },
+  preview:function(d){
+    if(!d){var di=decInfo(),miss=[];if(!di||!di.side)miss.push('回到第 1 站放好天秤，按「我做好決定了」（天秤不能一樣重）');if(document.getElementById('wSay').value.trim().length<2)miss.push('寫下你會怎麼說');
+      return '<b style="color:var(--bad)">還差一點：</b><ul style="margin:.3rem 0 0;padding-left:1.3em">'+miss.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul>'}
+    return '<img alt="我的決定單" style="width:min(100%,420px);border-radius:10px;display:block;margin:0 auto" src="data:image/svg+xml;charset=utf-8,'+encodeURIComponent(d.svg)+'">';
+  }
+});
+document.getElementById('wSay').addEventListener('input',function(){SUBD.refresh()});
+decSum();
 
 KIT.quiz(document.getElementById('quizBox'),[
   {q:'「做決定」的最後一步是什麼？',o:['趕快答應','問自己：這是一個健康的好決定嗎？','聽大家的'],a:1,e:'做完決定要再檢查一次。'},
