@@ -1,9 +1,10 @@
-/* 教室小書櫃｜上課工具視窗：計時器、抽籤、白板、畫筆
+/* 教室小書櫃｜上課工具視窗：計時器、抽籤、白板、畫筆、回饋（學生想法牆，assets/feedback.js）
    由 assets/home-fab.js 自動載入，每份教材打開時出現在右上角，可拖曳、可收起。
    位置、計時器、抽籤紀錄存在這台電腦（localStorage），換教材時會延續；白板和畫筆的內容只保留在目前這一頁。 */
 (function () {
   if (window.__classTools) return;
   window.__classTools = true;
+  var ME = document.currentScript && document.currentScript.src;
 
   /* ---------- 小工具 ---------- */
   function load(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
@@ -49,7 +50,7 @@
     ".ct-panel.collapsed .ct-mini:empty{display:none}",
     ".ct-panel.collapsed .ct-tog{min-width:0;min-height:44px;padding:0 14px;border-color:transparent;font-size:15px}",
     ".ct-panel.collapsed .ct-tabs,.ct-panel.collapsed .ct-body{display:none}",
-    ".ct-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 10px 0}",
+    ".ct-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:10px 10px 0}",
     ".ct-tabs button{min-height:46px;padding:0 2px;border-radius:12px;border:2px solid #C9DBD3;background:#F4F8F6;color:#1E3A34}",
     ".ct-tabs button[aria-selected=true]{background:#1E3A34;border-color:#1E3A34;color:#FFFFFF}",
     ".ct-tabs button .on{display:inline-block;width:8px;height:8px;border-radius:50%;background:#C4501E;margin-left:3px;vertical-align:2px}",
@@ -203,7 +204,7 @@
   var tabs = el("div", "ct-tabs");
   tabs.setAttribute("role", "tablist");
   var body = el("div", "ct-body");
-  var TABS = [["timer", "計時器"], ["draw", "抽籤"], ["board", "白板"], ["pen", "畫筆"]];
+  var TABS = [["timer", "計時器"], ["draw", "抽籤"], ["board", "白板"], ["pen", "畫筆"], ["fb", "回饋"]];
   var secs = {}, tabBtns = {};
   TABS.forEach(function (t) {
     var b = btn("", t[1]);
@@ -229,6 +230,7 @@
       secs[x[0]].hidden = x[0] !== t;
       tabBtns[x[0]].setAttribute("aria-selected", x[0] === t ? "true" : "false");
     });
+    if (t === "fb") loadFeedback();
     clampPos();
   }
   tabs.addEventListener("click", function (e) { var b = e.target.closest("button[data-t]"); if (b) showTab(b.dataset.t); });
@@ -926,6 +928,20 @@
     penS.strokes = penByPage[id] || [];
     penS.redraw(); penBar.render();
   });
+
+  /* 回饋分頁：第一次打開時才載入 assets/feedback.js；登入狀態改變時重畫 */
+  var fbLoading = false;
+  function loadFeedback() {
+    if (window.FB) { if (!secs.fb.firstChild) window.FB.panel(secs.fb); return; }
+    if (fbLoading) return; fbLoading = true;
+    secs.fb.innerHTML = '<p class="ct-note">載入中…</p>';
+    var s = document.createElement("script");
+    s.src = ME ? ME.replace(/class-tools\.js(\?.*)?$/, "feedback.js") : "../assets/feedback.js";
+    s.onload = function () { secs.fb.innerHTML = ""; if (window.FB) window.FB.panel(secs.fb); clampPos(); };
+    s.onerror = function () { fbLoading = false; secs.fb.innerHTML = '<p class="ct-note">載入失敗，請確認網路連線。</p>'; };
+    document.head.appendChild(s);
+  }
+  window.addEventListener("cls-status", function () { if (window.FB && secs.fb.firstChild) { window.FB.panel(secs.fb); } });
 
   /* 雲端同步（assets/sync.js）：別台電腦改了設定，這裡跟著更新 */
   window.addEventListener("cls-sync", function (e) {
