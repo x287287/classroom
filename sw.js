@@ -72,7 +72,8 @@ self.addEventListener("fetch", e => {
   /* 其他檔案：先抓最新版，抓不到或太慢就用存檔 */
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const net = fetch(req).then(r => {
+    /* no-cache：每次都向 GitHub 確認有沒有新版（瀏覽器自己的暫存最多會留 10 分鐘舊版） */
+    const net = fetch(req.url, { cache: "no-cache" }).then(r => {
       if (r.ok) cache.put(req, r.clone());
       return r;
     });
