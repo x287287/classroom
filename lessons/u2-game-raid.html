@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>全班共戰：打倒大魔王</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<!-- 第二單元統整遊戲「全班共戰」：大螢幕（老師帳號登入）出題，全班用平板同時作答（raid.html?r=房號），
+     答對的人數就是對大魔王的傷害；全班 8 成以上答對再多打 50%（暴擊）。魔王血量＝加入人數 × 難度（5／7／9）。
+     題庫和另外兩個版本共用 lessons/data/u2-game-questions.js。
+     資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop、raid_finish，
+     學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。 -->
+<style>
+:root{color-scheme:light;--ink:#1F2A27;--stage:#18213A;--stage2:#26345A;--line2:#3D4F7C;--gold:#FFD54F;--ok:#1E8A5A;--no:#C8414B;
+  --oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0;--oD:#0F766E}
+html,body{min-height:100%}
+body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#1E1630 55%,#0E0B18 100%) fixed;padding-bottom:90px}
+.app{max-width:1500px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-left,0px)) 0;display:grid;gap:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.top h1{font-size:clamp(1.4rem,2.6vw,2.2rem);color:var(--gold);text-shadow:0 3px 0 #0006;margin:0}
+.top .r{display:flex;gap:.5rem;flex-wrap:wrap}
+.top button{appearance:none;border:2px solid #5B4A7C;background:#2E2347;color:#fff;border-radius:999px;padding:.2rem 1.1rem;min-height:2.9rem;cursor:pointer;font-family:var(--font-display);font-size:1rem}
+.card{background:#fff;color:var(--ink);border-radius:24px;padding:clamp(16px,2.4vw,30px);box-shadow:0 14px 34px #0007}
+.card h2{margin:0;font-size:clamp(1.5rem,3vw,2.4rem);color:#7A2E8E}
+.setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:12px;margin-top:12px}
+.setgrid fieldset{border:2px solid #E3DDEB;border-radius:16px;padding:.6rem .8rem;margin:0}
+.setgrid legend{font-weight:700;padding:0 .3rem}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{appearance:none;border:2px solid #CFC6DD;background:#F7F4FB;color:var(--ink);border-radius:999px;min-height:2.9rem;padding:0 1rem;font:inherit;font-size:1.05rem;cursor:pointer}
+.seg button[aria-pressed=true]{background:#7A2E8E;border-color:#7A2E8E;color:#fff}
+.bigbtn{appearance:none;border:0;background:var(--gold);color:#3E2C00;border-radius:999px;min-height:3.8rem;padding:0 2.2rem;font-family:var(--font-display);font-size:clamp(1.3rem,2.2vw,1.7rem);cursor:pointer;box-shadow:0 5px 0 #B28704}
+.bigbtn:disabled{background:#CFC8B0;box-shadow:none;cursor:default;color:#5E5640}
+.sec{appearance:none;border:2px solid #7A2E8E;background:#fff;color:#7A2E8E;border-radius:999px;min-height:3rem;padding:0 1.4rem;font-family:var(--font-display);font-size:1.1rem;cursor:pointer}
+.note{color:#4A5550;font-size:1rem;line-height:1.7;margin:.6rem 0 0}
+/* 大廳 */
+.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;align-items:start}
+@media (max-width:900px){.lobby{grid-template-columns:minmax(0,1fr)}}
+.qrbox{text-align:center;display:grid;gap:8px}
+.qrbox .code svg{width:min(100%,380px);height:auto}
+.qrbox .rc{font-family:var(--font-display);font-size:clamp(2rem,4vw,3.2rem);letter-spacing:.3rem;color:#7A2E8E}
+.qrbox .url{font-size:.9rem;color:#4A5550;word-break:break-all}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;margin-top:10px}
+.seats span{display:grid;place-items:center;min-height:48px;border-radius:12px;background:#F1EDF6;color:#A79DB5;font-family:var(--font-display);font-size:1.2rem}
+.seats span.in{background:#7A2E8E;color:#fff;animation:pin .5s}
+@keyframes pin{0%{transform:scale(.5)}70%{transform:scale(1.15)}100%{transform:none}}
+.joined{font-family:var(--font-display);font-size:clamp(1.4rem,2.6vw,2rem)}
+/* 戰鬥 */
+.battle{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px;align-items:stretch}
+@media (max-width:1000px){.battle{grid-template-columns:minmax(0,1fr)}}
+.boss{position:relative;border-radius:24px;background:radial-gradient(circle at 50% 40%,#6A3D86 0%,#2E2347 72%);border:3px solid #5B4A7C;display:grid;gap:10px;align-content:center;justify-items:center;padding:16px;overflow:hidden;min-height:300px}
+.boss svg.bs{width:min(100%,360px);height:auto;filter:drop-shadow(0 12px 14px #000a)}
+.boss .bn{font-family:var(--font-display);font-size:clamp(1.3rem,2.4vw,1.9rem);color:var(--gold)}
+.hpw{width:100%}
+.hp{height:30px;border-radius:99px;background:#130E20;border:3px solid #5B4A7C;overflow:hidden}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#FF8A5B,#E2463F 60%,#B3125A);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.hpn{display:flex;justify-content:space-between;font-family:var(--font-display);font-size:1.15rem;margin-top:4px;color:#E6DDF3}
+.boss.hit svg.bs{animation:hit .6s}
+.boss.crit::after{content:"";position:absolute;inset:0;background:#FFD54F;opacity:0;animation:flash .5s}
+@keyframes hit{0%,100%{transform:none}15%{transform:translateX(-16px) rotate(-5deg)}45%{transform:translateX(16px) rotate(5deg)}75%{transform:translateX(-8px)}}
+@keyframes flash{30%{opacity:.45}100%{opacity:0}}
+.dmg{position:absolute;top:18%;left:0;right:0;text-align:center;font-family:var(--font-display);font-size:clamp(2.6rem,6vw,4.6rem);color:#FFE27A;text-shadow:0 4px 0 #7A1E3A,0 0 18px #F80;animation:dmg 1.6s forwards;pointer-events:none}
+@keyframes dmg{0%{transform:scale(.4);opacity:0}20%{transform:scale(1.2);opacity:1}100%{transform:translateY(-40px);opacity:0}}
+.qbox{display:grid;gap:14px;align-content:start}
+.qmeta{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap;font-size:1.1rem;color:#4A5550}
+.qmeta .pill{background:#F1EDF6;border-radius:999px;padding:.2rem .9rem;font-weight:700;color:#4A2B5E}
+.qt{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.6rem);line-height:1.45;color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.opts .o{position:relative;border-radius:18px;padding:.7rem 1rem .7rem 3.6rem;min-height:4.4rem;display:flex;align-items:center;color:#fff;font-size:clamp(1.15rem,2vw,1.6rem);line-height:1.4;overflow:hidden}
+.opts .o b{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);width:2.2rem;height:2.2rem;border-radius:50%;background:#fff3;display:grid;place-items:center;font-family:var(--font-display)}
+.opts .o .bar{position:absolute;left:0;bottom:0;height:6px;background:#fff9;transition:width .8s}
+.opts .o .n{margin-left:auto;padding-left:.8rem;font-family:var(--font-display);font-size:1.4rem}
+.opts .o.c0{background:var(--oA)}.opts .o.c1{background:var(--oB)}.opts .o.c2{background:var(--oC)}.opts .o.c3{background:var(--oD)}
+.opts.ox .o{justify-content:center;font-family:var(--font-display);font-size:clamp(2.4rem,5vw,4rem);padding-left:1rem}
+.opts.reveal .o{opacity:.35}
+.opts.reveal .o.right{opacity:1;box-shadow:0 0 0 5px var(--gold)}
+.opts.reveal .o.right::after{content:"✓ 正確答案";position:absolute;right:.8rem;top:.4rem;font-size:.9rem;background:var(--gold);color:#3E2C00;border-radius:999px;padding:.05rem .6rem}
+.status{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.clock{width:84px;height:84px;flex:none}
+.clock text{font-family:var(--font-display)}
+.ans{font-family:var(--font-display);font-size:clamp(1.3rem,2.4vw,1.9rem)}
+.ans small{font-family:inherit;font-size:.7em;color:#4A5550}
+.res{border-radius:16px;padding:.8rem 1rem;font-size:clamp(1.1rem,1.8vw,1.4rem);line-height:1.6;background:#E7F4EC;color:#14532D}
+.res.crit{background:#FFF3C4;color:#5B3F00}
+.res b{font-family:var(--font-display);font-weight:400}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* 結束 */
+.endc{text-align:center;display:grid;gap:14px}
+.endc .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:10px}
+.endc .stat div{background:#F1EDF6;border-radius:16px;padding:.6rem}
+.endc .stat b{display:block;font-family:var(--font-display);font-size:2.2rem;color:#4A2B5E}
+.review{text-align:left;display:grid;gap:8px}
+.review .it{border:2px solid #E3DDEB;border-radius:14px;padding:.6rem .9rem;font-size:1.05rem;line-height:1.6}
+.review .it .p{float:right;font-family:var(--font-display);color:#B3261E}
+[hidden]{display:none!important}
+.tdlg{position:fixed;inset:0;z-index:200;background:rgba(10,8,20,.75);display:grid;place-items:center;padding:16px}
+.tdlg .box{background:#fff;color:#1F2A27;border-radius:22px;max-width:780px;width:100%;max-height:90vh;overflow:auto;padding:22px 28px;font-size:1rem;line-height:1.7;text-align:left}
+.tdlg h2{margin:0 0 .3rem;font-family:var(--font-display);font-weight:400;font-size:1.6rem}
+.tdlg h3{margin:1rem 0 .2rem;font-size:1.15rem;color:#7A2E8E}
+.tdlg ul,.tdlg ol{margin:.2rem 0;padding-left:1.4rem}
+.tdlg .close{margin-top:1rem;appearance:none;border:0;background:#1F2A27;color:#fff;border-radius:999px;min-height:3rem;padding:0 1.6rem;font-family:var(--font-display);font-size:1.1rem;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.boss.hit svg.bs,.boss.crit::after,.dmg,.seats span.in{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><h1>⚔️ 全班共戰：打倒大魔王</h1><div class="r"><button type="button" id="bTeach">老師說明</button><button type="button" id="bFs">全螢幕</button></div></div>
+
+  <section class="card" id="scrLogin" hidden>
+    <h2>需要老師帳號</h2>
+    <p class="note">全班共戰要用老師帳號開房間。請先到<a href="../index.html">書櫃首頁</a>按「老師登入」，再回到這個遊戲。</p>
+  </section>
+
+  <section class="card" id="scrSetup" hidden>
+    <h2>開一場全班共戰</h2>
+    <p class="note">「菸、酒、檳榔」三隻惡魔合體成大魔王！全班用平板同時作答，每答對一個人就打魔王一下。全班 8 成以上答對，還會「暴擊」多打一半！</p>
+    <div class="setgrid">
+      <fieldset><legend>題數</legend><div class="seg" data-k="rounds"><button type="button" data-v="8">8 題</button><button type="button" data-v="12">12 題</button><button type="button" data-v="16">16 題</button></div></fieldset>
+      <fieldset><legend>每題時間</legend><div class="seg" data-k="secs"><button type="button" data-v="15">15 秒</button><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button><button type="button" data-v="0">不計時</button></div></fieldset>
+      <fieldset><legend>魔王強度</legend><div class="seg" data-k="hpper"><button type="button" data-v="5">簡單</button><button type="button" data-v="7">普通</button><button type="button" data-v="9">困難</button></div></fieldset>
+    </div>
+    <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bCreate">開房間</button><span class="note" id="setMsg" style="margin:0"></span></div>
+  </section>
+
+  <section class="card" id="scrLobby" hidden>
+    <div class="lobby">
+      <div class="qrbox"><b style="font-size:1.4rem">用平板掃描加入</b><div class="code" id="qr"></div><div>房號</div><div class="rc" id="roomCode"></div><div class="url" id="roomUrl"></div></div>
+      <div>
+        <div class="joined" id="joined">等待同學加入…</div>
+        <div class="seats" id="seatGrid"></div>
+        <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bStart" disabled>開始戰鬥！</button><button type="button" class="sec" id="bCancel">取消</button></div>
+        <p class="note">魔王血量會依加入人數決定。開始後還沒加入的同學也可以掃描加入，從下一題開始作答。</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="scrBattle" hidden>
+    <div class="battle">
+      <div class="boss" id="boss">
+        <svg class="bs" id="bossArt" viewBox="0 0 300 200" aria-hidden="true"></svg>
+        <div class="bn">三惡魔合體大魔王</div>
+        <div class="hpw"><div class="hp" role="progressbar" aria-label="魔王血量" aria-valuemin="0" id="hpBar"><i id="hpFill"></i></div><div class="hpn"><span id="hpText"></span><span id="roundText"></span></div></div>
+      </div>
+      <div class="card qbox">
+        <div class="qmeta"><span class="pill" id="qTag"></span><span id="qType"></span></div>
+        <div class="qt" id="qText"></div>
+        <div class="opts" id="opts"></div>
+        <div class="status" id="liveBox"><svg class="clock" viewBox="0 0 100 100" id="clock" aria-hidden="true"></svg><div class="ans" id="ansCount"></div><button type="button" class="sec" id="bStop" style="margin-left:auto">提前公布答案</button></div>
+        <div id="revealBox" hidden>
+          <div class="res" id="resText"></div>
+          <div class="row" style="margin-top:12px"><button type="button" class="bigbtn" id="bNext">下一題 →</button><span class="note" id="qrHint" style="margin:0"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card endc" id="scrEnd" hidden></section>
+</div>
+
+<div class="tdlg" id="tDlg" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
+  <h2 id="tT">老師說明：全班共戰打倒大魔王</h2>
+  <h3>這是什麼</h3>
+  <ul><li>第二單元〈拒菸拒酒拒檳榔〉統整遊戲的全班合作版（課本 p.30–53）。題庫和「趕走三惡魔」兩個版本相同。</li>
+  <li>大螢幕出題，每位學生用自己的平板同時作答。答對的人數就是對魔王的傷害，全班 8 成以上答對再多打 50%（暴擊）。題目出完前把魔王血量打到 0 就獲勝。</li></ul>
+  <h3>怎麼開始</h3>
+  <ol><li>這台電腦要先在書櫃首頁登入老師帳號。</li>
+  <li>選題數、每題時間、魔王強度，按「開房間」。</li>
+  <li>學生用平板掃 QR Code（或打開網站的 raid.html 輸入房號），選自己的座號加入。</li>
+  <li>大家都加入後按「開始戰鬥」。魔王血量＝加入人數 × 強度（簡單 5、普通 7、困難 9）。</li>
+  <li>時間到或全班都作答完，會自動公布答案和每個選項的人數，再按「下一題」。</li></ol>
+  <h3>時間安排</h3>
+  <ul><li>12 題、每題 20 秒，加上公布與講解，約 15～20 分鐘。只有 10 分鐘就選 8 題。</li>
+  <li>公布答案時，可以請選錯最多的那一組說說看為什麼，再看說明。</li></ul>
+  <h3>小提醒</h3>
+  <ul><li>平板只用座號加入，不輸入姓名；大螢幕不會顯示個人成績，只顯示全班答對人數。</li>
+  <li>同一個座號只能在一台平板加入。如果學生選錯座號，請他按「換座號」重選。</li>
+  <li>網路斷線的平板，重新連上後會自動回到目前的題目。</li>
+  <li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js）。</li></ul>
+  <button type="button" class="close">關閉</button>
+</div></div>
+
+<script src="data/u2-game-questions.js"></script>
+<script src="../assets/vendor/qrcode.js"></script>
+<script>
+var DM=[
+  {k:'smoke',n:'菸惡魔',c:'#9C8CB9',art:function(c){return '<circle cx="50" cy="55" r="34" fill="'+c+'"/><circle cx="28" cy="40" r="18" fill="'+c+'"/><circle cx="72" cy="40" r="18" fill="'+c+'"/><rect x="20" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(-20 25 23)"/><rect x="70" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(20 75 23)"/><rect x="18" y="6" width="10" height="6" fill="#FF7043" transform="rotate(-20 23 9)"/><rect x="72" y="6" width="10" height="6" fill="#FF7043" transform="rotate(20 77 9)"/><circle cx="40" cy="52" r="6" fill="#fff"/><circle cx="60" cy="52" r="6" fill="#fff"/><circle cx="41" cy="53" r="3" fill="#222"/><circle cx="61" cy="53" r="3" fill="#222"/><path d="M38 72 q12 -8 24 0" stroke="#222" stroke-width="3" fill="none"/>'}},
+  {k:'wine',n:'酒惡魔',c:'#D8708A',art:function(c){return '<rect x="38" y="6" width="24" height="22" rx="4" fill="'+c+'"/><path d="M30 28 h40 q8 10 8 22 v34 q0 8 -8 8 h-40 q-8 0 -8 -8 v-34 q0 -12 8 -22z" fill="'+c+'"/><rect x="30" y="56" width="40" height="18" fill="#fff" opacity=".85"/><path d="M26 32 l-10 -14 M74 32 l10 -14" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="44" r="5" fill="#fff"/><circle cx="58" cy="44" r="5" fill="#fff"/><circle cx="43" cy="45" r="2.5" fill="#222"/><circle cx="59" cy="45" r="2.5" fill="#222"/><text x="50" y="70" text-anchor="middle" font-size="11" fill="'+c+'">酒</text>'}},
+  {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
+];
+var Q=window.GAME_QUESTIONS||[];
+var SET={rounds:12,secs:20,hpper:7};
+try{var _s=JSON.parse(localStorage.getItem('raidSet')||'null');if(_s)SET=Object.assign(SET,_s)}catch(e){}
+var G=null; /* {room, rounds, list:[問題], stats:[], seats:[], lastSeats, poll} */
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function show(id){['scrLogin','scrSetup','scrLobby','scrBattle','scrEnd'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0)}
+function api(path,body,method){
+  return window.CLS.api(path,{method:method||'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body)})
+    .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});return r.text().then(function(t){return t?JSON.parse(t):null})});
+}
+function rpc(fn,args){return api('rest/v1/rpc/'+fn,args)}
+var LABEL=['A','B','C','D'];
+var DNAME={smoke:'菸惡魔',wine:'酒惡魔',betel:'檳榔惡魔'};
+
+/* 合體大魔王：三隻惡魔疊在一起，戴著王冠 */
+(function(){
+  var art=function(k){var d=DM.filter(function(x){return x.k===k})[0];return d.art(d.c)};
+  $('bossArt').innerHTML='<g transform="translate(10 40) scale(1.25)">'+art('smoke')+'</g><g transform="translate(165 40) scale(1.25)">'+art('betel')+'</g>'+
+    '<g transform="translate(80 18) scale(1.45)">'+art('wine')+'</g>'+
+    '<path d="M110 22 h80 l-10 -22 l-15 12 l-15 -18 l-15 18 l-15 -12 z" fill="#FFD54F" stroke="#C79100" stroke-width="3"/>';
+})();
+
+/* 設定按鈕 */
+[].forEach.call(document.querySelectorAll('.seg'),function(seg){
+  var k=seg.dataset.k;
+  function paint(){[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[k]))})}
+  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SET[k]=+b.dataset.v;try{localStorage.setItem('raidSet',JSON.stringify(SET))}catch(x){}paint()});
+  paint();
+});
+
+/* 等 sync.js 載入、確認老師帳號 */
+var authTries=0;
+function checkAuth(){
+  if(G)return;
+  if(window.CLS&&window.CLS.isTeacher){show('scrSetup');return}
+  if(window.CLS&&authTries>12){show('scrLogin');return}
+  authTries++;setTimeout(checkAuth,400);
+}
+window.addEventListener('cls-status',function(){if(!G)checkAuth()});
+checkAuth();
+
+/* 選題：三隻惡魔平均出題 */
+function pick(n){
+  var by={smoke:shuf(Q.filter(function(q){return q.d==='smoke'})),wine:shuf(Q.filter(function(q){return q.d==='wine'})),betel:shuf(Q.filter(function(q){return q.d==='betel'}))};
+  var keys=['smoke','wine','betel'],out=[],i=0;
+  while(out.length<n&&(by.smoke.length||by.wine.length||by.betel.length)){var k=keys[i%3];if(by[k].length)out.push(by[k].shift());i++}
+  return out;
+}
+
+$('bCreate').addEventListener('click',function(){
+  var b=this;b.disabled=true;$('setMsg').textContent='建立中…';
+  api('rest/v1/raid_rooms',{game:'u2',rounds:SET.rounds}).then(function(d){
+    var room=d[0];
+    G={room:room.id,rounds:SET.rounds,secs:SET.secs,hpper:SET.hpper,list:pick(SET.rounds),stats:[],seats:[],cur:null,phase:'lobby',hp:0,max:0};
+    var url=new URL('../raid.html?r='+room.id,location.href).href;
+    $('roomCode').textContent=room.id;$('roomUrl').textContent=url;
+    try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
+    $('qrHint').textContent='還沒加入的同學：打開 raid.html，輸入房號 '+room.id;
+    show('scrLobby');startPoll();
+  }).catch(function(){b.disabled=false;$('setMsg').textContent='建立失敗，請確認網路與老師帳號後再試一次。'});
+});
+$('bCancel').addEventListener('click',function(){
+  if(G)rpc('raid_finish',{p_room:G.room,p_result:'cancel'}).catch(function(){});
+  stopPoll();G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup');
+});
+
+/* 輪詢 */
+function startPoll(){stopPoll();G.poll=setInterval(tick,1000);tick()}
+function stopPoll(){if(G&&G.poll){clearInterval(G.poll);G.poll=null}}
+var busy=false;
+function tick(){
+  if(!G||busy)return;
+  rpc('raid_host',{p_room:G.room}).then(function(h){
+    if(!G||!h)return;
+    G.seats=h.seats||[];
+    if(G.phase==='lobby')drawLobby();
+    else if(G.phase==='question'){
+      drawLive(h.answered,h.left);
+      var all=G.seats.length>0&&h.answered>=G.seats.length;
+      var timeUp=G.secs>0&&h.left===0;
+      if(all||timeUp)reveal();
+    }
+  }).catch(function(){});
+}
+function drawLobby(){
+  var n=G.seats.length;
+  $('joined').textContent=n?('已加入 '+n+' 位同學'):'等待同學加入…';
+  var g=$('seatGrid'),had=G.lastSeats||[];
+  var max=Math.max(30,G.seats.length?G.seats[G.seats.length-1]:0);
+  var h='';for(var i=1;i<=max;i++){var on=G.seats.indexOf(i)>=0;h+='<span class="'+(on?'in':'')+'"'+(on&&had.indexOf(i)>=0?' style="animation:none"':'')+'>'+i+'</span>'}
+  g.innerHTML=h;G.lastSeats=G.seats.slice();
+  $('bStart').disabled=!n;
+}
+
+/* 開始／下一題 */
+$('bStart').addEventListener('click',function(){nextQ()});
+$('bNext').addEventListener('click',function(){
+  if(G.hp<=0)return finish('win');
+  if(G.stats.length>=G.rounds)return finish('lose');
+  nextQ();
+});
+function nextQ(){
+  var q=G.list[G.stats.length];if(!q){return finish(G.hp<=0?'win':'lose')}
+  var payload,ans,opts;
+  if(q.ox){payload={q:q.q,ox:1,d:q.d};ans=q.a?0:1;opts=['O','X'];} /* O 在第 0 格、X 在第 1 格 */
+  else{
+    var order=shuf(q.o.map(function(t,i){return i}));
+    opts=order.map(function(i){return q.o[i]});ans=order.indexOf(q.a);payload={q:q.q,o:opts,d:q.d};
+  }
+  G.cur={q:q,opts:opts,ans:ans,ox:!!q.ox};
+  busy=true;$('bStart').disabled=true;$('bNext').disabled=true;
+  rpc('raid_next',{p_room:G.room,p_question:payload,p_answer:{a:ans,e:q.e},p_seconds:G.secs,p_hp_per:G.hpper}).then(function(h){
+    busy=false;$('bNext').disabled=false;
+    if(!h)throw new Error('next failed');
+    G.phase='question';G.hp=h.hp;G.max=h.max_hp;G.seats=h.seats||G.seats;
+    drawQuestion();drawHp(false);drawLive(0,h.left);show('scrBattle');
+  }).catch(function(){busy=false;$('bStart').disabled=false;$('bNext').disabled=false;alertMsg('出題失敗，請確認網路連線後再按一次。')});
+}
+function alertMsg(t){var r=$('resText');$('revealBox').hidden=false;r.className='res';r.textContent=t}
+function drawQuestion(){
+  var c=G.cur;
+  $('qTag').textContent='第 '+(G.stats.length+1)+' / '+G.rounds+' 題・'+DNAME[c.q.d];
+  $('qType').textContent=c.ox?'是非題：對的選 O，錯的選 X':'選擇題';
+  $('qText').textContent=c.q.q;
+  var o=$('opts');o.className='opts'+(c.ox?' ox':'');
+  o.innerHTML=c.opts.map(function(t,i){return '<div class="o c'+i+'">'+(c.ox?'':'<b>'+LABEL[i]+'</b>')+'<span>'+esc(t)+'</span><span class="n"></span><span class="bar" style="width:0"></span></div>'}).join('');
+  $('liveBox').hidden=false;$('revealBox').hidden=true;
+  $('roundText').textContent='第 '+(G.stats.length+1)+' / '+G.rounds+' 題';
+}
+function drawHp(anim){
+  var p=G.max?Math.max(0,G.hp)/G.max*100:100;
+  $('hpFill').style.width=p+'%';$('hpText').textContent='血量 '+Math.max(0,G.hp)+' / '+G.max;
+  $('hpBar').setAttribute('aria-valuemax',G.max);$('hpBar').setAttribute('aria-valuenow',Math.max(0,G.hp));
+}
+function drawLive(n,left){
+  var tot=G.seats.length;
+  $('ansCount').innerHTML=n+' / '+tot+' <small>位已作答</small>';
+  var c=$('clock');
+  if(G.secs>0&&left!=null){
+    var f=Math.max(0,Math.min(1,left/G.secs)),r=42,L=2*Math.PI*r;
+    c.innerHTML='<circle cx="50" cy="50" r="'+r+'" fill="#F1EDF6"/><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+(left<=5?'#C8414B':'#7A2E8E')+'" stroke-width="10" stroke-dasharray="'+(L*f)+' '+L+'" transform="rotate(-90 50 50)" stroke-linecap="round"/><text x="50" y="62" text-anchor="middle" font-size="34" fill="#1F2A27">'+left+'</text>';
+    c.style.display='';
+  }else c.style.display='none';
+}
+$('bStop').addEventListener('click',function(){reveal()});
+function reveal(){
+  if(!G||G.phase!=='question'||busy)return;
+  busy=true;G.phase='revealing';
+  rpc('raid_reveal',{p_room:G.room}).then(function(r){
+    busy=false;if(!r){G.phase='question';return}
+    G.phase='reveal';
+    var c=G.cur,dmg=r.damage;G.hp=r.hp;
+    var dist=r.dist||{};
+    var o=$('opts');o.classList.add('reveal');
+    [].forEach.call(o.children,function(el,i){
+      var key=String(i),cnt=dist[key]||0;
+      if(i===c.ans)el.classList.add('right');
+      el.querySelector('.n').textContent=cnt+' 人';
+      el.querySelector('.bar').style.width=(r.answered?cnt/r.answered*100:0)+'%';
+    });
+    G.stats.push({q:c.q.q,a:c.opts[c.ans],e:c.q.e,ok:r.ok,n:r.answered,pl:r.players});
+    var boss=$('boss');boss.classList.remove('hit','crit');void boss.offsetWidth;
+    if(dmg>0){boss.classList.add('hit');if(r.crit)boss.classList.add('crit');
+      var d=document.createElement('div');d.className='dmg';d.textContent=(r.crit?'暴擊！':'')+'-'+dmg;boss.appendChild(d);setTimeout(function(){d.remove()},1700)}
+    drawHp(true);
+    $('liveBox').hidden=true;$('revealBox').hidden=false;
+    var res=$('resText');res.className='res'+(r.crit?' crit':'');
+    res.innerHTML=(r.crit?'<b>🔥 全班 8 成以上答對，暴擊！</b><br>':'')+
+      '<b>'+r.ok+' / '+r.players+' 人答對</b>，打掉魔王 <b>'+dmg+'</b> 點血！'+
+      '<br>✓ 正確答案：<b>'+esc(c.opts[c.ans])+'</b>　'+esc(c.q.e);
+    var nb=$('bNext');
+    if(G.hp<=0)nb.textContent='🎉 打倒魔王了！看結果';
+    else if(G.stats.length>=G.rounds)nb.textContent='看結果';
+    else nb.textContent='下一題 →';
+  }).catch(function(){busy=false;G.phase='question'});
+}
+function finish(result){
+  stopPoll();
+  rpc('raid_finish',{p_room:G.room,p_result:result}).catch(function(){});
+  var tot=G.stats.reduce(function(s,x){return s+x.n},0),ok=G.stats.reduce(function(s,x){return s+x.ok},0);
+  var pct=tot?Math.round(ok/tot*100):0;
+  var hard=G.stats.map(function(s,i){return {i:i,p:s.n?s.ok/s.n:1,s:s}}).filter(function(x){return x.p<0.7}).sort(function(a,b){return a.p-b.p}).slice(0,5);
+  var win=result==='win';
+  var h=(win?'<h2>🎉 全班合力打倒大魔王！</h2><p class="note" style="font-size:1.2rem">菸、酒、檳榔惡魔都被趕走了，大家一起說「不」！</p>'
+          :'<h2>魔王逃走了……</h2><p class="note" style="font-size:1.2rem">魔王還剩 '+G.hp+' 點血。複習下面的題目，下次一定打得倒！</p>')+
+    '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>'+
+    '<div class="stat"><div><b>'+G.stats.length+'</b>題</div><div><b>'+pct+'%</b>全班答對率</div><div><b>'+(G.max-Math.max(0,G.hp))+'</b>總傷害</div><div><b>'+G.seats.length+'</b>位勇者</div></div>';
+  if(hard.length)h+='<h3 style="margin:0;text-align:left;color:#7A2E8E">📖 大家比較需要複習的題目</h3><div class="review">'+hard.map(function(x){return '<div class="it"><span class="p">'+Math.round(x.p*100)+'% 答對</span>'+esc(x.s.q)+'<br><b style="color:#1E8A5A">答案：'+esc(x.s.a)+'</b>　'+esc(x.s.e)+'</div>'}).join('')+'</div>';
+  else h+='<p class="note" style="font-size:1.2rem">每一題都有 7 成以上的同學答對，太厲害了！</p>';
+  h+='<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
+  var e=$('scrEnd');e.innerHTML=h;show('scrEnd');
+  $('bAgain').addEventListener('click',function(){G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
+}
+
+/* 全螢幕、老師說明 */
+$('bFs').addEventListener('click',function(){var d=document.documentElement;if(document.fullscreenElement)document.exitFullscreen();else if(d.requestFullscreen)d.requestFullscreen()});
+(function(){var d=$('tDlg'),last;function open(){last=document.activeElement;d.hidden=false;d.querySelector('.close').focus()}function close(){d.hidden=true;if(last)last.focus()}
+$('bTeach').addEventListener('click',open);d.querySelector('.close').addEventListener('click',close);
+d.addEventListener('click',function(e){if(e.target===d)close()});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!d.hidden)close()})})();
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>全班共戰：打倒大魔王</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<!-- 全班共戰（lessons/u2-game-raid.html）的學生平板頁：raid.html?r=房號。
+     先選座號加入（同一座號只能在一台平板），再跟著大螢幕作答；公布時顯示自己的對錯與說明。
+     只呼叫 Supabase RPC：raid_join、raid_state、raid_answer；不傳姓名。裝置代碼與想法牆共用 fbDevice，座號記在 raidSeat:<房號>。 -->
+<style>
+:root{--ink:#1F2A27;--muted:#4A5550;--gold:#FFD54F;--ok:#1E8A5A;--no:#C8414B;--oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0;--oD:#0F766E;
+  --font:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;color:#fff;font:400 18px/1.6 var(--font);background:radial-gradient(900px 600px at 50% -10%,#4A2B5E 0%,#1E1630 60%,#0E0B18 100%) fixed}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 40px;display:grid;gap:14px}
+h1{margin:0;font-size:clamp(20px,5vw,28px);color:var(--gold)}
+.card{background:#fff;color:var(--ink);border-radius:22px;padding:16px;display:grid;gap:12px}
+.card h2{margin:0;font-size:22px;color:#7A2E8E}
+.muted{color:var(--muted);font-size:15px;margin:0}
+.code{display:flex;gap:8px}
+.code input{flex:1;font:inherit;font-size:28px;letter-spacing:.3rem;text-align:center;border:2px solid #CFC6DD;border-radius:14px;padding:8px;min-width:0}
+button{appearance:none;font:700 19px/1.2 var(--font);cursor:pointer;border-radius:999px;min-height:52px;padding:0 20px;border:0;background:#7A2E8E;color:#fff}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:10px}
+.seats button{min-height:62px;padding:0;font-size:24px;background:#F1EDF6;color:#4A2B5E}
+.me{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700}
+.me button{min-height:42px;font-size:15px;padding:0 14px;background:transparent;border:2px solid #8E7AAE;color:#fff}
+.hud{display:flex;align-items:center;gap:12px}
+.hud svg{width:76px;height:auto;flex:none}
+.hp{flex:1;height:22px;border-radius:99px;background:#130E20;border:2px solid #5B4A7C;overflow:hidden}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#FF8A5B,#E2463F 60%,#B3125A);transition:width .8s}
+.hpn{font-size:14px;color:#E6DDF3}
+.qt{font-size:clamp(20px,5.2vw,26px);line-height:1.5;font-weight:700}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:15px;color:var(--muted)}
+.left{font-weight:700;color:#7A2E8E}.left.hot{color:var(--no)}
+.opts{display:grid;gap:10px}
+.opts button{border-radius:18px;min-height:66px;text-align:left;padding:10px 14px 10px 58px;position:relative;font-size:clamp(18px,4.6vw,22px);line-height:1.4;font-weight:700}
+.opts button b{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:#fff3;display:grid;place-items:center}
+.opts button.c0{background:var(--oA)}.opts button.c1{background:var(--oB)}.opts button.c2{background:var(--oC)}.opts button.c3{background:var(--oD)}
+.opts.ox{grid-template-columns:1fr 1fr}
+.opts.ox button{text-align:center;padding:10px;font-size:48px;min-height:110px}
+.opts.done button{opacity:.35}
+.opts.done button.pick{opacity:1;box-shadow:0 0 0 5px var(--gold)}
+.wait{text-align:center;font-size:20px;font-weight:700;padding:10px}
+.big{font-size:56px;line-height:1.1;text-align:center}
+.rv{border-radius:16px;padding:12px 14px;font-size:18px;line-height:1.65}
+.rv.ok{background:#E7F4EC;color:#14532D}.rv.no{background:#FDE4E6;color:#7A1520}.rv.na{background:#F1EDF6;color:#4A2B5E}
+.rv b{font-size:22px}
+.msg{font-weight:700;color:var(--no);min-height:1.2em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚔️ 全班共戰：打倒大魔王</h1>
+
+  <section class="card" id="sCode" hidden>
+    <h2>輸入房號</h2>
+    <p class="muted">房號是老師大螢幕上的 6 位數字。</p>
+    <div class="code"><input id="codeIn" inputmode="numeric" maxlength="6" autocomplete="off" aria-label="房號"><button type="button" id="codeGo">加入</button></div>
+    <div class="msg" id="codeMsg"></div>
+  </section>
+
+  <section class="card" id="sSeat" hidden>
+    <h2>👋 選你的座號</h2>
+    <p class="muted">大螢幕只會顯示全班答對幾個人，不會顯示你的座號和成績。</p>
+    <div class="msg" id="seatMsg" aria-live="polite"></div>
+    <div class="seats" id="seats"></div>
+  </section>
+
+  <div id="sGame" hidden>
+    <div class="me" id="me"></div>
+    <div class="hud" style="margin-top:12px"><svg id="miniBoss" viewBox="0 0 300 200" aria-hidden="true"></svg><div style="flex:1"><div class="hp"><i id="hpFill"></i></div><div class="hpn" id="hpText"></div></div></div>
+    <section class="card" id="body" style="margin-top:12px"></section>
+  </div>
+</div>
+<script>
+var DM=[
+  {k:'smoke',n:'菸惡魔',c:'#9C8CB9',art:function(c){return '<circle cx="50" cy="55" r="34" fill="'+c+'"/><circle cx="28" cy="40" r="18" fill="'+c+'"/><circle cx="72" cy="40" r="18" fill="'+c+'"/><rect x="20" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(-20 25 23)"/><rect x="70" y="10" width="10" height="26" rx="3" fill="#fff" transform="rotate(20 75 23)"/><rect x="18" y="6" width="10" height="6" fill="#FF7043" transform="rotate(-20 23 9)"/><rect x="72" y="6" width="10" height="6" fill="#FF7043" transform="rotate(20 77 9)"/><circle cx="40" cy="52" r="6" fill="#fff"/><circle cx="60" cy="52" r="6" fill="#fff"/><circle cx="41" cy="53" r="3" fill="#222"/><circle cx="61" cy="53" r="3" fill="#222"/><path d="M38 72 q12 -8 24 0" stroke="#222" stroke-width="3" fill="none"/>'}},
+  {k:'wine',n:'酒惡魔',c:'#D8708A',art:function(c){return '<rect x="38" y="6" width="24" height="22" rx="4" fill="'+c+'"/><path d="M30 28 h40 q8 10 8 22 v34 q0 8 -8 8 h-40 q-8 0 -8 -8 v-34 q0 -12 8 -22z" fill="'+c+'"/><rect x="30" y="56" width="40" height="18" fill="#fff" opacity=".85"/><path d="M26 32 l-10 -14 M74 32 l10 -14" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="42" cy="44" r="5" fill="#fff"/><circle cx="58" cy="44" r="5" fill="#fff"/><circle cx="43" cy="45" r="2.5" fill="#222"/><circle cx="59" cy="45" r="2.5" fill="#222"/><text x="50" y="70" text-anchor="middle" font-size="11" fill="'+c+'">酒</text>'}},
+  {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
+];
+(function(){
+  var SB_URL="https://tsxbphngzuzpdddhadfw.supabase.co", SB_KEY="sb_publishable_EOXrx2SRQbFRHACqHbUUig_4e-EkgkE";
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function load(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+  function save(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function rpc(fn,a){return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(a),cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})}
+  var device=load("fbDevice",null);
+  if(!device){device="d"+Math.random().toString(36).slice(2,10)+Date.now().toString(36);save("fbDevice",device)}
+  var room=(new URLSearchParams(location.search).get("r")||"").replace(/\D/g,"");
+  var seat=0, st=null, sig="", timer=null, sending=false;
+  var LABEL=["A","B","C","D"];
+
+  var art=function(k){var d=DM.filter(function(x){return x.k===k})[0];return d.art(d.c)};
+  $("miniBoss").innerHTML='<g transform="translate(10 40) scale(1.25)">'+art("smoke")+'</g><g transform="translate(165 40) scale(1.25)">'+art("betel")+'</g><g transform="translate(80 18) scale(1.45)">'+art("wine")+'</g><path d="M110 22 h80 l-10 -22 l-15 12 l-15 -18 l-15 18 l-15 -12 z" fill="#FFD54F" stroke="#C79100" stroke-width="3"/>';
+
+  function show(id){["sCode","sSeat","sGame"].forEach(function(k){$(k).hidden=(k!==id)})}
+
+  /* 房號 */
+  function goRoom(code){room=code;history.replaceState(null,"","?r="+code);seat=+load("raidSeat:"+room,0)||0;
+    if(seat)join(seat);else{show("sSeat")}
+    poll();if(!timer)timer=setInterval(function(){if(!document.hidden)poll()},1200);}
+  $("codeGo").addEventListener("click",function(){var c=$("codeIn").value.replace(/\D/g,"");if(c.length!==6){$("codeMsg").textContent="請輸入 6 位數字的房號。";return}
+    rpc("raid_state",{p_room:c,p_seat:0,p_device:device}).then(function(d){if(!d){$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}goRoom(c)}).catch(function(){$("codeMsg").textContent="連線失敗，請再試一次。"})});
+
+  /* 座號 */
+  for(var i=1;i<=40;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");$("seats").appendChild(b)}
+  $("seats").addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;join(+b.dataset.s)});
+  function join(s){
+    $("seatMsg").textContent="加入中…";
+    rpc("raid_join",{p_room:room,p_seat:s,p_device:device}).then(function(r){
+      if(r==="ok"){seat=s;save("raidSeat:"+room,s);$("seatMsg").textContent="";sig="";drawMe();show("sGame");poll();return}
+      seat=0;save("raidSeat:"+room,null);show("sSeat");
+      $("seatMsg").textContent={seat_taken:s+" 號已經有人用別的平板加入了。請確認你的座號，或請老師幫忙。",ended:"這場遊戲已經結束了。",no_room:"找不到這個房間。",full:"人數已滿。"}[r]||"加入失敗，請再試一次。";
+    }).catch(function(){$("seatMsg").textContent="連線失敗，請再試一次。"});
+  }
+  function drawMe(){
+    $("me").innerHTML="<span>我是 "+seat+" 號</span>";
+    var c=document.createElement("button");c.type="button";c.textContent="選錯了，換座號";
+    c.addEventListener("click",function(){seat=0;save("raidSeat:"+room,null);$("seatMsg").textContent="";show("sSeat")});
+    $("me").appendChild(c);
+  }
+
+  /* 狀態 */
+  function poll(){
+    if(!room)return;
+    rpc("raid_state",{p_room:room,p_seat:seat||0,p_device:device}).then(function(d){
+      if(!d){show("sCode");$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}
+      st=d;
+      if(seat&&!d.joined&&d.status!=="end"){ join(seat); return; }
+      if(!seat){ if(d.status==="end"){show("sGame");$("me").innerHTML="";render()} return; }
+      show("sGame");render();
+    }).catch(function(){});
+  }
+  function hp(){var p=st.max_hp?Math.max(0,st.hp)/st.max_hp*100:100;$("hpFill").style.width=p+"%";$("hpText").textContent=st.max_hp?("魔王血量 "+Math.max(0,st.hp)+" / "+st.max_hp):"魔王血量：開始後依人數決定"}
+  function render(){
+    hp();
+    var key=[st.status,st.round,st.answered,st.my_correct,st.result,st.hp].join("|");
+    var b=$("body");
+    if(st.status==="question"&&!st.answered){
+      var lt=$("leftT");if(lt&&st.left!=null){lt.textContent="⏱ 剩 "+st.left+" 秒";lt.className="left"+(st.left<=5?" hot":"")}
+    }
+    if(key===sig)return; sig=key;
+    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div><p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
+    if(st.status==="end"){
+      var win=st.result==="win";
+      b.innerHTML='<div class="big">'+(win?"🎉":"💪")+'</div><div class="wait">'+(win?"全班合力打倒大魔王！":(st.result==="cancel"?"老師取消了這場遊戲":"魔王逃走了，下次再挑戰！"))+'</div>'+
+        (seat?'<div class="rv na">你答對了 <b>'+st.my_right+'</b> / '+st.my_total+' 題，打了魔王 '+st.my_right+' 下！</div>':'');
+      return;
+    }
+    var q=st.question||{};
+    var opts=q.ox?["O","X"]:(q.o||[]);
+    var h='<div class="meta"><span>第 '+st.round+' / '+st.rounds+' 題</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div><div class="qt">'+esc(q.q)+'</div>';
+    var mine=st.my_choice;
+    if(st.status==="question"){
+      h+='<div class="opts'+(q.ox?" ox":"")+(st.answered?" done":"")+'" id="opts">'+opts.map(function(t,i){return '<button type="button" class="c'+i+(st.answered&&mine===i?" pick":"")+'" data-i="'+i+'"'+(st.answered?" disabled":"")+'>'+(q.ox?"":"<b>"+LABEL[i]+"</b>")+esc(t)+'</button>'}).join("")+'</div>';
+      h+=st.answered?'<div class="wait">✓ 已送出！看大螢幕等老師公布答案</div>':'<div class="msg" id="ansMsg"></div>';
+    }else{
+      var a=st.answer||{},right=opts[a.a];
+      if(!st.answered)h+='<div class="rv na">這題你沒有作答。<br>正確答案：<b>'+esc(right)+'</b><br>'+esc(a.e)+'</div>';
+      else if(st.my_correct)h+='<div class="big">⚔️</div><div class="rv ok"><b>答對了！</b>你打了魔王一下！<br>'+esc(a.e)+'</div>';
+      else h+='<div class="rv no"><b>差一點！</b>正確答案是「'+esc(right)+'」。<br>'+esc(a.e)+'</div>';
+      h+='<p class="muted" style="text-align:center">看大螢幕，等老師出下一題</p>';
+    }
+    b.innerHTML=h;
+    var o=$("opts");
+    if(o&&!st.answered)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||sending)return;answer(+btn.dataset.i)});
+  }
+  function answer(i){
+    sending=true;
+    [].forEach.call($("opts").children,function(x){x.disabled=true});
+    rpc("raid_answer",{p_room:room,p_round:st.round,p_seat:seat,p_device:device,p_choice:i}).then(function(r){
+      sending=false;
+      if(r==="ok"||r==="already"){st.answered=true;st.my_choice=i;sig="";render();return}
+      var m={closed:"這題已經結束了。",late:"時間到了，來不及送出。",not_joined:"請重新選座號。"}[r]||"送出失敗，請再按一次。";
+      var am=$("ansMsg");if(am)am.textContent=m;
+      if(r==="not_joined"){join(seat)}
+      [].forEach.call($("opts").children,function(x){x.disabled=false});
+      poll();
+    }).catch(function(){sending=false;var am=$("ansMsg");if(am)am.textContent="網路不穩，請再按一次。";[].forEach.call($("opts").children,function(x){x.disabled=false})});
+  }
+
+  if(room.length===6)goRoom(room);else show("sCode");
+})();
+</script>
+</body>
+</html>
