@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="assets/fonts.css">
 <!-- 學生回饋：老師在上課工具「回饋」分頁開題目後，學生掃 QR Code 打開這頁（fb.html?b=代碼）。
      一打開先選座號（每個題目各記一次：fbSeat:<代碼>），再寫想法：每個座號只能有 1 則，要寫新的要先刪掉原本那則。
-     看全班的想法（匿名），幫最好的想法按讚（每個座號最多 3 個）。身分＝這台平板的代碼＋座號。
+     自己送出想法之後，才看得到全班的想法（匿名，fb_list 回傳 locked）並按讚（每個座號最多 3 個）；老師關閉回饋後全部看得到。身分＝這台平板的代碼＋座號。
      只呼叫 Supabase RPC：fb_list、fb_post、fb_delete、fb_like；不會傳出姓名，同學看不到座號。 -->
 <style>
 :root{--bg:#F3F1EA;--card:#FFFFFF;--ink:#1F2A27;--muted:#4A5A55;--line:#C9DBD3;--accent:#1E3A34;--good:#1E7A4F;--bad:#B3261E;--heart:#C2185B;
@@ -45,6 +45,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
 .like[aria-pressed=true]{background:var(--heart);color:#fff}
 .like.own{border-style:dashed}
 .empty{color:var(--muted);text-align:center;padding:16px}
+.lock{text-align:center;padding:22px 12px;border:2px dashed var(--line);border-radius:16px;color:var(--muted);font-weight:700;font-size:19px;line-height:1.6}
+.lock b{display:block;font-size:40px;line-height:1.2}
 .note{font-size:14px;color:var(--muted);margin:0}
 .seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
 .seats button{min-height:64px;padding:0;font-size:24px;background:#fff;color:var(--accent)}
@@ -87,7 +89,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   <section class="box" style="margin-top:16px">
     <div class="bar">
       <h2>全班的想法</h2>
-      <div class="sort"><button type="button" data-s="new" aria-pressed="true">最新</button><button type="button" data-s="likes" aria-pressed="false">最多讚</button></div>
+      <div class="sort" id="sortBox"><button type="button" data-s="new" aria-pressed="true">最新</button><button type="button" data-s="likes" aria-pressed="false">最多讚</button></div>
     </div>
     <div class="left" id="left" aria-live="polite"></div>
     <div class="list" id="list"><div class="empty">讀取中…</div></div>
@@ -157,6 +159,12 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
       }
     }
     $("send").disabled=!data.open;
+    $("sortBox").hidden=!!data.locked;
+    if(data.locked){
+      $("left").textContent="";
+      $("list").innerHTML='<div class="lock"><b>🔒</b>先送出你自己的想法，<br>才看得到全班的想法喔！'+(data.total?'<br><span style="font-size:16px">已經有 '+data.total+' 則想法</span>':'')+'</div>';
+      return;
+    }
     $("left").textContent=data.open?("❤️ 你還可以按 "+data.left+" 個讚（點一下愛心按讚，再點一下收回）"):"";
     var list=data.posts.slice();
     if(sortBy==="likes")list.sort(function(a,b){return b.likes-a.likes;}); else list.reverse();
