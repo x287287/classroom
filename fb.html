@@ -113,7 +113,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
 
   /* 第一步：選座號 */
   var seats=$("seats");
-  for(var i=1;i<=40;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");seats.appendChild(b);}
+  for(var i=1;i<=25;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");seats.appendChild(b);}
   seats.addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;seat=+b.dataset.s;save(SEAT_KEY,seat);$("msg").textContent="";showMain();pull();});
   function showSeat(){$("seatBox").hidden=false;$("mainBox").hidden=true;}
   function showMain(){

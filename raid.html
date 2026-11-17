@@ -135,7 +135,7 @@ var DM=[
     rpc("raid_state",{p_room:c,p_seat:0,p_device:device}).then(function(d){if(!d){$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}goRoom(c)}).catch(function(){$("codeMsg").textContent="連線失敗，請再試一次。"})});
 
   /* 座號 */
-  for(var i=1;i<=40;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");$("seats").appendChild(b)}
+  for(var i=1;i<=25;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");$("seats").appendChild(b)}
   $("seats").addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;join(+b.dataset.s)});
   function join(s){
     $("seatMsg").textContent="加入中…";
@@ -159,7 +159,7 @@ var DM=[
   function stopSay(){if(TTS)try{speechSynthesis.cancel()}catch(e){}}
   function speak(t){if(!TTS||!t)return;stopSay();setTimeout(function(){try{var u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:"zh-TW";if(voice)u.voice=voice;u.rate=0.85;speechSynthesis.speak(u)}catch(e){}},60)}
   function clean(t){return String(t||"").replace(/[_＿]{2,}|（\s*）|\(\s*\)/g,"，什麼，")}
-  function readCur(){if(!cur)return;var t=clean(cur.q)+"。";
+  function readCur(){if(!cur)return;var t=clean(cur.q);if(!/[。？！?!]$/.test(t))t+="。";
     if(cur.ox)t+="對的請選 O，錯的請選 X。";
     else cur.opts.forEach(function(o,i){if(cur.skip.indexOf(i)<0)t+=LABEL[i]+"，"+o+"。"});
     speak(t)}

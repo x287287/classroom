@@ -79,6 +79,12 @@ body{color:#fff;background:radial-gradient(1200px 600px at 50% -10%,#33497F 0%,v
 .review .it b{color:var(--ok)}
 .best{font-size:.95rem;color:#4A5550}
 [hidden]{display:none!important}
+.orow{display:grid;grid-template-columns:1fr 3.6rem;gap:8px;align-items:stretch}
+.opts .say,.sayrow button{appearance:none;border:3px solid #D9CFE6;background:#F1EDF6;color:#4A2B5E;border-radius:16px;font:inherit;cursor:pointer}
+.opts .say{padding:0;text-align:center;font-size:1.4rem;min-height:3.6rem}
+.sayrow{display:flex;gap:8px;flex-wrap:wrap}
+.sayrow button{min-height:2.9rem;padding:0 1rem;font-size:1.05rem;border-radius:999px}
+.sayrow button[aria-pressed="true"]{background:#4A2B5E;border-color:#4A2B5E;color:#fff}
 .tdlg{position:fixed;inset:0;z-index:200;background:rgba(10,15,30,.72);display:grid;place-items:center;padding:16px}
 .tdlg .box{background:#fff;color:#1F2A27;border-radius:22px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:22px 26px;font-size:1rem;line-height:1.7;text-align:left}
 .tdlg h2{margin:0 0 .3rem;font-family:var(--font-display);font-weight:400;font-size:1.6rem}
@@ -100,6 +106,7 @@ body{color:#fff;background:radial-gradient(1200px 600px at 50% -10%,#33497F 0%,v
       <li>你有 <b>5 顆愛心</b>。答錯會被惡魔打中，少 1 顆。</li>
       <li>每連續答對 3 題，第 3 題會「連擊」，打掉 2 點血！</li>
       <li>每題答完都會告訴你為什麼，仔細看喔。</li>
+      <li>看不懂題目可以按「🔊 唸題目和選項」，或選項旁邊的 🔊。</li>
     </ul></div>
     <div class="btns">
       <button type="button" class="go" id="bGo">⚔️ 開始挑戰三隻惡魔</button>
@@ -116,8 +123,10 @@ body{color:#fff;background:radial-gradient(1200px 600px at 50% -10%,#33497F 0%,v
     <div class="qcard" style="margin-top:12px">
       <div class="qmeta"><span id="qno"></span><span id="qtype"></span></div>
       <div class="qt" id="qt"></div>
+      <div class="sayrow" id="sayQ" hidden><button type="button" data-say="q">🔊 唸題目和選項</button><button type="button" data-say="auto" aria-pressed="false">自動唸：關</button></div>
       <div class="opts" id="opts"></div>
       <div class="fb" id="fb" aria-live="polite"></div>
+      <div class="sayrow" id="sayE" hidden><button type="button" data-say="e">🔊 唸說明</button></div>
       <button type="button" class="next" id="next" hidden>下一題 →</button>
     </div>
   </div>
@@ -135,6 +144,7 @@ body{color:#fff;background:radial-gradient(1200px 600px at 50% -10%,#33497F 0%,v
   <li>也可以從書櫃首頁點「第二單元 → 單元統整遊戲」打開。</li></ol>
   <h3>玩法</h3>
   <ul><li>三隻惡魔各 8 點血、勇者 5 顆愛心。答對打 1 點血，每連續答對第 3、6、9…題是「連擊」打 2 點；答錯少 1 顆愛心，愛心用完就要重新挑戰。</li>
+  <li>語音唸題：每題有「🔊 唸題目和選項」、每個選項旁的 🔊、答完後的「🔊 唸說明」，也可以打開「自動唸」（每台平板會記住）。用的是平板內建的中文語音，建議戴耳機；iPad 要先點一下 🔊，自動唸才會開始。</li>
   <li>結算依剩下的愛心給星星（5 顆 ★★★、3～4 顆 ★★、1～2 顆 ★）。</li>
   <li>也可以只選一隻惡魔練習，適合上完某一課後複習。</li></ul>
   <h3>時間安排</h3>
@@ -161,6 +171,25 @@ function art(d,cls){return '<svg'+(cls?' class="'+cls+'"':'')+' viewBox="0 0 100
 function loadBest(){try{return JSON.parse(localStorage.getItem('u2soloBest')||'null')}catch(e){return null}}
 function saveBest(b){try{localStorage.setItem('u2soloBest',JSON.stringify(b))}catch(e){}}
 var Q=window.GAME_QUESTIONS||[];
+
+/* 語音唸題 */
+var TTS=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window),voice=null,auto=false;
+try{auto=localStorage.getItem('u2soloTTS')==='1'}catch(e){}
+function pickVoice(){try{var vs=speechSynthesis.getVoices();voice=vs.filter(function(v){return /zh[-_]TW/i.test(v.lang)})[0]||vs.filter(function(v){return /zh[-_](HK|Hant)/i.test(v.lang)})[0]||vs.filter(function(v){return /^(zh|cmn)/i.test(v.lang)})[0]||null}catch(e){}}
+if(TTS){pickVoice();try{speechSynthesis.addEventListener('voiceschanged',pickVoice)}catch(e){}}
+function stopSay(){if(TTS)try{speechSynthesis.cancel()}catch(e){}}
+function speak(t){if(!TTS||!t)return;stopSay();setTimeout(function(){try{var u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:'zh-TW';if(voice)u.voice=voice;u.rate=0.85;speechSynthesis.speak(u)}catch(e){}},60)}
+function clean(t){return String(t||'').replace(/[_＿]{2,}|（\s*）|\(\s*\)/g,'，什麼，')}
+function readQ(){var q=S&&S.cur;if(!q)return;var t=clean(q.q);if(!/[。？！?!]$/.test(t))t+='。';
+  if(q.ox)t+='對的請按 O，錯的請按 X。';else t+='選項有：'+S.items.map(function(it){return it.t}).join('。')+'。';speak(t)}
+function paintAuto(){var b=document.querySelector('[data-say=auto]');b.setAttribute('aria-pressed',String(auto));b.textContent=auto?'自動唸：開':'自動唸：關'}
+if(TTS){$('sayQ').hidden=false;paintAuto()}
+document.querySelector('.qcard').addEventListener('click',function(e){
+  var b=e.target.closest('[data-say]');if(!b)return;var k=b.dataset.say;
+  if(k==='auto'){auto=!auto;try{localStorage.setItem('u2soloTTS',auto?'1':'0')}catch(x){}paintAuto();if(auto)readQ();else stopSay();return}
+  if(k==='q')readQ();else if(k==='e')speak($('fb').textContent);
+  else if(k.charAt(0)==='o'){var it=S.items[+k.slice(1)];if(it)speak(it.t)}
+});
 
 /* 開始畫面 */
 $('big3').innerHTML=DM.map(function(d){return art(d)}).join('');
@@ -203,15 +232,20 @@ function ask(){
   $('qtype').textContent=q.ox?'是非題：對的按 O，錯的按 X':'選擇題';
   $('qt').textContent=q.q;
   var box=$('opts');box.innerHTML='';box.className='opts'+(q.ox?' ox':'');
-  var items=q.ox?[{t:'O',v:true},{t:'X',v:false}]:shuf(q.o.map(function(t,i){return{t:t,v:i}}));
-  items.forEach(function(it){var b=document.createElement('button');b.type='button';b.textContent=it.t;b.dataset.v=String(it.v);
+  var items=S.items=q.ox?[{t:'O',v:true},{t:'X',v:false}]:shuf(q.o.map(function(t,i){return{t:t,v:i}}));
+  items.forEach(function(it,i){var b=document.createElement('button');b.type='button';b.textContent=it.t;b.dataset.v=String(it.v);
     if(q.ox)b.setAttribute('aria-label',it.v?'O，對':'X，錯');
-    b.addEventListener('click',function(){answer(b,it.v)});box.appendChild(b)});
-  $('fb').className='fb';$('fb').textContent='';$('next').hidden=true;
+    b.addEventListener('click',function(){answer(b,it.v)});
+    if(q.ox||!TTS){box.appendChild(b);return}
+    var row=document.createElement('div');row.className='orow';row.appendChild(b);
+    var sb=document.createElement('button');sb.type='button';sb.className='say';sb.dataset.say='o'+i;sb.textContent='🔊';sb.setAttribute('aria-label','唸這個選項');
+    row.appendChild(sb);box.appendChild(row)});
+  $('fb').className='fb';$('fb').textContent='';$('next').hidden=true;$('sayE').hidden=true;
+  stopSay();if(auto)setTimeout(readQ,300);
 }
 function answer(btn,v){
   var q=S.cur,ok=(v===q.a);
-  [].forEach.call($('opts').children,function(b){b.disabled=true;if(b.dataset.v===String(q.a))b.classList.add('right')});
+  [].forEach.call($('opts').querySelectorAll('button[data-v]'),function(b){b.disabled=true;if(b.dataset.v===String(q.a))b.classList.add('right')});
   var fb=$('fb'),show=$('show');
   var ans=q.ox?(q.a?'O':'X'):q.o[q.a];
   if(ok){
@@ -225,6 +259,7 @@ function answer(btn,v){
     show.classList.remove('hurt');void show.offsetWidth;show.classList.add('hurt');
   }
   drawHud();
+  if(TTS){$('sayE').hidden=false;if(auto)speak(fb.textContent);else stopSay()}
   var nx=$('next');
   if(S.lives<=0){nx.textContent='看結果';}
   else if(S.hp<=0){nx.textContent=(S.si<S.order.length-1)?'打倒'+demon().n+'了！下一關 →':'看結果 🎉';}
@@ -241,7 +276,7 @@ $('next').addEventListener('click',function(){
   ask();
 });
 function end(win){
-  $('game').hidden=true;var e=$('endScr');e.hidden=false;
+  stopSay();$('game').hidden=true;var e=$('endScr');e.hidden=false;
   var stars=win?(S.lives>=5?3:S.lives>=3?2:1):0;
   var pct=Math.round(S.right/Math.max(1,S.total)*100);
   var h=win?'<div class="big3">'+S.order.map(function(i){return art(DM[i])}).join('')+'</div><h2>'+(S.practice?'練習完成！':'三隻惡魔都被趕走了！')+'</h2>'
