@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>勇敢說不、積極同意</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+/* 中年級反霸凌入班宣導〈勇敢說不、積極同意〉的互動版。內容與學務處原簡報（files/friendly/mid-say-no.pdf，11 張）相同，只重新排版。 */
+.credit{margin-top:.6rem;color:var(--muted);font-size:.95rem}
+.trio .card h3{font-size:1.45rem}
+.trio .card p{font-size:1.12rem;line-height:1.65}
+.card.top{border-top:6px solid var(--accent)}
+.card.top.c1{border-top-color:#2F6FB5}
+.card.top.c2{border-top-color:var(--good)}
+.card.top.c3{border-top-color:var(--warn)}
+.card .em{font-size:2.6rem;line-height:1.1;margin-bottom:.3rem}
+.ex{margin-top:1.3rem;font-size:1.15rem}
+.key{margin-top:1.4rem;padding:1rem 1.2rem;border-radius:var(--r);background:var(--warn-soft);border:1px solid var(--warn);font-size:1.2rem;font-weight:700}
+/* 小遊戲 */
+.game{display:grid;gap:1rem;margin-top:1.2rem}
+.gq{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.2rem}
+.gq .q{display:flex;gap:.8rem;align-items:flex-start;font-size:1.25rem;line-height:1.55}
+.gq .n{flex:none;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--font-display);font-size:1.2rem}
+.gq .row{margin-top:.8rem;padding-left:3.2rem}
+.gq .ans{margin-top:.8rem;margin-left:3.2rem;padding:.8rem 1rem;border-radius:12px;background:var(--good-soft);border:1px solid var(--good);font-size:1.15rem;line-height:1.6}
+.gq .ans b{color:var(--good)}
+@media (max-width:640px){.gq .row,.gq .ans{padding-left:0;margin-left:0}}
+/* 小組討論 */
+.sc-tabs{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.sc-tabs .chip{font-size:1.05rem;font-family:var(--font-display)}
+.sc-tabs .chip[aria-selected="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.scene{margin-top:1rem;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.2rem;align-items:stretch}
+@media (max-width:860px){.scene{grid-template-columns:minmax(0,1fr)}}
+.scene .story{font-size:1.45rem;line-height:1.7;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:var(--r);padding:1.2rem 1.4rem}
+.scene .story .lab{display:block;font-family:var(--font-display);color:var(--accent);font-size:1.1rem;margin-bottom:.3rem}
+.scene ol{margin:.4rem 0 0;padding-left:0;list-style:none;display:grid;gap:.6rem}
+.scene li{font-size:1.3rem;padding:.6rem .9rem;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.prog{margin-top:.8rem;color:var(--muted);font-size:.95rem}
+/* 求助 */
+.call .num{font-family:var(--font-display);font-size:2.6rem;color:var(--accent);line-height:1.1}
+.trust{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.6rem}
+.trust span{display:inline-grid;place-items:center;min-width:6.5rem;min-height:3rem;border:2px dashed var(--accent);border-radius:14px;color:var(--muted);font-size:1rem}
+.pledge{margin-top:1.4rem;display:grid;gap:.6rem}
+.pledge button{appearance:none;text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.7rem 1rem;min-height:3.4rem;font-size:1.25rem;cursor:pointer;color:var(--fg);font-family:inherit}
+.pledge button::before{content:"☐ ";color:var(--muted)}
+.pledge button[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft)}
+.pledge button[aria-pressed="true"]::before{content:"☑ ";color:var(--good)}
+</style>
+</head>
+<body class="fc">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">友善校園暨反霸凌入班宣導｜中年級（三、四年級）</div>
+    <h1>勇敢說不、積極同意</h1>
+    <p class="k-lede">一起把我們的班級變成友善的班級！今天我們要學會：不被欺負、不欺負人，也不當沒事的旁觀者。</p>
+    <p class="credit">公埔國小 生教訓育組長　張奕軒</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#what"><span class="no">第 1 站</span><b>什麼是霸凌？</b><span>故意、一再、受傷</span></a>
+      <a href="#joke"><span class="no">第 2 站</span><b>玩笑還是傷人？</b><span>對方的感覺最重要</span></a>
+      <a href="#no"><span class="no">第 3 站</span><b>勇敢說「不」</b><span>保護自己和同學</span></a>
+      <a href="#consent"><span class="no">第 4 站</span><b>積極同意</b><span>先問，大家都願意</span></a>
+      <a href="#game"><span class="no">第 5 站</span><b>小遊戲</b><span>這時候怎麼做？</span></a>
+      <a href="#talk"><span class="no">第 6 站</span><b>小組討論</b><span>情境 A、B、C</span></a>
+      <a href="#help"><span class="no">第 7 站</span><b>找信任的大人</b><span>反霸凌專線 1953</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="what">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>什麼是霸凌？</h2></div>
+  <div class="cards trio">
+    <div class="card top c1"><div class="em" aria-hidden="true">🎯</div><h3>故意</h3><p>明明知道會讓人難過，還是做。</p></div>
+    <div class="card top c2"><div class="em" aria-hidden="true">🔁</div><h3>一再發生</h3><p>不是一次，而是常常。</p></div>
+    <div class="card top c3"><div class="em" aria-hidden="true">💔</div><h3>讓人受傷或害怕</h3><p>身體痛、心裡難過、不敢來學校。</p></div>
+  </div>
+  <p class="ex"><b>例如：</b>亂取綽號、推打、排擠不讓人加入、在群組罵人、傳別人的糗照。</p>
+ </div>
+</section>
+
+<section class="k-sec alt" id="joke">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>是玩笑，還是傷人？</h2></div>
+  <div class="cards trio">
+    <div class="card good"><div class="em" aria-hidden="true">😄</div><h3>玩笑</h3><p>大家都在笑，包括被開玩笑的人。對方說「不要」，馬上就停。</p></div>
+    <div class="card warn"><div class="em" aria-hidden="true">😢</div><h3>傷人</h3><p>只有一個人在笑，另一個人難過、想躲。就算說「只是開玩笑」，也一樣會痛。</p></div>
+  </div>
+  <div class="key">判斷方法：對方的感覺最重要，不是我覺得好不好笑。</div>
+ </div>
+</section>
+
+<section class="k-sec" id="no">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>勇敢說「不」</h2></div>
+  <div class="cards trio">
+    <div class="card top c1"><div class="em" aria-hidden="true">✋</div><h3>被欺負時</h3><p>大聲說：「不要這樣！我不喜歡！」然後走開，告訴大人。</p></div>
+    <div class="card top c2"><div class="em" aria-hidden="true">👀</div><h3>看到別人被欺負</h3><p>不笑、不看熱鬧、不轉傳。說：「這樣不好，停！」</p></div>
+    <div class="card top c3"><div class="em" aria-hidden="true">🤝</div><h3>害怕出面時</h3><p>陪被欺負的同學走開，或馬上去找老師。這也是勇敢。</p></div>
+  </div>
+  <div class="key">說「不」不是沒禮貌，是保護自己和同學。</div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="consent">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>積極同意：先問，大家都願意才玩</h2></div>
+  <div class="cards trio">
+    <div class="card top c1"><div class="em" aria-hidden="true">❓</div><h3>先問再做</h3><p>取綽號、拍照、借東西、加入遊戲前，先問：「可以嗎？」</p></div>
+    <div class="card top c2"><div class="em" aria-hidden="true">🤐</div><h3>沒說好，就不是同意</h3><p>不說話、低頭、勉強笑，都不是同意。對方隨時可以改變主意。</p></div>
+    <div class="card top c3"><div class="em" aria-hidden="true">👍</div><h3>也要積極說「好」</h3><p>對友善的事說：「好，我跟你玩！」「我來幫忙！」</p></div>
+  </div>
+  <div class="key">同意要清楚、自願，也要看對方的表情和反應。</div>
+ </div>
+</section>
+
+<section class="k-sec" id="game">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 5 站</span><h2>小遊戲：這時候怎麼做？</h2></div>
+  <p class="big">先想一想，再看參考答案。</p>
+  <div class="game" id="gameBox"></div>
+  <div class="btnrow" style="margin-top:1rem"><button class="btn" type="button" id="gameAll">全部打開</button><button class="btn" type="button" id="gameReset">全部收起</button></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="talk">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 6 站</span><h2>小組討論</h2></div>
+  <div class="sc-tabs" role="tablist" id="scTabs"></div>
+  <div class="scene" id="scene"></div>
+  <div class="btnrow" style="margin-top:1rem"><button class="btn fill" type="button" id="scNext">下一個情境 →</button></div>
+ </div>
+</section>
+
+<section class="k-sec" id="help">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 7 站</span><h2>需要幫忙，就找信任的大人</h2></div>
+  <div class="cards call">
+    <div class="card"><h3>我可以找誰？</h3><p class="big" style="margin:.3rem 0 0">導師、輔導老師、學校的大人、爸爸媽媽。</p>
+      <p style="margin-top:.8rem"><b>想想看：</b>我的「信任大人」是哪三位？</p>
+      <div class="trust" aria-hidden="true"><span>1</span><span>2</span><span>3</span></div></div>
+    <div class="card"><h3>📞 反霸凌專線</h3><div class="num">1953</div><p>遇到霸凌，可以請大人一起打電話求助。</p></div>
+  </div>
+  <div class="pledge" id="pledge">
+    <button type="button" aria-pressed="false">我會說「不」</button>
+    <button type="button" aria-pressed="false">我會先問「可以嗎」</button>
+    <button type="button" aria-pressed="false">我會幫助需要幫助的同學</button>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>這份是學務處入班宣導簡報〈勇敢說不、積極同意〉（11 張）的互動版，文字內容與原簡報相同，只是改成網站的版面：原第 6、7 張「小遊戲」與「參考答案」合成第 5 站，三題可以一題一題點開答案；原第 8～10 張三個小組討論情境合成第 6 站，可切換情境 A、B、C。最後一站的三句話改成可以點選打勾。</li>
+      <li>小組討論時可以用右上角「工具」裡的計時器限時討論，用抽籤請小組發表。</li>
+      <li>原簡報仍保留在書櫃（同一分類的「勇敢說不、積極同意：反霸凌入班宣導」），也可以下載 PDF：<a href="../files/friendly/mid-say-no.pdf" target="_blank" rel="noopener">mid-say-no.pdf</a>。</li>
+      <li>1953 為教育部反霸凌專線（111 年 8 月 30 日起取代 0800-200-885，24 小時）。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>公埔國小學務處（生教訓育組長 張奕軒）：友善校園暨反霸凌入班宣導簡報〈勇敢說不、積極同意〉。</li>
+    <li>台灣英文新聞（2022/8/30）：教育部反霸凌專線改為 1953，24 小時提供服務。https://www.taiwannews.com.tw/zh/news/4641966</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script>
+/* 第 5 站：小遊戲（原簡報第 6、7 張） */
+(function(){
+  var G=[
+    {q:'同學幫小明取了難聽的綽號，大家都在笑。',a:'<b>不跟著叫、不笑。</b><br>可以說：「這樣他會難過，我們叫他的名字。」'},
+    {q:'我想玩遊戲，但有同學說「你不要來」。',a:'<b>排擠也是霸凌。</b><br>大家一起想讓每個人都能加入的玩法，或找老師幫忙。'},
+    {q:'有人在群組傳同學的糗照，我想拍照上傳。',a:'<b>先問本人「可以嗎？」</b><br>他說不要就不傳。看到別人傳，不轉傳、告訴大人。'}
+  ];
+  var box=document.getElementById('gameBox');
+  G.forEach(function(g,i){
+    var d=document.createElement('div');d.className='gq';
+    d.innerHTML='<div class="q"><span class="n">'+'①②③'.charAt(i)+'</span><span>'+g.q+'</span></div>'+
+      '<div class="row"><button class="btn" type="button" aria-expanded="false">想好了，看參考答案</button></div>'+
+      '<div class="ans pop-in" hidden>'+g.a+'</div>';
+    var b=d.querySelector('button'), a=d.querySelector('.ans');
+    b.addEventListener('click',function(){var open=a.hidden;a.hidden=!open;b.setAttribute('aria-expanded',String(open));b.textContent=open?'收起答案':'想好了，看參考答案';});
+    box.appendChild(d);
+  });
+  function setAll(open){box.querySelectorAll('.gq').forEach(function(d){var b=d.querySelector('button'),a=d.querySelector('.ans');a.hidden=!open;b.setAttribute('aria-expanded',String(open));b.textContent=open?'收起答案':'想好了，看參考答案';});}
+  document.getElementById('gameAll').addEventListener('click',function(){setAll(true);});
+  document.getElementById('gameReset').addEventListener('click',function(){setAll(false);});
+})();
+
+/* 第 6 站：小組討論（原簡報第 8～10 張） */
+(function(){
+  var S=[
+    {k:'情境 A',t:'下課時，有同學偷偷把小華的鉛筆盒拿走藏起來，害小華找不到。'},
+    {k:'情境 B',t:'分組時，小美問大家可不可以同組，沒有人回答，大家假裝沒聽到。'},
+    {k:'情境 C',t:'有人在紙條上寫小明的壞話，還有人寫讚、畫笑臉。'}
+  ];
+  var tabs=document.getElementById('scTabs'), scene=document.getElementById('scene'), next=document.getElementById('scNext'), cur=0;
+  S.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('role','tab');b.textContent=s.k;b.addEventListener('click',function(){show(i);});tabs.appendChild(b);});
+  function show(i){
+    cur=i;
+    [].forEach.call(tabs.children,function(b,k){b.setAttribute('aria-selected',String(k===i));});
+    scene.innerHTML='<div class="story"><span class="lab">'+S[i].k+'</span>'+S[i].t+'<div class="prog">小組討論（ '+(i+1)+' ／ 3 ）</div></div>'+
+      '<div class="panel"><h3>請討論：</h3><ol><li>① 誰會難過？</li><li>② 我可以說什麼、做什麼？</li><li>③ 可以找誰幫忙？</li></ol></div>';
+    next.textContent=i<S.length-1?'下一個情境 →':'回到情境 A';
+  }
+  next.addEventListener('click',function(){show((cur+1)%S.length);});
+  show(0);
+})();
+
+/* 第 7 站：三句話打勾 */
+[].forEach.call(document.querySelectorAll('#pledge button'),function(b){
+  b.addEventListener('click',function(){b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));});
+});
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
