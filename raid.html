@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="assets/fonts.css">
 <!-- 全班共戰（lessons/u2-game-raid.html）的學生平板頁：raid.html?r=房號。
      先選座號加入（同一座號只能在一台平板），再跟著大螢幕作答；公布時顯示自己的對錯與說明。
-     只呼叫 Supabase RPC：raid_join、raid_state、raid_answer；不傳姓名。裝置代碼與想法牆共用 fbDevice，座號記在 raidSeat:<房號>。 -->
+     「各自搶攻」模式：用 raid_free_q 拿題目、raid_free_answer 作答（伺服器改題），答完馬上看對錯與說明，自動換下一題；答錯定身 3 秒。
+     只呼叫 Supabase RPC：raid_join、raid_state、raid_answer、raid_free_q、raid_free_answer；不傳姓名。裝置代碼與想法牆共用 fbDevice，座號記在 raidSeat:<房號>。 -->
 <style>
 :root{--ink:#1F2A27;--muted:#4A5550;--gold:#FFD54F;--ok:#1E8A5A;--no:#C8414B;--oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0;--oD:#0F766E;
   --font:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
@@ -50,6 +51,20 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .rv.ok{background:#E7F4EC;color:#14532D}.rv.no{background:#FDE4E6;color:#7A1520}.rv.na{background:#F1EDF6;color:#4A2B5E}
 .rv b{font-size:22px}
 .msg{font-weight:700;color:var(--no);min-height:1.2em}
+.fbar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.fbar .clk{font-size:22px;color:#7A2E8E}.fbar .clk.hot{color:var(--no)}
+.fbar .stk{color:#C2410C}
+.opts button.right{box-shadow:0 0 0 5px var(--gold);opacity:1}
+.opts.done2 button{opacity:.35}.opts.done2 button.right,.opts.done2 button.pick{opacity:1}
+.opts.done2 button.pick:not(.right){opacity:1;outline:4px dashed #fff;outline-offset:-8px}
+.opts.done2 button.pick:not(.right)::after{content:"✗ 你選的";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;background:#fff;color:var(--no);border-radius:999px;padding:2px 10px}
+.opts.done2 button.right::after{content:"✓ 答案";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;background:var(--gold);color:#3E2C00;border-radius:999px;padding:2px 10px}
+.opts.done2 button{padding-right:96px}
+.opts.ox.done2 button{padding-right:10px}
+.opts.ox.done2 button.right::after,.opts.ox.done2 button.pick:not(.right)::after{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap}
+.opts.ox.done2 button{padding-bottom:34px}
+.freeze{text-align:center;font-weight:700;color:#7A1520}
+.nextbtn{width:100%}
 </style>
 </head>
 <body>
@@ -139,13 +154,15 @@ var DM=[
   function hp(){var p=st.max_hp?Math.max(0,st.hp)/st.max_hp*100:100;$("hpFill").style.width=p+"%";$("hpText").textContent=st.max_hp?("魔王血量 "+Math.max(0,st.hp)+" / "+st.max_hp):"魔王血量：開始後依人數決定"}
   function render(){
     hp();
+    if(st.mode==="free"&&st.status==="play"){ freeTick(); return; }
+    F.on=false;
     var key=[st.status,st.round,st.answered,st.my_correct,st.result,st.hp].join("|");
     var b=$("body");
     if(st.status==="question"&&!st.answered){
       var lt=$("leftT");if(lt&&st.left!=null){lt.textContent="⏱ 剩 "+st.left+" 秒";lt.className="left"+(st.left<=5?" hot":"")}
     }
     if(key===sig)return; sig=key;
-    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div><p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
+    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div>'+(st.mode==="free"?'<p class="muted" style="text-align:center">這一場是「⚡ 各自搶攻」：開始後題目會出現在你的平板上，答完自動換下一題。答錯會被定身 3 秒，要仔細看題目喔！</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
     if(st.status==="end"){
       var win=st.result==="win";
       b.innerHTML='<div class="big">'+(win?"🎉":"💪")+'</div><div class="wait">'+(win?"全班合力打倒大魔王！":(st.result==="cancel"?"老師取消了這場遊戲":"魔王逃走了，下次再挑戰！"))+'</div>'+
@@ -182,6 +199,64 @@ var DM=[
       [].forEach.call($("opts").children,function(x){x.disabled=false});
       poll();
     }).catch(function(){sending=false;var am=$("ansMsg");if(am)am.textContent="網路不穩，請再按一次。";[].forEach.call($("opts").children,function(x){x.disabled=false})});
+  }
+
+  /* ---------- 各自搶攻 ---------- */
+  var F={on:false,q:null,busy:false,res:null,timer:null};
+  function fmt(L){L=Math.max(0,L|0);return Math.floor(L/60)+":"+(L%60<10?"0":"")+(L%60)}
+  function freeHeader(){
+    var c=$("fClk");if(c&&st.left!=null){c.textContent="⏱ "+fmt(st.left);c.className="clk"+(st.left<=30?" hot":"")}
+    var m=$("fMine");if(m)m.textContent="我答對 "+st.my_right+" / "+st.my_total+" 題";
+  }
+  function freeTick(){
+    if(!F.on){F.on=true;sig="";F.q=null;F.res=null;loadQ();return}
+    freeHeader();
+  }
+  function loadQ(){
+    if(F.busy)return;F.busy=true;
+    rpc("raid_free_q",{p_room:room,p_seat:seat,p_device:device}).then(function(q){
+      F.busy=false;
+      if(q.err){ if(q.err==="not_joined"){join(seat)} F.on=false; poll(); return; }
+      F.q=q;F.res=null;drawFree();
+      if(q.wait>0)freezeThen(q.wait,function(){drawFree()});
+    }).catch(function(){F.busy=false;setTimeout(loadQ,1500)});
+  }
+  function drawFree(){
+    var q=F.q,b=$("body");if(!q)return;
+    var opts=q.o||[],r=F.res;
+    var h='<div class="fbar"><span class="clk" id="fClk"></span><span class="stk" id="fStk">'+(q.streak>=2&&!r?"🔥 連續答對 "+q.streak+" 題":"")+'</span></div>'+
+      '<div class="meta"><span id="fMine"></span><span>'+({smoke:"菸惡魔",wine:"酒惡魔",betel:"檳榔惡魔"}[q.d]||"")+'</span></div>'+
+      '<div class="qt">'+esc(q.q)+'</div>'+
+      '<div class="opts'+(q.ox?" ox":"")+(r?" done2":"")+'" id="opts">'+opts.map(function(t,i){
+        var cls="c"+i+(r&&t===r.answer?" right":"")+(r&&i===r.pick?" pick":"");
+        return '<button type="button" class="'+cls+'" data-i="'+i+'"'+(r?" disabled":"")+'>'+(q.ox?"":"<b>"+"ABCD"[i]+"</b>")+esc(t)+'</button>'}).join("")+'</div>';
+    if(r){
+      if(r.correct)h+='<div class="rv ok"><b>⚔️ 答對了！</b>打掉魔王 '+r.dmg+' 點血'+(r.dmg>1?"（連擊！）":"")+'<br>'+esc(r.e)+'</div>';
+      else h+='<div class="rv no"><b>被魔王打中了！</b>正確答案是「'+esc(r.answer)+'」。<br>'+esc(r.e)+'</div><div class="freeze" id="frz"></div>';
+      h+='<button type="button" class="nextbtn" id="fNext"'+(r.correct?"":" disabled")+'>下一題 →</button>';
+    }else h+='<div class="msg" id="ansMsg"></div>';
+    b.innerHTML=h;freeHeader();
+    var o=$("opts");
+    if(!r)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||F.busy)return;freeAnswer(+btn.dataset.i)});
+    var nb=$("fNext");if(nb)nb.addEventListener("click",function(){if(!nb.disabled){clearTimeout(F.timer);loadQ()}});
+  }
+  function freezeThen(sec,cb){
+    var left=sec;var tick=function(){var z=$("frz");if(z)z.textContent=left>0?"😵 定身中…… "+left+" 秒":"";
+      if(left<=0){var nb=$("fNext");if(nb){nb.disabled=false;nb.focus()}if(cb)cb();return}left--;F.timer=setTimeout(tick,1000)};tick();
+  }
+  function freeAnswer(i){
+    F.busy=true;[].forEach.call($("opts").children,function(x){x.disabled=true});
+    rpc("raid_free_answer",{p_room:room,p_seat:seat,p_device:device,p_qid:F.q.qid,p_choice:i}).then(function(r){
+      F.busy=false;
+      if(r.err){
+        if(r.err==="wait"){[].forEach.call($("opts").children,function(x){x.disabled=false});$("ansMsg").textContent="還在定身中，等一下再按！";return}
+        if(r.err==="stale"){loadQ();return}
+        F.on=false;poll();return;
+      }
+      r.pick=i;F.res=r;st.hp=r.hp;st.max_hp=r.max_hp;st.my_total++;if(r.correct)st.my_right++;hp();
+      F.q.streak=r.streak;drawFree();
+      if(r.correct){F.timer=setTimeout(loadQ,1600)}else freezeThen(r.wait||3);
+    }).catch(function(){F.busy=false;[].forEach.call($("opts").children,function(x){x.disabled=false});var m=$("ansMsg");if(m)m.textContent="網路不穩，請再按一次。"});
   }
 
   if(room.length===6)goRoom(room);else show("sCode");

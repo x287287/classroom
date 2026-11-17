@@ -7,10 +7,14 @@
 <link rel="stylesheet" href="../assets/fonts.css">
 <link rel="stylesheet" href="../assets/kit.css">
 <!-- 第二單元統整遊戲「全班共戰」：大螢幕（老師帳號登入）出題，全班用平板同時作答（raid.html?r=房號），
-     答對的人數就是對大魔王的傷害；全班 8 成以上答對再多打 50%（暴擊）。魔王血量＝加入人數 × 難度（5／7／9）。
+     兩種模式：
+       同步作答（sync）：大螢幕出同一題，答對的人數就是傷害；全班 8 成以上答對再多打 50%（暴擊）。魔王血量＝人數 × 題數 × 強度（0.8／1.0／1.25）。
+       各自搶攻（free）：每人在平板上用自己的速度作答，題目由伺服器從 raid_bank 隨機出（用完重新洗牌），答對打 1 點、連續答對第 5 題多打 1 點，
+                         答錯被定身 3 秒；限時 3／5／8 分鐘，魔王血量＝人數 × 分鐘 × 強度（3／4／5）。
      題庫和另外兩個版本共用 lessons/data/u2-game-questions.js。
      資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop、raid_finish，
-     學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。 -->
+     學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。
+     各自搶攻另用 raid_free_start、raid_free_summary（老師）與 raid_free_q、raid_free_answer（學生）。 -->
 <style>
 :root{color-scheme:light;--ink:#1F2A27;--stage:#18213A;--stage2:#26345A;--line2:#3D4F7C;--gold:#FFD54F;--ok:#1E8A5A;--no:#C8414B;
   --oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0;--oD:#0F766E}
@@ -33,6 +37,26 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 .bigbtn:disabled{background:#CFC8B0;box-shadow:none;cursor:default;color:#5E5640}
 .sec{appearance:none;border:2px solid #7A2E8E;background:#fff;color:#7A2E8E;border-radius:999px;min-height:3rem;padding:0 1.4rem;font-family:var(--font-display);font-size:1.1rem;cursor:pointer}
 .note{color:#4A5550;font-size:1rem;line-height:1.7;margin:.6rem 0 0}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:12px;margin-top:14px}
+.mode{appearance:none;text-align:left;border:3px solid #E3DDEB;background:#FBFAFD;color:var(--ink);border-radius:18px;padding:.8rem 1rem;cursor:pointer;display:grid;gap:.3rem;font:inherit}
+.mode b{font-family:var(--font-display);font-weight:400;font-size:1.4rem;color:#4A2B5E}
+.mode span{font-size:1rem;line-height:1.6;color:#4A5550}
+.mode[aria-checked=true]{border-color:#7A2E8E;background:#F4ECF8;box-shadow:0 0 0 3px #7A2E8E33}
+/* 各自搶攻 */
+.free{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:stretch}
+@media (max-width:1000px){.free{grid-template-columns:minmax(0,1fr)}}
+.free .boss{min-height:440px}
+.free .boss svg.bs{width:min(100%,460px)}
+.fside{display:grid;gap:14px;align-content:start}
+.bigclock{font-family:var(--font-display);font-size:clamp(3rem,7vw,5.6rem);line-height:1;text-align:center;color:#4A2B5E}
+.bigclock.hot{color:#C8414B}
+.fstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center}
+.fstat div{background:#F1EDF6;border-radius:14px;padding:.5rem}
+.fstat b{display:block;font-family:var(--font-display);font-size:1.9rem;color:#4A2B5E}
+.fstat span{font-size:.9rem;color:#4A5550}
+.miniqr{display:flex;gap:12px;align-items:center}
+.miniqr .code svg{width:120px;height:120px}
+.miniqr p{margin:0;font-size:1rem;line-height:1.6}
 /* 大廳 */
 .lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;align-items:start}
 @media (max-width:900px){.lobby{grid-template-columns:minmax(0,1fr)}}
@@ -113,11 +137,19 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 
   <section class="card" id="scrSetup" hidden>
     <h2>開一場全班共戰</h2>
-    <p class="note">「菸、酒、檳榔」三隻惡魔合體成大魔王！全班用平板同時作答，每答對一個人就打魔王一下。全班 8 成以上答對，還會「暴擊」多打一半！</p>
-    <div class="setgrid">
-      <fieldset><legend>題數</legend><div class="seg" data-k="rounds"><button type="button" data-v="8">8 題</button><button type="button" data-v="12">12 題</button><button type="button" data-v="16">16 題</button></div></fieldset>
+    <p class="note">「菸、酒、檳榔」三隻惡魔合體成大魔王！全班用平板一起作答，把魔王的血打到 0 就獲勝。</p>
+    <div class="modes" role="radiogroup" aria-label="遊戲模式">
+      <button type="button" class="mode" data-mode="sync" role="radio"><b>🖥️ 同步作答</b><span>大螢幕出同一題，全班一起答、一起看答案。答對的人數就是傷害，全班 8 成答對還會暴擊。適合邊玩邊講解。</span></button>
+      <button type="button" class="mode" data-mode="free" role="radio"><b>⚡ 各自搶攻</b><span>每個人在平板上用自己的速度一直答題，題目會自動換、題庫用完重新出。限時內全班一起把魔王打倒！答錯會被定身 3 秒。</span></button>
+    </div>
+    <div class="setgrid" data-for="sync">
+      <fieldset><legend>題數</legend><div class="seg" data-k="rounds"><button type="button" data-v="8">8 題</button><button type="button" data-v="12">12 題</button><button type="button" data-v="16">16 題</button><button type="button" data-v="20">20 題</button></div></fieldset>
       <fieldset><legend>每題時間</legend><div class="seg" data-k="secs"><button type="button" data-v="15">15 秒</button><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button><button type="button" data-v="0">不計時</button></div></fieldset>
-      <fieldset><legend>魔王強度</legend><div class="seg" data-k="hpper"><button type="button" data-v="5">簡單</button><button type="button" data-v="7">普通</button><button type="button" data-v="9">困難</button></div></fieldset>
+      <fieldset><legend>魔王強度</legend><div class="seg" data-k="lv"><button type="button" data-v="1">簡單</button><button type="button" data-v="2">普通</button><button type="button" data-v="3">困難</button></div></fieldset>
+    </div>
+    <div class="setgrid" data-for="free">
+      <fieldset><legend>遊戲時間</legend><div class="seg" data-k="mins"><button type="button" data-v="3">3 分鐘</button><button type="button" data-v="5">5 分鐘</button><button type="button" data-v="8">8 分鐘</button></div></fieldset>
+      <fieldset><legend>魔王強度</legend><div class="seg" data-k="lv"><button type="button" data-v="1">簡單</button><button type="button" data-v="2">普通</button><button type="button" data-v="3">困難</button></div></fieldset>
     </div>
     <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bCreate">開房間</button><span class="note" id="setMsg" style="margin:0"></span></div>
   </section>
@@ -129,7 +161,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
         <div class="joined" id="joined">等待同學加入…</div>
         <div class="seats" id="seatGrid"></div>
         <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bStart" disabled>開始戰鬥！</button><button type="button" class="sec" id="bCancel">取消</button></div>
-        <p class="note">魔王血量會依加入人數決定。開始後還沒加入的同學也可以掃描加入，從下一題開始作答。</p>
+        <p class="note">魔王血量會依加入人數決定。開始後還沒加入的同學也可以掃描加入，馬上開始作答。</p>
       </div>
     </div>
   </section>
@@ -154,6 +186,22 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
     </div>
   </div>
 
+  <div id="scrFree" hidden>
+    <div class="free">
+      <div class="boss" id="fBoss">
+        <svg class="bs" id="fBossArt" viewBox="0 0 300 200" aria-hidden="true"></svg>
+        <div class="bn">三惡魔合體大魔王</div>
+        <div class="hpw"><div class="hp" role="progressbar" aria-label="魔王血量" aria-valuemin="0" id="fHpBar"><i id="fHpFill"></i></div><div class="hpn"><span id="fHpText"></span><span>⚡ 各自搶攻</span></div></div>
+      </div>
+      <div class="fside">
+        <div class="card"><div class="bigclock" id="fClock" aria-live="off"></div><p class="note" style="text-align:center;margin:0">剩下的時間</p></div>
+        <div class="card fstat"><div><b id="fAns">0</b><span>全班已作答</span></div><div><b id="fPct">0%</b><span>答對率</span></div><div><b id="fPl">0</b><span>位勇者</span></div></div>
+        <div class="card miniqr"><div class="code" id="fQr"></div><p>還沒加入的同學，掃描加入！<br>房號 <b id="fRoom" style="font-size:1.4rem;color:#7A2E8E"></b></p></div>
+        <div class="row"><button type="button" class="sec" id="fStop">提前結束</button></div>
+      </div>
+    </div>
+  </div>
+
   <section class="card endc" id="scrEnd" hidden></section>
 </div>
 
@@ -161,21 +209,23 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
   <h2 id="tT">老師說明：全班共戰打倒大魔王</h2>
   <h3>這是什麼</h3>
   <ul><li>第二單元〈拒菸拒酒拒檳榔〉統整遊戲的全班合作版（課本 p.30–53）。題庫和「趕走三惡魔」兩個版本相同。</li>
-  <li>大螢幕出題，每位學生用自己的平板同時作答。答對的人數就是對魔王的傷害，全班 8 成以上答對再多打 50%（暴擊）。題目出完前把魔王血量打到 0 就獲勝。</li></ul>
+  <li>有兩種模式：</li></ul>
+  <ul><li><b>同步作答</b>：大螢幕出同一題，全班同時作答，時間到或全班答完就公布答案和每個選項的人數。答對的人數就是傷害，全班 8 成以上答對再多打 50%（暴擊）。題目出完前把魔王打到 0 就獲勝。魔王血量＝人數 × 題數 × 強度（簡單 0.8、普通 1.0、困難 1.25）。例如 25 人、12 題、普通，魔王有 300 點血，全班平均要答對約 8 成並常常暴擊才打得倒。</li>
+  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，題目會自動換（題庫用完會重新洗牌出題）。答對打 1 點，連續答對第 5、10、15…題多打 1 點；答錯會看到正確答案和說明，並被定身 3 秒。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 3、普通 4、困難 5）。大螢幕即時顯示血量、時間、全班作答數和答對率。</li></ul>
   <h3>怎麼開始</h3>
   <ol><li>這台電腦要先在書櫃首頁登入老師帳號。</li>
-  <li>選題數、每題時間、魔王強度，按「開房間」。</li>
+  <li>選模式，再選題數／每題時間（同步作答）或遊戲時間（各自搶攻）與魔王強度，按「開房間」。</li>
   <li>學生用平板掃 QR Code（或打開網站的 raid.html 輸入房號），選自己的座號加入。</li>
-  <li>大家都加入後按「開始戰鬥」。魔王血量＝加入人數 × 強度（簡單 5、普通 7、困難 9）。</li>
-  <li>時間到或全班都作答完，會自動公布答案和每個選項的人數，再按「下一題」。</li></ol>
+  <li>大家都加入後按「開始戰鬥」。魔王血量依加入人數決定。</li></ol>
   <h3>時間安排</h3>
-  <ul><li>12 題、每題 20 秒，加上公布與講解，約 15～20 分鐘。只有 10 分鐘就選 8 題。</li>
+  <ul><li>同步作答：12 題、每題 20 秒，加上公布與講解，約 15～20 分鐘。只有 10 分鐘就選 8 題。</li>
+  <li>各自搶攻：遊戲時間加上加入、結算，約 5～12 分鐘。適合上完講解後的總複習。</li>
   <li>公布答案時，可以請選錯最多的那一組說說看為什麼，再看說明。</li></ul>
   <h3>小提醒</h3>
   <ul><li>平板只用座號加入，不輸入姓名；大螢幕不會顯示個人成績，只顯示全班答對人數。</li>
   <li>同一個座號只能在一台平板加入。如果學生選錯座號，請他按「換座號」重選。</li>
   <li>網路斷線的平板，重新連上後會自動回到目前的題目。</li>
-  <li>想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js）。</li></ul>
+  <li>題庫共 74 題（菸 25、酒 24、檳榔 25），選項順序每次隨機。想新增或修改題目，跟 Claude 說要改哪一題就好（題庫在 lessons/data/u2-game-questions.js，各自搶攻模式另外存在資料庫，Claude 會一起更新）。</li></ul>
   <button type="button" class="close">關閉</button>
 </div></div>
 
@@ -188,13 +238,14 @@ var DM=[
   {k:'betel',n:'檳榔惡魔',c:'#5DAA68',art:function(c){return '<ellipse cx="50" cy="56" rx="30" ry="38" fill="'+c+'"/><path d="M50 18 v-12" stroke="#6D4C41" stroke-width="6"/><path d="M50 10 q-16 -8 -22 4 M50 10 q16 -8 22 4" stroke="#43A047" stroke-width="5" fill="none"/><path d="M24 40 l-12 -8 M76 40 l12 -8" stroke="'+c+'" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="50" r="6" fill="#fff"/><circle cx="60" cy="50" r="6" fill="#fff"/><circle cx="41" cy="51" r="3" fill="#222"/><circle cx="61" cy="51" r="3" fill="#222"/><path d="M38 70 q12 8 24 0" stroke="#B71C1C" stroke-width="4" fill="#E57373"/>'}}
 ];
 var Q=window.GAME_QUESTIONS||[];
-var SET={rounds:12,secs:20,hpper:7};
+var SET={mode:'sync',rounds:12,secs:20,lv:2,mins:5};
+var SYNC_K=[0.8,1.0,1.25], FREE_K=[3,4,5];
 try{var _s=JSON.parse(localStorage.getItem('raidSet')||'null');if(_s)SET=Object.assign(SET,_s)}catch(e){}
 var G=null; /* {room, rounds, list:[問題], stats:[], seats:[], lastSeats, poll} */
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
-function show(id){['scrLogin','scrSetup','scrLobby','scrBattle','scrEnd'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0)}
+function show(id){['scrLogin','scrSetup','scrLobby','scrBattle','scrFree','scrEnd'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0)}
 function api(path,body,method){
   return window.CLS.api(path,{method:method||'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body)})
     .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});return r.text().then(function(t){return t?JSON.parse(t):null})});
@@ -206,18 +257,25 @@ var DNAME={smoke:'菸惡魔',wine:'酒惡魔',betel:'檳榔惡魔'};
 /* 合體大魔王：三隻惡魔疊在一起，戴著王冠 */
 (function(){
   var art=function(k){var d=DM.filter(function(x){return x.k===k})[0];return d.art(d.c)};
-  $('bossArt').innerHTML='<g transform="translate(10 40) scale(1.25)">'+art('smoke')+'</g><g transform="translate(165 40) scale(1.25)">'+art('betel')+'</g>'+
+  $('bossArt').innerHTML=$('fBossArt').innerHTML='<g transform="translate(10 40) scale(1.25)">'+art('smoke')+'</g><g transform="translate(165 40) scale(1.25)">'+art('betel')+'</g>'+
     '<g transform="translate(80 18) scale(1.45)">'+art('wine')+'</g>'+
     '<path d="M110 22 h80 l-10 -22 l-15 12 l-15 -18 l-15 18 l-15 -12 z" fill="#FFD54F" stroke="#C79100" stroke-width="3"/>';
 })();
 
 /* 設定按鈕 */
+function saveSet(){try{localStorage.setItem('raidSet',JSON.stringify(SET))}catch(x){}}
+function paintSegs(){[].forEach.call(document.querySelectorAll('.seg'),function(seg){var k=seg.dataset.k;[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[k]))})})}
 [].forEach.call(document.querySelectorAll('.seg'),function(seg){
-  var k=seg.dataset.k;
-  function paint(){[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[k]))})}
-  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SET[k]=+b.dataset.v;try{localStorage.setItem('raidSet',JSON.stringify(SET))}catch(x){}paint()});
-  paint();
+  seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SET[seg.dataset.k]=+b.dataset.v;saveSet();paintSegs()});
 });
+function paintMode(){
+  if(SET.mode!=='free')SET.mode='sync';
+  [].forEach.call(document.querySelectorAll('.mode'),function(b){b.setAttribute('aria-checked',String(b.dataset.mode===SET.mode))});
+  [].forEach.call(document.querySelectorAll('.setgrid[data-for]'),function(g){g.hidden=g.dataset.for!==SET.mode});
+}
+[].forEach.call(document.querySelectorAll('.mode'),function(b){b.addEventListener('click',function(){SET.mode=b.dataset.mode;saveSet();paintMode()})});
+if([1,2,3].indexOf(SET.lv)<0)SET.lv=2;
+paintSegs();paintMode();
 
 /* 等 sync.js 載入、確認老師帳號 */
 var authTries=0;
@@ -240,12 +298,14 @@ function pick(n){
 
 $('bCreate').addEventListener('click',function(){
   var b=this;b.disabled=true;$('setMsg').textContent='建立中…';
-  api('rest/v1/raid_rooms',{game:'u2',rounds:SET.rounds}).then(function(d){
+  var free=SET.mode==='free';
+  api('rest/v1/raid_rooms',{game:'u2',rounds:free?40:SET.rounds,mode:free?'free':'sync'}).then(function(d){
     var room=d[0];
-    G={room:room.id,rounds:SET.rounds,secs:SET.secs,hpper:SET.hpper,list:pick(SET.rounds),stats:[],seats:[],cur:null,phase:'lobby',hp:0,max:0};
+    G={room:room.id,mode:free?'free':'sync',rounds:SET.rounds,secs:SET.secs,mins:SET.mins,lv:SET.lv,list:free?[]:pick(SET.rounds),stats:[],seats:[],cur:null,phase:'lobby',hp:0,max:0,lastId:0};
     var url=new URL('../raid.html?r='+room.id,location.href).href;
     $('roomCode').textContent=room.id;$('roomUrl').textContent=url;
-    try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
+    try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=$('fQr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
+    $('fRoom').textContent=room.id;
     $('qrHint').textContent='還沒加入的同學：打開 raid.html，輸入房號 '+room.id;
     show('scrLobby');startPoll();
   }).catch(function(){b.disabled=false;$('setMsg').textContent='建立失敗，請確認網路與老師帳號後再試一次。'});
@@ -265,6 +325,7 @@ function tick(){
     if(!G||!h)return;
     G.seats=h.seats||[];
     if(G.phase==='lobby')drawLobby();
+    else if(G.phase==='free')drawFree(h);
     else if(G.phase==='question'){
       drawLive(h.answered,h.left);
       var all=G.seats.length>0&&h.answered>=G.seats.length;
@@ -284,7 +345,7 @@ function drawLobby(){
 }
 
 /* 開始／下一題 */
-$('bStart').addEventListener('click',function(){nextQ()});
+$('bStart').addEventListener('click',function(){if(G.mode==='free')startFree();else nextQ()});
 $('bNext').addEventListener('click',function(){
   if(G.hp<=0)return finish('win');
   if(G.stats.length>=G.rounds)return finish('lose');
@@ -300,7 +361,7 @@ function nextQ(){
   }
   G.cur={q:q,opts:opts,ans:ans,ox:!!q.ox};
   busy=true;$('bStart').disabled=true;$('bNext').disabled=true;
-  rpc('raid_next',{p_room:G.room,p_question:payload,p_answer:{a:ans,e:q.e},p_seconds:G.secs,p_hp_per:G.hpper}).then(function(h){
+  rpc('raid_next',{p_room:G.room,p_question:payload,p_answer:{a:ans,e:q.e},p_seconds:G.secs,p_hp_per:Math.max(1,Math.round(G.rounds*SYNC_K[G.lv-1]))}).then(function(h){
     busy=false;$('bNext').disabled=false;
     if(!h)throw new Error('next failed');
     G.phase='question';G.hp=h.hp;G.max=h.max_hp;G.seats=h.seats||G.seats;
@@ -381,6 +442,54 @@ function finish(result){
   h+='<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
   var e=$('scrEnd');e.innerHTML=h;show('scrEnd');
   $('bAgain').addEventListener('click',function(){G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
+}
+
+/* ---------- 各自搶攻 ---------- */
+function startFree(){
+  busy=true;$('bStart').disabled=true;
+  rpc('raid_free_start',{p_room:G.room,p_minutes:G.mins,p_hp_per_min:FREE_K[G.lv-1]}).then(function(h){
+    busy=false;if(!h||h.status!=='play')throw new Error('start failed');
+    G.phase='free';G.hp=h.hp;G.max=h.max_hp;G.lastId=h.last_id||0;G.secsTotal=G.mins*60;
+    show('scrFree');drawFree(h);
+  }).catch(function(){busy=false;$('bStart').disabled=false;$('joined').textContent='開始失敗，請確認網路連線後再按一次。'});
+}
+function drawFree(h){
+  if(!G||G.phase!=='free')return;
+  G.seats=h.seats||G.seats;
+  var hit=0;(h.recent||[]).forEach(function(x){if(x.id>G.lastId)hit+=x.dmg});
+  if(h.last_id)G.lastId=Math.max(G.lastId,h.last_id);
+  G.hp=h.hp;G.max=h.max_hp;
+  var p=G.max?Math.max(0,G.hp)/G.max*100:100;
+  $('fHpFill').style.width=p+'%';$('fHpText').textContent='血量 '+Math.max(0,G.hp)+' / '+G.max;
+  $('fHpBar').setAttribute('aria-valuemax',G.max);$('fHpBar').setAttribute('aria-valuenow',Math.max(0,G.hp));
+  var L=h.left==null?0:h.left,m=Math.floor(L/60),sec=L%60;
+  var c=$('fClock');c.textContent=m+':'+(sec<10?'0':'')+sec;c.className='bigclock'+(L<=30?' hot':'');
+  $('fAns').textContent=h.answered;$('fPct').textContent=(h.answered?Math.round(h.correct/h.answered*100):0)+'%';$('fPl').textContent=G.seats.length;
+  if(hit>0){var b=$('fBoss');b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');
+    var d=document.createElement('div');d.className='dmg';d.textContent='-'+hit;d.style.left=(Math.random()*30-15)+'%';b.appendChild(d);setTimeout(function(){d.remove()},1700)}
+  if(h.status==='end'&&h.result==='win')return finishFree('win');
+  if(h.status==='play'&&L<=0)return finishFree(G.hp<=0?'win':'lose');
+}
+$('fStop').addEventListener('click',function(){finishFree(G.hp<=0?'win':'lose')});
+function finishFree(result){
+  if(!G||G.phase==='done')return;
+  G.phase='done';stopPoll();
+  rpc('raid_finish',{p_room:G.room,p_result:result}).catch(function(){});
+  var ans=+$('fAns').textContent||0,pct=$('fPct').textContent;
+  rpc('raid_free_summary',{p_room:G.room}).catch(function(){return []}).then(function(list){
+    list=list||[];
+    var hard=list.filter(function(x){return x.n>=2&&x.ok/x.n<0.7}).slice(0,6);
+    var win=result==='win';
+    var h=(win?'<h2>🎉 全班合力打倒大魔王！</h2><p class="note" style="font-size:1.2rem">菸、酒、檳榔惡魔都被趕走了，大家一起說「不」！</p>'
+            :'<h2>時間到，魔王逃走了……</h2><p class="note" style="font-size:1.2rem">魔王還剩 '+G.hp+' 點血。複習下面的題目，下次一定打得倒！</p>')+
+      '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>'+
+      '<div class="stat"><div><b>'+ans+'</b>全班作答題數</div><div><b>'+pct+'</b>全班答對率</div><div><b>'+(G.max-Math.max(0,G.hp))+'</b>總傷害</div><div><b>'+G.seats.length+'</b>位勇者</div></div>';
+    if(hard.length)h+='<h3 style="margin:0;text-align:left;color:#7A2E8E">📖 大家比較需要複習的題目</h3><div class="review">'+hard.map(function(x){return '<div class="it"><span class="p">'+Math.round(x.ok/x.n*100)+'% 答對（'+x.n+' 人次）</span>'+esc(x.q)+'<br><b style="color:#1E8A5A">答案：'+esc(x.answer)+'</b>　'+esc(x.e)+'</div>'}).join('')+'</div>';
+    else h+='<p class="note" style="font-size:1.2rem">每一題的答對率都在 7 成以上，太厲害了！</p>';
+    h+='<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
+    var e=$('scrEnd');e.innerHTML=h;show('scrEnd');
+    $('bAgain').addEventListener('click',function(){G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
+  });
 }
 
 /* 全螢幕、老師說明 */
