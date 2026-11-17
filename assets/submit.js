@@ -18,6 +18,8 @@
   var SB_URL = "https://tsxbphngzuzpdddhadfw.supabase.co";
   var SB_KEY = "sb_publishable_EOXrx2SRQbFRHACqHbUUig_4e-EkgkE";
   var WHO_KEY = "subWho";
+  var ME = document.currentScript && document.currentScript.src;
+  var TEACHER_URL = ME ? new URL("../teacher.html", ME).href : "../teacher.html";
   function api(path, opts) {
     opts = opts || {};
     var h = { apikey: SB_KEY };
@@ -43,7 +45,16 @@
     ".sb-go:disabled{opacity:.5;cursor:default}",
     ".sb-msg{font-weight:700;min-height:1.4em;font-size:1.05rem}",
     ".sb-msg.ok{color:var(--good,#1E7A4F)}.sb-msg.err{color:var(--bad,#B3261E)}",
-    ".sb-note{font-size:.88rem;color:var(--muted,#5C6B66)}"
+    ".sb-note{font-size:.88rem;color:var(--muted,#5C6B66)}",
+    /* 老師登入時：直接開放／關閉繳交 */
+    ".sb-teach{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;background:#FFF6DC;border:2px dashed #B7791F;border-radius:14px;padding:.6rem .8rem;color:#5B3F00}",
+    ".sb-teach[hidden]{display:none}",
+    ".sb-teach b{font-size:1.02rem}",
+    ".sb-teach .t{flex:1 1 14rem;line-height:1.5}",
+    ".sb-teach button,.sb-teach a{appearance:none;border:2px solid #5B3F00;border-radius:999px;min-height:2.9rem;padding:0 1.1rem;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;background:#fff;color:#5B3F00;text-decoration:none;display:inline-flex;align-items:center}",
+    ".sb-teach button.on{background:#1E7A4F;border-color:#1E7A4F;color:#fff}",
+    ".sb-teach button.off{background:#fff;border-color:#B3261E;color:#B3261E}",
+    ".sb-teach button:disabled{opacity:.6;cursor:default}"
   ].join("\n");
 
   function mount(box, cfg) {
@@ -59,7 +70,8 @@
     var go = el("button", "sb-go", "📤 繳交給老師"); go.type = "button";
     var msg = el("div", "sb-msg"); msg.setAttribute("aria-live", "polite");
     var note = el("p", "sb-note", "只會傳出班級和座號，不會傳出名字。交錯了可以修改後再交一次，老師會看到最新的那一份。");
-    [state, who, prev, go, msg, note].forEach(function (x) { wrap.appendChild(x); });
+    var teach = el("div", "sb-teach"); teach.hidden = true;
+    [teach, state, who, prev, go, msg, note].forEach(function (x) { wrap.appendChild(x); });
     box.appendChild(wrap);
 
     var A = null, me = load(WHO_KEY, {}), timer = null;
@@ -96,6 +108,7 @@
           var a = rows[0];
           var was = A && A.open && JSON.stringify(A.classes) === JSON.stringify(a && a.classes) && A.seats === (a && a.seats);
           A = a || null;
+          drawTeach();
           if (!A) { setState(false, "這份作業還沒有設定繳交。"); return; }
           if (!A.open) { setState(false, "老師還沒開放繳交。老師開放後，這裡會自動出現繳交按鈕。"); return; }
           if (!A.classes || !A.classes.length) { setState(false, "老師還沒設定班級。"); return; }
@@ -104,6 +117,42 @@
         })
         .catch(function () { setState(false, navigator.onLine === false ? "目前沒有網路，連上網路才能繳交。" : "連不上伺服器，稍後會自動再試。"); });
     }
+    /* ---------- 老師登入時（不是學生模式）：在這裡直接開放／關閉繳交 ---------- */
+    function isTeacher() {
+      var stu = null; try { stu = JSON.parse(sessionStorage.getItem("clsStu") || "null"); } catch (e) {}
+      return !stu && window.CLS && window.CLS.isTeacher && window.CLS.api;
+    }
+    var tBusy = false;
+    function drawTeach() {
+      if (!isTeacher()) { teach.hidden = true; return; }
+      teach.hidden = false;
+      if (!A) { teach.innerHTML = '<span class="t"><b>🧑‍🏫 老師</b>：資料庫裡還沒有這份作業（' + cfg.assignment + '），請 Claude 建立。</span>'; return; }
+      var cls = (A.classes || []).join("、");
+      teach.innerHTML = '<span class="t"><b>🧑‍🏫 老師</b>：這份作業' + (A.open ? '<b style="color:#1E7A4F">正在收作品</b>' : '<b style="color:#B3261E">還沒開放</b>') +
+        (cls ? "（" + cls + "，座號 1～" + (A.seats || 25) + "）" : "（還沒設定班級，開放時會收全部班級）") +
+        '。學生用左下角「QR」掃描就會打開這一站。</span>';
+      var b = el("button", A.open ? "off" : "on", A.open ? "⏸ 關閉繳交" : "▶ 開放繳交"); b.type = "button"; b.disabled = tBusy;
+      var w = el("a", "", "看作品牆 →"); w.href = TEACHER_URL;
+      teach.appendChild(b); teach.appendChild(w);
+      b.addEventListener("click", function () {
+        if (tBusy) return; tBusy = true; b.disabled = true; b.textContent = "更新中…";
+        var v = !A.open;
+        var getCls = (v && !(A.classes || []).length)
+          ? window.CLS.api("rest/v1/class_list?select=name,seats&order=sort.asc,name.asc").then(function (r) { return r.ok ? r.json() : []; })
+          : Promise.resolve(null);
+        getCls.then(function (list) {
+          var data = { open: v };
+          if (list && list.length) { data.classes = list.map(function (c) { return c.name; }); data.seats = Math.max.apply(null, list.map(function (c) { return c.seats || 25; })); }
+          return window.CLS.api("rest/v1/assignments?id=eq." + encodeURIComponent(cfg.assignment), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+        }).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); })
+          .then(function () { tBusy = false; return check(); }, function () { tBusy = false; drawTeach(); var t = teach.querySelector(".t"); if (t) t.insertAdjacentHTML("beforeend", '<br><b style="color:#B3261E">更新失敗，請確認網路後再按一次。</b>'); });
+      });
+    }
+    window.addEventListener("cls-status", function () { drawTeach(); });
+    window.addEventListener("cls-sync", function () { drawTeach(); });
+    var tWait = 0;
+    (function waitCls() { if (window.CLS && window.CLS.isTeacher) { drawTeach(); return; } if (++tWait < 30) setTimeout(waitCls, 300); })();
+
     function poll() { clearTimeout(timer); timer = setTimeout(function () { if (!document.hidden) check().then(poll, poll); else poll(); }, A && A.open ? 30000 : 10000); }
     check().then(poll, poll);
     document.addEventListener("visibilitychange", function () { if (!document.hidden) check(); });

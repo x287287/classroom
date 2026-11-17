@@ -176,7 +176,7 @@
     document.head.appendChild(s);
   }
   function liveId() { return window.CLS_LIVE && !window.CLS_LIVE.isStudent ? window.CLS_LIVE.id : null; }
-  function qrUrl() { var c = lget("clsClass", ""), u = pageUrl(), id = liveId(); return u + (u.indexOf("?") < 0 ? "?" : "&") + "stu=1" + (c ? "&c=" + encodeURIComponent(c) : "") + (id ? "&s=" + id : ""); }
+  function qrUrl() { var c = lget("clsClass", ""), u = pageUrl(), id = liveId(); return u + (u.indexOf("?") < 0 ? "?" : "&") + "stu=1" + (c ? "&c=" + encodeURIComponent(c) : "") + (id ? "&s=" + id : "") + (/^#[\w-]+$/.test(location.hash) ? location.hash : ""); }
   /* 課堂房間：開始／結束、顯示幾台平板跟著 */
   function drawLive() {
     var box = ov.querySelector(".cls-live"); if (!box) return;
