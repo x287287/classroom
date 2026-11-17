@@ -104,10 +104,19 @@ select.sel{background:var(--card);border:2px solid var(--line);border-radius:12p
 .unit-toggle .prog{width:90px;height:8px;border-radius:99px;background:var(--line);overflow:hidden;flex:none}
 .unit-toggle .prog i{display:block;height:100%;background:var(--leaf)}
 .unit-toggle .pt{font-size:13px;color:var(--leaf);font-weight:700}
-.lesson-group{margin-top:18px}
-.lesson-h{font-family:var(--body);font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;padding-bottom:6px;border-bottom:2px dashed var(--line)}
-.lesson-h .n{font-size:12px;font-weight:500;color:var(--muted)}
-.lesson-h.game{color:var(--accent)}
+.lesson-group{margin-top:10px}
+.lesson-h{font-family:var(--body);font-size:16px;font-weight:700;color:var(--ink);margin:0}
+.lesson-toggle{appearance:none;width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;min-height:48px;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.lesson-toggle:hover{border-color:var(--ink)}
+.lesson-toggle .lt{font-size:17px;font-weight:700}
+.lesson-toggle .n{font-size:13px;font-weight:500;color:var(--muted)}
+.lesson-toggle .pt{font-size:13px;color:var(--leaf);font-weight:700;margin-left:auto}
+.lesson-toggle .chev{width:26px;height:26px;flex:none;border-radius:50%;border:2px solid var(--ink);position:relative;transition:transform .2s}
+.lesson-toggle .chev::before{content:"";position:absolute;left:5px;top:6px;width:8px;height:8px;border-right:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);transform:rotate(-45deg)}
+.lesson-group.open .lesson-toggle .chev{transform:rotate(90deg)}
+.lesson-group.open .lesson-toggle{border-color:var(--ink)}
+.lesson-h.game .lt{color:var(--accent)}
+.lesson-body{padding-top:2px}
 .chip.ppt{background:var(--sky)}.chip.web{background:var(--leaf)}.chip.game{background:var(--accent)}
 .empty{background:var(--card);border:1.5px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted);display:grid;gap:8px;justify-items:center}
 .empty b{font-family:var(--display);font-size:20px;color:var(--ink)}
@@ -488,7 +497,10 @@ function render(){
     const isOpen=filtering||!!openSet[uk];
     const lessons=[...L.keys()].filter(k=>k!=="單元統整遊戲").length, hasGame=L.has("單元統整遊戲");
     return `<section class="unit${isOpen?" open":""}"><h2><button class="unit-toggle" type="button" aria-expanded="${isOpen}" aria-controls="ub${ui}" data-uk="${esc(uk)}"><span class="chev" aria-hidden="true"></span><span class="ut">${esc(u)}</span>${+g?`<span class="g">${gradeName(+g)}</span>`:""}<span class="cnt">${lessons} ${[...L.keys()].every(k=>/年級/.test(k))?"個年級":"課"}・${total} 份教材${hasGame?"・含統整遊戲":""}</span><span class="prog" aria-label="已上過 ${doneU} / ${allU.length} 份"><i style="width:${allU.length?doneU/allU.length*100:0}%"></i></span><span class="pt">已上過 ${doneU} / ${allU.length}</span></button></h2><div class="unit-body" id="ub${ui}"${isOpen?"":" hidden"}>${
-      [...L.keys()].map(lk=>`<div class="lesson-group"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}">${esc(lk)}<span class="n">${L.get(lk).length} 份</span></h3><div class="cards">${L.get(lk).map(card).join("")}</div></div>`).join("")
+      [...L.keys()].map((lk,li)=>{
+        const lkey=uk+"||"+lk, lOpen=filtering||!!openSet[lkey], items=L.get(lk), dn=items.filter(x=>doneSet[x.url]).length;
+        return `<div class="lesson-group${lOpen?" open":""}"><h3 class="lesson-h${lk==="單元統整遊戲"?" game":""}"><button class="lesson-toggle" type="button" aria-expanded="${lOpen}" aria-controls="lb${ui}_${li}" data-lk="${esc(lkey)}"><span class="chev" aria-hidden="true"></span><span class="lt">${esc(lk)}</span><span class="n">${items.length} 份</span><span class="pt">${dn?`已上過 ${dn} / ${items.length}`:""}</span></button></h3><div class="lesson-body" id="lb${ui}_${li}"${lOpen?"":" hidden"}><div class="cards">${items.map(card).join("")}</div></div></div>`;
+      }).join("")
     }</div></section>`;
   }).join(""));
   $("expandAll").hidden=$("collapseAll").hidden=filtering;renderRecent();renderWeek();
@@ -498,6 +510,12 @@ let openSet={};
 try{openSet=JSON.parse(localStorage.getItem("shelfOpen")||"{}")||{}}catch(e){openSet={}}
 function saveOpen(){try{localStorage.setItem("shelfOpen",JSON.stringify(openSet))}catch(e){}}
 $("units").addEventListener("click",e=>{
+  const t=e.target.closest(".lesson-toggle"); if(t){
+    const g=t.closest(".lesson-group"), body=g.querySelector(".lesson-body"), open=t.getAttribute("aria-expanded")!=="true";
+    t.setAttribute("aria-expanded",open); body.hidden=!open; g.classList.toggle("open",open);
+    if(!query.trim()&&curType==="all"&&curGrade==="all"&&!onlyTodo){ if(open)openSet[t.dataset.lk]=1; else delete openSet[t.dataset.lk]; saveOpen(); }
+    return;
+  }
   const b=e.target.closest(".unit-toggle"); if(!b)return;
   const sec=b.closest(".unit"), body=sec.querySelector(".unit-body"), open=b.getAttribute("aria-expanded")!=="true";
   b.setAttribute("aria-expanded",open); body.hidden=!open; sec.classList.toggle("open",open);
@@ -523,7 +541,7 @@ const renderFs=()=>{$("fsBtn").textContent=fsEl()?"⛶ 結束全螢幕":"⛶ 全
 document.addEventListener("fullscreenchange",renderFs);document.addEventListener("webkitfullscreenchange",renderFs);
 function remember(u){recent=[{url:u,t:Date.now()}].concat(recent.filter(r=>r.url!==u)).slice(0,8);save("shelfRecent",recent);}
 $("todoOnly").addEventListener("click",e=>{onlyTodo=!onlyTodo;e.currentTarget.setAttribute("aria-pressed",onlyTodo);render();});
-$("expandAll").addEventListener("click",()=>{document.querySelectorAll(".unit-toggle").forEach(b=>openSet[b.dataset.uk]=1);saveOpen();render();});
+$("expandAll").addEventListener("click",()=>{document.querySelectorAll(".unit-toggle").forEach(b=>openSet[b.dataset.uk]=1);document.querySelectorAll(".lesson-toggle").forEach(b=>openSet[b.dataset.lk]=1);saveOpen();render();});
 $("collapseAll").addEventListener("click",()=>{openSet={};saveOpen();render();});
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;curType=b.dataset.t;render();});
 $("gradeSel").addEventListener("change",e=>{curGrade=e.target.value;render();});

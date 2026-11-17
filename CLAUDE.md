@@ -3,7 +3,7 @@
 老師個人的教材網站，以 GitHub Pages 發布在 https://x287287.github.io/classroom/ 。使用場景是教室的大型觸控螢幕（教室電腦沒有登入 Claude），對象是國小四年級。
 
 ## 結構
-- `index.html`：書櫃首頁。教材清單寫在檔案裡的 `MATERIALS` 陣列，依單元 → 課次分組顯示；每一筆有 `unit`、`lesson`、`topic`（對應的課本小標題）、`title`、`type`、`grade`、`pages`（課本頁碼，如 `"32–33"`）、`mins`（建議分鐘數）、`note`、`url`。首頁的「已上過」、「最近打開」與「本週要用」（卡片上的「☆ 本週」釘選，置頂顯示，按「清空本週」換週）存在 localStorage（`shelfDone`、`shelfRecent`、`shelfWeek`）；老師登入後由 `assets/sync.js` 同步到雲端。首頁工具列有「字」與「⛶ 全螢幕」按鈕。陣列順序就是頁面上的順序，請依課本小標題順序排列。
+- `index.html`：書櫃首頁。教材清單寫在檔案裡的 `MATERIALS` 陣列，依單元 → 課次分組顯示，單元和課次（友善校園是低／中／高年級）都是可以折疊的兩層，預設收起，展開狀態記在 `shelfOpen`（單元 key 是 `年級|單元`，課次 key 是 `年級|單元||課次`），搜尋或篩選時全部展開；每一筆有 `unit`、`lesson`、`topic`（對應的課本小標題）、`title`、`type`、`grade`、`pages`（課本頁碼，如 `"32–33"`）、`mins`（建議分鐘數）、`note`、`url`。首頁的「已上過」、「最近打開」與「本週要用」（卡片上的「☆ 本週」釘選，置頂顯示，按「清空本週」換週）存在 localStorage（`shelfDone`、`shelfRecent`、`shelfWeek`）；老師登入後由 `assets/sync.js` 同步到雲端。首頁工具列有「字」與「⛶ 全螢幕」按鈕。陣列順序就是頁面上的順序，請依課本小標題順序排列。
 - `lessons/`：每份教材一個獨立的 HTML 檔。補充教材命名為 `u<單元>-<課><a,b,c…>-<英文代號>.html`，統整遊戲為 `u<單元>-game-<代號>.html`。友善校園的互動教材命名為 `fc-<low|mid|high>-<代號>.html`，用 `<body class="fc">`（靛藍主色）。
 - `lessons/data/`：統整遊戲的題庫／關卡（`u2-game-questions.js`、`u3-game-levels.js`），檔頭有格式說明；改題目只要改這裡。
 - `assets/home-fab.js`：共用的左下角懸浮按鈕：「⌂ 回書櫃」與「QR」（顯示這份教材網址的 QR Code，產生器是 `assets/vendor/qrcode.js`，MIT）。它也會自動載入 `assets/class-tools.js` 並註冊離線用的 `sw.js`。
