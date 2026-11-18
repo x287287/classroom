@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>加入課堂</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+/* 學生掃書櫃首頁「📡 課堂 QR」打開的頁面：先選座號，之後交給 assets/live.js 跟著老師（平常顯示「請看大螢幕」） */
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(160deg,#1E3A34,#24524A);color:#1F2A27;font:400 18px/1.6 'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}
+main{min-height:100vh;display:grid;place-items:center;padding:16px}
+.box{background:#fff;border-radius:24px;padding:22px clamp(14px,4vw,28px);width:min(640px,100%);display:grid;gap:14px;text-align:center}
+h1{margin:0;font:700 clamp(26px,6vw,34px)/1.3 'Huninn','Noto Sans TC',sans-serif;color:#1E3A34}
+.cl{font-weight:700;color:#2A7563}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.grid button{appearance:none;min-height:64px;border-radius:16px;border:2px solid #C9D2CC;background:#F4F6F3;color:#1E3A34;font:700 26px/1 'Huninn','Noto Sans TC',sans-serif;cursor:pointer}
+.grid button:active{transform:scale(.96)}
+.grid button:focus-visible{outline:3px solid #F5B521;outline-offset:2px}
+.msg{color:#B3261E;font-weight:700;min-height:1.6em}
+</style>
+</head>
+<body>
+<main>
+  <div class="box" id="box">
+    <h1>👋 加入課堂</h1>
+    <div class="cl" id="cl"></div>
+    <p style="margin:0">點你的座號</p>
+    <div class="grid" id="grid" role="group" aria-label="座號"></div>
+    <div class="msg" id="msg" role="status"></div>
+  </div>
+</main>
+<script>
+(function(){
+  var SB_URL="https://tsxbphngzuzpdddhadfw.supabase.co", SB_KEY="sb_publishable_EOXrx2SRQbFRHACqHbUUig_4e-EkgkE";
+  var qs=new URLSearchParams(location.search);
+  var sid=(qs.get("s")||"").replace(/\D/g,"").slice(0,6), cls=(qs.get("c")||"").slice(0,20);
+  function sget(k){try{return JSON.parse(sessionStorage.getItem(k)||"null")}catch(e){return null}}
+  function sset(k,v){try{if(v==null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  var $=function(id){return document.getElementById(id)};
+  if(sid.length!==6){$("msg").textContent="QR Code 不完整，請再掃一次老師的 QR Code。";return}
+  $("cl").textContent=cls||"";
+  function go(){
+    var sc=document.createElement("script");sc.src="assets/live.js";document.body.appendChild(sc);
+  }
+  var prev=sget("clsSeat"), pstu=sget("clsStu");
+  if(qs.get("re")!=="1"&&prev&&prev.seat&&pstu&&pstu.cls===cls&&sget("clsSess")===sid){sset("clsSess",sid);go();return}
+  function draw(n){
+    var h="";for(var i=1;i<=n;i++)h+='<button type="button" data-s="'+i+'">'+i+'</button>';
+    $("grid").innerHTML=h;
+  }
+  draw(25);
+  fetch(SB_URL+"/rest/v1/class_list?select=name,seats&name=eq."+encodeURIComponent(cls),{headers:{apikey:SB_KEY},cache:"no-store"})
+    .then(function(r){return r.ok?r.json():[]}).then(function(l){if(l[0]&&l[0].seats&&l[0].seats!==25)draw(l[0].seats)}).catch(function(){});
+  $("grid").addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    sset("clsStu",{cls:cls});sset("clsSeat",{seat:+b.dataset.s});sset("clsSess",sid);
+    history.replaceState(null,"","?s="+sid+(cls?"&c="+encodeURIComponent(cls):""));
+    go();
+  });
+})();
+</script>
+</body>
+</html>

@@ -186,11 +186,11 @@
       var h = L.host || {}, seats = h.seats || [];
       box.innerHTML = '<div class="on">📡 課堂進行中・代碼 <b>' + id + '</b>・<b>' + (h.count || 0) + '</b> 台平板跟著' +
         (seats.length ? '<br><small>座號：' + seats.join("、") + "</small>" : "") + '</div>' +
-        '<p>你打開別份教材、換站、開全班共戰或想法牆，學生平板都會自動跟過去。還沒加入的同學掃這個 QR Code。</p>' +
+        '<p>平常學生平板顯示「請看大螢幕」；你換到「交給老師」那一站、開全班共戰或想法牆、打開平板遊戲時，平板會自動打開。還沒加入的同學掃這個 QR Code。</p>' +
         '<button type="button" class="live-end">結束課堂</button>';
     } else if (window.CLS && window.CLS.isTeacher) {
       box.innerHTML = '<button type="button" class="live-go">📡 開始課堂：全班跟著我換頁</button>' +
-        '<p>學生只要掃一次、選一次座號。之後你換教材、換站、開遊戲房間或想法牆，平板會自動跟著換。</p>';
+        '<p>學生只要掃一次、選一次座號。平常平板顯示「請看大螢幕」，玩遊戲、交作品、寫想法時才會自動打開。（書櫃首頁也有「📡 課堂 QR」）</p>';
     } else box.innerHTML = '<p>登入老師帳號後，可以開「課堂房間」讓全班平板跟著你換頁。</p>';
   }
   window.addEventListener("cls-live", function () {

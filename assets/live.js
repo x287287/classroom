@@ -1,12 +1,11 @@
 /* 教室小書櫃：課堂房間（全班跟著老師換頁）
-   老師（登入老師帳號）在教材的「QR」視窗按「📡 開始課堂」→ 產生 6 位數課堂代碼（localStorage clsLive），
-   QR Code 變成「教材?stu=1&c=班級&s=代碼」。學生掃一次、選一次座號，之後：
-     ・老師打開別份教材 → 學生平板自動跳到同一份（學生模式，座號沿用）
-     ・老師在分站教材換站（kit-page）→ 學生平板跟著換到同一站
-     ・老師開全班共戰房間 → 學生平板自動進 raid.html?r=房號（座號自動帶入）
-     ・老師開想法牆 → 學生平板自動進 fb.html?b=代碼（座號自動帶入）
-     ・只給大螢幕用的頁面（<meta name="live" content="screen">，例如兩隊對戰）→ 學生平板顯示「請看大螢幕」
-     ・<meta name="live" content="none"> 的頁面（書櫃首頁）不會帶學生過去
+   老師（登入老師帳號）在書櫃首頁按「📡 課堂 QR」（或教材的「QR」視窗按「📡 開始課堂」）→ 產生 6 位數課堂代碼（localStorage clsLive），
+   學生掃 QR（書櫃：join.html?s=代碼&c=班級；教材：教材?stu=1&c=班級&s=代碼）、選一次座號，之後平板跟著老師：
+     ・平常（書櫃、教材的一般站、動畫簡報、宣導簡報、只給大螢幕的遊戲）→ 平板顯示「👀 請看大螢幕，認真上課」
+     ・老師把教材換到「交給老師」那一站（#send），或 <meta name="live-play" content="站id,…"> 列的站 → 平板打開同一站一起操作
+     ・老師開全班共戰房間 → 平板自動進 raid.html?r=房號；老師開想法牆 → 平板自動進 fb.html?b=代碼（座號都自動帶入）
+     ・<meta name="live" content="play"> 的頁面（平板遊戲：個人挑戰、小豬消防隊）→ 平板打開同一份一起玩
+     ・<meta name="live" content="screen">（兩隊對戰、全班共戰老師頁）或 "none"（書櫃首頁）→ 看大螢幕
    老師結束課堂，或 6 小時沒有換頁，學生平板就停止跟隨。
    資料表 live_sessions（id、class_name、url、title、open；只有老師能讀寫）、live_seen（哪些平板在跟）；
    學生只用 RPC live_state(p_id,p_device,p_seat)，老師用 live_host(p_id) 看幾台平板在跟。
@@ -77,7 +76,10 @@
     function showScreen(title) {
       onReady(function () {
         if (!screenOv) { screenOv = document.createElement("div"); screenOv.className = "cls-live-screen"; screenOv.setAttribute("role", "status"); document.body.appendChild(screenOv); }
-        screenOv.innerHTML = "<div><div style='font-size:64px'>👀</div><b>請看大螢幕</b><div>" + esc(title || "") + "</div><div style='font-size:16px;opacity:.8;margin-top:1em'>老師換到下一個活動時，這裡會自動換過去。</div></div>";
+        screenOv.innerHTML = "<div><div style='font-size:64px'>👀</div><b>請看大螢幕，認真上課</b><div>" + esc(title || "") + "</div><div style='font-size:16px;opacity:.8;margin-top:1em'>" + (seat() ? "我是 " + seat() + " 號・" : "") + "要玩遊戲、交作品或寫想法時，這裡會自動打開。</div>" +
+          (seat() ? "<button type='button' class='re' style='margin-top:1.4em;appearance:none;border:2px solid #fff;background:transparent;color:#fff;border-radius:999px;min-height:46px;padding:0 20px;font:700 16px/1 inherit;cursor:pointer'>選錯座號？重新選</button>" : "") + "</div>";
+        var re = screenOv.querySelector(".re");
+        if (re) re.onclick = function () { var stu = sget("clsStu") || {}; moving = true; location.href = ROOT + "join.html?re=1&s=" + sid + (stu.cls ? "&c=" + encodeURIComponent(stu.cls) : ""); };
         screenOv.hidden = false;
       });
     }
@@ -87,8 +89,7 @@
       rpc("live_state", { p_id: sid, p_device: device, p_seat: seat() || null }).then(function (d) {
         if (!d || !d.open) { stop(d && d.err ? "" : "老師結束了課堂"); return; }
         var url = d.url || "";
-        if (!url) return;
-        if (url.indexOf("screen:") === 0) { showScreen(url.slice(7)); return; }
+        if (!url || url.indexOf("screen:") === 0) { showScreen(url.slice(7)); return; }
         if (screenOv) screenOv.hidden = true;
         var cur = rel(location.href);
         if (noHash(url) === noHash(cur)) {
@@ -135,18 +136,24 @@
   };
   L.screen = function (title) { L.push("screen:" + (title || pageTitle()), title || pageTitle()); };
   /* 依這一頁的設定推送：一般教材＝這一頁（含目前的站）；screen＝請學生看大螢幕；none＝不推送 */
-  L.pushHere = function () {
+  /* 平板要不要打開這一頁：只有互動環節（平板遊戲 play、「交給老師」#send 站）才打開，其餘都看大螢幕 */
+  function hereUrl() {
     var m = metaLive();
-    if (m === "none") return;
-    if (m === "screen") return L.screen(pageTitle());
-    L.push(rel(location.href), pageTitle());
-  };
+    if (m === "play") return rel(location.href);
+    if (m === "screen" || m === "none") return "screen:" + (m === "none" ? "" : pageTitle());
+    /* 平板一起操作的站：<meta name="live-play" content="studio,send">，沒寫就只有「交給老師」#send */
+    var mp = document.querySelector('meta[name="live-play"]');
+    var ids = (mp ? mp.getAttribute("content") : "send").split(/[\s,]+/);
+    var h = location.hash.slice(1);
+    if (h && ids.indexOf(h) >= 0 && document.getElementById(h)) return rel(location.href);
+    return "screen:" + pageTitle();
+  }
+  L.pushHere = function () { var u = hereUrl(); L.push(u, pageTitle()); };
   L.start = function (cls) {
     var tries = 0;
     function attempt() {
       var id = String(Math.floor(100000 + Math.random() * 900000));
-      var m = metaLive();
-      var url = m === "none" ? "" : m === "screen" ? "screen:" + pageTitle() : rel(location.href);
+      var url = hereUrl();
       return api("rest/v1/live_sessions", "POST", { id: id, class_name: cls || null, url: url, title: pageTitle() }).then(function () {
         live = { id: id, cls: cls || "", t: Date.now() }; lset("clsLive", live); L.id = id; lastPush = url; L.host = { count: 0, seats: [] };
         startHost(); fire(); return id;
@@ -183,12 +190,10 @@
         pill = document.createElement("button"); pill.type = "button"; pill.className = "cls-live-pill";
         pill.addEventListener("click", function () {
           var qrBtn = document.querySelector(".cls-fab.qr");
-          if (qrBtn) qrBtn.click();
-          else if (pill.dataset.arm) { L.end(); }
-          else { pill.dataset.arm = "1"; pill.textContent = "再按一次結束課堂"; setTimeout(function () { if (pill) { delete pill.dataset.arm; drawPill(); } }, 3000); }
+          if (qrBtn) qrBtn.click(); else L.openDialog();
         });
       }
-      if (!pill.dataset.arm) pill.textContent = "📡 課堂 " + L.id + (L.host ? "・" + L.host.count + " 台跟著" : "");
+      pill.textContent = "📡 課堂 " + L.id + (L.host ? "・" + L.host.count + " 台跟著" : "");
       pill.setAttribute("aria-label", "課堂進行中，代碼 " + L.id + (L.host ? "，" + L.host.count + " 台平板跟著" : ""));
       var bar = document.querySelector(".cls-fabs");
       if (bar) { pill.classList.remove("cls-live-solo"); if (pill.parentNode !== bar) bar.appendChild(pill); }
@@ -196,6 +201,81 @@
     });
   }
   window.addEventListener("cls-live", drawPill);
+
+  /* ---------- 書櫃首頁的「📡 課堂 QR」視窗：選班級 → 開課堂 → 顯示加入用的 QR ---------- */
+  var SITE = /github\.io$/.test(location.hostname) ? ROOT : "https://x287287.github.io/classroom/";
+  var dlg = null, dlgCls = lget("clsClass", "");
+  var dcss = ".cls-ldlg{position:fixed;inset:0;z-index:2147483003;background:rgba(10,20,18,.62);display:grid;place-items:center;padding:16px}" +
+    ".cls-ldlg[hidden]{display:none}" +
+    ".cls-ldlg .box{background:#fff;color:#1F2A27;border-radius:24px;padding:22px 26px;width:min(560px,100%);max-height:94vh;overflow:auto;display:grid;gap:12px;justify-items:center;text-align:center;font:400 17px/1.6 'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.35)}" +
+    ".cls-ldlg h2{margin:0;font:700 26px/1.3 'Huninn','Noto Sans TC',sans-serif;color:#4A2B5E}" +
+    ".cls-ldlg .cls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}" +
+    ".cls-ldlg button{appearance:none;min-height:48px;padding:0 20px;border-radius:999px;border:2px solid #1E3A34;background:#fff;color:#1E3A34;font:700 17px/1 'Noto Sans TC',sans-serif;cursor:pointer}" +
+    ".cls-ldlg button[aria-pressed=true],.cls-ldlg button.go{background:#7A2E8E;border-color:#7A2E8E;color:#fff}" +
+    ".cls-ldlg button.end{border-color:#B3261E;color:#B3261E}" +
+    ".cls-ldlg .code{width:min(360px,70vw);aspect-ratio:1}.cls-ldlg .code svg{width:100%;height:100%}" +
+    ".cls-ldlg .on{background:#F4ECF8;color:#4A2B5E;border-radius:14px;padding:8px 14px}" +
+    ".cls-ldlg .url{font-size:14px;color:#4A5550;word-break:break-all}" +
+    ".cls-ldlg .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}";
+  function loadQr(cb) {
+    if (window.qrcode) return cb();
+    var sc = document.createElement("script"); sc.src = ROOT + "assets/vendor/qrcode.js"; sc.onload = function () { cb(); }; sc.onerror = function () { cb(1); }; document.head.appendChild(sc);
+  }
+  function classes(cb) {
+    fetch(SB_URL + "/rest/v1/class_list?select=name,seats&order=sort.asc,name.asc", { headers: { apikey: SB_KEY }, cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : []; }).then(cb).catch(function () { cb([]); });
+  }
+  function drawDlg() {
+    if (!dlg || dlg.hidden) return;
+    var box = dlg.querySelector(".box");
+    if (!(window.CLS && window.CLS.isTeacher)) { box.innerHTML = "<h2>📡 課堂</h2><p>請先按「☁ 老師登入」，登入老師帳號後才能開課堂。</p><button type='button' class='x'>關閉</button>"; return; }
+    if (!L.id) {
+      box.innerHTML = "<h2>📡 開始課堂</h2><p>選班級後開始，學生掃 QR Code、選座號就加入。<br>平常平板顯示「請看大螢幕」，玩遊戲、交作品、寫想法時才會自動打開。</p>" +
+        "<div class='cls'></div><div class='row'><button type='button' class='go'>📡 開始課堂</button><button type='button' class='x'>取消</button></div>";
+      classes(function (list) {
+        var c = box.querySelector(".cls"); if (!c) return;
+        if (list.length && !list.some(function (x) { return x.name === dlgCls; })) dlgCls = list.length === 1 ? list[0].name : dlgCls;
+        c.innerHTML = list.map(function (x) { return "<button type='button' data-c='" + esc(x.name) + "' aria-pressed='" + (x.name === dlgCls) + "'>" + esc(x.name) + "</button>"; }).join("") ||
+          "<span>還沒有班級，可以到老師後台「🏫 班級名單」新增。</span>";
+      });
+      return;
+    }
+    var h = L.host || {}, seats = h.seats || [];
+    var url = SITE + "join.html?s=" + L.id + (live && live.cls ? "&c=" + encodeURIComponent(live.cls) : "");
+    box.innerHTML = "<h2>📡 掃描加入課堂" + (live && live.cls ? "・" + esc(live.cls) : "") + "</h2>" +
+      "<div class='on'>課堂代碼 <b>" + L.id + "</b>・<b>" + (h.count || 0) + "</b> 台平板跟著" + (seats.length ? "<br><small>座號：" + seats.join("、") + "</small>" : "") + "</div>" +
+      "<div class='code' aria-label='加入課堂的 QR Code'></div><div class='url'>" + esc(url) + "</div>" +
+      "<div class='row'><button type='button' class='x go'>開始上課</button><button type='button' class='end'>結束課堂</button></div>";
+    loadQr(function (err) {
+      var c = box.querySelector(".code"); if (!c) return;
+      if (err || !window.qrcode) { c.textContent = "QR Code 載入失敗，請學生輸入上面的網址。"; return; }
+      var qr = window.qrcode(0, "M"); qr.addData(url); qr.make(); c.innerHTML = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+    });
+  }
+  L.openDialog = function () {
+    addCss();
+    if (!dlg) {
+      var st = document.createElement("style"); st.textContent = dcss; document.head.appendChild(st);
+      dlg = document.createElement("div"); dlg.className = "cls-ldlg"; dlg.setAttribute("role", "dialog"); dlg.setAttribute("aria-modal", "true"); dlg.setAttribute("aria-label", "課堂");
+      dlg.innerHTML = "<div class='box'></div>"; document.body.appendChild(dlg);
+      dlg.addEventListener("click", function (e) {
+        if (e.target === dlg) { dlg.hidden = true; return; }
+        var b = e.target.closest("button"); if (!b) return;
+        if (b.dataset.c != null) { dlgCls = b.dataset.c; lset("clsClass", dlgCls); [].forEach.call(dlg.querySelectorAll("[data-c]"), function (x) { x.setAttribute("aria-pressed", String(x === b)); }); return; }
+        if (b.classList.contains("x")) { dlg.hidden = true; return; }
+        if (b.classList.contains("go")) { b.disabled = true; b.textContent = "開課堂中…"; L.start(dlgCls).then(drawDlg).catch(function () { b.disabled = false; b.textContent = "開課堂失敗，請再按一次"; }); return; }
+        if (b.classList.contains("end")) { if (!b.dataset.arm) { b.dataset.arm = "1"; b.textContent = "再按一次結束（平板停止跟隨）"; return; } L.end().then(function () { dlg.hidden = true; }); }
+      });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && dlg && !dlg.hidden) dlg.hidden = true; });
+      window.addEventListener("cls-live", function () {
+        if (!dlg || dlg.hidden || dlg.querySelector(".end[data-arm]")) return;
+        var on = dlg.querySelector(".on"), h = L.host || {};
+        if (L.id && on && dlg.querySelector(".code svg")) on.innerHTML = "課堂代碼 <b>" + L.id + "</b>・<b>" + (h.count || 0) + "</b> 台平板跟著" + ((h.seats || []).length ? "<br><small>座號：" + h.seats.join("、") + "</small>" : "");
+        else drawDlg();
+      });
+    }
+    dlg.hidden = false; drawDlg();
+  };
 
   /* 等登入狀態確定後，把這一頁推給學生 */
   if (L.id) {
@@ -205,6 +285,6 @@
       if (++waited > 40) return;
       setTimeout(ready, 250);
     })();
-    window.addEventListener("kit-page", function () { setTimeout(L.pushHere, 60); });
   }
+  window.addEventListener("kit-page", function () { if (L.id) setTimeout(L.pushHere, 60); });
 })();
