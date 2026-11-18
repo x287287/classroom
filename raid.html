@@ -77,6 +77,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .opts.ox button.tried::after{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap}
 .pot{border-radius:14px;padding:8px 12px;font-weight:700;font-size:17px;background:#FFF4D6;color:#6A4A00}
 .pot.p1{background:#EAF2FF;color:#163F80}.pot.p0{background:#F1EDF6;color:#4A2B5E}
+/* 分隊競賽、魔王反擊、錯題復仇戰、情境闖關 */
+.tbadge{display:inline-block;border-radius:999px;padding:0 12px;color:#fff;font-weight:700}
+.tc1{background:#C8414B}.tc2{background:#1D5FBF}.tc3{background:#17784E}.tc4{background:#A84A00}
+.revq{border-radius:14px;padding:8px 12px;font-weight:700;font-size:17px;background:linear-gradient(90deg,#7A1520,#B3125A);color:#fff;text-align:center}
+.ctr{border:5px solid #C8414B;box-shadow:0 0 30px #C8414B88}
+.ctr h2{color:#9B1C2A!important;font-size:26px!important;display:flex;justify-content:space-between;gap:8px}
+.scene{background:#F7F5FA;border-radius:16px;padding:12px 14px;font-size:clamp(18px,4.6vw,21px);line-height:1.7}
+.scene .intro{display:block;color:var(--muted);font-size:.9em;margin-bottom:6px}
+.opts.story button{min-height:60px}
 </style>
 </head>
 <body>
@@ -123,14 +132,21 @@ var DM=[
   var LABEL=["A","B","C","D"];
 
   /* 第三單元的房間（raid_state.game='u3'）換成第三單元的怪物 */
-  var game="u2";
+  var game="u2", bossName="大魔王";
   function setGame(g){
     if(!/^u\d+$/.test(g||"")||g===game)return;game=g;
     var sc=document.createElement("script");sc.src="lessons/data/"+g+"-game-questions.js";
     sc.onload=function(){var pk=window.GAME_PACK;if(!pk||!pk.monsters)return;DM=pk.monsters;drawBoss();
-      document.title="全班共戰：打倒"+pk.boss;$("h1").textContent="⚔️ 全班共戰：打倒"+pk.boss;};
+      bossName=pk.boss||bossName;setTitle();};
     document.head.appendChild(sc);
   }
+  function setTitle(){
+    var m=st&&st.mode;
+    var t=m==="story"?"🧭 情境闖關":m==="team"?"👥 分隊競賽：打倒"+bossName:"⚔️ 全班共戰：打倒"+bossName;
+    if($("h1").textContent!==t){$("h1").textContent=t;document.title=t.replace(/^\S+\s/,"")}
+    var hud=document.querySelector(".hud");if(hud)hud.hidden=m==="story";
+  }
+  function tname(t){return ["","紅隊","藍隊","綠隊","橘隊"][t]||""}
   function dname(k){var d=DM.filter(function(x){return x.k===k})[0];return d?d.n:""}
   function drawBoss(){
   var art=function(i){var d=DM[i];return d?d.art(d.c):""};
@@ -161,7 +177,7 @@ var DM=[
     }).catch(function(){$("seatMsg").textContent="連線失敗，請再試一次。"});
   }
   function drawMe(){
-    $("me").innerHTML="<span>我是 "+seat+" 號</span>";
+    $("me").innerHTML="<span>我是 "+seat+" 號</span>"+(st&&st.team?'<span class="tbadge tc'+st.team+'">'+tname(st.team)+'</span>':"");
     var c=document.createElement("button");c.type="button";c.textContent="選錯了，換座號";
     c.addEventListener("click",function(){seat=0;save("raidSeat:"+room,null);$("seatMsg").textContent="";show("sSeat")});
     $("me").appendChild(c);
@@ -199,42 +215,73 @@ var DM=[
     if(!room)return;
     rpc("raid_state",{p_room:room,p_seat:seat||0,p_device:device}).then(function(d){
       if(!d){show("sCode");$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}
-      st=d;setGame(d.game);
+      var hadTeam=st&&st.team;st=d;setGame(d.game);setTitle();
+      if(seat&&d.team&&d.team!==hadTeam)drawMe();
       if(seat&&!d.joined&&d.status!=="end"){ join(seat); return; }
       if(!seat){ if(d.status==="end"){show("sGame");$("me").innerHTML="";render()} return; }
       show("sGame");render();
     }).catch(function(){});
   }
-  function hp(){var p=st.max_hp?Math.max(0,st.hp)/st.max_hp*100:100;$("hpFill").style.width=p+"%";$("hpText").textContent=st.max_hp?("魔王血量 "+Math.max(0,st.hp)+" / "+st.max_hp):"魔王血量：開始後依人數決定"}
+  function hp(){
+    if(st.mode==="team"&&st.team&&st.team_max){var mx=st.team_max[st.team-1]||1,v=Math.max(0,st.team_hp[st.team-1]);
+      $("hpFill").style.width=(v/mx*100)+"%";$("hpText").textContent=tname(st.team)+"的魔王血量 "+v+" / "+mx;return}
+    var p=st.max_hp?Math.max(0,st.hp)/st.max_hp*100:100;$("hpFill").style.width=p+"%";
+    $("hpText").textContent=st.max_hp&&st.status!=="lobby"?("魔王血量 "+Math.max(0,st.hp)+" / "+st.max_hp):(st.mode==="team"?"每隊各有一隻魔王，開始後依隊伍人數決定血量":"魔王血量：開始後依人數決定")}
   function render(){
     hp();
-    if(st.mode==="free"&&st.status==="play"){ freeTick(); return; }
+    var FR=st.mode==="free"||st.mode==="team";
+    var ctr=st.counter;
+    if(ctr&&ctr.done){if(C.doneN!==ctr.n){C.doneN=ctr.n;C.doneAt=Date.now()}else if(Date.now()-C.doneAt>7000)ctr=null}
+    if(FR&&st.status==="play"&&ctr){ F.on=false;clearTimeout(F.timer);drawCounter(); return; }
+    C.sig="";
+    if(FR&&st.status==="play"){ freeTick(); return; }
     F.on=false;
-    var key=[st.status,st.round,st.answered,st.my_correct,st.result,st.hp].join("|");
+    var key=[st.status,st.round,st.answered,st.my_correct,st.result,st.hp,st.team,st.winner].join("|");
     var b=$("body");
     if(st.status==="question"&&!st.answered){
       var lt=$("leftT");if(lt&&st.left!=null){lt.textContent="⏱ 剩 "+st.left+" 秒";lt.className="left"+(st.left<=5?" hot":"")}
     }
     if(key===sig)return; sig=key;
-    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div>'+(st.mode==="free"?'<p class="muted" style="text-align:center">這一場是「⚡ 各自搶攻」：開始後題目會出現在你的平板上，一次就答對打 2 點、第 2 次才答對打 1 點；答錯不會換題，會被定身 3 秒，再選一次。看不懂題目可以按「🔊 唸題目」。</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
+    if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div>'+(FR?'<p class="muted" style="text-align:center">這一場是「'+(st.mode==="team"?"👥 分隊競賽":"⚡ 各自搶攻")+'」：開始後題目會出現在你的平板上，一次就答對打 2 點、第 2 次才答對打 1 點；答錯不會換題，會被定身 3 秒，再選一次。看不懂題目可以按「🔊 唸題目」。</p>':'')+
+      (st.mode==="team"&&st.team?'<div class="rv na" style="text-align:center">你是 <span class="tbadge tc'+st.team+'">'+tname(st.team)+'</span>！幫自己的隊伍打倒魔王，最先打倒的隊伍獲勝！</div>':'')+
+      (FR&&st.opt_counter?'<p class="muted" style="text-align:center">🛡️ 魔王會反擊：反擊題出現時要趕快作答，'+(st.mode==="team"?"隊上":"全班")+' 8 成以上答對才擋得住！</p>':'')+
+      (FR&&st.opt_revenge?'<p class="muted" style="text-align:center">🔁 最後 3 分鐘是錯題復仇戰：出大家常錯的題目，答對傷害 ×2！</p>':'')+
+      (st.mode==="story"?'<p class="muted" style="text-align:center">這一場是「🧭 情境闖關」：大螢幕會出一個生活故事，每一關選「你會怎麼做？」。沒有標準的快慢，想清楚再選！</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
     if(st.status==="end"){
+      if(st.mode==="story"){b.innerHTML='<div class="big">🧭</div><div class="wait">'+(st.result==="cancel"?"老師取消了這場闖關":"闖關完成！")+'</div>'+(seat&&st.result!=="cancel"?'<div class="rv na">你在 '+st.my_total+' 關裡，選到最好的做法 <b>'+st.my_right+'</b> 關。</div>':'');return}
+      if(st.mode==="team"&&st.result!=="cancel"&&st.winner){
+        var mine=st.team===st.winner;
+        b.innerHTML='<div class="big">'+(mine?"🏆":"💪")+'</div><div class="wait"><span class="tbadge tc'+st.winner+'">'+tname(st.winner)+'</span> 獲勝！'+(mine?"<br>恭喜你的隊伍！":"<br>你的隊伍也很努力，下次再拚！")+'</div>'+
+          (seat?'<div class="rv na">你在 2 次內答對 <b>'+st.my_right+'</b> 題，打掉魔王 <b>'+(st.my_dmg||0)+'</b> 點血！</div>':'');return}
       var win=st.result==="win";
       b.innerHTML='<div class="big">'+(win?"🎉":"💪")+'</div><div class="wait">'+(win?"全班合力打倒大魔王！":(st.result==="cancel"?"老師取消了這場遊戲":"魔王逃走了，下次再挑戰！"))+'</div>'+
-        (seat?(st.mode==="free"?'<div class="rv na">你在 2 次內答對 <b>'+st.my_right+'</b> 題，打掉魔王 <b>'+(st.my_dmg||0)+'</b> 點血！</div>':'<div class="rv na">你答對了 <b>'+st.my_right+'</b> / '+st.my_total+' 題，打了魔王 '+st.my_right+' 下！</div>'):'');
+        (seat?(FR?'<div class="rv na">你在 2 次內答對 <b>'+st.my_right+'</b> 題，打掉魔王 <b>'+(st.my_dmg||0)+'</b> 點血！</div>':'<div class="rv na">你答對了 <b>'+st.my_right+'</b> / '+st.my_total+' 題，打了魔王 '+st.my_right+' 下！</div>'):'');
       return;
     }
     var q=st.question||{};
     var opts=q.ox?["O","X"]:(q.o||[]);
-    var h='<div class="meta"><span>第 '+st.round+' / '+st.rounds+' 題</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div><div class="qt">'+esc(q.q)+'</div>';
+    var SY=st.mode==="story";
+    var h='<div class="meta"><span>第 '+st.round+' / '+st.rounds+(SY?' 關':' 題')+'</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div>'+
+      (SY&&q.s?'<div class="scene">'+(q.intro?'<span class="intro">'+esc(q.intro)+'</span>':'')+esc(q.s)+'</div>':'')+'<div class="qt">'+esc(q.q)+'</div>';
     var mine=st.my_choice;
     if(st.status==="question"){
-      cur={q:q.q,opts:opts,ox:q.ox,skip:[],e:""};
+      cur={q:(SY&&q.s?q.s+"。":"")+q.q,opts:opts,ox:q.ox,skip:[],e:""};
       if(!st.answered)h+=sayBar();
       h+=optsHTML(opts,q.ox,function(i){return st.answered&&mine===i?" pick":""},function(){return st.answered},st.answered?" done":"");
       if(!st.answered&&auto&&spoken!=="s"+st.round){spoken="s"+st.round;setTimeout(readCur,300)}
-      h+=st.answered?'<div class="wait">✓ 已送出！看大螢幕等老師公布答案</div>':'<div class="msg" id="ansMsg"></div>';
+      h+=st.answered?'<div class="wait">✓ 已送出！'+(SY?"看大螢幕，等大家都選好":"看大螢幕等老師公布答案")+'</div>':'<div class="msg" id="ansMsg"></div>';
     }else{
       var a=st.answer||{},right=opts[a.a];
+      if(SY){
+        var fb=(a.f||[])[mine];
+        if(!st.answered)h+='<div class="rv na">這一關你沒有作答。<br>最好的做法：<b>'+esc(right)+'</b><br>'+esc(a.e)+'</div>';
+        else if(st.my_correct)h+='<div class="big">🌟</div><div class="rv ok"><b>你選了最好的做法！</b><br>'+esc(a.e)+'</div>';
+        else h+='<div class="rv no"><b>你選的做法會這樣：</b><br>'+esc(fb)+'</div><div class="rv ok"><b>最好的做法：</b>'+esc(right)+'<br>'+esc(a.e)+'</div>';
+        cur={q:q.q,opts:opts,ox:false,skip:[],e:(st.answered&&!st.my_correct?"你選的做法會這樣："+fb+"。":"")+"最好的做法是："+right+"。"+(a.e||"")};
+        if(TTS)h+='<div class="sayrow"><button type="button" data-say="e">🔊 唸出來</button></div>';
+        h+='<p class="muted" style="text-align:center">看大螢幕，聽聽大家的想法</p>';
+        b.innerHTML=h;return;
+      }
       if(!st.answered)h+='<div class="rv na">這題你沒有作答。<br>正確答案：<b>'+esc(right)+'</b><br>'+esc(a.e)+'</div>';
       else if(st.my_correct)h+='<div class="big">⚔️</div><div class="rv ok"><b>答對了！</b>你打了魔王一下！<br>'+esc(a.e)+'</div>';
       else h+='<div class="rv no"><b>差一點！</b>正確答案是「'+esc(right)+'」。<br>'+esc(a.e)+'</div>';
@@ -264,7 +311,7 @@ var DM=[
   // 答錯不換題：第 1 次就答對打 2 點、第 2 次答對打 1 點（O／X 題第 2 次只剩一個選項，打 0 點）、再之後 0 點
   var F={on:false,q:null,busy:false,res:null,timer:null,hit:false,frozen:false};
   function fmt(L){L=Math.max(0,L|0);return Math.floor(L/60)+":"+(L%60<10?"0":"")+(L%60)}
-  function pot(q){return q.tries===0?2:(q.tries===1&&!q.ox?1:0)}
+  function pot(q){return (q.tries===0?2:(q.tries===1&&!q.ox?1:0))*(q.rev?2:1)}
   function freeHeader(){
     var c=$("fClk");if(c&&st.left!=null){c.textContent="⏱ "+fmt(st.left);c.className="clk"+(st.left<=30?" hot":"")}
     var m=$("fMine");if(m)m.textContent="我答對 "+(st.my_right||0)+" 題・打了 "+(st.my_dmg||0)+" 點";
@@ -291,7 +338,8 @@ var DM=[
     var h='<div class="fbar"><span class="clk" id="fClk"></span><span class="stk">'+(q.streak>=2&&!r&&!q.tries?"🔥 連續一次答對 "+q.streak+" 題":"")+'</span></div>'+
       '<div class="meta"><span id="fMine"></span><span>'+dname(q.d)+'</span></div>'+
       '<div class="qt">'+esc(q.q)+'</div>'+sayBar();
-    if(!r)h+='<div class="pot p'+p+'">'+(p===2?"⚔️⚔️ 這題一次就答對：打 2 點":p===1?"⚔️ 這題現在答對：打 1 點":"這題現在答對不會打到魔王，但還是要找出正確答案！")+'</div>';
+    if(q.rev)h+='<div class="revq">🔁 復仇題：這是全班常答錯的題目，答對傷害 ×2！</div>';
+    if(!r)h+='<div class="pot p'+Math.min(2,p)+'">'+(p>=2?"⚔️⚔️ 這題"+(q.tries===0?"一次就":"現在")+"答對：打 "+p+" 點":p===1?"⚔️ 這題現在答對：打 1 點":"這題現在答對不會打到魔王，但還是要找出正確答案！")+'</div>';
     h+=optsHTML(opts,q.ox,function(i){return (wrong.indexOf(i)>=0?" tried":"")+(r&&opts[i]===r.answer?" right":"")},
       function(i){return !!r||F.frozen||wrong.indexOf(i)>=0},r?" done2":"");
     if(r){
@@ -322,7 +370,7 @@ var DM=[
         if(r.err==="stale"){loadQ();return}
         F.on=false;poll();return;
       }
-      st.hp=r.hp;st.max_hp=r.max_hp;hp();
+      st.hp=r.hp;st.max_hp=r.max_hp;if(r.team_hp!=null&&st.team&&st.team_hp)st.team_hp[st.team-1]=r.team_hp;hp();
       if(r.correct){
         F.res=r;F.q.streak=r.streak;if(r.dmg>0)st.my_right=(st.my_right||0)+1;st.my_dmg=(st.my_dmg||0)+r.dmg;drawFree();
         if(auto)speak(cur.e);else F.timer=setTimeout(loadQ,2500);
@@ -330,6 +378,43 @@ var DM=[
         F.q.wrong.push(i);F.q.tries=r.attempt;F.q.streak=0;F.hit=true;F.frozen=true;drawFree();freezeThen(r.wait||3);
       }
     }).catch(function(){F.busy=false;drawFree();var m=$("ansMsg");if(m)m.textContent="網路不穩，請再按一次。"});
+  }
+
+  /* ---------- 魔王反擊：大螢幕出一題全班題，限時作答 ---------- */
+  var C={sig:"",busy:false,doneN:0,doneAt:0};
+  function drawCounter(){
+    var c=st.counter,b=$("body"),done=!!c.done,mine=c.mine;
+    var key=c.n+"|"+done+"|"+mine;
+    var lt=$("cLeft");if(lt&&!done)lt.textContent="⏱ "+Math.max(0,c.left||0)+" 秒";
+    if(key===C.sig)return;C.sig=key;
+    var opts=c.o||[],ox=!!c.ox;
+    var h='<h2 style="margin:0">⚠️ 魔王反擊！<span id="cLeft" class="left">'+(done?"":"⏱ "+Math.max(0,c.left||0)+" 秒")+'</span></h2>'+
+      '<p class="muted">'+(st.mode==="team"?"隊上":"全班")+' 8 成以上的人答對，就能擋下反擊！答錯太多，魔王會回血。</p><div class="qt">'+esc(c.q)+'</div>';
+    if(!done){
+      cur={q:c.q,opts:opts,ox:ox,skip:[],e:""};
+      if(mine==null)h+=sayBar();
+      h+=optsHTML(opts,ox,function(i){return mine===i?" pick":""},function(){return mine!=null},mine!=null?" done":"");
+      h+=mine!=null?'<div class="wait">✓ 已送出！看大螢幕等結算</div>':'<div class="msg" id="ansMsg"></div>';
+      if(mine==null&&auto&&spoken!=="c"+c.n){spoken="c"+c.n;setTimeout(readCur,300)}
+    }else{
+      var r=(c.res||[]).filter(function(x){return x.t===0||x.t===st.team})[0]||{},ok=mine!=null&&mine===c.a;
+      h+=optsHTML(opts,ox,function(i){return (i===c.a?" right":"")+(mine===i?" pick":"")},function(){return true}," done2");
+      h+='<div class="rv '+(r.heal?"no":"ok")+'"><b>'+(r.heal?"💥 魔王回血 +"+r.heal+"！":"🛡️ 擋下反擊了！")+'</b><br>'+(r.t?tname(r.t):"全班")+' '+(r.ok||0)+' / '+(r.n||0)+' 人答對。'+
+        (mine==null?"你這題沒有作答。":ok?"你答對了，謝謝你幫忙擋住！":"你這題答錯了。")+'<br>✓ 答案：<b>'+esc(opts[c.a])+'</b>　'+esc(c.e||"")+'</div><p class="muted" style="text-align:center">馬上回到你的題目……</p>';
+    }
+    b.innerHTML='<div class="ctr card" style="margin:-16px;gap:12px">'+h+'</div>';
+    var o=$("opts");
+    if(o&&!done&&mine==null)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||C.busy)return;counterAnswer(c.n,+btn.dataset.i)});
+  }
+  function counterAnswer(n,i){
+    C.busy=true;stopSay();optBtns().forEach(function(x){x.disabled=true});
+    rpc("raid_counter_answer",{p_room:room,p_seat:seat,p_device:device,p_n:n,p_choice:i}).then(function(r){
+      C.busy=false;
+      if(r==="ok"||r==="already"){st.counter.mine=i;drawCounter();return}
+      var m={closed:"反擊已經結束了。",late:"時間到了，來不及送出。",not_joined:"請重新選座號。"}[r]||"送出失敗，請再按一次。";
+      var am=$("ansMsg");if(am)am.textContent=m;optBtns().forEach(function(x){x.disabled=false});
+      if(r==="not_joined")join(seat);
+    }).catch(function(){C.busy=false;var am=$("ansMsg");if(am)am.textContent="網路不穩，請再按一次。";optBtns().forEach(function(x){x.disabled=false})});
   }
 
   if(room.length===6)goRoom(room);else show("sCode");

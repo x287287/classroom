@@ -16,7 +16,15 @@
      題庫和另外兩個版本共用 lessons/data/u2-game-questions.js。
      資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop、raid_finish，
      學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。
-     各自搶攻另用 raid_free_start、raid_free_summary（老師）與 raid_free_q、raid_free_answer（學生）。 -->
+     各自搶攻另用 raid_free_start、raid_free_summary（老師）與 raid_free_q、raid_free_answer（學生）。
+     2026-11-18 新增：
+       分隊競賽（team）：raid_rooms.teams＝2～4，座號輪流分隊（raid_players.team＝(座號-1)%隊數+1），每隊魔王血量存在 team_hp／team_max（隊伍人數 × 分鐘 × 強度），
+                         作答流程同各自搶攻；最先打倒自己魔王的隊伍獲勝（winner），時間到比剩下血量比例最少的隊伍。統計代號 u2-team／u3-team。
+       情境闖關（story）：劇本在 data/u2-story.js、u3-story.js（STORY_PACK），沿用同步作答的 raid_next／raid_answer／raid_reveal，
+                         answer＝{a:最好的選項,e,f:[每個選項的結果]}；raid_rooms.story 記劇本 id。統計代號 u2-story／u3-story（ok＝選到最好的做法）。
+       魔王反擊（opt_counter，各自搶攻／分隊競賽可選）：第 5、10、15 分鐘大螢幕呼叫 raid_counter_start 出一題（30 秒），學生用 raid_counter_answer，
+                         raid_counter_end 結算：8 成以上答對擋下，5～8 成回 5% 血，不到 5 成回 10% 血（分隊時各隊分開算）。作答在 raid_counter_ans。
+       錯題復仇戰（opt_revenge）：最後 3 分鐘 raid_free_q 改從這一場第 1 次答對率最低的題目出（cur_rev），答對傷害 ×2。 -->
 <style>
 :root{color-scheme:light;--ink:#1F2A27;--stage:#18213A;--stage2:#26345A;--line2:#3D4F7C;--gold:#FFD54F;--ok:#1E8A5A;--no:#C8414B;
   --oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0;--oD:#0F766E}
@@ -153,6 +161,72 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 .tdlg ul,.tdlg ol{margin:.2rem 0;padding-left:1.4rem}
 .tdlg .close{margin-top:1rem;appearance:none;border:0;background:#1F2A27;color:#fff;border-radius:999px;min-height:3rem;padding:0 1.6rem;font-family:var(--font-display);font-size:1.1rem;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.boss.hit svg.bs,.boss.crit::after,.dmg,.seats span.in{animation:none}}
+/* 加開挑戰（魔王反擊、錯題復仇戰） */
+.opts2{grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr))}
+.opt{appearance:none;text-align:left;border:3px solid #E3DDEB;background:#FBFAFD;color:var(--ink);border-radius:18px;padding:.7rem 1rem .7rem 3.4rem;cursor:pointer;display:grid;gap:.25rem;font:inherit;position:relative;min-height:3rem}
+.opt::before{content:"";position:absolute;left:.9rem;top:.9rem;width:1.7rem;height:1.7rem;border-radius:8px;border:3px solid #8E7AAE;background:#fff}
+.opt[aria-pressed=true]{border-color:#7A2E8E;background:#F4ECF8}
+.opt[aria-pressed=true]::before{content:"✓";background:#7A2E8E;border-color:#7A2E8E;color:#fff;display:grid;place-items:center;font-weight:700;line-height:1}
+.opt b{font-family:var(--font-display);font-weight:400;font-size:1.25rem;color:#4A2B5E}
+.opt span{font-size:.98rem;line-height:1.6;color:#4A5550}
+/* 情境闖關：選故事 */
+.stories{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:10px}
+.stories button{appearance:none;text-align:left;border:3px solid #E3DDEB;background:#FBFAFD;color:var(--ink);border-radius:16px;padding:.6rem .8rem;cursor:pointer;font:inherit;display:grid;gap:.2rem;min-height:3rem}
+.stories button b{font-family:var(--font-display);font-weight:400;font-size:1.2rem;color:#4A2B5E}
+.stories button span{font-size:.95rem;line-height:1.5;color:#4A5550}
+.stories button[aria-pressed=true]{border-color:#7A2E8E;background:#F4ECF8;box-shadow:0 0 0 3px #7A2E8E33}
+/* 分隊競賽 */
+.tc1{--tc:#C8414B}.tc2{--tc:#1D5FBF}.tc3{--tc:#17784E}.tc4{--tc:#A84A00}
+.tdot{display:inline-block;min-width:1.6em;padding:0 .35em;border-radius:999px;background:var(--tc);color:#fff;font-size:.8em;text-align:center;margin-right:.3em;vertical-align:.1em}
+.seats span.in.tc1,.seats span.in.tc2,.seats span.in.tc3,.seats span.in.tc4{background:var(--tc)}
+.tlegend{display:flex;gap:.5rem 1rem;flex-wrap:wrap;margin-top:8px;font-size:1.1rem}
+.tboss{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:12px;align-content:start}
+.tboss .tb{position:relative;border-radius:22px;background:radial-gradient(circle at 20% 50%,#4A3266 0%,#241B38 75%);border:4px solid var(--tc);padding:10px 16px;display:grid;grid-template-columns:clamp(110px,12vw,190px) minmax(0,1fr);gap:4px 16px;align-items:center;overflow:hidden}
+.tboss .tb svg.bs{grid-row:1/span 4;grid-column:1;width:100%;height:auto;filter:drop-shadow(0 8px 10px #000a)}
+.tboss .tb h3{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(1.3rem,2.2vw,1.9rem);color:#fff;display:flex;gap:.5rem;align-items:center;justify-content:space-between}
+.tboss .tb h3 i{font-style:normal;background:var(--tc);border-radius:999px;padding:0 .8rem}
+.tboss .tb .pc{font-family:var(--font-display);font-size:clamp(1.5rem,2.6vw,2.3rem);color:var(--gold);line-height:1.2}
+.tboss .tb .hp{width:100%}
+.tboss .tb .hpn{width:100%;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;font-size:1.05rem;color:#E6DDF3}
+.tboss .tb.hit svg.bs{animation:hit .6s}
+.tboss .tb.lead{box-shadow:0 0 0 4px var(--gold),0 0 28px #FFD54F88}
+.tboss .tb.lead h3::after{content:"👑 領先";font-size:.8em;color:var(--gold)}
+.tboss .tb.dead svg.bs{filter:grayscale(1);opacity:.5}
+.tboss .tb .dmg{font-size:clamp(2rem,4vw,3.2rem);top:10%}
+.rank li .s .tdot{font-size:.75em}
+/* 錯題復仇戰 */
+.revbar{border-radius:18px;padding:.5rem 1rem;background:linear-gradient(90deg,#7A1520,#B3125A);color:#fff;font-family:var(--font-display);font-size:clamp(1.05rem,1.6vw,1.3rem);text-align:center;box-shadow:0 0 0 3px var(--gold);animation:revp 1.6s ease-in-out infinite}
+@keyframes revp{50%{box-shadow:0 0 0 6px var(--gold),0 0 30px #FFD54F}}
+/* 魔王反擊 */
+.cov{position:fixed;inset:0;z-index:150;background:rgba(40,6,16,.82);display:grid;place-items:center;padding:16px}
+.cbox{background:#fff;color:var(--ink);border-radius:26px;max-width:1100px;width:100%;max-height:94vh;overflow:auto;padding:clamp(16px,2.6vw,32px);display:grid;gap:14px;border:6px solid #C8414B;box-shadow:0 0 60px #C8414B99}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.chead h2{margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,3.4vw,2.8rem);color:#9B1C2A}
+.cclk{font-family:var(--font-display);font-size:clamp(2.2rem,4.4vw,3.6rem);color:#9B1C2A;min-width:3ch;text-align:right}
+.cnote{margin:0;font-size:1.15rem;color:#4A5550}
+.cq{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.4rem);line-height:1.45}
+.cres{display:grid;gap:8px}
+.cres .cr{border-radius:16px;padding:.7rem 1rem;font-size:clamp(1.15rem,2vw,1.5rem);line-height:1.5;background:#E7F4EC;color:#14532D}
+.cres .cr.bad{background:#FDE4E6;color:#7A1520}.cres .cr.mid{background:#FFF3C4;color:#5B3F00}
+.cres .cr b{font-family:var(--font-display);font-weight:400}
+/* 情境闖關 */
+.story{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:16px;align-items:start}
+@media (max-width:1000px){.story{grid-template-columns:minmax(0,1fr)}}
+.scene{display:grid;gap:12px;align-content:start}
+.stext{font-size:clamp(1.25rem,2.3vw,1.9rem);line-height:1.7;color:var(--ink)}
+.stext .ico{font-size:clamp(3rem,6vw,5rem);line-height:1;display:block;text-align:center;margin-bottom:.3rem}
+.sopts{grid-template-columns:minmax(0,1fr)}
+.sopts .o{flex-wrap:wrap}
+.sopts .o .fb{display:none;flex-basis:100%;font-size:clamp(1rem,1.6vw,1.25rem);line-height:1.55;background:#fff;color:var(--ink);border-radius:12px;padding:.4rem .7rem;margin:.4rem 0 .3rem}
+.opts.reveal.sopts .o{opacity:.75}
+.opts.reveal.sopts .o .fb{display:block}
+.opts.reveal.sopts .o.right{opacity:1}
+.opts.reveal.sopts .o.right{padding-top:2.4rem}
+.opts.reveal.sopts .o.right::after{content:"🌟 最好的做法";left:3.6rem;right:auto;top:.5rem;font-size:1rem}
+.opts.reveal.sopts .o.most{outline:4px dashed #fff;outline-offset:-9px}
+.sum{display:grid;gap:8px;text-align:left}
+.sum .it{background:#F7F5FA;border-radius:14px;padding:.6rem .9rem;font-size:1.1rem;line-height:1.6}
+.sum .it .p{float:right;font-family:var(--font-display);color:#7A2E8E;font-size:1.3rem;margin-left:.6rem}
 </style>
 </head>
 <body>
@@ -170,16 +244,29 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
     <div class="modes" role="radiogroup" aria-label="遊戲模式">
       <button type="button" class="mode" data-mode="sync" role="radio"><b>🖥️ 同步作答</b><span>大螢幕出同一題，全班一起答、一起看答案。答對的人數就是傷害，全班 8 成答對還會暴擊。適合邊玩邊講解。</span></button>
       <button type="button" class="mode" data-mode="free" role="radio"><b>⚡ 各自搶攻</b><span>每個人在平板上用自己的速度一直答題，題目會自動換、題庫用完重新出。一次就答對打 2 點、第 2 次答對打 1 點；答錯不換題，定身 3 秒再選。大螢幕有即時戰力排行榜。</span></button>
+      <button type="button" class="mode" data-mode="team" role="radio"><b>👥 分隊競賽</b><span>依座號自動分成 2～4 隊，每隊有自己的魔王。玩法和各自搶攻一樣，自己答題打自己隊的魔王，最先打倒魔王的隊伍獲勝；時間到就比誰的魔王剩下的血最少。</span></button>
+      <button type="button" class="mode" data-mode="story" role="radio"><b>🧭 情境闖關</b><span>一個生活故事分成幾關，每關全班在平板上選「你會怎麼做？」，大螢幕公布大家的選擇和每個選項的結果，老師帶著討論再進下一關。沒有魔王，重點是練習做決定。</span></button>
     </div>
     <div class="setgrid" data-for="sync">
       <fieldset><legend>題數</legend><div class="seg" data-k="rounds"><button type="button" data-v="8">8 題</button><button type="button" data-v="12">12 題</button><button type="button" data-v="16">16 題</button><button type="button" data-v="20">20 題</button></div></fieldset>
       <fieldset><legend>每題時間</legend><div class="seg" data-k="secs"><button type="button" data-v="15">15 秒</button><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button><button type="button" data-v="0">不計時</button></div></fieldset>
       <fieldset><legend>魔王強度</legend><div class="seg" data-k="lv"><button type="button" data-v="1">簡單</button><button type="button" data-v="2">普通</button><button type="button" data-v="3">困難</button></div></fieldset>
     </div>
-    <div class="setgrid" data-for="free">
+    <div class="setgrid" data-for="free team">
       <fieldset><legend>遊戲時間</legend><div class="seg" data-k="mins"><button type="button" data-v="10">10 分鐘</button><button type="button" data-v="15">15 分鐘</button><button type="button" data-v="20">20 分鐘</button></div></fieldset>
       <fieldset><legend>魔王強度</legend><div class="seg" data-k="lv"><button type="button" data-v="1">簡單</button><button type="button" data-v="2">普通</button><button type="button" data-v="3">困難</button></div></fieldset>
       <p class="note" id="freeEst" style="grid-column:1/-1;margin:0;font-size:1.05rem"></p>
+    </div>
+    <div class="setgrid" data-for="team">
+      <fieldset><legend>隊數（依座號輪流分隊：1、3、5… 號一隊）</legend><div class="seg" data-k="teams"><button type="button" data-v="2">2 隊</button><button type="button" data-v="3">3 隊</button><button type="button" data-v="4">4 隊</button></div></fieldset>
+    </div>
+    <div class="setgrid opts2" data-for="free team">
+      <button type="button" class="opt" data-o="counter" aria-pressed="false"><b>🛡️ 魔王反擊</b><span>每 5 分鐘，魔王出一題「反擊題」，大螢幕和平板同時出現、限時 30 秒。全班（分隊時每隊分開算）8 成以上答對就擋下；5～8 成答對魔王回 5% 血，不到 5 成回 10% 血。</span></button>
+      <button type="button" class="opt" data-o="revenge" aria-pressed="false"><b>🔁 錯題復仇戰</b><span>最後 3 分鐘，題目改從這一場全班最常答錯的題目出，答對的傷害 ×2。把剛剛錯的題目再練一次。</span></button>
+    </div>
+    <div class="setgrid" data-for="story">
+      <fieldset style="grid-column:1/-1"><legend>選一個故事</legend><div class="stories" id="storyList"></div></fieldset>
+      <fieldset><legend>每關作答時間</legend><div class="seg" data-k="ssecs"><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button><button type="button" data-v="45">45 秒</button><button type="button" data-v="0">不計時</button></div></fieldset>
     </div>
     <fieldset class="clsset" style="margin-top:12px;border:2px solid #E3DDEB;border-radius:16px;padding:.6rem .8rem"><legend style="font-weight:700;padding:0 .3rem">班級（作答統計會記在這個班）</legend><div class="seg" id="clsSeg"><span class="note">讀取班級中…</span></div></fieldset>
     <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bCreate">開房間</button><span class="note" id="setMsg" style="margin:0"></span></div>
@@ -192,7 +279,8 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
         <div class="joined" id="joined">等待同學加入…</div>
         <div class="seats" id="seatGrid"></div>
         <div class="row" style="margin-top:16px"><button type="button" class="bigbtn" id="bStart" disabled>開始戰鬥！</button><button type="button" class="sec" id="bCancel">取消</button></div>
-        <p class="note">魔王血量會依加入人數決定。開始後還沒加入的同學也可以掃描加入，馬上開始作答。</p>
+        <div class="tlegend" id="lobbyTeams" hidden></div>
+        <p class="note" id="lobbyNote">魔王血量會依加入人數決定。開始後還沒加入的同學也可以掃描加入，馬上開始作答。</p>
       </div>
     </div>
   </section>
@@ -219,12 +307,14 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 
   <div id="scrFree" hidden>
     <div class="free">
+      <div class="tboss" id="fTeams" hidden></div>
       <div class="boss" id="fBoss">
         <svg class="bs" id="fBossArt" viewBox="0 0 300 200" aria-hidden="true"></svg>
         <div class="bn" data-pk="boss">三惡魔合體大魔王</div>
-        <div class="hpw"><div class="hp" role="progressbar" aria-label="魔王血量" aria-valuemin="0" id="fHpBar"><i id="fHpFill"></i></div><div class="hpn"><span id="fHpText"></span><span>⚡ 各自搶攻</span></div></div>
+        <div class="hpw"><div class="hp" role="progressbar" aria-label="魔王血量" aria-valuemin="0" id="fHpBar"><i id="fHpFill"></i></div><div class="hpn"><span id="fHpText"></span><span id="fModeTag">⚡ 各自搶攻</span></div></div>
       </div>
       <div class="fside">
+        <div class="revbar" id="fRev" hidden>🔁 錯題復仇戰！最後 3 分鐘出全班最常錯的題目，答對傷害 ×2</div>
         <div class="card ftop"><div><div class="bigclock" id="fClock" aria-live="off"></div><p class="note" style="text-align:center;margin:0">剩下的時間</p></div>
         <div class="fstat"><div><b id="fAns">0</b><span>全班已作答</span></div><div><b id="fPct">0%</b><span>一次答對率</span></div><div><b id="fPl">0</b><span>位勇者</span></div></div></div>
         <div class="ranks">
@@ -237,19 +327,51 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
     </div>
   </div>
 
+  <div id="scrStory" hidden>
+    <div class="story">
+      <div class="card scene">
+        <div class="qmeta"><span class="pill" id="sTag"></span><span id="sTitle"></span></div>
+        <div class="stext" id="sText"></div>
+      </div>
+      <div class="card qbox">
+        <div class="qt" id="sQ"></div>
+        <div class="opts sopts" id="sOpts"></div>
+        <div class="status" id="sLive"><svg class="clock" viewBox="0 0 100 100" id="sClock" aria-hidden="true"></svg><div class="ans" id="sAns"></div><button type="button" class="sec" id="sStop" style="margin-left:auto">提前公布</button></div>
+        <div id="sRes" hidden>
+          <div class="res" id="sResText"></div>
+          <div class="row" style="margin-top:12px"><button type="button" class="bigbtn" id="sNext">下一關 →</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <section class="card endc" id="scrEnd" hidden></section>
 </div>
+
+<div class="cov" id="cOv" hidden role="dialog" aria-modal="false" aria-labelledby="cT"><div class="cbox">
+  <div class="chead"><h2 id="cT">⚠️ 魔王反擊！</h2><div class="cclk" id="cClk"></div></div>
+  <p class="cnote" id="cNote">全班一起在平板上作答，8 成以上答對就能擋下反擊！</p>
+  <div class="cq" id="cQ"></div>
+  <div class="opts" id="cOpts"></div>
+  <div class="row" style="align-items:center"><div class="ans" id="cAns"></div><button type="button" class="sec" id="cStop" style="margin-left:auto">提前結算</button></div>
+  <div class="cres" id="cRes" hidden></div>
+</div></div>
 
 <div class="tdlg" id="tDlg" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
   <h2 id="tT">老師說明：全班共戰打倒大魔王</h2>
   <h3>這是什麼</h3>
   <ul><li id="tUnit">第二單元〈拒菸拒酒拒檳榔〉統整遊戲的全班合作版（課本 p.30–53）。題庫和「趕走三惡魔」兩個版本相同。</li>
-  <li>有兩種模式：</li></ul>
+  <li>有四種模式：</li></ul>
   <ul><li><b>同步作答</b>：大螢幕出同一題，全班同時作答，時間到或全班答完就公布答案和每個選項的人數。答對的人數就是傷害，全班 8 成以上答對再多打 50%（暴擊）。題目出完前把魔王打到 0 就獲勝。魔王血量＝人數 × 題數 × 強度（簡單 0.8、普通 1.0、困難 1.25）。例如 25 人、12 題、普通，魔王有 300 點血，全班平均要答對約 8 成並常常暴擊才打得倒。</li>
-  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，答對才換下一題（題庫用完會重新洗牌出題）。第 1 次就答對打 2 點、第 2 次才答對打 1 點、第 3 次以後答對 0 點（O／X 題答錯後只剩一個選項，所以第 2 次答對也是 0 點）；連續「一次就答對」第 5、10、15…題多打 1 點。答錯不會公布答案，被定身 3 秒後從剩下的選項再選一次。學生平板上每題都有「🔊 唸題目和選項」與每個選項旁的 🔊，也可以開「自動唸」（建議戴耳機）。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 11、普通 15、困難 19），例如 25 人、20 分鐘、普通＝7500 點；開房間前畫面上會顯示預估血量。強度是依實際上課的紀錄調整的：四年級學生熟練後每分鐘可以作答 10 次以上、每人每分鐘約打 20 點，所以困難大約要打滿整節遊戲時間，普通約 15～18 分鐘、簡單約 11～13 分鐘打倒。<span id="tCount">題庫 155 題</span>，作答很快的學生在後段可能會遇到看過的題目。大螢幕即時顯示血量、時間、作答數、一次答對率、「🏆 戰力排行榜」（前 5 名，只顯示座號；依 2 次內答對的題數排名，同分比傷害）和「🎯 正確率排行榜」（前 5 名，第 1 次就答對的比率，作答滿 10 題才上榜，避免只答 1 題就 100%）。正確率榜讓答得慢但很認真的同學也有機會上榜。如果不想讓排行榜造成壓力，可以提醒學生「排行是比誰認真讀題，不是比誰按得快」。</li></ul>
+  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，答對才換下一題（題庫用完會重新洗牌出題）。第 1 次就答對打 2 點、第 2 次才答對打 1 點、第 3 次以後答對 0 點（O／X 題答錯後只剩一個選項，所以第 2 次答對也是 0 點）；連續「一次就答對」第 5、10、15…題多打 1 點。答錯不會公布答案，被定身 3 秒後從剩下的選項再選一次。學生平板上每題都有「🔊 唸題目和選項」與每個選項旁的 🔊，也可以開「自動唸」（建議戴耳機）。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 11、普通 15、困難 19），例如 25 人、20 分鐘、普通＝7500 點；開房間前畫面上會顯示預估血量。強度是依實際上課的紀錄調整的：四年級學生熟練後每分鐘可以作答 10 次以上、每人每分鐘約打 20 點，所以困難大約要打滿整節遊戲時間，普通約 15～18 分鐘、簡單約 11～13 分鐘打倒。<span id="tCount">題庫 155 題</span>，作答很快的學生在後段可能會遇到看過的題目。大螢幕即時顯示血量、時間、作答數、一次答對率、「🏆 戰力排行榜」（前 5 名，只顯示座號；依 2 次內答對的題數排名，同分比傷害）和「🎯 正確率排行榜」（前 5 名，第 1 次就答對的比率，作答滿 10 題才上榜，避免只答 1 題就 100%）。正確率榜讓答得慢但很認真的同學也有機會上榜。如果不想讓排行榜造成壓力，可以提醒學生「排行是比誰認真讀題，不是比誰按得快」。</li>
+  <li><b>分隊競賽</b>：玩法和各自搶攻相同，但依座號輪流分成 2～4 隊（例如 2 隊時單號一隊、雙號一隊），每隊有自己的魔王，血量＝該隊人數 × 分鐘 × 強度。最先打倒自己魔王的隊伍獲勝；時間到就比哪一隊的魔王剩下的血（比例）最少。大螢幕顯示各隊血量、一次答對率，排行榜的座號旁有隊伍顏色。</li>
+  <li><b>情境闖關</b>：選一個生活故事（每個故事 4 關），每關大螢幕出情境和「你會怎麼做？」，全班在平板上選；公布時顯示每個選項的人數和結果，學生平板也會看到自己選的那個做法會發生什麼事。老師可以請選不同做法的同學說說理由，再按「下一關」。沒有魔王和分數，重點是練習做決定（劇本在 lessons/data/u2-story.js、u3-story.js）。</li></ul>
+  <h3>可以加開的挑戰（各自搶攻、分隊競賽）</h3>
+  <ul><li><b>🛡️ 魔王反擊</b>：每 5 分鐘（第 5、10、15 分鐘）魔王出一題反擊題，大螢幕和每台平板同時出現，限時 30 秒（全部作答完會提早結算）。8 成以上答對就擋下；5～8 成答對魔王回 5% 血；不到 5 成回 10% 血。分隊競賽時每隊分開算，只回自己隊的魔王。反擊時遊戲時間照算。</li>
+  <li><b>🔁 錯題復仇戰</b>：最後 3 分鐘，伺服器改從這一場「第 1 次作答答對率最低」的題目出題（至少 2 人次作答、答對率低於 85%，最多挑 12 題），答對的傷害 ×2；這些題目不夠時照常出題。</li></ul>
   <h3>怎麼開始</h3>
   <ol><li>這台電腦要先在書櫃首頁登入老師帳號。</li>
-  <li>選模式，再選題數／每題時間（同步作答）或遊戲時間（各自搶攻）與魔王強度，按「開房間」。</li>
+  <li>選模式，再選題數／每題時間（同步作答）、遊戲時間與魔王強度（各自搶攻、分隊競賽，可勾選魔王反擊、錯題復仇戰），或故事與每關時間（情境闖關），按「開房間」。</li>
   <li>學生用平板掃 QR Code（或打開網站的 raid.html 輸入房號），選自己的座號加入。</li>
   <li>大家都加入後按「開始戰鬥」。魔王血量依加入人數決定。</li></ol>
   <h3>時間安排</h3>
@@ -265,20 +387,22 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
   <button type="button" class="close">關閉</button>
 </div></div>
 
-<script>var UNIT=/[?&]u=3(&|$)/.test(location.search)?'u3':'u2';document.write('<script src="data/'+UNIT+'-game-questions.js"><\/script>')</script>
+<script>var UNIT=/[?&]u=3(&|$)/.test(location.search)?'u3':'u2';document.write('<script src="data/'+UNIT+'-game-questions.js"><\/script><script src="data/'+UNIT+'-story.js"><\/script>')</script>
 <script src="../assets/vendor/qrcode.js"></script>
 <script>
 var PK=window.GAME_PACK||{};
 var DM=PK.monsters||[];
 var Q=window.GAME_QUESTIONS||[];
-var SET={mode:'sync',rounds:12,secs:20,lv:2,mins:20};
+var SET={mode:'sync',rounds:12,secs:20,lv:2,mins:20,teams:2,counter:false,revenge:false,story:'',ssecs:30};
+var SP=window.STORY_PACK||{list:[]};
+var TN=['全班','紅隊','藍隊','綠隊','橘隊'];
 var SYNC_K=[0.8,1.0,1.25], FREE_K=[11,15,19]; /* 2026-11-18 依實際上課調整：20 人困難（舊 8）只花約 8 分鐘就打倒，平均每人每分鐘打約 20 點 */
 try{var _s=JSON.parse(localStorage.getItem('raidSet')||'null');if(_s)SET=Object.assign(SET,_s)}catch(e){}
 var G=null; /* {room, rounds, list:[問題], stats:[], seats:[], lastSeats, poll} */
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
-function show(id){['scrLogin','scrSetup','scrLobby','scrBattle','scrFree','scrEnd'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0)}
+function show(id){['scrLogin','scrSetup','scrLobby','scrBattle','scrFree','scrStory','scrEnd'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0)}
 function api(path,body,method){
   return window.CLS.api(path,{method:method||'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body)})
     .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});return r.text().then(function(t){return t?JSON.parse(t):null})});
@@ -309,20 +433,34 @@ var DNAME={};DM.forEach(function(d){DNAME[d.k]=d.n});
 /* 設定按鈕 */
 function saveSet(){try{localStorage.setItem('raidSet',JSON.stringify(SET))}catch(x){}}
 function paintEst(){var k=FREE_K[SET.lv-1],hp=25*SET.mins*k;
+  if(SET.mode==='team'){var per=Math.ceil(25/SET.teams);
+    $('freeEst').innerHTML='以全班 25 人分 '+SET.teams+' 隊估算：每隊約 '+per+' 人，每隊的魔王約 <b>'+(per*SET.mins*k).toLocaleString()+'</b> 點血。平均每人每分鐘要打 '+k+' 點（大約 '+Math.ceil(k/2)+' 題一次就答對）。實際血量依各隊加入的人數計算，人少的隊伍魔王血也少。';return}
   $('freeEst').innerHTML='以全班 25 人估算：魔王約 <b>'+hp.toLocaleString()+'</b> 點血。全班要在 '+SET.mins+' 分鐘內打完，平均每人每分鐘要打 '+k+' 點（大約 '+Math.ceil(k/2)+' 題一次就答對）。實際血量依加入的人數計算。'}
+function paintOpts(){[].forEach.call(document.querySelectorAll('.opt[data-o]'),function(b){b.setAttribute('aria-pressed',String(!!SET[b.dataset.o]))})}
+[].forEach.call(document.querySelectorAll('.opt[data-o]'),function(b){b.addEventListener('click',function(){SET[b.dataset.o]=!SET[b.dataset.o];saveSet();paintOpts()})});
+function storyById(id){for(var i=0;i<SP.list.length;i++)if(SP.list[i].id===id)return SP.list[i];return null}
+function paintStories(){
+  if(!storyById(SET.story)&&SP.list.length)SET.story=SP.list[0].id;
+  var box=$('storyList');
+  if(!box.children.length)box.innerHTML=SP.list.map(function(x){return '<button type="button" data-sid="'+x.id+'"><b>'+x.icon+' '+esc(x.title)+'</b><span>'+esc(x.intro)+'</span><span>共 '+x.steps.length+' 關</span></button>'}).join('')||'<p class="note">這個單元還沒有故事。</p>';
+  [].forEach.call(box.querySelectorAll('button[data-sid]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.sid===SET.story))});
+}
+$('storyList').addEventListener('click',function(e){var b=e.target.closest('button[data-sid]');if(!b)return;SET.story=b.dataset.sid;saveSet();paintStories()});
 function paintSegs(){paintEst();[].forEach.call(document.querySelectorAll('.seg'),function(seg){var k=seg.dataset.k;[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[k]))})})}
 [].forEach.call(document.querySelectorAll('.seg'),function(seg){
   seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SET[seg.dataset.k]=+b.dataset.v;saveSet();paintSegs()});
 });
 function paintMode(){
-  if(SET.mode!=='free')SET.mode='sync';
+  if(['free','team','story'].indexOf(SET.mode)<0)SET.mode='sync';paintEst();
   [].forEach.call(document.querySelectorAll('.mode'),function(b){b.setAttribute('aria-checked',String(b.dataset.mode===SET.mode))});
-  [].forEach.call(document.querySelectorAll('.setgrid[data-for]'),function(g){g.hidden=g.dataset.for!==SET.mode});
+  [].forEach.call(document.querySelectorAll('.setgrid[data-for]'),function(g){g.hidden=g.dataset.for.split(' ').indexOf(SET.mode)<0});
 }
 [].forEach.call(document.querySelectorAll('.mode'),function(b){b.addEventListener('click',function(){SET.mode=b.dataset.mode;saveSet();paintMode()})});
 if([1,2,3].indexOf(SET.lv)<0)SET.lv=2;
 if([10,15,20].indexOf(SET.mins)<0)SET.mins=20;
-paintSegs();paintMode();
+if([2,3,4].indexOf(SET.teams)<0)SET.teams=2;
+if([20,30,45,0].indexOf(SET.ssecs)<0)SET.ssecs=30;
+paintSegs();paintOpts();paintStories();paintMode();
 
 /* 等 sync.js 載入、確認老師帳號 */
 var authTries=0;
@@ -357,10 +495,18 @@ function pick(n){
 
 $('bCreate').addEventListener('click',function(){
   var b=this;b.disabled=true;$('setMsg').textContent='建立中…';
-  var free=SET.mode==='free';
-  api('rest/v1/raid_rooms',{game:PK.code||'u2',rounds:free?40:SET.rounds,mode:free?'free':'sync',class_name:CLASS||null}).then(function(d){
+  var m=SET.mode,free=m==='free'||m==='team',sp=m==='story'?storyById(SET.story):null;
+  if(m==='story'&&!sp){b.disabled=false;$('setMsg').textContent='請先選一個故事。';return}
+  var body={game:PK.code||'u2',rounds:free?40:sp?sp.steps.length:SET.rounds,mode:m,class_name:CLASS||null,
+    teams:m==='team'?SET.teams:0,opt_counter:free&&!!SET.counter,opt_revenge:free&&!!SET.revenge,story:sp?sp.id:null};
+  api('rest/v1/raid_rooms',body).then(function(d){
     var room=d[0];
-    G={room:room.id,mode:free?'free':'sync',rounds:SET.rounds,secs:SET.secs,mins:SET.mins,lv:SET.lv,list:free?[]:pick(SET.rounds),stats:[],seats:[],cur:null,phase:'lobby',hp:0,max:0,lastId:0};
+    G={room:room.id,mode:m,rounds:sp?sp.steps.length:SET.rounds,secs:sp?SET.ssecs:SET.secs,mins:SET.mins,lv:SET.lv,list:m==='sync'?pick(SET.rounds):[],stats:[],seats:[],tseats:[],cur:null,phase:'lobby',hp:0,max:0,lastId:0,
+      teams:body.teams,optC:body.opt_counter,optR:body.opt_revenge,story:sp,cFired:0};
+    $('lobbyNote').textContent=m==='story'?('故事：'+sp.icon+' '+sp.title+'（共 '+sp.steps.length+' 關）。開始後還沒加入的同學也可以掃描加入，從目前這一關開始作答。')
+      :m==='team'?'依座號輪流分成 '+G.teams+' 隊（座號旁的顏色就是隊伍）。每隊魔王的血量依該隊加入的人數決定。開始後才加入的同學會自動分到自己的隊伍。'
+      :'魔王血量會依加入人數決定。開始後還沒加入的同學也可以掃描加入，馬上開始作答。';
+    $('fTeams').innerHTML='';$('fTeams').hidden=true;$('fBoss').hidden=false;$('fModeTag').textContent='⚡ 各自搶攻';$('fRev').hidden=true;hideCounter();
     var url=new URL('../raid.html?r='+room.id,location.href).href;
     $('roomCode').textContent=room.id;$('roomUrl').textContent=url;
     try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=$('fQr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
@@ -384,14 +530,14 @@ function tick(){
   if(!G||busy)return;
   rpc('raid_host',{p_room:G.room}).then(function(h){
     if(!G||!h)return;
-    G.seats=h.seats||[];
+    G.seats=h.seats||[];G.tseats=h.tseats||[];
     if(G.phase==='lobby')drawLobby();
     else if(G.phase==='free')drawFree(h);
     else if(G.phase==='question'){
       drawLive(h.answered,h.left);
       var all=G.seats.length>0&&h.answered>=G.seats.length;
       var timeUp=G.secs>0&&h.left===0;
-      if(all||timeUp)reveal();
+      if(all||timeUp){if(G.mode==='story')revealStory();else reveal()}
     }
   }).catch(function(){});
 }
@@ -400,13 +546,16 @@ function drawLobby(){
   $('joined').textContent=n?('已加入 '+n+' 位同學'):'等待同學加入…';
   var g=$('seatGrid'),had=G.lastSeats||[];
   var max=Math.max(30,G.seats.length?G.seats[G.seats.length-1]:0);
-  var h='';for(var i=1;i<=max;i++){var on=G.seats.indexOf(i)>=0;h+='<span class="'+(on?'in':'')+'"'+(on&&had.indexOf(i)>=0?' style="animation:none"':'')+'>'+i+'</span>'}
+  var h='';for(var i=1;i<=max;i++){var on=G.seats.indexOf(i)>=0;h+='<span class="'+(on?'in':'')+(G.teams>1?' tc'+(((i-1)%G.teams)+1):'')+'"'+(on&&had.indexOf(i)>=0?' style="animation:none"':'')+'>'+i+'</span>'}
   g.innerHTML=h;G.lastSeats=G.seats.slice();
+  var lt=$('lobbyTeams');lt.hidden=!(G.teams>1);
+  if(G.teams>1){var cnt={};(G.tseats||[]).forEach(function(x){cnt[x.team]=(cnt[x.team]||0)+1});
+    var t2='';for(var t=1;t<=G.teams;t++)t2+='<span class="tc'+t+'"><span class="tdot">'+t+'</span>'+TN[t]+' '+(cnt[t]||0)+' 人</span>';lt.innerHTML=t2}
   $('bStart').disabled=!n;
 }
 
 /* 開始／下一題 */
-$('bStart').addEventListener('click',function(){if(G.mode==='free')startFree();else nextQ()});
+$('bStart').addEventListener('click',function(){if(G.mode==='free'||G.mode==='team')startFree();else if(G.mode==='story')nextStory();else nextQ()});
 $('bNext').addEventListener('click',function(){
   if(G.hp<=0)return finish('win');
   if(G.stats.length>=G.rounds)return finish('lose');
@@ -447,8 +596,9 @@ function drawHp(anim){
 }
 function drawLive(n,left){
   var tot=G.seats.length;
-  $('ansCount').innerHTML=n+' / '+tot+' <small>位已作答</small>';
-  var c=$('clock');
+  var S=G.mode==='story';
+  $(S?'sAns':'ansCount').innerHTML=n+' / '+tot+' <small>位已作答</small>';
+  var c=$(S?'sClock':'clock');
   if(G.secs>0&&left!=null){
     var f=Math.max(0,Math.min(1,left/G.secs)),r=42,L=2*Math.PI*r;
     c.innerHTML='<circle cx="50" cy="50" r="'+r+'" fill="#F1EDF6"/><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+(left<=5?'#C8414B':'#7A2E8E')+'" stroke-width="10" stroke-dasharray="'+(L*f)+' '+L+'" transform="rotate(-90 50 50)" stroke-linecap="round"/><text x="50" y="62" text-anchor="middle" font-size="34" fill="#1F2A27">'+left+'</text>';
@@ -502,7 +652,7 @@ function finish(result){
   else h+='<p class="note" style="font-size:1.2rem">每一題都有 7 成以上的同學答對，太厲害了！</p>';
   h+='<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
   var e=$('scrEnd');e.innerHTML=h;show('scrEnd');
-  $('bAgain').addEventListener('click',function(){G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
+  $('bAgain').addEventListener('click',function(){setH1();G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
 }
 
 /* ---------- 各自搶攻 ---------- */
@@ -516,8 +666,8 @@ function startFree(){
 }
 function drawFree(h){
   if(!G||G.phase!=='free')return;
-  G.seats=h.seats||G.seats;
-  var hit=0;(h.recent||[]).forEach(function(x){if(x.id>G.lastId)hit+=x.dmg});
+  G.seats=h.seats||G.seats;G.tseats=h.tseats||G.tseats;G.lastH=h;
+  var hit=0,thit={};(h.recent||[]).forEach(function(x){if(x.id>G.lastId){hit+=x.dmg;if(x.team)thit[x.team]=(thit[x.team]||0)+x.dmg}});
   if(h.last_id)G.lastId=Math.max(G.lastId,h.last_id);
   G.hp=h.hp;G.max=h.max_hp;
   var p=G.max?Math.max(0,G.hp)/G.max*100:100;
@@ -527,24 +677,117 @@ function drawFree(h){
   var c=$('fClock');c.textContent=m+':'+(sec<10?'0':'')+sec;c.className='bigclock'+(L<=30?' hot':'');
   $('fAns').textContent=h.answered;$('fPct').textContent=(h.answered?Math.round(h.correct/h.answered*100):0)+'%';$('fPl').textContent=G.seats.length;
   drawRank(h.board||[]);drawAcc(h.acc||[]);
-  if(hit>0){var b=$('fBoss');b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');
+  $('fRev').hidden=!h.rev;
+  if(G.mode==='team')drawTeams(h,thit);
+  else if(hit>0){var b=$('fBoss');b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');
     var d=document.createElement('div');d.className='dmg';d.textContent='-'+hit;d.style.left=(Math.random()*30-15)+'%';b.appendChild(d);setTimeout(function(){d.remove()},1700)}
+  drawCounter(h);
   if(h.status==='end'&&h.result==='win')return finishFree('win');
-  if(h.status==='play'&&L<=0)return finishFree(G.hp<=0?'win':'lose');
+  if(h.status==='play'&&L<=0)return finishFree(G.mode==='team'?'time':(G.hp<=0?'win':'lose'));
+  maybeCounter(h,L);
+}
+/* ---------- 分隊競賽：每隊一隻魔王 ---------- */
+function buildTeams(){
+  var art=$('fBossArt').innerHTML,h='';
+  for(var t=1;t<=G.teams;t++)h+='<div class="tb tc'+t+'" id="tb'+t+'"><svg class="bs" viewBox="0 0 300 200" aria-hidden="true">'+art+'</svg><h3><i>'+TN[t]+'</i><span id="tbn'+t+'"></span></h3>'+
+    '<div class="pc" id="tbp'+t+'"></div><div class="hp" role="progressbar" aria-label="'+TN[t]+'的魔王血量" aria-valuemin="0" id="tbb'+t+'"><i id="tbf'+t+'"></i></div><div class="hpn"><span id="tbh'+t+'"></span><span id="tba'+t+'"></span></div></div>';
+  var box=$('fTeams');box.innerHTML=h;box.hidden=false;$('fBoss').hidden=true;
+  $('fModeTag').textContent='👥 分隊競賽';
+}
+function teamRows(h){
+  var hp=h.team_hp||[],mx=h.team_max||[],ts=h.tstat||[],out=[];
+  for(var t=1;t<=G.teams;t++){var s=ts[t-1]||{},m=mx[t-1]||1,v=Math.min(m,Math.max(0,hp[t-1]==null?m:hp[t-1]));
+    out.push({t:t,hp:v,max:m,left:v/m,n:s.n||0,first:s.first||0,ok:s.ok||0})}
+  return out;
+}
+function drawTeams(h,thit){
+  if(!$('tb1'))buildTeams();
+  var rows=teamRows(h),best=rows.slice().sort(function(a,b){return a.left-b.left})[0];
+  rows.forEach(function(x){var t=x.t,card=$('tb'+t);
+    $('tbn'+t).textContent=x.n+' 人';
+    $('tbp'+t).textContent=x.hp<=0?'打倒了！':'還剩 '+Math.ceil(x.left*100)+'%';
+    $('tbf'+t).style.width=(x.left*100)+'%';$('tbb'+t).setAttribute('aria-valuemax',x.max);$('tbb'+t).setAttribute('aria-valuenow',x.hp);
+    $('tbh'+t).textContent='血量 '+x.hp+' / '+x.max;
+    $('tba'+t).textContent='一次答對 '+(x.first?Math.round(x.ok/x.first*100):0)+'%';
+    card.classList.toggle('lead',best&&best.t===t&&best.left<1);card.classList.toggle('dead',x.hp<=0);
+    if(thit[t]){card.classList.remove('hit');void card.offsetWidth;card.classList.add('hit');
+      var d=document.createElement('div');d.className='dmg';d.textContent='-'+thit[t];card.appendChild(d);setTimeout(function(){d.remove()},1700)}
+  });
+}
+/* ---------- 魔王反擊：每 5 分鐘一題全班題 ---------- */
+function maybeCounter(h,L){
+  if(!G.optC||G.cBusy||G.phase!=='free')return;
+  var c=h.counter;if(c&&!c.done)return;
+  var el=G.secsTotal-L,pts=[];for(var m=5;m<G.mins;m+=5)pts.push(m*60);
+  if(G.cFired<pts.length&&el>=pts[G.cFired]&&L>25){G.cFired++;startCounter()}
+}
+function startCounter(){
+  if(!Q.length)return;
+  var q=Q[Math.floor(Math.random()*Q.length)],payload,ans;
+  if(q.ox){payload={q:q.q,o:['O','X'],ox:true,d:q.d};ans=q.a?0:1}
+  else{var ord=shuf(q.o.map(function(t,i){return i}));payload={q:q.q,o:ord.map(function(i){return q.o[i]}),ox:false,d:q.d};ans=ord.indexOf(q.a)}
+  G.cBusy=true;
+  rpc('raid_counter_start',{p_room:G.room,p_q:payload,p_key:{a:ans,e:q.e},p_secs:30}).then(function(h){G.cBusy=false;if(h)drawCounter(h)}).catch(function(){G.cBusy=false});
+}
+function endCounter(){
+  if(G.cEnding)return;G.cEnding=true;
+  rpc('raid_counter_end',{p_room:G.room}).then(function(c){G.cEnding=false;if(c&&G)drawCounter({counter:c})}).catch(function(){G.cEnding=false});
+}
+$('cStop').addEventListener('click',endCounter);
+function hideCounter(){$('cOv').hidden=true}
+function drawCounter(h){
+  var c=h.counter,ov=$('cOv');
+  if(!c||!G){hideCounter();return}
+  if(!c.done){
+    if(G.cN!==c.n){G.cN=c.n;
+      $('cT').textContent='⚠️ 魔王反擊！';
+      $('cNote').textContent=G.mode==='team'?'每一隊分開算：隊上 8 成以上的人答對，就能擋下反擊！答錯太多，自己隊的魔王會回血。':'全班一起在平板上作答：8 成以上的人答對，就能擋下反擊！答錯太多，魔王會回血。';
+      $('cQ').textContent=c.q;
+      var o=$('cOpts');o.className='opts'+(c.ox?' ox':'');
+      o.innerHTML=(c.o||[]).map(function(t,i){return '<div class="o c'+i+'">'+(c.ox?'':'<b>'+LABEL[i]+'</b>')+'<span>'+esc(t)+'</span><span class="n"></span><span class="bar" style="width:0"></span></div>'}).join('');
+      $('cRes').hidden=true;$('cStop').hidden=false;ov.hidden=false;
+    }
+    var L=c.left==null?0:c.left;$('cClk').textContent=L+' 秒';
+    $('cAns').innerHTML=(c.answered||0)+' / '+G.seats.length+' <small>位已作答</small>';
+    if(c.left!=null&&(L<=0||(G.seats.length&&c.answered>=G.seats.length)))endCounter();
+    return;
+  }
+  if(G.cRes!==c.n){G.cRes=c.n;G.cN=c.n;G.cHide=Date.now()+9000;
+    if(ov.hidden){$('cQ').textContent=c.q;var o2=$('cOpts');o2.className='opts'+(c.ox?' ox':'');
+      o2.innerHTML=(c.o||[]).map(function(t,i){return '<div class="o c'+i+'">'+(c.ox?'':'<b>'+LABEL[i]+'</b>')+'<span>'+esc(t)+'</span><span class="n"></span><span class="bar" style="width:0"></span></div>'}).join('')}
+    var dist=c.dist||{},tot=0,k;for(k in dist)tot+=dist[k];
+    var o=$('cOpts');o.classList.add('reveal');
+    [].forEach.call(o.children,function(el,i){var n=dist[String(i)]||0;if(i===c.a)el.classList.add('right');el.querySelector('.n').textContent=n+' 人';el.querySelector('.bar').style.width=(tot?n/tot*100:0)+'%'});
+    var blocked=(c.res||[]).every(function(r){return !r.heal});
+    $('cT').textContent=blocked?'🛡️ 反擊擋下來了！':'💥 魔王回血了！';
+    $('cClk').textContent='';$('cStop').hidden=true;$('cAns').innerHTML='';
+    $('cRes').innerHTML=(c.res||[]).map(function(r){
+      var p=r.n?Math.round(r.ok/r.n*100):0,cls=!r.heal?'':(r.ok*2>=r.n?' mid':' bad');
+      return '<div class="cr'+cls+'">'+(r.t?'<span class="tc'+r.t+'"><span class="tdot">'+r.t+'</span></span><b>'+TN[r.t]+'</b>：':'<b>全班</b>：')+r.ok+' / '+r.n+' 人答對（'+p+'%）→ '+(r.heal?'魔王回血 <b>+'+r.heal+'</b>':'<b>擋下反擊！</b>')+'</div>'}).join('')+
+      (c.e?'<div class="cr" style="background:#F1EDF6;color:#4A2B5E">✓ 答案：<b>'+esc((c.o||[])[c.a])+'</b>　'+esc(c.e)+'</div>':'');
+    $('cRes').hidden=false;ov.hidden=false;
+    return;
+  }
+  if(G.cHide&&Date.now()>G.cHide)hideCounter();
+}
+function seatLabel(seat){
+  if(!G||G.mode!=='team')return seat+' 號';
+  var t=0;(G.tseats||[]).forEach(function(x){if(x.seat===seat)t=x.team});
+  return t?'<span class="tc'+t+'"><span class="tdot" title="'+TN[t]+'">'+t+'</span></span>'+seat+' 號':seat+' 號';
 }
 function rankRows(list,n,prev){
   var medal=['🥇','🥈','🥉'],rk=0,last=null;
   return list.slice(0,n).map(function(x,i){
     var key=x.ok+'|'+x.dmg;if(key!==last){rk=i+1;last=key}
     var up=prev&&prev[x.seat]!=null&&prev[x.seat]<x.ok;
-    return '<li class="'+(rk<=3?'top':'')+(up?' up':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+x.seat+' 號</span><span class="ok">答對 '+x.ok+' 題<small class="dm">⚔ '+x.dmg+'</small></span></li>'}).join('');
+    return '<li class="'+(rk<=3?'top':'')+(up?' up':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+seatLabel(x.seat)+'</span><span class="ok">答對 '+x.ok+' 題<small class="dm">⚔ '+x.dmg+'</small></span></li>'}).join('');
 }
 /* 正確率排行榜：第 1 次作答就答對的比率，作答滿 10 題才上榜（raid_host.acc） */
 function accRows(list,n){
   var medal=['🥇','🥈','🥉'],rk=0,last=null;
   return list.slice(0,n).map(function(x,i){
     if(x.pct!==last){rk=i+1;last=x.pct}
-    return '<li class="'+(rk<=3?'top':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+x.seat+' 號</span><span class="pc">'+x.pct+'%<small>'+x.ok+'／'+x.n+' 題</small></span></li>'}).join('');
+    return '<li class="'+(rk<=3?'top':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+seatLabel(x.seat)+'</span><span class="pc">'+x.pct+'%<small>'+x.ok+'／'+x.n+' 題</small></span></li>'}).join('');
 }
 function drawAcc(list){
   G.acc=list;var sig=list.slice(0,5).map(function(x){return x.seat+':'+x.ok+':'+x.n}).join(',');
@@ -557,19 +800,29 @@ function drawRank(board){
   if(sig!==G.rankSig){G.rankSig=sig;$('fRank').innerHTML=board.length?rankRows(board,5,prev):'<li style="display:block;background:none"><p class="empty">答對第一題的同學會出現在這裡！</p></li>'}
   G.rankPrev=now;
 }
-$('fStop').addEventListener('click',function(){finishFree(G.hp<=0?'win':'lose')});
+$('fStop').addEventListener('click',function(){finishFree(G.mode==='team'?'time':(G.hp<=0?'win':'lose'))});
+function teamHead(result){
+  var rows=teamRows(G.lastH||{}),w=(G.lastH&&G.lastH.winner)||null;
+  rows.sort(function(a,b){return a.left-b.left||a.t-b.t});
+  if(!w&&rows.length)w=rows[0].t;
+  var medal=['🥇','🥈','🥉','4'];
+  return '<h2>🏆 <span class="tc'+w+'"><span class="tdot">'+w+'</span></span>'+TN[w]+'獲勝！</h2><p class="note" style="font-size:1.2rem">'+
+    (result==='win'?TN[w]+'最先打倒了自己的魔王！':'時間到！'+TN[w]+'的魔王剩下的血最少。')+'每一隊都很努力，下次再拚一場！</p>'+
+    '<div class="sum" style="max-width:820px;margin:0 auto;width:100%">'+rows.map(function(x,i){
+      return '<div class="it tc'+x.t+'"><span class="p">'+(x.hp<=0?'打倒魔王！':'魔王還剩 '+Math.ceil(x.left*100)+'%')+'</span>'+medal[i]+' <span class="tdot">'+x.t+'</span><b>'+TN[x.t]+'</b>（'+x.n+' 人）　一次答對率 '+(x.first?Math.round(x.ok/x.first*100):0)+'%</div>'}).join('')+'</div>';
+}
 function finishFree(result){
   if(!G||G.phase==='done')return;
-  G.phase='done';stopPoll();
+  G.phase='done';stopPoll();hideCounter();
   rpc('raid_finish',{p_room:G.room,p_result:result}).catch(function(){});
   var ans=+$('fAns').textContent||0,pct=$('fPct').textContent;
   rpc('raid_free_summary',{p_room:G.room}).catch(function(){return []}).then(function(list){
     list=list||[];
     var hard=list.filter(function(x){return x.n>=2&&x.ok/x.n<0.7}).slice(0,6);
     var win=result==='win';
-    var h=(win?'<h2>🎉 全班合力打倒'+esc(PK.boss||'大魔王')+'！</h2><p class="note" style="font-size:1.2rem">'+esc(PK.winLine||'')+'</p>'
+    var h=(G.mode==='team'?teamHead(result):(win?'<h2>🎉 全班合力打倒'+esc(PK.boss||'大魔王')+'！</h2><p class="note" style="font-size:1.2rem">'+esc(PK.winLine||'')+'</p>'
             :'<h2>時間到，魔王逃走了……</h2><p class="note" style="font-size:1.2rem">魔王還剩 '+G.hp+' 點血。複習下面的題目，下次一定打得倒！</p>')+
-      '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>'+
+      '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>')+
       '<div class="stat"><div><b>'+ans+'</b>全班作答題數</div><div><b>'+pct+'</b>一次答對率</div><div><b>'+(G.max-Math.max(0,G.hp))+'</b>總傷害</div><div><b>'+G.seats.length+'</b>位勇者</div></div>'+
       (((G.board||[]).length||(G.acc||[]).length)?'<div class="ranks" style="max-width:980px;margin:0 auto;width:100%">'+
         ((G.board||[]).length?'<div class="card rank"><h3>🏆 戰力排行榜 前 5 名</h3><ol>'+rankRows(G.board,5)+'</ol></div>':'')+
@@ -578,8 +831,73 @@ function finishFree(result){
     else h+='<p class="note" style="font-size:1.2rem">每一題的答對率都在 7 成以上，太厲害了！</p>';
     h+='<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
     var e=$('scrEnd');e.innerHTML=h;show('scrEnd');
-    $('bAgain').addEventListener('click',function(){G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
+    $('bAgain').addEventListener('click',function(){setH1();G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
   });
+}
+
+/* ---------- 情境闖關 ---------- */
+var H1=null;function setH1(t){var h=document.querySelector('.top h1');if(H1==null)H1=h.textContent;h.textContent=t==null?H1:t}
+function nextStory(){
+  var sp=G.story,i=G.stats.length,st=sp.steps[i];
+  if(!st)return finishStory();
+  var payload={q:st.q,o:st.o,s:st.s,t:sp.title,icon:sp.icon,i:i+1,n:sp.steps.length,d:st.d,intro:i===0?sp.intro:''};
+  busy=true;$('bStart').disabled=true;$('sNext').disabled=true;
+  rpc('raid_next',{p_room:G.room,p_question:payload,p_answer:{a:st.best,e:st.f[st.best],f:st.f},p_seconds:G.secs,p_hp_per:1}).then(function(h){
+    busy=false;$('sNext').disabled=false;
+    if(!h)throw new Error('next failed');
+    G.phase='question';G.cur={st:st,i:i};G.seats=h.seats||G.seats;
+    setH1('🧭 情境闖關：'+sp.title);drawStory();drawLive(0,h.left);show('scrStory');
+  }).catch(function(){busy=false;$('bStart').disabled=false;$('sNext').disabled=false;
+    $('sRes').hidden=false;$('sResText').className='res';$('sResText').textContent='出題失敗，請確認網路連線後再按一次。'});
+}
+function drawStory(){
+  var sp=G.story,c=G.cur,st=c.st;
+  $('sTag').textContent='第 '+(c.i+1)+' / '+sp.steps.length+' 關';
+  $('sTitle').textContent=sp.icon+' '+sp.title;
+  $('sText').innerHTML=(c.i===0?'<span class="ico" aria-hidden="true">'+sp.icon+'</span><p style="margin:0 0 .6rem;color:#4A5550">'+esc(sp.intro)+'</p>':'')+esc(st.s);
+  $('sQ').textContent=st.q;
+  var o=$('sOpts');o.className='opts sopts';
+  o.innerHTML=st.o.map(function(t,i){return '<div class="o c'+i+'"><b>'+LABEL[i]+'</b><span>'+esc(t)+'</span><span class="n"></span><span class="fb">'+esc(st.f[i])+'</span><span class="bar" style="width:0"></span></div>'}).join('');
+  $('sLive').hidden=false;$('sRes').hidden=true;
+}
+$('sStop').addEventListener('click',function(){revealStory()});
+function revealStory(){
+  if(!G||G.phase!=='question'||busy)return;
+  busy=true;G.phase='revealing';
+  rpc('raid_reveal',{p_room:G.room}).then(function(r){
+    busy=false;if(!r){G.phase='question';return}
+    G.phase='reveal';
+    var st=G.cur.st,dist=r.dist||{},o=$('sOpts'),most=-1,mx=0;
+    st.o.forEach(function(t,i){var n=dist[String(i)]||0;if(n>mx){mx=n;most=i}});
+    o.classList.add('reveal');
+    [].forEach.call(o.children,function(el,i){var n=dist[String(i)]||0;
+      if(i===st.best)el.classList.add('right');if(i===most&&i!==st.best)el.classList.add('most');
+      el.querySelector('.n').textContent=n+' 人';el.querySelector('.bar').style.width=(r.answered?n/r.answered*100:0)+'%'});
+    G.stats.push({q:st.q,s:st.s,best:st.o[st.best],ok:r.ok,n:r.answered,pl:r.players,most:most});
+    $('sLive').hidden=true;$('sRes').hidden=false;
+    var x=$('sResText');x.className='res';
+    x.innerHTML=(r.answered?'<b>'+r.ok+' / '+r.answered+' 人選了最好的做法。</b>':'<b>這一關沒有人作答。</b>')+
+      (most>=0&&most!==st.best?'<br>最多人選的是「'+esc(st.o[most])+'」（虛線框）。請選這個做法的同學說說看：為什麼會這樣選？結果會怎樣？':
+       (mx>0?'<br>最多人選到最好的做法！請一位同學說說看：還有沒有其他好方法？':''));
+    $('sNext').textContent=G.stats.length>=G.story.steps.length?'看闖關結果':'下一關 →';
+  }).catch(function(){busy=false;G.phase='question'});
+}
+$('sNext').addEventListener('click',function(){
+  if(busy)return;
+  if(G.stats.length>=G.story.steps.length)return finishStory();
+  nextStory();
+});
+function finishStory(){
+  stopPoll();
+  rpc('raid_finish',{p_room:G.room,p_result:'win'}).catch(function(){});
+  var sp=G.story,tot=0,ok=0;G.stats.forEach(function(x){tot+=x.n;ok+=x.ok});
+  var h='<h2>🧭 闖關完成：'+sp.icon+' '+esc(sp.title)+'</h2><p class="note" style="font-size:1.25rem">'+esc(sp.end)+'</p>'+
+    '<div class="stat"><div><b>'+G.stats.length+'</b>關</div><div><b>'+(tot?Math.round(ok/tot*100):0)+'%</b>選到最好的做法</div><div><b>'+G.seats.length+'</b>位同學參加</div></div>'+
+    '<h3 style="margin:0;text-align:left;color:#7A2E8E">📖 每一關最好的做法</h3><div class="sum">'+G.stats.map(function(x,i){
+      return '<div class="it"><span class="p">'+(x.n?Math.round(x.ok/x.n*100):0)+'% 選對</span><b>第 '+(i+1)+' 關</b>　'+esc(x.q)+'<br><b style="color:#1E8A5A">🌟 '+esc(x.best)+'</b></div>'}).join('')+'</div>'+
+    '<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
+  var e=$('scrEnd');e.innerHTML=h;show('scrEnd');
+  $('bAgain').addEventListener('click',function(){setH1();G=null;$('bCreate').disabled=false;$('setMsg').textContent='';show('scrSetup')});
 }
 
 /* 全螢幕、老師說明 */
