@@ -122,6 +122,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
   <section class="card" id="sSeat" hidden>
     <h2>👋 選你的座號</h2>
     <p class="muted">大螢幕不會顯示名字。「各自搶攻」的排行榜只顯示座號和答對題數。</p>
+    <p class="muted" style="font-weight:700;color:#7A1520">🔒 選好之後就不能自己換，請看清楚再按。選錯了要請老師輸入密碼。</p>
     <div class="msg" id="seatMsg" aria-live="polite"></div>
     <div class="seats" id="seats"></div>
   </section>
@@ -177,29 +178,39 @@ var DM=[
   function show(id){["sCode","sSeat","sGame"].forEach(function(k){$(k).hidden=(k!==id)})}
 
   /* 房號 */
-  function goRoom(code){room=code;history.replaceState(null,"","?r="+code);seat=+load("raidSeat:"+room,0)||0;
-    /* 從課堂房間跟過來的：沿用已經選好的座號（sessionStorage clsSeat） */
-    if(!seat){try{var cs=JSON.parse(sessionStorage.getItem("clsSeat")||"null");if(cs&&cs.seat>=1&&cs.seat<=40&&sessionStorage.getItem("clsSess")){seat=cs.seat;save("raidSeat:"+room,seat)}}catch(e){}}
-    if(seat)join(seat);else{show("sSeat")}
+  /* 座號鎖定（assets/seatlock.js）：這台平板今天在這個班選過座號，就直接用那個座號；要換要老師輸入密碼 */
+  var RCLS="";
+  function SL(){return window.SEATLOCK||{get:function(){return 0},set:function(){},unlock:function(){return Promise.resolve(true)}}}
+  function goRoom(code){room=code;history.replaceState(null,"","?r="+code);
+    rpc("raid_state",{p_room:room,p_seat:0,p_device:device}).catch(function(){return null}).then(function(d){
+      RCLS=d&&d.class_name||"";
+      seat=+load("raidSeat:"+room,0)||0;
+      var lk=SL().get(RCLS);if(lk&&lk!==seat){seat=lk;save("raidSeat:"+room,seat)}
+      /* 從課堂房間跟過來的：沿用已經選好的座號（sessionStorage clsSeat） */
+      if(!seat){try{var cs=JSON.parse(sessionStorage.getItem("clsSeat")||"null");if(cs&&cs.seat>=1&&cs.seat<=40&&sessionStorage.getItem("clsSess")){seat=cs.seat;save("raidSeat:"+room,seat)}}catch(e){}}
+      if(seat)join(seat);else{show("sSeat")}
+    });
     poll();if(!timer)timer=setInterval(function(){if(!document.hidden)poll()},1200);}
   $("codeGo").addEventListener("click",function(){var c=$("codeIn").value.replace(/\D/g,"");if(c.length!==6){$("codeMsg").textContent="請輸入 6 位數字的房號。";return}
     rpc("raid_state",{p_room:c,p_seat:0,p_device:device}).then(function(d){if(!d){$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}goRoom(c)}).catch(function(){$("codeMsg").textContent="連線失敗，請再試一次。"})});
 
   /* 座號 */
   for(var i=1;i<=25;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");$("seats").appendChild(b)}
-  $("seats").addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;join(+b.dataset.s)});
+  $("seats").addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;var s=+b.dataset.s,lk=SL().get(RCLS);
+    if(lk&&lk!==s){SL().unlock(RCLS).then(function(ok){if(ok)join(s)});return}join(s)});
   function join(s){
     $("seatMsg").textContent="加入中…";
     rpc("raid_join",{p_room:room,p_seat:s,p_device:device}).then(function(r){
-      if(r==="ok"){seat=s;save("raidSeat:"+room,s);$("seatMsg").textContent="";sig="";drawMe();show("sGame");poll();return}
+      if(r==="ok"){seat=s;save("raidSeat:"+room,s);SL().set(RCLS,s);$("seatMsg").textContent="";sig="";drawMe();show("sGame");poll();return}
       seat=0;save("raidSeat:"+room,null);show("sSeat");
       $("seatMsg").textContent={seat_taken:s+" 號已經有人用別的平板加入了。請確認你的座號，或請老師幫忙。",ended:"這場遊戲已經結束了。",no_room:"找不到這個房間。",full:"人數已滿。"}[r]||"加入失敗，請再試一次。";
     }).catch(function(){$("seatMsg").textContent="連線失敗，請再試一次。"});
   }
   function drawMe(){
     $("me").innerHTML="<span>我是 "+seat+" 號</span>"+(st&&st.team?'<span class="tbadge tc'+st.team+'">'+tname(st.team)+'</span>':"");
-    var c=document.createElement("button");c.type="button";c.textContent="選錯了，換座號";
-    c.addEventListener("click",function(){seat=0;save("raidSeat:"+room,null);$("seatMsg").textContent="";show("sSeat")});
+    var c=document.createElement("button");c.type="button";c.textContent="選錯座號？請老師幫忙";
+    c.addEventListener("click",function(){var go=function(){seat=0;save("raidSeat:"+room,null);$("seatMsg").textContent="";show("sSeat")};
+      if(SL().get(RCLS))SL().unlock(RCLS).then(function(ok){if(ok)go()});else go()});
     $("me").appendChild(c);
   }
 
@@ -485,6 +496,7 @@ var DM=[
   if(room.length===6)goRoom(room);else show("sCode");
 })();
 </script>
+<script src="assets/seatlock.js"></script>
 <script src="assets/live.js"></script>
 </body>
 </html>

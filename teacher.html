@@ -165,6 +165,13 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
       <div class="card"><div id="clsList"></div>
         <div class="cls-add row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><input id="clsNew" maxlength="20" placeholder="例如：四年忠班" aria-label="新班級名稱"><select id="clsNewSeats" aria-label="座號數"></select><button class="b pri" type="button" id="clsAdd">＋ 新增班級</button></div>
         <div class="msg" id="clsMsg" aria-live="polite"></div></div>
+      <div class="card" style="margin-top:14px">
+        <h3 style="margin:0 0 6px">🔒 換座號密碼</h3>
+        <p class="counts" style="margin:0 0 10px">學生在平板上選好座號後就不能自己換（同一台平板當天鎖在那個座號，隔天自動解除）。學生選錯時，請在他的平板上按「選錯座號？請老師幫忙」，輸入這個密碼就能重選。密碼是 4～8 位數字，只有老師知道；資料庫只存加密後的雜湊，忘記了就在這裡設一個新的。同一台平板 10 分鐘內輸錯 5 次會暫停 10 分鐘。</p>
+        <div id="pinState" class="counts" style="margin:0 0 8px">讀取中…</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="pinNew" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password" placeholder="新密碼（4～8 位數字）" aria-label="新的換座號密碼" style="max-width:14rem"><input id="pinNew2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password" placeholder="再輸入一次" aria-label="再輸入一次新密碼" style="max-width:14rem"><button class="b" type="button" id="pinSave">儲存密碼</button></div>
+        <div class="msg" id="pinMsg" aria-live="polite"></div>
+      </div>
     </div>
     <div id="pWork">
     <p class="counts" style="margin:0 0 12px">上課時打開作業的「開放繳交」，學生在平板上就能交作品；下課記得關掉。學生只填班級和座號，不會傳出名字。</p>
@@ -363,9 +370,24 @@ function gname(r){return GNAME[r.game]||r.title||r.game}
 /* 頁面分頁 */
 [].forEach.call(document.querySelectorAll('.ptabs [data-p]'),function(b){b.addEventListener('click',function(){
   [].forEach.call(document.querySelectorAll('.ptabs [data-p]'),function(x){x.setAttribute('aria-pressed',String(x===b));$(x.dataset.p).hidden=x!==b});
-  if(b.dataset.p==='pGame')load();if(b.dataset.p==='pCls')loadCls();
+  if(b.dataset.p==='pGame')load();if(b.dataset.p==='pCls'){loadCls();loadPin();}
 })});
 
+/* 換座號密碼（RPC set_seat_pin／seat_pin_status，只存雜湊） */
+function loadPin(){
+  CLS.api('rest/v1/rpc/seat_pin_status',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(J).then(function(st){
+    $('pinState').innerHTML=st&&st.set?'✅ 已經設定密碼（'+esc(when(st.updated_at))+' 設定）'+(st.recent?'・最近 7 天有 '+st.recent+' 次用密碼換座號':''):'<b style="color:#B3261E">⚠ 還沒有設定密碼：學生選錯座號時沒有辦法換，請先設定。</b>';
+  }).catch(function(){$('pinState').textContent='讀取失敗';});
+}
+$('pinSave').addEventListener('click',function(){
+  var a=$('pinNew').value.trim(),b=$('pinNew2').value.trim(),m=$('pinMsg');
+  if(!/^[0-9]{4,8}$/.test(a)){m.className='msg err';m.textContent='密碼要是 4～8 位數字。';return;}
+  if(a!==b){m.className='msg err';m.textContent='兩次輸入的密碼不一樣。';return;}
+  CLS.api('rest/v1/rpc/set_seat_pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_pin:a})}).then(J).then(function(r){
+    if(r==='ok'){m.className='msg ok';m.textContent='已儲存新的換座號密碼。';$('pinNew').value='';$('pinNew2').value='';loadPin();}
+    else{m.className='msg err';m.textContent=r==='bad_pin'?'密碼要是 4～8 位數字。':'儲存失敗，請確認是老師帳號。';}
+  }).catch(function(){m.className='msg err';m.textContent='儲存失敗，請確認網路。';});
+});
 function loadCls(){
   return CLS.api('rest/v1/class_list?select=*&order=sort.asc,name.asc').then(J).then(function(l){CL=l||[];drawCls();drawFilters();return CL}).catch(function(){$('clsMsg').className='msg err';$('clsMsg').textContent='班級讀取失敗';});
 }

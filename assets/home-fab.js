@@ -1,7 +1,8 @@
 /* 教室小書櫃：每份教材共用的左下角按鈕
    「⌂ 回書櫃」回到首頁；「QR」顯示這份教材的 QR Code（老師先選班級），學生用平板或手機掃描就能打開。
    學生模式：用 QR Code 打開的網址帶 ?stu=1&c=班級。學生模式不顯示「回書櫃」、QR 和上課工具，
-   一打開先選座號（記在這個分頁的 sessionStorage clsSeat），左下角顯示「班級 座號」可以換。
+   一打開先選座號（記在這個分頁的 sessionStorage clsSeat，並鎖定在 localStorage clsSeatLock，見 seatlock.js），
+   左下角顯示「班級 座號」；要換座號要老師輸入密碼。
    window.CLS_STU = {on, cls, seat}；選好座號時發出 cls-seat 事件。
    也會載入 assets/stats.js（遊戲作答統計 STATS.send），在它載入前呼叫的 STATS.send 會先排隊。
    用法：在教材 HTML 的 </body> 前加上
@@ -38,6 +39,13 @@
     if (!stu || stu.cls !== c0) sset("clsSeat", null);
     stu = { cls: c0 }; sset("clsStu", stu);
   }
+  /* 座號鎖定（格式同 assets/seatlock.js）：這台平板今天在這個班選過座號，就直接用；要換要老師輸入密碼 */
+  function lockAll() { try { return JSON.parse(localStorage.getItem("clsSeatLock") || "{}") || {}; } catch (e) { return {}; } }
+  function lockDay() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function lockGet(cls) { var k = cls || "*", r = lockAll()[k]; return r && r.seat && r.day === lockDay() && (k !== "*" || Date.now() - (r.at || 0) < 3600000) ? r.seat : 0; }
+  function lockSet(cls, seat) { var m = lockAll(); m[cls || "*"] = { seat: +seat, day: lockDay(), at: Date.now() }; try { localStorage.setItem("clsSeatLock", JSON.stringify(m)); } catch (e) {} }
+  function withSeatLock(cb) { if (window.SEATLOCK) return cb(window.SEATLOCK); var sc = document.createElement("script"); sc.src = (me || "").replace(/home-fab\.js(\?.*)?$/, "seatlock.js"); sc.onload = function () { cb(window.SEATLOCK); }; document.head.appendChild(sc); }
+  if (stu && !(sget("clsSeat") || {}).seat && lockGet(stu.cls)) sset("clsSeat", { seat: lockGet(stu.cls) });
   var seatRec = stu ? sget("clsSeat") : null;
   window.CLS_STU = stu ? { on: true, cls: stu.cls || "", seat: seatRec && seatRec.seat || 0 } : { on: false, cls: "", seat: 0 };
 
@@ -109,11 +117,12 @@
     var seatOv = document.createElement("div");
     seatOv.className = "cls-seat"; seatOv.setAttribute("role", "dialog"); seatOv.setAttribute("aria-modal", "true"); seatOv.setAttribute("aria-label", "選你的座號");
     var nSeats = 25;
-    function paintMe() { var s = window.CLS_STU; meBtn.textContent = (s.cls ? s.cls + " " : "") + (s.seat ? s.seat + " 號" : "選座號"); meBtn.setAttribute("aria-label", "我是" + (s.cls || "") + (s.seat ? s.seat + "號" : "") + "，點一下換座號"); }
+    function paintMe() { var s = window.CLS_STU; meBtn.textContent = (s.cls ? s.cls + " " : "") + (s.seat ? s.seat + " 號" : "選座號"); meBtn.setAttribute("aria-label", "我是" + (s.cls || "") + (s.seat ? s.seat + "號" : "") + "，要換座號請老師幫忙"); }
     function drawSeats() {
       var s = window.CLS_STU, h = "";
       for (var i = 1; i <= nSeats; i++) h += '<button type="button" data-s="' + i + '" aria-pressed="' + (i === s.seat) + '" aria-label="' + i + ' 號">' + i + "</button>";
       seatOv.innerHTML = '<div class="box"><h2>👋 選你的座號</h2>' + (s.cls ? '<div class="cl">' + esc(s.cls) + "</div>" : "") +
+        '<p style="margin:0;color:#7A1520;font-weight:700;font-size:15px">🔒 選好之後就不能自己換，請看清楚再按。選錯了要請老師輸入密碼。</p>' +
         '<div class="grid">' + h + "</div>" + (s.seat ? '<button type="button" class="cancel">不用換，回去</button>' : '<p style="margin:0;color:#4A5550;font-size:15px">選好座號才能開始。</p>') + "</div>";
     }
     function openSeat() { drawSeats(); seatOv.hidden = false; var b = seatOv.querySelector("button"); if (b) b.focus(); }
@@ -121,10 +130,14 @@
       var b = e.target.closest("button"); if (!b) return;
       if (b.classList.contains("cancel")) { seatOv.hidden = true; return; }
       var n = +b.dataset.s; if (!n) return;
-      window.CLS_STU.seat = n; sset("clsSeat", { seat: n }); seatOv.hidden = true; paintMe();
+      window.CLS_STU.seat = n; sset("clsSeat", { seat: n }); lockSet(window.CLS_STU.cls, n); seatOv.hidden = true; paintMe();
       try { window.dispatchEvent(new CustomEvent("cls-seat", { detail: window.CLS_STU })); } catch (x) {}
     });
-    meBtn.addEventListener("click", openSeat);
+    meBtn.addEventListener("click", function () {
+      var c = window.CLS_STU.cls;
+      if (!lockGet(c)) return openSeat();
+      withSeatLock(function (SL) { if (SL) SL.unlock(c).then(function (ok) { if (ok) openSeat(); }); });
+    });
     getClasses(function (list) { var c = (list || []).filter(function (x) { return x.name === window.CLS_STU.cls; })[0]; var n = c ? c.seats : 25; if (n !== nSeats) { nSeats = n; if (!seatOv.hidden) drawSeats(); } });
     paintMe();
     if (window.CLS_STU.seat) seatOv.hidden = true; else { seatOv.hidden = false; drawSeats(); }

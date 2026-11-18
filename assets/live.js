@@ -89,7 +89,7 @@
       onReady(function () {
         if (!screenOv) { screenOv = document.createElement("div"); screenOv.className = "cls-live-screen"; screenOv.setAttribute("role", "status"); document.body.appendChild(screenOv); }
         screenOv.innerHTML = "<div><div style='font-size:64px'>👀</div><b>請看大螢幕，認真上課</b><div>" + esc(title || "") + "</div><div style='font-size:16px;opacity:.8;margin-top:1em'>" + (seat() ? "我是 " + seat() + " 號・" : "") + "要玩遊戲、交作品或寫想法時，這裡會自動打開。</div>" +
-          (seat() ? "<button type='button' class='re' style='margin-top:1.4em;appearance:none;border:2px solid #fff;background:transparent;color:#fff;border-radius:999px;min-height:46px;padding:0 20px;font:700 16px/1 inherit;cursor:pointer'>選錯座號？重新選</button>" : "") + "</div>";
+          (seat() ? "<button type='button' class='re' style='margin-top:1.4em;appearance:none;border:2px solid #fff;background:transparent;color:#fff;border-radius:999px;min-height:46px;padding:0 20px;font:700 16px/1 inherit;cursor:pointer'>選錯座號？請老師幫忙</button>" : "") + "</div>";
         var re = screenOv.querySelector(".re");
         if (re) re.onclick = function () { var stu = sget("clsStu") || {}; moving = true; location.href = ROOT + "join.html?re=1&s=" + sid + (stu.cls ? "&c=" + encodeURIComponent(stu.cls) : ""); };
         screenOv.hidden = false;

@@ -68,6 +68,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   <section class="box" id="seatBox" hidden>
     <h2>👋 先選你的座號</h2>
     <p class="note">同學看不到你的座號，只有老師看得到。</p>
+    <p class="note" style="font-weight:700;color:#7A1520">🔒 選好之後就不能自己換，請看清楚再按。選錯了要請老師輸入密碼。</p>
     <div class="seats" id="seats"></div>
   </section>
 
@@ -116,13 +117,19 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
   /* 第一步：選座號 */
   var seats=$("seats");
   for(var i=1;i<=25;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");seats.appendChild(b);}
-  seats.addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;seat=+b.dataset.s;save(SEAT_KEY,seat);$("msg").textContent="";showMain();pull();});
+  /* 座號鎖定（assets/seatlock.js） */
+  var FCLS="";
+  function SL(){return window.SEATLOCK||{get:function(){return 0},set:function(){},unlock:function(){return Promise.resolve(true)}}}
+  function pick(s){seat=s;save(SEAT_KEY,seat);SL().set(FCLS,seat);$("msg").textContent="";showMain();pull();}
+  seats.addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;var s=+b.dataset.s,lk=SL().get(FCLS);
+    if(lk&&lk!==s){SL().unlock(FCLS).then(function(ok){if(ok)pick(s)});return}pick(s);});
   function showSeat(){$("seatBox").hidden=false;$("mainBox").hidden=true;}
   function showMain(){
     $("seatBox").hidden=true;$("mainBox").hidden=false;
     $("me").innerHTML='<span>我是 '+seat+' 號</span>';
-    var c=document.createElement("button");c.type="button";c.textContent="選錯了，換座號";
-    c.addEventListener("click",function(){seat=0;save(SEAT_KEY,null);data=null;showSeat();});
+    var c=document.createElement("button");c.type="button";c.textContent="選錯座號？請老師幫忙";
+    c.addEventListener("click",function(){var go=function(){seat=0;save(SEAT_KEY,null);data=null;showSeat();};
+      if(SL().get(FCLS))SL().unlock(FCLS).then(function(ok){if(ok)go()});else go();});
     $("me").appendChild(c);
   }
   $("body").addEventListener("input",function(){$("cnt").textContent=$("body").value.length;});
@@ -156,7 +163,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
       mb.hidden=true;mb.innerHTML="";$("form").hidden=false;
       if(data.seat_used){
         mb.hidden=false;
-        mb.innerHTML='<div class="warn">'+seat+' 號已經在別的平板寫過想法了。如果你選錯座號，請按上面的「選錯了，換座號」。</div>';
+        mb.innerHTML='<div class="warn">'+seat+' 號已經在別的平板寫過想法了。如果你選錯座號，請老師幫你換座號。</div>';
         $("form").hidden=true;
       }
     }
@@ -189,7 +196,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
     if(!t){m.className="msg err";m.textContent="請先寫下你的想法。";$("body").focus();return;}
     $("send").disabled=true;m.className="msg";m.textContent="送出中…";
     rpc("fb_post",{p_board:board,p_seat:seat,p_device:device,p_body:t}).then(function(r){
-      var M={ok:"✅ 送出了！你的想法已經在大螢幕上。",closed:"老師已經關閉回饋。",already:"你已經送出 1 則想法了，要先刪掉才能重寫。",seat_used:seat+" 號已經在別的平板寫過了。選錯座號的話，請按「選錯了，換座號」。",too_long:"想法太長了，最多 200 字。",empty:"請先寫下你的想法。",full:"想法已經太多了，請告訴老師。",bad_seat:"座號不正確。",no_board:"找不到這個討論。"};
+      var M={ok:"✅ 送出了！你的想法已經在大螢幕上。",closed:"老師已經關閉回饋。",already:"你已經送出 1 則想法了，要先刪掉才能重寫。",seat_used:seat+" 號已經在別的平板寫過了。選錯座號的話，請老師幫你換座號。",too_long:"想法太長了，最多 200 字。",empty:"請先寫下你的想法。",full:"想法已經太多了，請告訴老師。",bad_seat:"座號不正確。",no_board:"找不到這個討論。"};
       m.className="msg "+(r==="ok"?"ok":"err");m.textContent=M[r]||"送出失敗，請再試一次。";
       if(r==="ok"){$("body").value="";$("cnt").textContent="0";}
       return pull();
@@ -207,11 +214,16 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px sol
     var b=e.target.closest("button[data-s]");if(!b)return;sortBy=b.dataset.s;
     [].forEach.call(this.children,function(x){x.setAttribute("aria-pressed",String(x===b));});render();
   });
-  if(seat)showMain();else if(board)showSeat();
-  pull();
+  if(!board)pull();
+  else rpc("fb_list",{p_board:board,p_device:device,p_seat:0}).catch(function(){return null}).then(function(d){
+    FCLS=d&&d.class||"";var lk=SL().get(FCLS);if(lk&&lk!==seat){seat=lk;save(SEAT_KEY,seat)}
+    if(seat){SL().set(FCLS,seat);showMain()}else showSeat();
+    pull();
+  });
   setInterval(function(){if(!document.hidden)pull();},4000);
 })();
 </script>
+<script src="assets/seatlock.js"></script>
 <script src="assets/live.js"></script>
 </body>
 </html>
