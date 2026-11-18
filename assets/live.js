@@ -4,6 +4,7 @@
      ・平常（書櫃、教材的一般站、動畫簡報、宣導簡報、只給大螢幕的遊戲）→ 平板顯示「👀 請看大螢幕，認真上課」
      ・老師把教材換到「交給老師」那一站（#send），或 <meta name="live-play" content="站id,…"> 列的站 → 平板打開同一站一起操作
      ・老師開全班共戰房間 → 平板自動進 raid.html?r=房號；老師開想法牆 → 平板自動進 fb.html?b=代碼（座號都自動帶入）
+     ・老師在任何一站按左下角「📱 給平板練習」→ 平板打開同一站自己練習（配對、分一分、小測驗…）；按「👀 收回平板」或換站就回到看大螢幕
      ・<meta name="live" content="play"> 的頁面（平板遊戲：個人挑戰、小豬消防隊）→ 平板打開同一份一起玩
      ・<meta name="live" content="screen">（兩隊對戰、全班共戰老師頁）或 "none"（書櫃首頁）→ 看大螢幕
    老師結束課堂，或 6 小時沒有換頁，學生平板就停止跟隨。
@@ -45,6 +46,7 @@
     ".cls-live-pill{appearance:none;box-sizing:border-box;height:52px;display:inline-flex;align-items:center;gap:.35em;padding:0 16px;border-radius:999px;" +
     "background:#7A2E8E;color:#fff;border:2px solid #fff;font:700 17px/1 'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.28);cursor:pointer}" +
     ".cls-live-pill:focus-visible{outline:3px solid #F5B521;outline-offset:3px}" +
+    ".cls-live-share{background:#1E7A4F}.cls-live-share.on{background:#B45309}" +
     ".cls-live-solo{position:fixed;z-index:2147483000;left:max(16px,calc(env(safe-area-inset-left,0px) + 12px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}" +
     ".cls-live-stu{position:fixed;z-index:2147483000;right:12px;top:10px;background:#7A2E8E;color:#fff;border-radius:999px;padding:6px 14px;font:700 15px/1.3 'Noto Sans TC',sans-serif;box-shadow:0 3px 12px rgba(0,0,0,.25);pointer-events:none}" +
     ".cls-live-screen{position:fixed;inset:0;z-index:2147483004;background:linear-gradient(160deg,#4A2B5E,#1E1630);color:#fff;display:grid;place-items:center;padding:24px;text-align:center;font:400 20px/1.6 'Huninn','Noto Sans TC',sans-serif}" +
@@ -137,7 +139,11 @@
   L.screen = function (title) { L.push("screen:" + (title || pageTitle()), title || pageTitle()); };
   /* 依這一頁的設定推送：一般教材＝這一頁（含目前的站）；screen＝請學生看大螢幕；none＝不推送 */
   /* 平板要不要打開這一頁：只有互動環節（平板遊戲 play、「交給老師」#send 站）才打開，其餘都看大螢幕 */
+  /* 老師按「📱 給平板練習／👀 收回平板」對目前這一站的臨時設定（離開這一站就失效） */
+  var ov = null;
   function hereUrl() {
+    var cur = rel(location.href);
+    if (ov && ov.url === cur) return ov.mode === "open" ? cur : "screen:" + pageTitle();
     var m = metaLive();
     if (m === "play") return rel(location.href);
     if (m === "screen" || m === "none") return "screen:" + (m === "none" ? "" : pageTitle());
@@ -198,7 +204,27 @@
       var bar = document.querySelector(".cls-fabs");
       if (bar) { pill.classList.remove("cls-live-solo"); if (pill.parentNode !== bar) bar.appendChild(pill); }
       else { pill.classList.add("cls-live-solo"); if (pill.parentNode !== document.body) document.body.appendChild(pill); }
+      drawShare(bar);
     });
+  }
+  /* 「📱 給平板練習」：把目前這一站（配對、分一分、小測驗…）打開在學生平板上自己練習；再按一次收回 */
+  var shareBtn = null;
+  function drawShare(bar) {
+    var m = metaLive();
+    if (!L.id || !bar || m === "none" || m === "screen") { if (shareBtn) { shareBtn.remove(); shareBtn = null; } return; }
+    if (!shareBtn) {
+      shareBtn = document.createElement("button"); shareBtn.type = "button"; shareBtn.className = "cls-live-pill cls-live-share";
+      shareBtn.addEventListener("click", function () {
+        var open = hereUrl().indexOf("screen:") !== 0;
+        ov = { url: rel(location.href), mode: open ? "screen" : "open" };
+        L.pushHere(); drawShare(document.querySelector(".cls-fabs"));
+      });
+    }
+    var isOpen = hereUrl().indexOf("screen:") !== 0;
+    shareBtn.textContent = isOpen ? "👀 收回平板" : "📱 給平板練習";
+    shareBtn.classList.toggle("on", isOpen);
+    shareBtn.setAttribute("aria-label", isOpen ? "學生平板正打開這一站，按一下收回，改成請看大螢幕" : "把這一站打開在學生平板上，讓學生自己練習");
+    if (shareBtn.parentNode !== bar) bar.appendChild(shareBtn);
   }
   window.addEventListener("cls-live", drawPill);
 
@@ -286,5 +312,5 @@
       setTimeout(ready, 250);
     })();
   }
-  window.addEventListener("kit-page", function () { if (L.id) setTimeout(L.pushHere, 60); });
+  window.addEventListener("kit-page", function () { if (L.id) setTimeout(function () { L.pushHere(); drawShare(document.querySelector(".cls-fabs")); }, 60); });
 })();
