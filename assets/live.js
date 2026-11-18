@@ -51,6 +51,8 @@
     ".cls-live-stu{position:fixed;z-index:2147483000;right:12px;top:10px;background:#7A2E8E;color:#fff;border-radius:999px;padding:6px 14px;font:700 15px/1.3 'Noto Sans TC',sans-serif;box-shadow:0 3px 12px rgba(0,0,0,.25);pointer-events:none}" +
     ".cls-live-screen{position:fixed;inset:0;z-index:2147483004;background:linear-gradient(160deg,#4A2B5E,#1E1630);color:#fff;display:grid;place-items:center;padding:24px;text-align:center;font:400 20px/1.6 'Huninn','Noto Sans TC',sans-serif}" +
     ".cls-live-screen[hidden]{display:none}" +
+    /* 跟著老師時鎖住分站：學生不能自己換站（目錄、頁籤、左右換站鈕都藏起來） */
+    "html.cls-live-lock .k-home,html.cls-live-lock .k-tablist,html.cls-live-lock .k-side,html.cls-live-lock .k-start{display:none!important}" +
     ".cls-live-screen b{display:block;font-size:clamp(28px,7vw,44px);margin:.3em 0;color:#FFD54F}" +
     ".cls-live-toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:2147483005;background:#1E3A34;color:#fff;border-radius:999px;padding:10px 20px;font:700 17px/1.4 'Noto Sans TC',sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3)}" +
     "@media print{.cls-live-pill,.cls-live-stu,.cls-live-screen{display:none}}";
@@ -75,6 +77,14 @@
       document.body.appendChild(p);
     });
     function seat() { var s = sget("clsSeat"); return s && s.seat || 0; }
+    /* 鎖站：老師打開哪一站，平板就停在那一站 */
+    var want = null;
+    document.documentElement.classList.add("cls-live-lock");
+    document.addEventListener("keydown", function (e) {
+      if (/^(ArrowLeft|ArrowRight|PageUp|PageDown)$/.test(e.key) && !(e.target.closest && e.target.closest("input,textarea,select,[contenteditable],[role=slider]"))) { e.stopImmediatePropagation(); e.preventDefault(); }
+    }, true);
+    function holdStation() { if (want != null && location.hash !== want) location.hash = want || "#"; }
+    window.addEventListener("kit-page", function () { setTimeout(holdStation, 0); });
     function showScreen(title) {
       onReady(function () {
         if (!screenOv) { screenOv = document.createElement("div"); screenOv.className = "cls-live-screen"; screenOv.setAttribute("role", "status"); document.body.appendChild(screenOv); }
@@ -95,7 +105,8 @@
         if (screenOv) screenOv.hidden = true;
         var cur = rel(location.href);
         if (noHash(url) === noHash(cur)) {
-          if (hashOf(url) !== hashOf(cur)) location.hash = hashOf(url) || "#";
+          want = hashOf(url);
+          if (want !== hashOf(cur)) location.hash = want || "#";
           return;
         }
         var x = new URL(url, ROOT);
