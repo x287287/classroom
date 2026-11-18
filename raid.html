@@ -244,7 +244,7 @@ var DM=[
     if(key===sig)return; sig=key;
     if(st.status==="lobby"){b.innerHTML='<div class="big">🛡️</div><div class="wait">加入成功！<br>等老師按「開始戰鬥」</div>'+(FR?'<p class="muted" style="text-align:center">這一場是「'+(st.mode==="team"?"👥 分隊競賽":"⚡ 各自搶攻")+'」：開始後題目會出現在你的平板上，一次就答對打 2 點、第 2 次才答對打 1 點；答錯不會換題，會被定身 3 秒，再選一次。看不懂題目可以按「🔊 唸題目」。</p>':'')+
       (st.mode==="team"&&st.team?'<div class="rv na" style="text-align:center">你是 <span class="tbadge tc'+st.team+'">'+tname(st.team)+'</span>！幫自己的隊伍打倒魔王，最先打倒的隊伍獲勝！</div>':'')+
-      (FR&&st.opt_counter?'<p class="muted" style="text-align:center">🛡️ 魔王會反擊：反擊題出現時要趕快作答，'+(st.mode==="team"?"隊上":"全班")+' 8 成以上答對才擋得住！</p>':'')+
+      (FR&&st.opt_counter?'<p class="muted" style="text-align:center">🛡️ 魔王會反擊：反擊題出現時要趕快作答，'+(st.mode==="team"?"隊上":"全班")+' 9 成以上答對才擋得住！</p>':'')+
       (FR&&st.opt_revenge?'<p class="muted" style="text-align:center">🔁 最後 3 分鐘是錯題復仇戰：出大家常錯的題目，答對傷害 ×2！</p>':'')+
       (st.mode==="story"?'<p class="muted" style="text-align:center">這一場是「🧭 情境闖關」：大螢幕會出一個生活故事，每一關選「你會怎麼做？」。沒有標準的快慢，想清楚再選！</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
     if(st.status==="end"){
@@ -389,7 +389,7 @@ var DM=[
     if(key===C.sig)return;C.sig=key;
     var opts=c.o||[],ox=!!c.ox;
     var h='<h2 style="margin:0">⚠️ 魔王反擊！<span id="cLeft" class="left">'+(done?"":"⏱ "+Math.max(0,c.left||0)+" 秒")+'</span></h2>'+
-      '<p class="muted">'+(st.mode==="team"?"隊上":"全班")+' 8 成以上的人答對，就能擋下反擊！答錯太多，魔王會回血。</p><div class="qt">'+esc(c.q)+'</div>';
+      '<p class="muted">'+(st.mode==="team"?"隊上":"全班")+' 9 成以上的人答對，才能擋下反擊！答錯太多，魔王會回血。</p><div class="qt">'+esc(c.q)+'</div>';
     if(!done){
       cur={q:c.q,opts:opts,ox:ox,skip:[],e:""};
       if(mine==null)h+=sayBar();

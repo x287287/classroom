@@ -271,7 +271,7 @@ begin
   return 'ok';
 end $function$;
 
--- 結算魔王反擊：8 成以上答對完全擋下；5～8 成魔王回 5% 血；不到 5 成回 10% 血（分隊競賽各隊分開算）
+-- 結算魔王反擊：9 成以上答對完全擋下；5～9 成魔王回 5% 血；不到 5 成回 10% 血（分隊競賽各隊分開算）
 create or replace function public.raid_counter_end(p_room text)
 returns jsonb language plpgsql security definer set search_path to '' as $function$
 declare r public.raid_rooms; res jsonb := '[]'::jsonb; g record; heal int; th int[]; cn int; n_pl int; n_ok int; dist jsonb;
@@ -287,7 +287,7 @@ begin
         (select count(*) from public.raid_counter_ans a join public.raid_players p on p.room_id = a.room_id and p.seat = a.seat
           where a.room_id = p_room and a.n = cn and a.correct and p.team = t) ok
       from generate_series(1, r.teams) t loop
-      heal := case when g.n = 0 or g.ok * 10 >= g.n * 8 then 0 when g.ok * 2 >= g.n then ceil(r.team_max[g.t] * 0.05) else ceil(r.team_max[g.t] * 0.10) end;
+      heal := case when g.n = 0 or g.ok * 10 >= g.n * 9 then 0 when g.ok * 2 >= g.n then ceil(r.team_max[g.t] * 0.05) else ceil(r.team_max[g.t] * 0.10) end;
       if r.status <> 'play' or th[g.t] <= 0 then heal := 0; end if;
       th[g.t] := least(r.team_max[g.t], th[g.t] + heal);
       res := res || jsonb_build_array(jsonb_build_object('t', g.t, 'n', g.n, 'ok', g.ok, 'heal', heal));
@@ -296,7 +296,7 @@ begin
   else
     select count(*) into n_pl from public.raid_players where room_id = p_room;
     select count(*) into n_ok from public.raid_counter_ans where room_id = p_room and n = cn and correct;
-    heal := case when n_pl = 0 or n_ok * 10 >= n_pl * 8 then 0 when n_ok * 2 >= n_pl then ceil(r.max_hp * 0.05) else ceil(r.max_hp * 0.10) end;
+    heal := case when n_pl = 0 or n_ok * 10 >= n_pl * 9 then 0 when n_ok * 2 >= n_pl then ceil(r.max_hp * 0.05) else ceil(r.max_hp * 0.10) end;
     if r.status <> 'play' or r.hp <= 0 then heal := 0; end if;
     update public.raid_rooms set hp = least(max_hp, hp + heal) where id = p_room;
     res := jsonb_build_array(jsonb_build_object('t', 0, 'n', n_pl, 'ok', n_ok, 'heal', heal));
