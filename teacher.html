@@ -60,6 +60,18 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
 .stat{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:10px 0}
 .stat .big{font:400 1.6rem/1 var(--display)}
 .missing{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.help{border:2px solid #C8414B;border-radius:16px;padding:12px 14px;margin:10px 0;background:#FFF7F7}
+.help h3{margin:0 0 6px;font-size:1.15rem;color:#9B1C2A;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.help h3 .seg2{margin-left:auto;display:flex;gap:4px;font-size:.9rem;font-weight:400;color:var(--ink)}
+.help h3 .seg2 button{min-height:36px;padding:0 10px;border-radius:999px;border:1.5px solid #C8414B;background:#fff;color:#9B1C2A;cursor:pointer;font:inherit}
+.help h3 .seg2 button[aria-pressed=true]{background:#C8414B;color:#fff}
+.help ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.help li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;background:#fff;border-radius:12px;padding:8px 10px;border:1px solid #F0D3D6;cursor:pointer}
+.help li b.s{font-size:1.15rem;color:#9B1C2A;white-space:nowrap}
+.help li .why{display:flex;flex-wrap:wrap;gap:6px}
+.help li .why span{background:#FDE4E6;color:#7A1520;border-radius:999px;padding:1px 10px;font-size:.9rem;font-weight:700}
+.help li small{grid-column:2;color:#4A5550}
+.help .ok{color:var(--leaf);font-weight:700}
 .missing span{display:inline-grid;place-items:center;min-width:38px;height:34px;border-radius:8px;border:1.5px dashed var(--accent);color:var(--accent);font-weight:700;font-size:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:14px}
 .w{background:var(--card);border:1.5px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
@@ -418,12 +430,35 @@ function draw(){
 }
 function wrongList(rs,n){var m={};rs.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(it&&it.q&&!it.ok){m[it.q]=(m[it.q]||0)+1}})});
   return Object.keys(m).sort(function(a,b){return m[b]-m[a]}).slice(0,n).map(function(q){return {q:q,n:m[q]}})}
+/* 需要幫忙的學生：第一次就答對比率低於門檻、最近一次比平均低 20 個百分點以上、或同一題錯 3 次以上且答對率低於門檻＋15（情境闖關不列入；至少作答 10 題才判斷） */
+var HELP_T=(function(){try{var v=+localStorage.getItem('gsHelp');return [50,60,70].indexOf(v)>=0?v:60}catch(e){return 60}})();
+function helpList(by){
+  var out=[];
+  Object.keys(by).forEach(function(k){var g=by[k],rs=g.rs.filter(function(r){return !/-story$/.test(r.game)}),R=0,T=0;
+    rs.forEach(function(r){R+=+(r.data||{}).right||0;T+=+(r.data||{}).total||0});
+    if(T<10)return;var p=Math.round(R*100/T),why=[];
+    if(p<HELP_T)why.push('第一次就答對只有 '+p+'%');
+    var last=rs[0],ld=last&&last.data||{};
+    if(rs.length>1&&+ld.total>=5){var lp=Math.round((+ld.right||0)*100/ld.total);if(lp<=p-20)why.push('最近一次退步（'+lp+'%）')}
+    var w=wrongList(rs,3).filter(function(x){return x.n>=3});if(w.length&&p<HELP_T+15)why.push('同一題錯 3 次以上');
+    if(why.length)out.push({k:k,g:g,p:p,why:why,w:wrongList(rs,2)});
+  });
+  return out.sort(function(a,b){return a.p-b.p});
+}
+function helpHtml(by){
+  var list=helpList(by);
+  return '<div class="help"><h3>🆘 需要幫忙的學生<span class="seg2" role="group" aria-label="門檻">第一次就答對低於'+[50,60,70].map(function(v){return '<button type="button" data-help="'+v+'" aria-pressed="'+(v===HELP_T)+'">'+v+'%</button>'}).join('')+'</span></h3>'+
+    (list.length?'<ul>'+list.map(function(x){return '<li data-k="'+esc(x.k)+'"><b class="s">'+esc((F.cls==='*'&&x.g.cls?x.g.cls+' ':'')+x.g.seat+' 號')+'</b><span class="why">'+x.why.map(function(t){return '<span>'+esc(t)+'</span>'}).join('')+'</span>'+
+      (x.w.length?'<small>常錯：'+x.w.map(function(y){return esc(y.q)}).join('；')+'</small>':'')+'</li>'}).join('')+'</ul><p class="counts" style="margin:6px 0 0">點一位學生，可以在下面的表格看他每一次的錯題。至少作答 10 題才判斷；情境闖關不列入。</p>'
+     :'<p class="ok" style="margin:0">目前沒有需要特別注意的學生（作答 10 題以上的學生，第一次就答對都有 '+HELP_T+'% 以上）。</p>')+'</div>';
+}
 function drawStu(L){
   var by={};L.filter(function(r){return r.seat}).forEach(function(r){var k=(r.class_name||'')+'#'+r.seat;(by[k]=by[k]||{cls:r.class_name,seat:r.seat,rs:[]}).rs.push(r)});
   var keys=Object.keys(by).sort(function(a,b){var x=by[a],y=by[b];return (x.cls||'').localeCompare(y.cls||'')||x.seat-y.seat});
   var h='';
   if(F.cls!=='*'&&F.cls!=='-'){var c=CL.filter(function(x){return x.name===F.cls})[0];if(c){var miss=[];for(var i=1;i<=c.seats;i++)if(!by[F.cls+'#'+i])miss.push(i);
     h+='<div class="stat"><span class="big">'+(c.seats-miss.length)+' / '+c.seats+'</span><span>位有紀錄</span><div class="missing"><b>還沒有紀錄：</b>'+(miss.length?miss.map(function(n){return '<span>'+n+'</span>'}).join(''):'<b style="color:var(--leaf)">全班都有！</b>')+'</div></div>';}}
+  h+=helpHtml(by);
   h+='<div class="tblw"><table class="tbl"><thead><tr><th>座號</th><th>玩了幾次</th><th>第一次就答對</th><th>最近一次</th><th>最常錯的題目</th></tr></thead><tbody>';
   keys.forEach(function(k){var g=by[k],R=0,T=0;g.rs.forEach(function(r){R+=+(r.data||{}).right||0;T+=+(r.data||{}).total||0});var last=g.rs[0],w=wrongList(g.rs,2);
     h+='<tr class="click" data-k="'+esc(k)+'"><td><b>'+esc((F.cls==='*'&&g.cls?g.cls+' ':'')+g.seat+' 號')+'</b></td><td class="num">'+g.rs.length+'</td><td class="num">'+bar(pct(R,T))+' <small>('+R+'/'+T+')</small></td><td>'+esc(gname(last))+'<br><small>'+esc(when(last.created_at))+'・'+esc(score(last))+(extra(last)?'・'+esc(extra(last)):'')+'</small></td><td><small>'+w.map(function(x){return esc(x.q)+(x.n>1?'（錯 '+x.n+' 次）':'')}).join('<br>')+'</small></td></tr>';
@@ -432,6 +467,9 @@ function drawStu(L){
   var bs=L.filter(function(r){return !r.seat});if(bs.length)h+='<p class="counts" style="margin-top:10px">另有 '+bs.length+' 筆大螢幕全班遊戲的紀錄，請看「依題目」或「每一筆紀錄」。</p>';
   $('gsBody').innerHTML=h;
   [].forEach.call($('gsBody').querySelectorAll('tr.click'),function(tr){tr.addEventListener('click',function(){var k=tr.dataset.k;open[k]=!open[k];drawStu(L)})});
+  [].forEach.call($('gsBody').querySelectorAll('.help li[data-k]'),function(li){li.addEventListener('click',function(){var k=li.dataset.k;open[k]=true;drawStu(L);
+    var tr=[].filter.call($('gsBody').querySelectorAll('tr.click'),function(x){return x.dataset.k===k})[0];if(tr)tr.scrollIntoView({behavior:'smooth',block:'center'})})});
+  [].forEach.call($('gsBody').querySelectorAll('[data-help]'),function(b){b.addEventListener('click',function(){HELP_T=+b.dataset.help;try{localStorage.setItem('gsHelp',HELP_T)}catch(e){}drawStu(L)})});
 }
 function recHtml(r){var d=r.data||{},it=(d.items||[]).filter(function(x){return x&&!x.ok});
   return '<div style="padding:6px 0;border-bottom:1px dashed var(--line)"><b>'+esc(when(r.created_at))+'</b>　'+esc(r.title||gname(r))+'　'+esc(score(r))+(extra(r)?'・'+esc(extra(r)):'')+

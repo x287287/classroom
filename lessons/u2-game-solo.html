@@ -171,7 +171,7 @@ function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math
 function art(d,cls){return '<svg'+(cls?' class="'+cls+'"':'')+' viewBox="0 0 100 100" aria-hidden="true">'+d.art(d.c)+'</svg>'}
 function loadBest(){try{return JSON.parse(localStorage.getItem('u2soloBest')||'null')}catch(e){return null}}
 function saveBest(b){try{localStorage.setItem('u2soloBest',JSON.stringify(b))}catch(e){}}
-var Q=window.GAME_QUESTIONS||[];
+var Q=(window.GAME_QUESTIONS||[]).filter(function(q){return !q.ord}); /* 排序題只在全班共戰出 */
 
 /* 語音唸題 */
 var TTS=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window),voice=null,auto=false;

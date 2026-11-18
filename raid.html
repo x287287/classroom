@@ -40,7 +40,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .opts{display:grid;gap:10px}
 .opts button{border-radius:18px;min-height:66px;text-align:left;padding:10px 14px 10px 58px;position:relative;font-size:clamp(18px,4.6vw,22px);line-height:1.4;font-weight:700}
 .opts button b{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:#fff3;display:grid;place-items:center}
-.opts button.c0{background:var(--oA)}.opts button.c1{background:var(--oB)}.opts button.c2{background:var(--oC)}.opts button.c3{background:var(--oD)}
+.opts button.c4,.ord .c4{background:#9D174D}.opts button.c0{background:var(--oA)}.opts button.c1{background:var(--oB)}.opts button.c2{background:var(--oC)}.opts button.c3{background:var(--oD)}
 .opts.ox{grid-template-columns:1fr 1fr}
 .opts.ox button{text-align:center;padding:10px;font-size:48px;min-height:110px}
 .opts.done button{opacity:.35}
@@ -86,6 +86,26 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .scene{background:#F7F5FA;border-radius:16px;padding:12px 14px;font-size:clamp(18px,4.6vw,21px);line-height:1.7}
 .scene .intro{display:block;color:var(--muted);font-size:.9em;margin-bottom:6px}
 .opts.story button{min-height:60px}
+/* 先看題目 */
+.pvwait{text-align:center;font-weight:700;font-size:20px;color:#4A2B5E;background:#F1EDF6;border-radius:16px;padding:14px}
+.pvwait b{font-size:30px;color:#7A2E8E}
+/* 排序題 */
+.ord{display:grid;gap:12px}
+.ordsel{display:grid;gap:8px;background:#F7F5FA;border-radius:16px;padding:10px}
+.ordsel .slot{display:flex;align-items:center;gap:10px;min-height:54px;border:2px dashed #CFC6DD;border-radius:14px;padding:6px 10px;color:var(--muted);font-size:17px;text-align:left;background:#fff;width:100%}
+.ordsel .slot i{font-style:normal;flex:none;width:34px;height:34px;border-radius:50%;background:#E3DDEB;color:#4A2B5E;display:grid;place-items:center;font-weight:700}
+.ordsel button.slot{border:0;color:#fff;font-weight:700;font-size:clamp(17px,4.4vw,20px);line-height:1.35;border-radius:14px;padding:8px 12px}
+.ordsel button.slot i{background:#fff3;color:#fff}
+.ordsel button.slot span{margin-left:auto;background:#fff3;border-radius:999px;padding:0 10px;font-size:15px}
+.ordsel .c0{background:var(--oA)}.ordsel .c1{background:var(--oB)}.ordsel .c2{background:var(--oC)}.ordsel .c3{background:var(--oD)}
+.ordpool{display:grid;gap:8px}
+.ordpool button{border-radius:16px;min-height:58px;text-align:left;padding:8px 14px 8px 56px;position:relative;font-size:clamp(17px,4.4vw,21px);line-height:1.35}
+.ordpool button b{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:#fff3;display:grid;place-items:center}
+.ordsel .c4,.ordpool .c4{background:#9D174D}
+.ordpool .c0{background:var(--oA)}.ordpool .c1{background:var(--oB)}.ordpool .c2{background:var(--oC)}.ordpool .c3{background:var(--oD)}
+.ordbar{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.ordbar .ghost{background:#F1EDF6;color:#4A2B5E}
+.ordlist{margin:6px 0 0;padding-left:1.4em}
 </style>
 </head>
 <body>
@@ -129,7 +149,7 @@ var DM=[
   if(!device){device="d"+Math.random().toString(36).slice(2,10)+Date.now().toString(36);save("fbDevice",device)}
   var room=(new URLSearchParams(location.search).get("r")||"").replace(/\D/g,"");
   var seat=0, st=null, sig="", timer=null, sending=false;
-  var LABEL=["A","B","C","D"];
+  var LABEL=["A","B","C","D","E"];
 
   /* 第三單元的房間（raid_state.game='u3'）換成第三單元的怪物 */
   var game="u2", bossName="大魔王";
@@ -215,7 +235,7 @@ var DM=[
     if(!room)return;
     rpc("raid_state",{p_room:room,p_seat:seat||0,p_device:device}).then(function(d){
       if(!d){show("sCode");$("codeMsg").textContent="找不到這個房間，請再看一次房號。";return}
-      var hadTeam=st&&st.team;st=d;setGame(d.game);setTitle();
+      var hadTeam=st&&st.team;d._at=Date.now();st=d;setGame(d.game);setTitle();
       if(seat&&d.team&&d.team!==hadTeam)drawMe();
       if(seat&&!d.joined&&d.status!=="end"){ join(seat); return; }
       if(!seat){ if(d.status==="end"){show("sGame");$("me").innerHTML="";render()} return; }
@@ -227,6 +247,29 @@ var DM=[
       $("hpFill").style.width=(v/mx*100)+"%";$("hpText").textContent=tname(st.team)+"的魔王血量 "+v+" / "+mx;return}
     var p=st.max_hp?Math.max(0,st.hp)/st.max_hp*100:100;$("hpFill").style.width=p+"%";
     $("hpText").textContent=st.max_hp&&st.status!=="lobby"?("魔王血量 "+Math.max(0,st.hp)+" / "+st.max_hp):(st.mode==="team"?"每隊各有一隻魔王，開始後依隊伍人數決定血量":"魔王血量：開始後依人數決定")}
+  /* 先看題目：還要幾秒才出選項 */
+  var PVT=null,PVI=null;
+  function pvLeft(){var q=st&&st.question;if(!q||!q.pv||st.status!=="question"||st.answered||st.q_age==null)return 0;
+    return q.pv-st.q_age-(Date.now()-(st._at||Date.now()))/1000}
+  /* 排序題：依序點選選項 */
+  var ORD={key:"",sel:[],items:[],dis:false,send:null};
+  function ordInner(){var it=ORD.items,n=it.length,h='<div class="ordsel" aria-label="你排的順序">';
+    for(var k=0;k<n;k++){var v=ORD.sel[k];
+      h+=v!=null?'<button type="button" class="slot c'+v+'" data-ordrm="'+k+'" aria-label="第 '+(k+1)+' 步，點一下拿掉"><i>'+(k+1)+'</i>'+esc(it[v])+'<span>✕</span></button>'
+                 :'<div class="slot"><i>'+(k+1)+'</i>'+(k===ORD.sel.length?"下一步是？點下面的選項":"")+'</div>'}
+    h+='</div><div class="ordpool">'+it.map(function(t,i){return ORD.sel.indexOf(i)>=0?"":'<button type="button" class="c'+i+'" data-ordpick="'+i+'"'+(ORD.dis?" disabled":"")+'><b>'+LABEL[i]+'</b>'+esc(t)+'</button>'}).join("")+'</div>'+
+      '<div class="ordbar"><button type="button" class="ghost" data-ordreset'+(ORD.sel.length&&!ORD.dis?"":" disabled")+'>↺ 重排</button><button type="button" data-ordsend'+(ORD.sel.length===n&&!ORD.dis?"":" disabled")+'>送出順序 ✓</button></div>';
+    return h}
+  function ordHTML(items,key,dis,send){if(ORD.key!==key){ORD.key=key;ORD.sel=[]}ORD.items=items;ORD.dis=!!dis;ORD.send=send;return '<div class="ord" id="ordBox">'+ordInner()+'</div>'}
+  function ordRedraw(){var x=$("ordBox");if(x)x.innerHTML=ordInner()}
+  $("body").addEventListener("click",function(e){
+    var t=e.target.closest("[data-ordpick],[data-ordrm],[data-ordreset],[data-ordsend]");if(!t||t.disabled||!$("ordBox"))return;
+    if(t.hasAttribute("data-ordpick")){var i=+t.dataset.ordpick;if(ORD.sel.indexOf(i)<0)ORD.sel.push(i)}
+    else if(t.hasAttribute("data-ordrm"))ORD.sel.splice(+t.dataset.ordrm,1);
+    else if(t.hasAttribute("data-ordreset"))ORD.sel=[];
+    else if(t.hasAttribute("data-ordsend")){if(ORD.send&&ORD.sel.length===ORD.items.length){ORD.dis=true;ordRedraw();ORD.send(ORD.sel.slice())}return}
+    ordRedraw();
+  });
   function render(){
     hp();
     var FR=st.mode==="free"||st.mode==="team";
@@ -236,7 +279,8 @@ var DM=[
     C.sig="";
     if(FR&&st.status==="play"){ freeTick(); return; }
     F.on=false;
-    var key=[st.status,st.round,st.answered,st.my_correct,st.result,st.hp,st.team,st.winner].join("|");
+    var PVL=pvLeft();
+    var key=[st.status,st.round,st.answered,st.my_correct,st.result,st.hp,st.team,st.winner,PVL>0?"pv":""].join("|");
     var b=$("body");
     if(st.status==="question"&&!st.answered){
       var lt=$("leftT");if(lt&&st.left!=null){lt.textContent="⏱ 剩 "+st.left+" 秒";lt.className="left"+(st.left<=5?" hot":"")}
@@ -264,14 +308,32 @@ var DM=[
     var h='<div class="meta"><span>第 '+st.round+' / '+st.rounds+(SY?' 關':' 題')+'</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div>'+
       (SY&&q.s?'<div class="scene">'+(q.intro?'<span class="intro">'+esc(q.intro)+'</span>':'')+esc(q.s)+'</div>':'')+'<div class="qt">'+esc(q.q)+'</div>';
     var mine=st.my_choice;
+    clearTimeout(PVT);clearInterval(PVI);
+    if(st.status==="question"&&PVL>0){
+      cur={q:(SY&&q.s?q.s+"。":"")+q.q,opts:[],ox:q.ox,skip:[],e:""};
+      h+=sayBar().replace("🔊 唸題目和選項","🔊 唸題目")+'<div class="pvwait">👀 先讀題目，想一想……<br>選項 <b id="pvS">'+Math.ceil(PVL)+'</b> 秒後出現'+(q.ord?"<br>（這一題要排順序）":"")+'</div>';
+      if(auto&&spoken!=="s"+st.round){spoken="s"+st.round;setTimeout(readCur,300)}
+      b.innerHTML=h;
+      PVI=setInterval(function(){var z=$("pvS"),L=pvLeft();if(z)z.textContent=Math.max(1,Math.ceil(L))},300);
+      PVT=setTimeout(function(){clearInterval(PVI);sig="";render()},PVL*1000+60);
+      return;
+    }
     if(st.status==="question"){
       cur={q:(SY&&q.s?q.s+"。":"")+q.q,opts:opts,ox:q.ox,skip:[],e:""};
       if(!st.answered)h+=sayBar();
+      if(q.ord){
+        if(!st.answered)h+=ordHTML(opts,"s"+st.round,sending,function(order){answer(order)});
+        else h+='<div class="rv na">你排的順序：<ol class="ordlist">'+(Array.isArray(mine)?mine:[]).map(function(i){return '<li>'+esc(opts[i])+'</li>'}).join("")+'</ol></div>';
+      }else
       h+=optsHTML(opts,q.ox,function(i){return st.answered&&mine===i?" pick":""},function(){return st.answered},st.answered?" done":"");
-      if(!st.answered&&auto&&spoken!=="s"+st.round){spoken="s"+st.round;setTimeout(readCur,300)}
-      h+=st.answered?'<div class="wait">✓ 已送出！'+(SY?"看大螢幕，等大家都選好":"看大螢幕等老師公布答案")+'</div>':'<div class="msg" id="ansMsg"></div>';
+      if(!st.answered&&auto){
+        if(spoken!=="s"+st.round){spoken="s"+st.round;setTimeout(readCur,300)}
+        else if(q.pv&&spoken!=="o"+st.round){spoken="o"+st.round;setTimeout(function(){speak(opts.map(function(o,i){return (q.ox?"":LABEL[i]+"，")+o}).join("。")+"。")},300)}
+      }
+      if(q.ord&&!st.answered)h+='<div class="msg" id="ansMsg"></div>';
+      else h+=st.answered?'<div class="wait">✓ 已送出！'+(SY?"看大螢幕，等大家都選好":"看大螢幕等老師公布答案")+'</div>':'<div class="msg" id="ansMsg"></div>';
     }else{
-      var a=st.answer||{},right=opts[a.a];
+      var a=st.answer||{},right=q.ord?(a.a||[]).map(function(i,k){return (k+1)+". "+opts[i]}).join(" → "):opts[a.a];
       if(SY){
         var fb=(a.f||[])[mine];
         if(!st.answered)h+='<div class="rv na">這一關你沒有作答。<br>最好的做法：<b>'+esc(right)+'</b><br>'+esc(a.e)+'</div>';
@@ -284,7 +346,7 @@ var DM=[
       }
       if(!st.answered)h+='<div class="rv na">這題你沒有作答。<br>正確答案：<b>'+esc(right)+'</b><br>'+esc(a.e)+'</div>';
       else if(st.my_correct)h+='<div class="big">⚔️</div><div class="rv ok"><b>答對了！</b>你打了魔王一下！<br>'+esc(a.e)+'</div>';
-      else h+='<div class="rv no"><b>差一點！</b>正確答案是「'+esc(right)+'」。<br>'+esc(a.e)+'</div>';
+      else h+='<div class="rv no"><b>差一點！</b>'+(q.ord?"正確順序是：":"正確答案是")+'「'+esc(right)+'」。<br>'+esc(a.e)+'</div>';
       cur={q:q.q,opts:opts,ox:q.ox,skip:[],e:"正確答案是："+(q.ox?(a.a===0?"O，對":"X，錯"):right)+"。"+(a.e||"")};
       if(TTS)h+='<div class="sayrow"><button type="button" data-say="e">🔊 唸答案和說明</button></div>';
       h+='<p class="muted" style="text-align:center">看大螢幕，等老師出下一題</p>';
@@ -299,10 +361,10 @@ var DM=[
     rpc("raid_answer",{p_room:room,p_round:st.round,p_seat:seat,p_device:device,p_choice:i}).then(function(r){
       sending=false;
       if(r==="ok"||r==="already"){st.answered=true;st.my_choice=i;sig="";render();return}
-      var m={closed:"這題已經結束了。",late:"時間到了，來不及送出。",not_joined:"請重新選座號。"}[r]||"送出失敗，請再按一次。";
+      var m={closed:"這題已經結束了。",late:"時間到了，來不及送出。",not_joined:"請重新選座號。",early:"選項還沒出現，等一下再按。"}[r]||"送出失敗，請再按一次。";
       var am=$("ansMsg");if(am)am.textContent=m;
       if(r==="not_joined"){join(seat)}
-      optBtns().forEach(function(x){x.disabled=false});
+      optBtns().forEach(function(x){x.disabled=false});ORD.dis=false;ordRedraw();
       poll();
     }).catch(function(){sending=false;var am=$("ansMsg");if(am)am.textContent="網路不穩，請再按一次。";optBtns().forEach(function(x){x.disabled=false})});
   }
@@ -326,7 +388,7 @@ var DM=[
       F.busy=false;
       if(q.err){ if(q.err==="not_joined"){join(seat)} F.on=false; poll(); return; }
       q.wrong=q.wrong||[];q.tries=q.tries||0;
-      F.q=q;F.res=null;F.hit=q.tries>0;F.frozen=q.wait>0;drawFree();
+      F.q=q;F.res=null;F.pos=null;F.hit=q.tries>0;F.frozen=q.wait>0;drawFree();
       if(auto&&spoken!=="f"+q.qid){spoken="f"+q.qid;stopSay();if(!F.frozen)setTimeout(readCur,300)}
       if(F.frozen)freezeThen(q.wait);
     }).catch(function(){F.busy=false;setTimeout(loadQ,1500)});
@@ -340,20 +402,22 @@ var DM=[
       '<div class="qt">'+esc(q.q)+'</div>'+sayBar();
     if(q.rev)h+='<div class="revq">🔁 復仇題：這是全班常答錯的題目，答對傷害 ×2！</div>';
     if(!r)h+='<div class="pot p'+Math.min(2,p)+'">'+(p>=2?"⚔️⚔️ 這題"+(q.tries===0?"一次就":"現在")+"答對：打 "+p+" 點":p===1?"⚔️ 這題現在答對：打 1 點":"這題現在答對不會打到魔王，但還是要找出正確答案！")+'</div>';
+    if(q.ord){if(!r)h+=ordHTML(opts,"f"+q.qid+"-"+q.tries,F.frozen||F.busy,function(order){freeAnswer(null,order)});}
+    else
     h+=optsHTML(opts,q.ox,function(i){return (wrong.indexOf(i)>=0?" tried":"")+(r&&opts[i]===r.answer?" right":"")},
       function(i){return !!r||F.frozen||wrong.indexOf(i)>=0},r?" done2":"");
     if(r){
       var msg=r.attempt===1?'<b>⚔️ 一次就答對！</b>打掉魔王 '+r.dmg+' 點血'+(r.dmg>2?"（連續一次答對 "+r.streak+" 題，多打 1 點！）":"")
         :r.dmg>0?'<b>⚔️ 答對了！</b>第 '+r.attempt+' 次答對，打掉魔王 '+r.dmg+' 點血'
         :'<b>✓ 答對了！</b>這次沒有打到魔王，下一題試試一次就答對！';
-      h+='<div class="rv ok">'+msg+'<br>'+esc(r.e)+'</div>';
+      h+='<div class="rv ok">'+msg+(q.ord?'<br>正確順序：'+esc(r.answer):'')+'<br>'+esc(r.e)+'</div>';
       if(TTS)h+='<div class="sayrow"><button type="button" data-say="e">🔊 唸答案和說明</button></div>';
       h+='<button type="button" class="nextbtn" id="fNext">下一題 →</button>';
-    }else if(F.hit)h+='<div class="rv no"><b>被魔王打中了！</b>這個答案不對。'+(F.frozen?"定身結束後再選一次。":"再想想看，選一次！")+'</div><div class="freeze" id="frz"></div>';
+    }else if(F.hit)h+='<div class="rv no"><b>被魔王打中了！</b>'+(q.ord?(F.pos!=null?"有 "+F.pos+" 個位置是對的，再排一次。":"順序不對。"):"這個答案不對。")+(F.frozen?"定身結束後再選一次。":"再想想看，選一次！")+'</div><div class="freeze" id="frz"></div>';
     else h+='<div class="msg" id="ansMsg"></div>';
     b.innerHTML=h;freeHeader();
     var o=$("opts");
-    if(!r)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||btn.disabled||F.busy||F.frozen)return;freeAnswer(+btn.dataset.i)});
+    if(!r&&o)o.addEventListener("click",function(e){var btn=e.target.closest("button[data-i]");if(!btn||btn.disabled||F.busy||F.frozen)return;freeAnswer(+btn.dataset.i)});
     var nb=$("fNext");if(nb)nb.addEventListener("click",function(){stopSay();loadQ()});
   }
   function freezeThen(sec){
@@ -361,9 +425,10 @@ var DM=[
     var tick=function(){var z=$("frz");if(z)z.textContent=left>0?"😵 定身中…… "+left+" 秒":"";
       if(left<=0){F.frozen=false;drawFree();if(auto)readCur();return}left--;F.timer=setTimeout(tick,1000)};tick();
   }
-  function freeAnswer(i){
+  function freeAnswer(i,order){
     F.busy=true;stopSay();optBtns().forEach(function(x){x.disabled=true});
-    rpc("raid_free_answer",{p_room:room,p_seat:seat,p_device:device,p_qid:F.q.qid,p_choice:i}).then(function(r){
+    var args={p_room:room,p_seat:seat,p_device:device,p_qid:F.q.qid};if(order)args.p_order=order;else args.p_choice=i;
+    rpc("raid_free_answer",args).then(function(r){
       F.busy=false;
       if(r.err){
         if(r.err==="wait"||r.err==="bad_choice"){drawFree();var m=$("ansMsg");if(m)m.textContent=r.err==="wait"?"還在定身中，等一下再按！":"這個選項已經選過了。";return}
@@ -375,7 +440,7 @@ var DM=[
         F.res=r;F.q.streak=r.streak;if(r.dmg>0)st.my_right=(st.my_right||0)+1;st.my_dmg=(st.my_dmg||0)+r.dmg;drawFree();
         if(auto)speak(cur.e);else F.timer=setTimeout(loadQ,2500);
       }else{
-        F.q.wrong.push(i);F.q.tries=r.attempt;F.q.streak=0;F.hit=true;F.frozen=true;drawFree();freezeThen(r.wait||3);
+        if(order)F.pos=r.pos_ok;else F.q.wrong.push(i);F.q.tries=r.attempt;F.q.streak=0;F.hit=true;F.frozen=true;drawFree();freezeThen(r.wait||3);
       }
     }).catch(function(){F.busy=false;drawFree();var m=$("ansMsg");if(m)m.textContent="網路不穩，請再按一次。"});
   }

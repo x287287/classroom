@@ -156,7 +156,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;background-ima
 <script src="../assets/kit.js"></script>
 <script>var UNIT=/[?&]u=3(&|$)/.test(location.search)?'u3':'u2';document.write('<script src="data/'+UNIT+'-game-questions.js"><\/script>')</script>
 <script>
-var Q=window.GAME_QUESTIONS||[];
+var Q=(window.GAME_QUESTIONS||[]).filter(function(q){return !q.ord}); /* 排序題只在全班共戰出 */
 var PK=window.GAME_PACK||{};
 var DM=PK.monsters||[];
 var S={hp:4,time:0,team:0,score:[0,0],dmi:0,dhp:[4,4,4],used:{},cur:null,answered:false,stealing:false,timerId:null,left:0};
