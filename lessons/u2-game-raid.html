@@ -12,7 +12,7 @@
        同步作答（sync）：大螢幕出同一題，答對的人數就是傷害；全班 8 成以上答對再多打 50%（暴擊）。魔王血量＝人數 × 題數 × 強度（0.8／1.0／1.25）。
        各自搶攻（free）：每人在平板上用自己的速度作答，題目由伺服器從 raid_bank 隨機出（用完重新洗牌），答錯不換題（定身 3 秒再選）：第 1 次就答對打 2 點、第 2 次答對打 1 點（O／X 題 0 點）、之後 0 點；
                          連續「一次就答對」第 5、10…題多打 1 點；限時 10／15／20 分鐘，魔王血量＝人數 × 分鐘 × 強度（11／15／19），例如 25 人 20 分鐘普通＝7500；
-                         大螢幕有即時戰力排行榜（座號，依 2 次內答對題數、同分比傷害）。
+                         大螢幕有即時戰力排行榜（座號，依 2 次內答對題數、同分比傷害）與正確率排行榜（第 1 次就答對的比率，作答滿 10 題才上榜，raid_host.acc）。
      題庫和另外兩個版本共用 lessons/data/u2-game-questions.js。
      資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop、raid_finish，
      學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。
@@ -45,7 +45,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 .mode span{font-size:1rem;line-height:1.6;color:#4A5550}
 .mode[aria-checked=true]{border-color:#7A2E8E;background:#F4ECF8;box-shadow:0 0 0 3px #7A2E8E33}
 /* 各自搶攻 */
-.free{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.free{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:stretch}
 @media (max-width:1000px){.free{grid-template-columns:minmax(0,1fr)}}
 .free .boss{min-height:440px}
 .free .boss svg.bs{width:min(100%,460px)}
@@ -71,6 +71,18 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
 @keyframes rk{0%{background:#FFE082;transform:scale(1.04)}100%{}}
 @media (prefers-reduced-motion:reduce){.rank li.up{animation:none}}
 .rank .empty{color:#4A5550;font-size:1rem;margin:0}
+/* 兩個排行榜：螢幕夠寬時左右並排 */
+.ranks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:12px}
+.rank li{grid-template-columns:2.2rem 1fr auto!important}
+.rank li .ok small{display:block;text-align:right;font-size:.85rem}
+.rank li .s{white-space:nowrap}.fside .rank li{gap:6px;padding:.15rem .55rem}.fside .rank li .ok{font-size:1rem;white-space:nowrap}
+.fside .ranks{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:1300px){.fside .ranks{grid-template-columns:minmax(0,1fr)}}
+.rank.acc h3{color:#1D4ED8}
+.rank.acc li{grid-template-columns:2.6rem 1fr auto;background:#EEF4FF}
+.rank.acc li.top{background:#FFF4D6}
+.rank.acc li .pc{color:#1D4ED8;font-size:1.3rem}
+.rank.acc li .pc small{display:block;font-size:.8rem;color:#4A5550;font-weight:700;text-align:right}
 .miniqr{display:flex;gap:12px;align-items:center}
 .miniqr .code svg{width:96px;height:96px}
 .miniqr p{margin:0;font-size:1rem;line-height:1.6}
@@ -215,7 +227,10 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
       <div class="fside">
         <div class="card ftop"><div><div class="bigclock" id="fClock" aria-live="off"></div><p class="note" style="text-align:center;margin:0">剩下的時間</p></div>
         <div class="fstat"><div><b id="fAns">0</b><span>全班已作答</span></div><div><b id="fPct">0%</b><span>一次答對率</span></div><div><b id="fPl">0</b><span>位勇者</span></div></div></div>
-        <div class="card rank" aria-live="off"><h3>🏆 戰力排行榜</h3><ol id="fRank"></ol></div>
+        <div class="ranks">
+          <div class="card rank" aria-live="off"><h3>🏆 戰力排行榜</h3><ol id="fRank"></ol></div>
+          <div class="card rank acc" aria-live="off"><h3>🎯 正確率排行榜</h3><ol id="fAcc"></ol></div>
+        </div>
         <div class="card miniqr"><div class="code" id="fQr"></div><p>還沒加入的同學，掃描加入！<br>房號 <b id="fRoom" style="font-size:1.4rem;color:#7A2E8E"></b></p></div>
         <div class="row"><button type="button" class="sec" id="fStop">提前結束</button></div>
       </div>
@@ -231,7 +246,7 @@ body{color:#fff;background:radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#
   <ul><li id="tUnit">第二單元〈拒菸拒酒拒檳榔〉統整遊戲的全班合作版（課本 p.30–53）。題庫和「趕走三惡魔」兩個版本相同。</li>
   <li>有兩種模式：</li></ul>
   <ul><li><b>同步作答</b>：大螢幕出同一題，全班同時作答，時間到或全班答完就公布答案和每個選項的人數。答對的人數就是傷害，全班 8 成以上答對再多打 50%（暴擊）。題目出完前把魔王打到 0 就獲勝。魔王血量＝人數 × 題數 × 強度（簡單 0.8、普通 1.0、困難 1.25）。例如 25 人、12 題、普通，魔王有 300 點血，全班平均要答對約 8 成並常常暴擊才打得倒。</li>
-  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，答對才換下一題（題庫用完會重新洗牌出題）。第 1 次就答對打 2 點、第 2 次才答對打 1 點、第 3 次以後答對 0 點（O／X 題答錯後只剩一個選項，所以第 2 次答對也是 0 點）；連續「一次就答對」第 5、10、15…題多打 1 點。答錯不會公布答案，被定身 3 秒後從剩下的選項再選一次。學生平板上每題都有「🔊 唸題目和選項」與每個選項旁的 🔊，也可以開「自動唸」（建議戴耳機）。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 11、普通 15、困難 19），例如 25 人、20 分鐘、普通＝7500 點；開房間前畫面上會顯示預估血量。強度是依實際上課的紀錄調整的：四年級學生熟練後每分鐘可以作答 10 次以上、每人每分鐘約打 20 點，所以困難大約要打滿整節遊戲時間，普通約 15～18 分鐘、簡單約 11～13 分鐘打倒。<span id="tCount">題庫 155 題</span>，作答很快的學生在後段可能會遇到看過的題目。大螢幕即時顯示血量、時間、作答數、一次答對率和「戰力排行榜」（前 5 名，只顯示座號；依 2 次內答對的題數排名，同分比傷害）。如果不想讓排行榜造成壓力，可以提醒學生「排行是比誰認真讀題，不是比誰按得快」。</li></ul>
+  <li><b>各自搶攻</b>：每個人在自己的平板上一直答題，答對才換下一題（題庫用完會重新洗牌出題）。第 1 次就答對打 2 點、第 2 次才答對打 1 點、第 3 次以後答對 0 點（O／X 題答錯後只剩一個選項，所以第 2 次答對也是 0 點）；連續「一次就答對」第 5、10、15…題多打 1 點。答錯不會公布答案，被定身 3 秒後從剩下的選項再選一次。學生平板上每題都有「🔊 唸題目和選項」與每個選項旁的 🔊，也可以開「自動唸」（建議戴耳機）。限時內打倒魔王就獲勝。魔王血量＝人數 × 分鐘 × 強度（簡單 11、普通 15、困難 19），例如 25 人、20 分鐘、普通＝7500 點；開房間前畫面上會顯示預估血量。強度是依實際上課的紀錄調整的：四年級學生熟練後每分鐘可以作答 10 次以上、每人每分鐘約打 20 點，所以困難大約要打滿整節遊戲時間，普通約 15～18 分鐘、簡單約 11～13 分鐘打倒。<span id="tCount">題庫 155 題</span>，作答很快的學生在後段可能會遇到看過的題目。大螢幕即時顯示血量、時間、作答數、一次答對率、「🏆 戰力排行榜」（前 5 名，只顯示座號；依 2 次內答對的題數排名，同分比傷害）和「🎯 正確率排行榜」（前 5 名，第 1 次就答對的比率，作答滿 10 題才上榜，避免只答 1 題就 100%）。正確率榜讓答得慢但很認真的同學也有機會上榜。如果不想讓排行榜造成壓力，可以提醒學生「排行是比誰認真讀題，不是比誰按得快」。</li></ul>
   <h3>怎麼開始</h3>
   <ol><li>這台電腦要先在書櫃首頁登入老師帳號。</li>
   <li>選模式，再選題數／每題時間（同步作答）或遊戲時間（各自搶攻）與魔王強度，按「開房間」。</li>
@@ -511,7 +526,7 @@ function drawFree(h){
   var L=h.left==null?0:h.left,m=Math.floor(L/60),sec=L%60;
   var c=$('fClock');c.textContent=m+':'+(sec<10?'0':'')+sec;c.className='bigclock'+(L<=30?' hot':'');
   $('fAns').textContent=h.answered;$('fPct').textContent=(h.answered?Math.round(h.correct/h.answered*100):0)+'%';$('fPl').textContent=G.seats.length;
-  drawRank(h.board||[]);
+  drawRank(h.board||[]);drawAcc(h.acc||[]);
   if(hit>0){var b=$('fBoss');b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');
     var d=document.createElement('div');d.className='dmg';d.textContent='-'+hit;d.style.left=(Math.random()*30-15)+'%';b.appendChild(d);setTimeout(function(){d.remove()},1700)}
   if(h.status==='end'&&h.result==='win')return finishFree('win');
@@ -522,7 +537,18 @@ function rankRows(list,n,prev){
   return list.slice(0,n).map(function(x,i){
     var key=x.ok+'|'+x.dmg;if(key!==last){rk=i+1;last=key}
     var up=prev&&prev[x.seat]!=null&&prev[x.seat]<x.ok;
-    return '<li class="'+(rk<=3?'top':'')+(up?' up':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+x.seat+' 號</span><span class="ok">答對 '+x.ok+' 題</span><span class="dm">⚔ '+x.dmg+'</span></li>'}).join('');
+    return '<li class="'+(rk<=3?'top':'')+(up?' up':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+x.seat+' 號</span><span class="ok">答對 '+x.ok+' 題<small class="dm">⚔ '+x.dmg+'</small></span></li>'}).join('');
+}
+/* 正確率排行榜：第 1 次作答就答對的比率，作答滿 10 題才上榜（raid_host.acc） */
+function accRows(list,n){
+  var medal=['🥇','🥈','🥉'],rk=0,last=null;
+  return list.slice(0,n).map(function(x,i){
+    if(x.pct!==last){rk=i+1;last=x.pct}
+    return '<li class="'+(rk<=3?'top':'')+'"><span class="r">'+(medal[rk-1]||rk)+'</span><span class="s">'+x.seat+' 號</span><span class="pc">'+x.pct+'%<small>'+x.ok+'／'+x.n+' 題</small></span></li>'}).join('');
+}
+function drawAcc(list){
+  G.acc=list;var sig=list.slice(0,5).map(function(x){return x.seat+':'+x.ok+':'+x.n}).join(',');
+  if(sig!==G.accSig){G.accSig=sig;$('fAcc').innerHTML=list.length?accRows(list,5):'<li style="display:block;background:none"><p class="empty">作答滿 10 題的同學會出現在這裡！</p></li>'}
 }
 function drawRank(board){
   G.board=board;var prev=G.rankPrev||{},now={};
@@ -545,7 +571,9 @@ function finishFree(result){
             :'<h2>時間到，魔王逃走了……</h2><p class="note" style="font-size:1.2rem">魔王還剩 '+G.hp+' 點血。複習下面的題目，下次一定打得倒！</p>')+
       '<svg viewBox="0 0 300 200" style="width:min(100%,320px);margin:0 auto;'+(win?'filter:grayscale(1);opacity:.55':'')+'" aria-hidden="true">'+$('bossArt').innerHTML+'</svg>'+
       '<div class="stat"><div><b>'+ans+'</b>全班作答題數</div><div><b>'+pct+'</b>一次答對率</div><div><b>'+(G.max-Math.max(0,G.hp))+'</b>總傷害</div><div><b>'+G.seats.length+'</b>位勇者</div></div>'+
-      ((G.board||[]).length?'<div class="card rank" style="max-width:640px;margin:0 auto;width:100%"><h3>🏆 戰力排行榜 前 5 名</h3><ol>'+rankRows(G.board,5)+'</ol></div>':'');
+      (((G.board||[]).length||(G.acc||[]).length)?'<div class="ranks" style="max-width:980px;margin:0 auto;width:100%">'+
+        ((G.board||[]).length?'<div class="card rank"><h3>🏆 戰力排行榜 前 5 名</h3><ol>'+rankRows(G.board,5)+'</ol></div>':'')+
+        ((G.acc||[]).length?'<div class="card rank acc"><h3>🎯 正確率排行榜 前 5 名</h3><ol>'+accRows(G.acc,5)+'</ol></div>':'')+'</div>':'');
     if(hard.length)h+='<h3 style="margin:0;text-align:left;color:#7A2E8E">📖 大家比較需要複習的題目</h3><div class="review">'+hard.map(function(x){return '<div class="it"><span class="p">'+Math.round(x.ok/x.n*100)+'% 答對（'+x.n+' 人次）</span>'+esc(x.q)+'<br><b style="color:#1E8A5A">答案：'+esc(x.answer)+'</b>　'+esc(x.e)+'</div>'}).join('')+'</div>';
     else h+='<p class="note" style="font-size:1.2rem">每一題的答對率都在 7 成以上，太厲害了！</p>';
     h+='<div class="row" style="justify-content:center"><button type="button" class="bigbtn" id="bAgain">再開一場</button></div>';
