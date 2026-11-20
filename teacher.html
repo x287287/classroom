@@ -110,6 +110,11 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
 .bar.low i{background:var(--accent)}
 .pct-low{color:var(--accent);font-weight:700}
 .wrongs{margin:4px 0 0;padding-left:1.2em;color:var(--muted);font-size:14px}
+.wrongs li{margin:3px 0}
+.ans{display:inline-flex;flex-wrap:wrap;gap:4px 10px;margin-top:2px;font-size:14px}
+.ans .no{color:#9B1C2A;font-weight:700}.ans .yes{color:#17663A;font-weight:700}
+.tbl td.wa{color:#9B1C2A;font-weight:700}.tbl td.ra{color:#17663A;font-weight:700}
+.wq{display:flex;flex-wrap:wrap;gap:4px}.wq span{background:#FDE4E6;color:#7A1520;border-radius:999px;padding:1px 9px;font-size:13px;font-weight:700}
 .det td{background:var(--soft)}
 .cls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
 .cls-row b{font:400 1.2rem var(--display);min-width:7em}
@@ -157,7 +162,7 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
         <div class="row"><span class="lab">期間</span><span class="row" id="gsDays"></span><button class="b sm" type="button" id="gsReload">↻ 重新整理</button><button class="b sm" type="button" id="gsCsv">⬇ 下載 CSV</button></div>
       </div>
       <div class="gs-sum" id="gsSum"></div>
-      <div class="ptabs" role="group" aria-label="檢視方式" id="gsView"><button class="b sm" type="button" data-v="stu" aria-pressed="true">依座號</button><button class="b sm" type="button" data-v="q" aria-pressed="false">依題目（最常錯的在前）</button><button class="b sm" type="button" data-v="log" aria-pressed="false">每一筆紀錄</button></div>
+      <div class="ptabs" role="group" aria-label="檢視方式" id="gsView"><button class="b sm" type="button" data-v="stu" aria-pressed="true">依座號</button><button class="b sm" type="button" data-v="wrong" aria-pressed="false">錯題明細（學生答案／正確答案）</button><button class="b sm" type="button" data-v="q" aria-pressed="false">依題目（最常錯的在前）</button><button class="b sm" type="button" data-v="log" aria-pressed="false">每一筆紀錄</button></div>
       <div id="gsBody"></div>
     </div>
     <div id="pCls" hidden>
@@ -448,7 +453,7 @@ function draw(){
   L.forEach(function(r){var d=r.data||{};sumR+=+d.right||0;sumT+=+d.total||0;if(r.seat)stus[(r.class_name||'')+'#'+r.seat]=1;});
   $('gsSum').innerHTML='<div><b>'+L.length+'</b><span>筆紀錄</span></div><div><b>'+Object.keys(stus).length+'</b><span>位學生</span></div><div><b>'+sumT+'</b><span>題作答</span></div><div><b>'+pct(sumR,sumT)+'%</b><span>第一次就答對</span></div>';
   if(!L.length){$('gsBody').innerHTML='<div class="card empty">這個範圍還沒有紀錄。請學生用 QR Code 打開遊戲、選好座號後開始玩。</div>';return;}
-  ({stu:drawStu,q:drawQ,log:drawLog})[F.view](L);
+  ({stu:drawStu,wrong:drawWrong,q:drawQ,log:drawLog})[F.view](L);
 }
 function wrongList(rs,n){var m={};rs.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(it&&it.q&&!it.ok){m[it.q]=(m[it.q]||0)+1}})});
   return Object.keys(m).sort(function(a,b){return m[b]-m[a]}).slice(0,n).map(function(q){return {q:q,n:m[q]}})}
@@ -493,15 +498,36 @@ function drawStu(L){
     var tr=[].filter.call($('gsBody').querySelectorAll('tr.click'),function(x){return x.dataset.k===k})[0];if(tr)tr.scrollIntoView({behavior:'smooth',block:'center'})})});
   [].forEach.call($('gsBody').querySelectorAll('[data-help]'),function(b){b.addEventListener('click',function(){HELP_T=+b.dataset.help;try{localStorage.setItem('gsHelp',HELP_T)}catch(e){}drawStu(L)})});
 }
+/* 逐題的「學生的答案」與「正確答案」：items 的 w（答錯時選的，依序）、r（正確答案）；2026-11-20 以前的紀錄可能沒有 */
+function ansText(it){
+  var w=(it.w||[]).filter(function(x){return x!=null&&x!==''});
+  if(it.skip)return '<span class="no">沒有作答</span>'+(it.r?'<span>正確答案：<b class="yes">'+esc(it.r)+'</b></span>':'');
+  return (w.length?'<span>選了：<b class="no">'+w.map(esc).join('</b>、<b class="no">')+'</b></span>':(it.r?'<span class="counts">（沒有記錄選了什麼）</span>':''))+
+    (it.r?'<span>正確答案：<b class="yes">'+esc(it.r)+'</b></span>':'')+(it.done&&!it.ok?'<span>（第 '+(it.tries||2)+' 次才答對）</span>':'');
+}
 function recHtml(r){var d=r.data||{},it=(d.items||[]).filter(function(x){return x&&!x.ok});
   return '<div style="padding:6px 0;border-bottom:1px dashed var(--line)"><b>'+esc(when(r.created_at))+'</b>　'+esc(r.title||gname(r))+'　'+esc(score(r))+(extra(r)?'・'+esc(extra(r)):'')+
-    (it.length?'<ul class="wrongs">'+it.map(function(x){return '<li>✗ '+esc(x.q)+(x.tries>1?'（試了 '+x.tries+' 次）':'')+(x.skip?'（沒作答）':'')+'</li>'}).join('')+'</ul>':'<div class="counts">全部第一次就答對</div>')+'</div>'}
+    (it.length?'<ul class="wrongs">'+it.map(function(x){var a=ansText(x);return '<li>✗ '+esc(x.q)+(a?'<br><span class="ans">'+a+'</span>':(x.tries>1?'（試了 '+x.tries+' 次）':''))+'</li>'}).join('')+'</ul>':'<div class="counts">全部第一次就答對</div>')+'</div>'}
+/* 錯題明細：每一題錯題一列（座號、時間、遊戲、題目、學生的答案、正確答案） */
+function drawWrong(L){
+  var out=[];
+  L.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(it&&it.q&&!it.ok)out.push({r:r,it:it})})});
+  if(!out.length){$('gsBody').innerHTML='<div class="card empty">這個範圍沒有錯題（或這些紀錄沒有逐題資料）。</div>';return;}
+  out.sort(function(a,b){var sa=a.r.seat||999,sb=b.r.seat||999;return (a.r.class_name||'').localeCompare(b.r.class_name||'')||sa-sb||(a.r.created_at<b.r.created_at?1:-1)});
+  $('gsBody').innerHTML='<p class="counts" style="margin:0 0 8px">共 '+out.length+' 題次答錯。「學生的答案」是答錯時選的選項（各自搶攻可能試了好幾次，依序列出）；11/20 以前的各自搶攻紀錄沒有記下學生選了什麼。</p>'+
+    '<div class="tblw"><table class="tbl"><thead><tr><th>誰</th><th>時間</th><th>遊戲</th><th>題目</th><th>學生的答案</th><th>正確答案</th></tr></thead><tbody>'+
+    out.slice(0,1500).map(function(x){var it=x.it,w=(it.w||[]).filter(function(v){return v!=null&&v!==''});
+      return '<tr><td style="white-space:nowrap">'+esc(who(x.r))+'</td><td class="num">'+esc(when(x.r.created_at))+'</td><td><small>'+esc(x.r.title||gname(x.r))+'</small></td><td>'+esc(it.q)+
+        '</td><td class="wa">'+(it.skip?'（沒有作答）':w.length?w.map(esc).join('<br>'):'<span class="counts">—</span>')+(it.done&&!it.ok?'<br><small class="counts">第 '+(it.tries||2)+' 次才答對</small>':'')+
+        '</td><td class="ra">'+esc(it.r||'')+'</td></tr>'}).join('')+'</tbody></table></div>'+(out.length>1500?'<p class="counts">只列出前 1500 列，下載 CSV 可以看全部。</p>':'');
+}
 function drawQ(L){
-  var m={};L.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(!it||!it.q||it.skip)return;var k=it.q;var o=m[k]=m[k]||{q:k,n:0,ok:0,games:{}};o.n++;if(it.ok)o.ok++;o.games[gname(r)]=1;})});
+  var m={};L.forEach(function(r){((r.data||{}).items||[]).forEach(function(it){if(!it||!it.q||it.skip)return;var k=it.q;var o=m[k]=m[k]||{q:k,n:0,ok:0,games:{},w:{},r:''};o.n++;if(it.ok)o.ok++;o.games[gname(r)]=1;if(it.r)o.r=it.r;(it.w||[]).forEach(function(v){if(v)o.w[v]=(o.w[v]||0)+1});})});
   var list=Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return a.ok/a.n-b.ok/b.n||b.n-a.n});
   if(!list.length){$('gsBody').innerHTML='<div class="card empty">這些紀錄沒有逐題資料。</div>';return;}
-  $('gsBody').innerHTML='<div class="tblw"><table class="tbl"><thead><tr><th>題目</th><th>第一次就答對</th><th>作答次數</th><th>遊戲</th></tr></thead><tbody>'+
-    list.map(function(o){return '<tr><td>'+esc(o.q)+'</td><td class="num">'+bar(pct(o.ok,o.n))+'</td><td class="num">'+o.n+'</td><td><small>'+esc(Object.keys(o.games).join('、'))+'</small></td></tr>'}).join('')+'</tbody></table></div>';
+  $('gsBody').innerHTML='<div class="tblw"><table class="tbl"><thead><tr><th>題目</th><th>第一次就答對</th><th>作答次數</th><th>正確答案</th><th>常選的錯誤答案</th><th>遊戲</th></tr></thead><tbody>'+
+    list.map(function(o){var ws=Object.keys(o.w).sort(function(a,b){return o.w[b]-o.w[a]}).slice(0,3);
+      return '<tr><td>'+esc(o.q)+'</td><td class="num">'+bar(pct(o.ok,o.n))+'</td><td class="num">'+o.n+'</td><td class="ra">'+esc(o.r)+'</td><td><div class="wq">'+ws.map(function(v){return '<span>'+esc(v)+' ×'+o.w[v]+'</span>'}).join('')+'</div></td><td><small>'+esc(Object.keys(o.games).join('、'))+'</small></td></tr>'}).join('')+'</tbody></table></div>';
 }
 function drawLog(L){
   $('gsBody').innerHTML='<div class="tblw"><table class="tbl"><thead><tr><th>時間</th><th>遊戲</th><th>誰</th><th>答對</th><th>結果</th><th></th></tr></thead><tbody>'+
@@ -513,7 +539,7 @@ function drawLog(L){
 }
 $('gsCsv').addEventListener('click',function(){
   var L=rows(),lines=[['時間','遊戲','班級','座號','答對','作答','結果','答錯的題目']];
-  L.forEach(function(r){var d=r.data||{};lines.push([new Date(r.created_at).toLocaleString('zh-TW'),r.title||gname(r),r.class_name||'',r.seat||'大螢幕',d.right!=null?d.right:'',d.total!=null?d.total:'',extra(r),(d.items||[]).filter(function(x){return x&&!x.ok}).map(function(x){return x.q}).join('｜')])});
+  L.forEach(function(r){var d=r.data||{};lines.push([new Date(r.created_at).toLocaleString('zh-TW'),r.title||gname(r),r.class_name||'',r.seat||'大螢幕',d.right!=null?d.right:'',d.total!=null?d.total:'',extra(r),(d.items||[]).filter(function(x){return x&&!x.ok}).map(function(x){var w=(x.w||[]).filter(Boolean);return x.q+(w.length||x.r?'（'+(w.length?'選：'+w.join('、'):x.skip?'沒作答':'')+(x.r?(w.length||x.skip?'；':'')+'正確：'+x.r:'')+'）':'')}).join('｜')])});
   var csv='﻿'+lines.map(function(l){return l.map(function(v){v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')}).join('\r\n');
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='遊戲作答統計.csv';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
 });

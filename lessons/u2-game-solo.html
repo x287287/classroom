@@ -246,7 +246,8 @@ function ask(){
 }
 function answer(btn,v){
   var q=S.cur,ok=(v===q.a);
-  S.log.push({q:q.q,ok:ok,d:q.d});
+  var rt=q.ox?(q.a?'O':'X'):q.o[q.a],mt=q.ox?(v?'O':'X'):q.o[v];
+  S.log.push({q:q.q,ok:ok,d:q.d,w:ok?[]:[mt],r:rt}); /* w＝學生選的錯答案、r＝正確答案（老師後台錯題明細用） */
   [].forEach.call($('opts').querySelectorAll('button[data-v]'),function(b){b.disabled=true;if(b.dataset.v===String(q.a))b.classList.add('right')});
   var fb=$('fb'),show=$('show');
   var ans=q.ox?(q.a?'O':'X'):q.o[q.a];
