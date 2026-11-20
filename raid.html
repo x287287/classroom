@@ -179,11 +179,11 @@ var DM=[
 
   /* 房號 */
   /* 座號鎖定（assets/seatlock.js）：這台平板今天在這個班選過座號，就直接用那個座號；要換要老師輸入密碼 */
-  var RCLS="";
+  var RCLS="",RMODE="";
   function SL(){return window.SEATLOCK||{get:function(){return 0},set:function(){},unlock:function(){return Promise.resolve(true)}}}
   function goRoom(code){room=code;history.replaceState(null,"","?r="+code);
     rpc("raid_state",{p_room:room,p_seat:0,p_device:device}).catch(function(){return null}).then(function(d){
-      RCLS=d&&d.class_name||"";
+      RCLS=d&&d.class_name||"";RMODE=d&&d.mode||"";
       seat=+load("raidSeat:"+room,0)||0;
       var lk=SL().get(RCLS);if(lk&&lk!==seat){seat=lk;save("raidSeat:"+room,seat)}
       /* 從課堂房間跟過來的：沿用已經選好的座號（sessionStorage clsSeat） */
@@ -198,9 +198,15 @@ var DM=[
   for(var i=1;i<=25;i++){var b=document.createElement("button");b.type="button";b.textContent=i;b.dataset.s=i;b.setAttribute("aria-label",i+" 號");$("seats").appendChild(b)}
   $("seats").addEventListener("click",function(e){var b=e.target.closest("button[data-s]");if(!b)return;var s=+b.dataset.s,lk=SL().get(RCLS);
     if(lk&&lk!==s){SL().unlock(RCLS).then(function(ok){if(ok)join(s)});return}join(s)});
+  /* 學生角色（assets/avatar.js）：還沒有角色要先做一個；從課堂房間跟過來的已經在 join.html 看過自己的角色，不再顯示 */
+  function avGate(s){
+    if(!window.AVATAR||RMODE==="story")return Promise.resolve();
+    var live=false;try{live=!!sessionStorage.getItem("clsSess")}catch(e){}
+    return AVATAR.gate(RCLS,s,{greet:!live}).catch(function(){});
+  }
   function join(s){
     $("seatMsg").textContent="加入中…";
-    rpc("raid_join",{p_room:room,p_seat:s,p_device:device}).then(function(r){
+    avGate(s).then(function(){return rpc("raid_join",{p_room:room,p_seat:s,p_device:device})}).then(function(r){
       if(r==="ok"){seat=s;save("raidSeat:"+room,s);SL().set(RCLS,s);$("seatMsg").textContent="";sig="";drawMe();show("sGame");poll();return}
       seat=0;save("raidSeat:"+room,null);show("sSeat");
       $("seatMsg").textContent={seat_taken:s+" 號已經有人用別的平板加入了。請確認你的座號，或請老師幫忙。",ended:"這場遊戲已經結束了。",no_room:"找不到這個房間。",full:"人數已滿。"}[r]||"加入失敗，請再試一次。";
@@ -212,6 +218,8 @@ var DM=[
     c.addEventListener("click",function(){var go=function(){seat=0;save("raidSeat:"+room,null);$("seatMsg").textContent="";show("sSeat")};
       if(SL().get(RCLS))SL().unlock(RCLS).then(function(ok){if(ok)go()});else go()});
     $("me").appendChild(c);
+    if(window.AVATAR&&RMODE!=="story"){var a=document.createElement("button");a.type="button";a.textContent="換造型？請老師幫忙";
+      a.addEventListener("click",function(){AVATAR.get(RCLS,seat).then(function(cfg){return AVATAR.change(RCLS,seat,cfg)}).catch(function(){})});$("me").appendChild(a)}
   }
 
   /* ---------- 語音唸題 ---------- */
@@ -496,6 +504,7 @@ var DM=[
   if(room.length===6)goRoom(room);else show("sCode");
 })();
 </script>
+<script src="assets/avatar.js"></script>
 <script src="assets/seatlock.js"></script>
 <script src="assets/live.js"></script>
 </body>

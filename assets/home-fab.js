@@ -44,6 +44,7 @@
   function lockDay() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
   function lockGet(cls) { var k = cls || "*", r = lockAll()[k]; return r && r.seat && r.day === lockDay() && (k !== "*" || Date.now() - (r.at || 0) < 3600000) ? r.seat : 0; }
   function lockSet(cls, seat) { var m = lockAll(); m[cls || "*"] = { seat: +seat, day: lockDay(), at: Date.now() }; try { localStorage.setItem("clsSeatLock", JSON.stringify(m)); } catch (e) {} }
+  function withAvatar(cb) { if (window.AVATAR) return cb(window.AVATAR); var sc = document.createElement("script"); sc.src = (me || "").replace(/home-fab\.js(\?.*)?$/, "avatar.js"); sc.onload = function () { cb(window.AVATAR); }; sc.onerror = function () { cb(null); }; document.head.appendChild(sc); }
   function withSeatLock(cb) { if (window.SEATLOCK) return cb(window.SEATLOCK); var sc = document.createElement("script"); sc.src = (me || "").replace(/home-fab\.js(\?.*)?$/, "seatlock.js"); sc.onload = function () { cb(window.SEATLOCK); }; document.head.appendChild(sc); }
   if (stu && !(sget("clsSeat") || {}).seat && lockGet(stu.cls)) sset("clsSeat", { seat: lockGet(stu.cls) });
   var seatRec = stu ? sget("clsSeat") : null;
@@ -131,6 +132,8 @@
       if (b.classList.contains("cancel")) { seatOv.hidden = true; return; }
       var n = +b.dataset.s; if (!n) return;
       window.CLS_STU.seat = n; sset("clsSeat", { seat: n }); lockSet(window.CLS_STU.cls, n); seatOv.hidden = true; paintMe();
+      /* 學生角色：這個座號還沒有角色就先做一個（assets/avatar.js） */
+      withAvatar(function (A) { if (A) A.gate(window.CLS_STU.cls, n, { greet: false }); });
       try { window.dispatchEvent(new CustomEvent("cls-seat", { detail: window.CLS_STU })); } catch (x) {}
     });
     meBtn.addEventListener("click", function () {
