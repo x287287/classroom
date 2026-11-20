@@ -11,7 +11,7 @@
    沒有 WebGL 或零件載入失敗時 init 會 reject，頁面繼續用原本的 2D 魔王。 */
 (function () {
   if (window.R3D) return;
-  var T = null, st = null;
+  var T = null, st = null, BX = 0; /* 魔王站在戰場正中央 */
   var TEAMC = ["#7A2E8E", "#C8414B", "#1D5FBF", "#17784E", "#A84A00"];
   var BOSS = {
     u2: { cfg: { skin: "#a58ad0", eyes: "細長眼", brows: "濃眉", nose: "大蒜鼻", mouth: "抿嘴", beard: "大鬍子", color: "#3b2f4a", hat: "牛角帽", body: "野蠻人皮衣", legs: "毛皮褲", cape: "毛皮披肩", right: "骷髏斧", left: "骷髏大盾" },
@@ -215,26 +215,24 @@
     var A = { i: i, team: team, g: g, players: {}, order: [], hp: 1, shakeV: 0, cam: new T.PerspectiveCamera(34, 1.6, .1, 200), dead: false, auraT: 0 };
     var gr = new T.Mesh(new T.CylinderGeometry(14, 14.6, .5, 48), new T.MeshStandardMaterial({ color: U.ground, roughness: 1 })); gr.position.y = -.25; g.add(gr);
     var rim = new T.Mesh(new T.TorusGeometry(14.2, .25, 8, 64), new T.MeshStandardMaterial({ color: team ? TEAMC[team] : U.rim, roughness: .6 })); rim.rotation.x = Math.PI / 2; g.add(rim);
-    var circle = new T.Mesh(new T.RingGeometry(3.2, 3.5, 48), new T.MeshBasicMaterial({ color: team ? TEAMC[team] : "#ffd54f", transparent: true, opacity: .35, side: T.DoubleSide })); circle.rotation.x = -Math.PI / 2; circle.position.set(-4.5, .02, 0); g.add(circle);
+    var circle = new T.Mesh(new T.RingGeometry(3.2, 3.5, 48), new T.MeshBasicMaterial({ color: team ? TEAMC[team] : "#ffd54f", transparent: true, opacity: .35, side: T.DoubleSide })); circle.rotation.x = -Math.PI / 2; circle.position.set(BX, .02, 0); g.add(circle);
     var rockM = new T.MeshStandardMaterial({ color: U.rim, roughness: 1, flatShading: true });
     for (var k = 0; k < 14; k++) { var a = k / 14 * Math.PI * 2 + .2, r = 12 + Math.random() * 1.5, rk = new T.Mesh(geo("rock", function () { return new T.DodecahedronGeometry(1, 0); }), rockM);
       rk.position.set(Math.cos(a) * r, .3, Math.sin(a) * r); rk.scale.set(.6 + Math.random(), .6 + Math.random() * 1.6, .6 + Math.random()); rk.rotation.y = Math.random() * 3; g.add(rk); }
     /* 魔王：放大的角色，材質帶單元顏色 */
     var b = AVATAR.make(U.cfg, { prune: true }), tint = new T.Color(U.tint);
     b.root.traverse(function (o) { if (!o.isMesh) return; var m = o.material.clone(); if (m.name !== "skin" && m.name !== "tint") m.color.multiply(tint); m.emissive = new T.Color(0, 0, 0); o.material = m; (b.mats = b.mats || []).push(m); });
-    b.root.scale.setScalar(2.3); b.root.position.set(-4.5, 0, 0); b.root.rotation.y = Math.PI / 2; g.add(b.root);
-    var sh = new T.Mesh(geo("shp", function () { var p = new T.PlaneGeometry(1, 1); p.rotateX(-Math.PI / 2); return p; }), new T.MeshBasicMaterial({ map: shadowTex(), transparent: true, depthWrite: false })); sh.scale.setScalar(4.2); sh.position.set(-4.5, .03, 0); g.add(sh);
+    b.root.scale.setScalar(2.3); b.root.position.set(BX, 0, 0); b.root.rotation.y = Math.PI / 2; g.add(b.root);
+    var sh = new T.Mesh(geo("shp", function () { var p = new T.PlaneGeometry(1, 1); p.rotateX(-Math.PI / 2); return p; }), new T.MeshBasicMaterial({ map: shadowTex(), transparent: true, depthWrite: false })); sh.scale.setScalar(4.2); sh.position.set(BX, .03, 0); g.add(sh);
     A.boss = b; A.flash = 0; A.hitCool = 0;
     return A;
   }
-  /* 學生排成方陣站在魔王右邊（一排最多 7 人，單雙排錯開），從前面斜上方看得到每個人 */
-  function slot(A, k, n) {
-    var cols = n <= 7 ? n : Math.ceil(n / Math.ceil(n / 7)), rows = Math.ceil(n / cols), r = Math.floor(k / cols), c = k % cols, cnt = Math.min(cols, n - r * cols);
-    return V(4 + (c - (cnt - 1) / 2) * 1.8 + (r % 2) * .5, 0, (r - (rows - 1) / 2) * 2.4 + .4);
-  }
+  /* 學生圍著魔王站成一圈（沒有前後排）：人越多圈越大，每人間隔約 1.7 */
+  function ringR(n) { return Math.max(6, n * 1.7 / (Math.PI * 2)); }
+  function slot(A, k, n) { var R = ringR(n), a = k / Math.max(1, n) * Math.PI * 2 + Math.PI / 2; return V(BX + Math.cos(a) * R, 0, Math.sin(a) * R); }
   function relayout(A) {
-    var seats = A.order = Object.keys(A.players).map(Number).sort(function (a, b) { return a - b; }), bp = A.boss.root.position;
-    seats.forEach(function (s, k) { var P = A.players[s], p = slot(A, k, seats.length); P.home = p; P.ch.root.position.copy(p); P.ch.root.rotation.y = Math.atan2(bp.x - p.x, bp.z - p.z) + .25; P.sh.position.set(p.x, .03, p.z); P.lb.position.set(p.x, 2.95, p.z); });
+    var seats = A.order = Object.keys(A.players).map(Number).sort(function (a, b) { return a - b; }), bp = A.boss.root.position; A.R = ringR(seats.length);
+    seats.forEach(function (s, k) { var P = A.players[s], p = slot(A, k, seats.length); P.home = p; P.ch.root.position.copy(p); P.ch.root.rotation.y = Math.atan2(bp.x - p.x, bp.z - p.z); P.sh.position.set(p.x, .03, p.z); P.lb.position.set(p.x, 2.95, p.z); });
   }
   function addPlayer(A, seat, cfg) {
     var old = A.players[seat]; if (old) { A.g.remove(old.ch.root, old.sh, old.lb); }
@@ -245,7 +243,7 @@
     relayout(A); if (!old) { ch.once("Spawn_Ground"); sprite(A, ch.root.position.clone().add(V(0, 1, 0)), TEAMC[A.team || 0], 2.2, .6, { grow: 1.5 }); }
   }
   function arenaFor(team) { return st.arenas.length > 1 ? st.arenas[Math.max(0, Math.min(st.arenas.length - 1, (team || 1) - 1))] : st.arenas[0]; }
-  function bossPoint(A) { var p = A.boss.root.position; return V(p.x + .6, 2.8 + (Math.random() - .5) * 1.2, p.z + (Math.random() - .5) * 1.4); }
+  function bossPoint(A) { var p = A.boss.root.position, a = Math.random() * Math.PI * 2; return V(BX + Math.cos(a) * .5, 2.8 + (Math.random() - .5) * 1.2, p.z + Math.sin(a) * .5); }
   function bossHit(A, dmg, col, crit) {
     if (!A || A.dead) return;
     A.flash = 1; A.shakeB = .25;
@@ -264,7 +262,7 @@
   /* ---------- 主迴圈 ---------- */
   function frame() {
     if (!st || !st.alive) return; requestAnimationFrame(frame);
-    var dt = Math.min(st.clock.getDelta(), .05); st.now += dt;
+    var dt = Math.min(st.clock.getDelta(), .05); st.now += dt; if (st.spin) st.ang += dt * .16;
     for (var i = st.timers.length - 1; i >= 0; i--) if (st.timers[i].at <= st.now) { var f = st.timers[i].fn; st.timers.splice(i, 1); try { f(); } catch (e) {} }
     if (st.q.length && st.now >= st.nextAt) { if (st.q.length > 40) { var extra = st.q.splice(0, st.q.length - 40); extra.forEach(function (x) { bossHit(arenaFor(x.team), x.dmg); }); }
       fire(st.q.shift()); st.nextAt = st.now + (st.q.length > 15 ? .05 : st.q.length > 5 ? .12 : .2); }
@@ -274,19 +272,21 @@
       A.boss.update(dt); Object.keys(A.players).forEach(function (s) { A.players[s].ch.update(dt); });
       A.hitCool -= dt;
       if (A.flash > 0) { A.flash = Math.max(0, A.flash - dt * 3); var fcol = A.flash * .6; A.boss.mats.forEach(function (m) { m.emissive.setRGB(fcol, fcol * .15, fcol * .1); }); }
-      var bp = A.boss.root.position; if (A.shakeB > 0) { A.shakeB -= dt; bp.x = -4.5 + (Math.random() - .5) * .25 * A.shakeB * 4; } else bp.x = -4.5;
+      var bp = A.boss.root.position; if (A.shakeB > 0) { A.shakeB -= dt; bp.x = BX + (Math.random() - .5) * .25 * A.shakeB * 4; } else bp.x = BX;
       A.auraT -= dt;
       if (A.auraT <= 0 && !A.dead) { var U = st.U, low = A.hp < .3; A.auraT = low ? .06 : .12;
-        var p = V(-4.5 + (Math.random() - .5) * 3, Math.random() * 3, (Math.random() - .5) * 3), col = low ? "#ff5252" : U.aura[Math.floor(Math.random() * U.aura.length)];
+        var p = V(BX + (Math.random() - .5) * 3, Math.random() * 3, (Math.random() - .5) * 3), col = low ? "#ff5252" : U.aura[Math.floor(Math.random() * U.aura.length)];
         if (U.fire) sprite(A, p, col, .9 + Math.random() * .6, .9, { rise: 2.4, grow: .2 }); else sprite(A, p, col, 1.4 + Math.random(), 1.6, { rise: 1, grow: 2, tex: softTex(), add: false, op: .45, fadeIn: 1 }); }
     });
     render();
   }
+  /* 鏡頭繞著魔王一直轉（st.ang），戰鬥結束（R3D.end）才停；魔王跟著轉身面向鏡頭 */
   function camFit(A, w, h) {
-    var asp = w / h, d = Math.max(10.8 / (Math.tan(17 * Math.PI / 180) * asp), 15), tgt = V(.4, asp > 2.4 ? 1.9 : 1.1, .6).add(A.g.position);
-    var dir = V(.04, .62, 1).normalize(); A.cam.aspect = asp; A.cam.position.copy(tgt).addScaledVector(dir, d);
+    var asp = w / h, hw = (A.R || 6) + 2.4, t17 = Math.tan(17 * Math.PI / 180), d = Math.max(hw / (t17 * asp), (hw * .8 + 2) / t17), tgt = V(BX, 1.4, 0).add(A.g.position);
+    var dir = V(Math.sin(st.ang), .62, Math.cos(st.ang)).normalize(); A.cam.aspect = asp; A.cam.position.copy(tgt).addScaledVector(dir, d);
     if (A.shakeV > 0) { A.cam.position.add(V((Math.random() - .5), (Math.random() - .5), 0).multiplyScalar(A.shakeV)); }
     A.cam.lookAt(tgt); A.cam.updateProjectionMatrix();
+    if (!A.dead) A.boss.root.rotation.y = st.ang;
   }
   function render() {
     var el = st.el, W = el.clientWidth, H = el.clientHeight; if (!W || !H) return;
@@ -311,7 +311,7 @@
         var r = new T.WebGLRenderer({ canvas: canvas, antialias: true }); r.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); r.setClearColor(U.sky);
         var scene = new T.Scene(); scene.fog = new T.Fog(U.sky, 40, 90);
         scene.add(new T.HemisphereLight(0xffffff, 0x554466, .78)); var sun = new T.DirectionalLight(0xfff1dc, .7); sun.position.set(6, 12, 8); scene.add(sun);
-        st = { el: el, canvas: canvas, r: r, scene: scene, U: U, arenas: [], fx: [], timers: [], q: [], now: 0, nextAt: 0, clock: new T.Clock(), alive: true, w: 0, h: 0, teams: o.teams || 0,
+        st = { ang: 0, spin: true, el: el, canvas: canvas, r: r, scene: scene, U: U, arenas: [], fx: [], timers: [], q: [], now: 0, nextAt: 0, clock: new T.Clock(), alive: true, w: 0, h: 0, teams: o.teams || 0,
           shake: function (A, v) { A.shakeV = Math.max(A.shakeV, v); }, camOf: function (A) { return A.cam; } };
         var n = o.teams > 1 ? o.teams : 1;
         for (var i = 0; i < n; i++) st.arenas.push(makeArena(i, o.teams > 1 ? i + 1 : 0));
@@ -333,28 +333,28 @@
       if (!st) return; var A = arenaFor(team); seats = (seats || []).filter(function (s) { return A.players[s]; });
       if (!seats.length) { bossHit(A, dmg, "#fff", crit); return; }
       seats.forEach(function (s, i) { later(i * .09, function () { fire({ seat: s, dmg: 0, team: team }); }); });
-      later(seats.length * .09 + .9, function () { bossHit(A, dmg, "#ffd54f", crit); if (crit) { st.shake(A, .6); ring(A, V(-4.5, .1, 0), "#ffd54f", 1, 12, .8, true); sprite(A, bossPoint(A), "#ffd54f", 6, .5, { grow: 1.6 }); } });
+      later(seats.length * .09 + .9, function () { bossHit(A, dmg, "#ffd54f", crit); if (crit) { st.shake(A, .6); ring(A, V(BX, .1, 0), "#ffd54f", 1, 12, .8, true); sprite(A, bossPoint(A), "#ffd54f", 6, .5, { grow: 1.6 }); } });
     },
     hp: function (team, ratio) { if (!st) return; var A = arenaFor(team); A.hp = ratio; if (ratio <= 0 && !A.dead) R3D.defeat(team); },
     defeat: function (team) {
       if (!st) return; var A = arenaFor(team); if (A.dead) return; A.dead = true; A.boss.hold = true; A.boss.once("Death_A");
-      later(.8, function () { burst(A, V(-4.5, 2, 0), ["#ffd54f", "#ffffff", "#ff80ab"], 30, 8, .7, { tex: starTex(), grav: 4 }); ring(A, V(-4.5, .1, 0), "#ffd54f", 1, 12, 1, true); });
+      later(.8, function () { burst(A, V(BX, 2, 0), ["#ffd54f", "#ffffff", "#ff80ab"], 30, 8, .7, { tex: starTex(), grav: 4 }); ring(A, V(BX, .1, 0), "#ffd54f", 1, 12, 1, true); });
       Object.keys(A.players).forEach(function (s, i) { later(.3 + i * .05, function () { cheerLoop(A.players[s].ch); }); });
     },
     counter: function (team) {
       if (!st) return; (team ? [arenaFor(team)] : st.arenas).forEach(function (A) {
         if (A.dead) return; A.busy = true; A.boss.once("2H_Melee_Attack_Spin", function () { A.busy = false; A.boss.play("Idle"); });
-        later(.55, function () { ring(A, V(-4.5, .12, 0), "#ff1744", 1, 16, .9, true, { op: 1 }); ring(A, V(-4.5, .14, 0), "#ff8a80", 1, 13, .8, true); st.shake(A, .5);
+        later(.55, function () { ring(A, V(BX, .12, 0), "#ff1744", 1, 16, .9, true, { op: 1 }); ring(A, V(BX, .14, 0), "#ff8a80", 1, 13, .8, true); st.shake(A, .5);
           Object.keys(A.players).forEach(function (s) { var P = A.players[s], d = P.ch.root.position.distanceTo(A.boss.root.position); later(d / 16 * .9, function () { P.ch.once("Hit_A"); sprite(A, P.ch.root.position.clone().add(V(0, 1.2, 0)), "#ff1744", 1.6, .4, { grow: 1.4 }); }); }); });
       });
     },
     heal: function (team) {
       if (!st) return; (team ? [arenaFor(team)] : st.arenas).forEach(function (A) { if (A.dead) return;
-        for (var i = 0; i < 16; i++) sprite(A, V(-4.5 + (Math.random() - .5) * 3, Math.random() * 2, (Math.random() - .5) * 3), "#69f0ae", .8, 1.2, { rise: 3, tex: Math.random() < .5 ? starTex() : null });
-        text(A, V(-4.5, 7.5, 0), "回血！", "#69f0ae", 1.8); });
+        for (var i = 0; i < 16; i++) sprite(A, V(BX + (Math.random() - .5) * 3, Math.random() * 2, (Math.random() - .5) * 3), "#69f0ae", .8, 1.2, { rise: 3, tex: Math.random() < .5 ? starTex() : null });
+        text(A, V(BX, 7.5, 0), "回血！", "#69f0ae", 1.8); });
     },
     end: function (result, winner) {
-      if (!st) return;
+      if (!st) return; st.spin = false;
       st.arenas.forEach(function (A) {
         var won = result === "win" && (st.arenas.length === 1 || A.team === winner);
         if (won || A.hp <= 0) { if (!A.dead) R3D.defeat(A.team || 0); return; }
