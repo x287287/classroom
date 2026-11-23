@@ -408,10 +408,21 @@
     } }).then(function (c) { if (got) return greet(cls, seat, got); return c; });
   }
 
-  /* 學生選好座號後呼叫 */
+  /* 這個班級有沒有開「建立人物」（老師後台班級名單勾選，class_list.avatar）；不指定班級、查不到或沒網路都當作沒開 */
+  var onC = {};
+  function enabled(cls) {
+    cls = cls || ""; if (!cls) return Promise.resolve(false);
+    if (onC[cls]) return onC[cls];
+    return onC[cls] = fetch(SB_URL + "/rest/v1/class_list?select=avatar&name=eq." + encodeURIComponent(cls), { headers: { apikey: SB_KEY }, cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : []; }).then(function (l) { return !!(l && l[0] && l[0].avatar); }, function () { delete onC[cls]; return false; });
+  }
+  /* 學生選好座號後呼叫：班級沒開「建立人物」就直接繼續 */
   function gate(cls, seat, o) {
     o = o || {}; cls = cls || ""; seat = +seat;
     if (!(seat >= 1 && seat <= 40)) return Promise.resolve(null);
+    return enabled(cls).then(function (on) { return on ? gate2(cls, seat, o) : null; });
+  }
+  function gate2(cls, seat, o) {
     var key = "avDone:" + cls + ":" + seat;
     if (lget(key) && !o.greet) return Promise.resolve(null);
     return get(cls, seat).then(function (cfg) {
@@ -420,5 +431,5 @@
     }, function () { return null; });
   }
 
-  window.AVATAR = { gate: gate, change: change, editor: editor, lib: lib, make: make, list: list, get: get, clean: clean, preset: preset, random: random, standIn: standIn, weapon: weapon, PRESETS: PRESETS };
+  window.AVATAR = { gate: gate, enabled: enabled, change: change, editor: editor, lib: lib, make: make, list: list, get: get, clean: clean, preset: preset, random: random, standIn: standIn, weapon: weapon, PRESETS: PRESETS };
 })();

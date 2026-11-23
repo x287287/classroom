@@ -118,6 +118,9 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
 .det td{background:var(--soft)}
 .cls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
 .cls-row b{font:400 1.2rem var(--display);min-width:7em}
+.cls-row .av{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:12px;border:2px solid var(--line);cursor:pointer;font-weight:700}
+.cls-row .av input{width:22px;height:22px;margin:0}
+.cls-row .av.on{border-color:var(--pri,#7A2E8E);background:color-mix(in srgb,var(--pri,#7A2E8E) 10%,transparent)}
 .cls-row select,.cls-add input,.cls-add select{font:inherit;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--paper);color:var(--ink);padding:0 10px}
 /* 展示 */
 .show{position:fixed;inset:0;z-index:100;background:#0E1513;color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
@@ -166,7 +169,7 @@ header.top h1{font:400 clamp(1.6rem,3vw,2.3rem)/1.2 var(--display);margin:0;flex
       <div id="gsBody"></div>
     </div>
     <div id="pCls" hidden>
-      <p class="counts" style="margin:0 0 12px">這裡的班級會出現在教材 QR 視窗與「全班共戰」開房間的選項；座號數決定學生選座號時有幾個按鈕。</p>
+      <p class="counts" style="margin:0 0 12px">這裡的班級會出現在教材 QR 視窗與「全班共戰」開房間的選項；座號數決定學生選座號時有幾個按鈕。勾選「🧙 建立人物」的班級，學生掃 QR Code 選座號時才會先做自己的 3D 角色（全班共戰用自己的角色打魔王）；沒勾的班級不會出現做角色的畫面。</p>
       <div class="card"><div id="clsList"></div>
         <div class="cls-add row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><input id="clsNew" maxlength="20" placeholder="例如：四年忠班" aria-label="新班級名稱"><select id="clsNewSeats" aria-label="座號數"></select><button class="b pri" type="button" id="clsAdd">＋ 新增班級</button></div>
         <div class="msg" id="clsMsg" aria-live="polite"></div></div>
@@ -401,8 +404,10 @@ function drawCls(){
   var box=$('clsList');box.innerHTML=CL.length?'':'<p class="counts">還沒有班級。</p>';
   CL.forEach(function(c){
     var d=document.createElement('div');d.className='cls-row';
-    d.innerHTML='<b></b><label>座號到 <select aria-label="座號數">'+seatSel(c.seats)+'</select></label><button class="b sm del" type="button">刪除</button>';
+    d.innerHTML='<b></b><label>座號到 <select aria-label="座號數">'+seatSel(c.seats)+'</select></label><label class="av'+(c.avatar?' on':'')+'"><input type="checkbox"'+(c.avatar?' checked':'')+'>🧙 建立人物</label><button class="b sm del" type="button">刪除</button>';
     d.querySelector('b').textContent=c.name;
+    var avc=d.querySelector('.av input');avc.addEventListener('change',function(){var v=avc.checked;
+      CLS.api('rest/v1/class_list?name=eq.'+encodeURIComponent(c.name),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar:v})}).then(J).then(function(){c.avatar=v;avc.parentNode.classList.toggle('on',v);$('clsMsg').className='msg ok';$('clsMsg').textContent=c.name+(v?'：學生選座號時會先建立人物':'：不會出現建立人物')}).catch(function(){avc.checked=!v;$('clsMsg').className='msg err';$('clsMsg').textContent='儲存失敗';});});
     d.querySelector('select').addEventListener('change',function(e){CLS.api('rest/v1/class_list?name=eq.'+encodeURIComponent(c.name),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({seats:+e.target.value})}).then(J).then(function(){c.seats=+e.target.value;$('clsMsg').className='msg ok';$('clsMsg').textContent='已儲存';}).catch(function(){$('clsMsg').className='msg err';$('clsMsg').textContent='儲存失敗';});});
     var del=d.querySelector('.del');del.addEventListener('click',function(){
       if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='再按一次刪除';setTimeout(function(){del.classList.remove('armed');del.textContent='刪除';},4000);return;}

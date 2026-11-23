@@ -121,3 +121,20 @@ begin
     'okseats', (select coalesce(jsonb_agg(seat order by seat), '[]'::jsonb) from public.raid_answers where room_id = p_room and round = r.round and correct),
     'dist', (select coalesce(jsonb_object_agg(c, n), '{}'::jsonb) from (select choice::text c, count(*) n from public.raid_answers where room_id = p_room and round = r.round group by choice) x));
 end $function$;
+
+-- 2026-11-23：老師在後台班級名單勾選「建立人物」的班級才用角色
+alter table public.class_list add column if not exists avatar boolean not null default false;
+create or replace function public.avatar_create(p_class text, p_seat int, p_device text, p_cfg jsonb) returns text
+language plpgsql security definer set search_path = '' as $$
+declare c text := coalesce(p_class, '');
+begin
+  if p_seat is null or p_seat not between 1 and 40 then return 'bad'; end if;
+  if p_device is null or char_length(p_device) not between 8 and 64 then return 'bad_device'; end if;
+  if not public.avatar_ok(p_cfg) then return 'bad'; end if;
+  if c = '' or not exists (select 1 from public.class_list where name = c) then return 'bad_class'; end if;
+  if not exists (select 1 from public.class_list where name = c and avatar) then return 'off'; end if;
+  if (select count(*) from public.avatars where device = p_device and created_at > now() - interval '10 minutes') >= 8 then return 'too_many'; end if;
+  insert into public.avatars(class_name, seat, cfg, device) values (c, p_seat, p_cfg, p_device) on conflict do nothing;
+  if not found then return 'exists'; end if;
+  return 'ok';
+end $$;

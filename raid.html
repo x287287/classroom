@@ -218,8 +218,8 @@ var DM=[
     c.addEventListener("click",function(){var go=function(){seat=0;save("raidSeat:"+room,null);$("seatMsg").textContent="";show("sSeat")};
       if(SL().get(RCLS))SL().unlock(RCLS).then(function(ok){if(ok)go()});else go()});
     $("me").appendChild(c);
-    if(window.AVATAR&&RMODE!=="story"){var a=document.createElement("button");a.type="button";a.textContent="換造型？請老師幫忙";
-      a.addEventListener("click",function(){AVATAR.get(RCLS,seat).then(function(cfg){return AVATAR.change(RCLS,seat,cfg)}).catch(function(){})});$("me").appendChild(a)}
+    if(window.AVATAR&&RMODE!=="story")AVATAR.enabled(RCLS).then(function(on){if(!on||$("me").querySelector(".avchg"))return;var a=document.createElement("button");a.type="button";a.className="avchg";a.textContent="換造型？請老師幫忙";
+      a.addEventListener("click",function(){AVATAR.get(RCLS,seat).then(function(cfg){return AVATAR.change(RCLS,seat,cfg)}).catch(function(){})});$("me").appendChild(a)});
   }
 
   /* ---------- 語音唸題 ---------- */
