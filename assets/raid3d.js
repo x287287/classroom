@@ -220,9 +220,13 @@
     for (var k = 0; k < 14; k++) { var a = k / 14 * Math.PI * 2 + .2, r = 12 + Math.random() * 1.5, rk = new T.Mesh(geo("rock", function () { return new T.DodecahedronGeometry(1, 0); }), rockM);
       rk.position.set(Math.cos(a) * r, .3, Math.sin(a) * r); rk.scale.set(.6 + Math.random(), .6 + Math.random() * 1.6, .6 + Math.random()); rk.rotation.y = Math.random() * 3; g.add(rk); }
     /* 魔王：放大的角色，材質帶單元顏色 */
-    var b = AVATAR.make(U.cfg, { prune: true }), tint = new T.Color(U.tint);
-    b.root.traverse(function (o) { if (!o.isMesh) return; var m = o.material.clone(); if (m.name !== "skin" && m.name !== "tint") m.color.multiply(tint); m.emissive = new T.Color(0, 0, 0); o.material = m; (b.mats = b.mats || []).push(m); });
-    b.root.scale.setScalar(2.3); b.root.position.set(BX, 0, 0); b.root.rotation.y = Math.PI / 2; g.add(b.root);
+    /* 魔王：assets/boss3d.js 自製的三頭魔王；沒有載入時退回放大、上色的 KayKit 角色 */
+    var b;
+    if (window.BOSS3D) b = BOSS3D.make(st.unit);
+    else { b = AVATAR.make(U.cfg, { prune: true }); var tint = new T.Color(U.tint);
+      b.root.traverse(function (o) { if (!o.isMesh) return; var m = o.material.clone(); if (m.name !== "skin" && m.name !== "tint") m.color.multiply(tint); m.emissive = new T.Color(0, 0, 0); o.material = m; (b.mats = b.mats || []).push(m); });
+      b.root.scale.setScalar(2.3); }
+    b.root.position.set(BX, 0, 0); g.add(b.root);
     var sh = new T.Mesh(geo("shp", function () { var p = new T.PlaneGeometry(1, 1); p.rotateX(-Math.PI / 2); return p; }), new T.MeshBasicMaterial({ map: shadowTex(), transparent: true, depthWrite: false })); sh.scale.setScalar(4.2); sh.position.set(BX, .03, 0); g.add(sh);
     A.boss = b; A.flash = 0; A.hitCool = 0;
     return A;
@@ -243,7 +247,7 @@
     relayout(A); if (!old) { ch.once("Spawn_Ground"); sprite(A, ch.root.position.clone().add(V(0, 1, 0)), TEAMC[A.team || 0], 2.2, .6, { grow: 1.5 }); }
   }
   function arenaFor(team) { return st.arenas.length > 1 ? st.arenas[Math.max(0, Math.min(st.arenas.length - 1, (team || 1) - 1))] : st.arenas[0]; }
-  function bossPoint(A) { var p = A.boss.root.position, a = Math.random() * Math.PI * 2; return V(BX + Math.cos(a) * .5, 2.8 + (Math.random() - .5) * 1.2, p.z + Math.sin(a) * .5); }
+  function bossPoint(A) { var p = A.boss.root.position, a = Math.random() * Math.PI * 2; return V(BX + Math.cos(a) * .6, (A.boss.hitY || 2.8) + (Math.random() - .5) * 1.4, p.z + Math.sin(a) * .6); }
   function bossHit(A, dmg, col, crit) {
     if (!A || A.dead) return;
     A.flash = 1; A.shakeB = .25;
@@ -271,11 +275,11 @@
     st.arenas.forEach(function (A) {
       A.boss.update(dt); Object.keys(A.players).forEach(function (s) { A.players[s].ch.update(dt); });
       A.hitCool -= dt;
-      if (A.flash > 0) { A.flash = Math.max(0, A.flash - dt * 3); var fcol = A.flash * .6; A.boss.mats.forEach(function (m) { m.emissive.setRGB(fcol, fcol * .15, fcol * .1); }); }
+      if (A.flash > 0) { A.flash = Math.max(0, A.flash - dt * 3); var fcol = A.flash * .35; A.boss.mats.forEach(function (m) { var e0 = m.userData.e0; m.emissive.setRGB((e0 ? e0.r : 0) + fcol, (e0 ? e0.g : 0) + fcol * .15, (e0 ? e0.b : 0) + fcol * .1); }); }
       var bp = A.boss.root.position; if (A.shakeB > 0) { A.shakeB -= dt; bp.x = BX + (Math.random() - .5) * .25 * A.shakeB * 4; } else bp.x = BX;
       A.auraT -= dt;
-      if (A.auraT <= 0 && !A.dead) { var U = st.U, low = A.hp < .3; A.auraT = low ? .06 : .12;
-        var p = V(BX + (Math.random() - .5) * 3, Math.random() * 3, (Math.random() - .5) * 3), col = low ? "#ff5252" : U.aura[Math.floor(Math.random() * U.aura.length)];
+      if (A.auraT <= 0 && !A.dead) { var U = st.U, low = A.hp < .3; A.auraT = low ? .08 : .18;
+        var aa = Math.random() * Math.PI * 2, rr = 2.2 + Math.random() * 1.2, p = V(BX + Math.cos(aa) * rr, Math.random() * 1.2, Math.sin(aa) * rr), col = low ? "#ff5252" : U.aura[Math.floor(Math.random() * U.aura.length)];
         if (U.fire) sprite(A, p, col, .9 + Math.random() * .6, .9, { rise: 2.4, grow: .2 }); else sprite(A, p, col, 1.4 + Math.random(), 1.6, { rise: 1, grow: 2, tex: softTex(), add: false, op: .45, fadeIn: 1 }); }
     });
     render();
@@ -311,7 +315,7 @@
         var r = new T.WebGLRenderer({ canvas: canvas, antialias: true }); r.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); r.setClearColor(U.sky);
         var scene = new T.Scene(); scene.fog = new T.Fog(U.sky, 40, 90);
         scene.add(new T.HemisphereLight(0xffffff, 0x554466, .78)); var sun = new T.DirectionalLight(0xfff1dc, .7); sun.position.set(6, 12, 8); scene.add(sun);
-        st = { ang: 0, spin: true, el: el, canvas: canvas, r: r, scene: scene, U: U, arenas: [], fx: [], timers: [], q: [], now: 0, nextAt: 0, clock: new T.Clock(), alive: true, w: 0, h: 0, teams: o.teams || 0,
+        st = { unit: o.unit, ang: 0, spin: true, el: el, canvas: canvas, r: r, scene: scene, U: U, arenas: [], fx: [], timers: [], q: [], now: 0, nextAt: 0, clock: new T.Clock(), alive: true, w: 0, h: 0, teams: o.teams || 0,
           shake: function (A, v) { A.shakeV = Math.max(A.shakeV, v); }, camOf: function (A) { return A.cam; } };
         var n = o.teams > 1 ? o.teams : 1;
         for (var i = 0; i < n; i++) st.arenas.push(makeArena(i, o.teams > 1 ? i + 1 : 0));
