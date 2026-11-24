@@ -163,7 +163,7 @@ var DM=[
   }
   function setTitle(){
     var m=st&&st.mode;
-    var t=m==="story"?"🧭 情境闖關":m==="team"?"👥 分隊競賽：打倒"+bossName:"⚔️ 全班共戰：打倒"+bossName;
+    var t=m==="story"?(/^fc-/.test(st&&st.game||"")?"🧭 友善校園情境挑戰":"🧭 情境闖關"):m==="team"?"👥 分隊競賽：打倒"+bossName:"⚔️ 全班共戰：打倒"+bossName;
     if($("h1").textContent!==t){$("h1").textContent=t;document.title=t.replace(/^\S+\s/,"")}
     var hud=document.querySelector(".hud");if(hud)hud.hidden=m==="story";
   }
@@ -311,7 +311,7 @@ var DM=[
       (FR&&st.opt_revenge?'<p class="muted" style="text-align:center">🔁 最後 3 分鐘是錯題復仇戰：出大家常錯的題目，答對傷害 ×2！</p>':'')+
       (st.mode==="story"?'<p class="muted" style="text-align:center">這一場是「🧭 情境闖關」：大螢幕會出一個生活故事，每一關選「你會怎麼做？」。沒有標準的快慢，想清楚再選！</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
     if(st.status==="end"){
-      if(st.mode==="story"){b.innerHTML='<div class="big">🧭</div><div class="wait">'+(st.result==="cancel"?"老師取消了這場闖關":"闖關完成！")+'</div>'+(seat&&st.result!=="cancel"?'<div class="rv na">你在 '+st.my_total+' 關裡，選到最好的做法 <b>'+st.my_right+'</b> 關。</div>':'');return}
+      if(st.mode==="story"){var BR=/^fc-/.test(st.game||"");b.innerHTML='<div class="big">🧭</div><div class="wait">'+(st.result==="cancel"?"老師取消了這場闖關":BR?"故事結束了！<br>看大螢幕，全班走到哪一個結局？":"闖關完成！")+'</div>'+(seat&&st.result!=="cancel"?'<div class="rv na">你在 '+st.my_total+(BR?' 次選擇':' 關')+'裡，選到最好的做法 <b>'+st.my_right+'</b> '+(BR?'次':'關')+'。</div>':'');return}
       if(st.mode==="team"&&st.result!=="cancel"&&st.winner){
         var mine=st.team===st.winner;
         b.innerHTML='<div class="big">'+(mine?"🏆":"💪")+'</div><div class="wait"><span class="tbadge tc'+st.winner+'">'+tname(st.winner)+'</span> 獲勝！'+(mine?"<br>恭喜你的隊伍！":"<br>你的隊伍也很努力，下次再拚！")+'</div>'+
@@ -324,7 +324,7 @@ var DM=[
     var q=st.question||{};
     var opts=q.ox?["O","X"]:(q.o||[]);
     var SY=st.mode==="story";
-    var h='<div class="meta"><span>第 '+st.round+' / '+st.rounds+(SY?' 關':' 題')+'</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div>'+
+    var h='<div class="meta"><span>'+(SY&&q.br?'第 '+(q.i||st.round)+' 次選擇':'第 '+st.round+' / '+st.rounds+(SY?' 關':' 題'))+'</span><span id="leftT" class="left">'+(st.status==="question"&&st.left!=null?"⏱ 剩 "+st.left+" 秒":"")+'</span></div>'+
       (SY&&q.s?'<div class="scene">'+(q.intro?'<span class="intro">'+esc(q.intro)+'</span>':'')+esc(q.s)+'</div>':'')+'<div class="qt">'+esc(q.q)+'</div>';
     var mine=st.my_choice;
     clearTimeout(PVT);clearInterval(PVI);

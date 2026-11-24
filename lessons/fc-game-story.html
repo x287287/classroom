@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="live" content="screen">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>友善校園情境挑戰</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<!-- 友善校園「情境挑戰」（大螢幕）：分支劇情，全班投票、多數決決定故事往哪裡走，每個故事 4 種結局。
+     ?g=low／mid／high 選年級（預設低年級，畫面上也能切換）。劇本在 data/fc-low-story.js、fc-mid-story.js、fc-high-story.js（window.FC_STORY，格式見 fc-low-story.js 檔頭）。
+     兩種玩法：
+       平板投票：老師帳號開房間（沿用全班共戰的 raid_rooms，game='fc-low'／'fc-mid'／'fc-high'，mode='story'，rounds=40），學生用平板開 raid.html?r=房號 選座號作答。
+                 每一關呼叫 raid_next（question 多帶 br:1、i＝第幾次選擇；answer＝{a:最好的選項,e,f}），raid_host 輪詢作答人數，全部答完或時間到呼叫 raid_reveal 拿 dist（各選項人數），
+                 票數最多的選項決定下一關，平手或沒人投票由老師決定；「重新投票」「回上一關」都是再呼叫一次 raid_next（新的一回合）。
+                 到結局時 raid_finish(…,'win')，伺服器把每個座號的作答寫進 game_results（統計代號 fc-low-story／fc-mid-story／fc-high-story，ok＝選到最好的做法）。
+       舉手計票：不用平板、不開房間，老師在大螢幕用 ＋／− 記錄舉手票數（不記錄作答統計）。
+     看過的結局記在 localStorage fcStoryGot（{故事id:[結局id]}），年級記在 fcStoryG，設定記在 fcStorySet。 -->
+<style>
+:root{color-scheme:light;--ink:#1F2A27;--mut:#4A5550;--gold:#FFD54F;--pur:#7A2E8E;--ok:#1E8A5A;--oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+html{background:#0E0B18 radial-gradient(1200px 700px at 50% -10%,#4A2B5E 0%,#1E1630 55%,#0E0B18 100%) no-repeat}
+body{margin:0;color:#fff;background:transparent;min-height:100vh;overflow-x:clip;padding-bottom:90px;font-family:var(--font-body,"Noto Sans TC",sans-serif)}
+h1,h2,h3,.disp{font-family:var(--font-display);font-weight:400}
+button{font:inherit}
+.app{max-width:1440px;margin:0 auto;padding:12px 16px 0;display:grid;gap:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.top h1{font-size:clamp(1.4rem,2.6vw,2.2rem);color:var(--gold);text-shadow:0 3px 0 #0006;margin:0;line-height:1.2}
+.top .r{display:flex;gap:.5rem;flex-wrap:wrap}
+.pillbtn{appearance:none;border:2px solid #5B4A7C;background:#2E2347;color:#fff;border-radius:999px;padding:.2rem 1.1rem;min-height:2.9rem;cursor:pointer;font-family:var(--font-display);font-size:1rem}
+.pillbtn:focus-visible,.bigbtn:focus-visible,.sec:focus-visible,.o button:focus-visible,.pick:focus-visible,.seg button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.card{background:#fff;color:var(--ink);border-radius:24px;padding:clamp(16px,2.4vw,30px);box-shadow:0 14px 34px #0007}
+.card h2{margin:0;font-size:clamp(1.5rem,3vw,2.3rem);color:var(--pur);line-height:1.2}
+.note{color:var(--mut);margin:.5rem 0 0;line-height:1.7}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{appearance:none;border:2px solid #CFC6DD;background:#F7F4FB;color:var(--ink);border-radius:999px;min-height:2.9rem;padding:0 1.1rem;font-size:1.05rem;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--pur);border-color:var(--pur);color:#fff}
+.gtabs button{font-size:1.15rem;font-weight:700;min-height:3.1rem;padding:0 1.4rem}
+.setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:12px;margin-top:14px}
+.setgrid fieldset{border:2px solid #E3DDEB;border-radius:16px;padding:.6rem .8rem;margin:0}
+.setgrid legend{font-weight:700;padding:0 .3rem}
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:14px;margin-top:14px}
+.pick{appearance:none;text-align:left;border:3px solid #E3DDEB;background:#FBFAFD;color:var(--ink);border-radius:20px;padding:1rem 1.1rem;cursor:pointer;display:grid;gap:.35rem;align-content:start}
+.pick[aria-pressed=true]{border-color:var(--pur);background:#F4ECF8;box-shadow:0 0 0 3px #7A2E8E33}
+.pick .ic{font-size:3.2rem;line-height:1}
+.pick b{font-size:1.45rem;color:#4A2B5E;font-family:var(--font-display);font-weight:400}
+.pick small{color:var(--mut);font-size:.95rem;line-height:1.5}
+.dots{display:flex;gap:6px;align-items:center;font-size:.95rem;color:var(--mut);flex-wrap:wrap}
+.dots i{width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;font-style:normal;background:#EEE9F4;font-size:.9rem}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:14px}
+.bigbtn{appearance:none;border:0;background:var(--gold);color:#3E2C00;border-radius:999px;min-height:3.6rem;padding:0 2rem;font-family:var(--font-display);font-size:clamp(1.2rem,2vw,1.55rem);cursor:pointer;box-shadow:0 5px 0 #B8901C}
+.bigbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #B8901C}
+.bigbtn:disabled{background:#CFC8B0;box-shadow:none;cursor:default;color:#5E5640}
+.sec{appearance:none;border:2px solid var(--pur);background:#fff;color:var(--pur);border-radius:999px;min-height:3rem;padding:0 1.2rem;font-weight:700;cursor:pointer}
+.sec[disabled]{opacity:.4;cursor:default}
+/* 等待加入 */
+.lobby{display:grid;grid-template-columns:minmax(0,18rem) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:800px){.lobby{grid-template-columns:minmax(0,1fr)}}
+.qrbox{display:grid;gap:6px;justify-items:center;text-align:center}
+.qrbox .code{width:100%;max-width:16rem;background:#fff;border:2px solid #E3DDEB;border-radius:16px;padding:6px}
+.qrbox .code svg{width:100%;height:auto;display:block}
+.rc{font-family:var(--font-display);font-size:2.6rem;letter-spacing:.12em;color:var(--pur)}
+.url{font-size:.85rem;color:var(--mut);word-break:break-all}
+.joined{font-family:var(--font-display);font-size:1.6rem;color:#4A2B5E}
+.seats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.seats span{width:2.6rem;height:2.6rem;border-radius:12px;display:grid;place-items:center;background:#F2EEF7;color:#8A7FA0;font-weight:700}
+.seats span.in{background:var(--pur);color:#fff}
+/* 闖關 */
+.play{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;align-items:start}
+@media (max-width:980px){.play{grid-template-columns:minmax(0,1fr)}}
+.meta{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;color:var(--mut);font-size:1rem}
+.tag{background:var(--pur);color:#fff;border-radius:999px;padding:.1rem .8rem;font-weight:700}
+.stext{font-size:clamp(1.3rem,2.4vw,1.95rem);line-height:1.7;margin-top:.8rem}
+.stext .ico{display:block;text-align:center;font-size:clamp(3.4rem,7vw,5.6rem);line-height:1.1}
+.stext .intro{display:block;color:var(--mut);font-size:.85em;margin-bottom:.5rem}
+.route{display:flex;flex-wrap:wrap;gap:6px;margin-top:1rem}
+.route span{background:#F2EEF7;border-radius:999px;padding:.1rem .7rem;font-size:.95rem;color:#4A2B5E}
+.qt{font-size:clamp(1.45rem,2.6vw,2.1rem);font-family:var(--font-display);margin:0 0 .8rem;color:#2C1B3D}
+.opts{display:grid;gap:12px}
+.o{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.4rem .8rem;align-items:center;border-radius:18px;padding:.8rem 1rem;color:#fff;overflow:hidden;font-size:clamp(1.15rem,2vw,1.5rem);line-height:1.5}
+.o.c0{background:var(--oA)}.o.c1{background:var(--oB)}.o.c2{background:var(--oC)}
+.o>.l{width:2.6rem;height:2.6rem;border-radius:12px;background:#fff3;display:grid;place-items:center;font-family:var(--font-display);font-size:1.5rem;position:relative;z-index:1}
+.o>.t{position:relative;z-index:1}
+.o .tally{display:flex;align-items:center;gap:.35rem;position:relative;z-index:1}
+.o .tally button{appearance:none;border:0;width:2.75rem;height:2.75rem;border-radius:50%;background:#fff;color:var(--ink);font-size:1.4rem;font-weight:900;cursor:pointer}
+.o .n{min-width:3.2ch;text-align:center;font-family:var(--font-display);font-size:1.5rem}
+.o .bar{position:absolute;left:0;top:0;bottom:0;background:#0003;width:0;transition:width .7s ease}
+.o .fb{display:none;grid-column:1/-1;background:#fff;color:var(--ink);border-radius:12px;padding:.45rem .8rem;font-size:clamp(1rem,1.6vw,1.2rem);position:relative;z-index:1}
+.o .badge{display:none;grid-column:1/-1;position:relative;z-index:1;font-weight:700;font-size:1rem}
+.live .o .tally button{display:none}.live .o .n{visibility:hidden}
+.rev .o{opacity:.8}.rev .o .fb{display:block}.rev .o .tally button{display:none}.rev .o .n{visibility:visible}
+.rev .o.best,.rev .o.win{opacity:1}
+.rev .o.best .badge,.rev .o.win .badge{display:block}
+.rev .o.win{outline:5px solid var(--gold);outline-offset:-5px;box-shadow:0 0 0 3px #fff6,0 0 28px #FFD54F88}
+.status{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:1.2rem}
+.status .clk{font-family:var(--font-display);font-size:1.6rem;color:#9B1C2A;min-width:4ch}
+.status .ans{font-family:var(--font-display);font-size:1.4rem;color:#4A2B5E}
+.count{margin-left:auto;color:var(--mut);font-size:1.05rem}
+.res{margin-top:14px;background:#F7F5FA;border-radius:16px;padding:.8rem 1rem;font-size:1.15rem;line-height:1.65}
+.res b{color:#4A2B5E}
+.tie{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+/* 結局 */
+.end{display:grid;gap:14px;text-align:center;justify-items:center}
+.end .big{font-size:clamp(5rem,12vw,8rem);line-height:1}
+.end h2{font-size:clamp(1.8rem,4vw,3rem)}
+.end .kind{border-radius:999px;padding:.2rem 1.2rem;font-weight:700;font-size:1.2rem}
+.k-good{background:#DDF3E6;color:#14532D}.k-ok{background:#FFF3C4;color:#5B3F00}.k-bad{background:#E6E9F2;color:#2D3A5A}
+.end .txt{font-size:clamp(1.25rem,2.4vw,1.75rem);line-height:1.7;max-width:46rem;margin:0}
+.end .tip{background:#F4ECF8;border-radius:18px;padding:.8rem 1.2rem;font-size:clamp(1.1rem,2vw,1.4rem);max-width:46rem;color:#4A2B5E}
+.sum{display:grid;gap:8px;width:100%;max-width:52rem;text-align:left}
+.sum .it{background:#F7F5FA;border-radius:14px;padding:.6rem .9rem;font-size:1.05rem;line-height:1.6}
+.sum .it em{font-style:normal;color:#9B1C2A;font-weight:700}.sum .it .g{color:var(--ok);font-weight:700}
+/* 視窗 */
+.dlg{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:16px;z-index:200}
+.dlg .box{background:#fff;color:var(--ink);border-radius:22px;max-width:980px;width:100%;max-height:92vh;overflow:auto;padding:clamp(16px,2.4vw,28px)}
+.dlg h2{margin:0 0 .4rem;color:var(--pur)}
+.dlg h3{margin:1.1rem 0 .3rem;color:#4A2B5E}
+.dlg li{line-height:1.7;margin:.2rem 0}
+.map .nd{border:2px solid #E3DDEB;border-radius:14px;padding:.6rem .9rem;margin:.5rem 0}
+.map .nd p{margin:.2rem 0}
+.map .nd ol{margin:.3rem 0 0;padding-left:1.6rem}
+.map .go{color:var(--pur);font-weight:700;white-space:nowrap}
+.map .star{color:var(--ok);font-weight:700}
+.map .ed{display:inline-block;margin:.2rem .3rem .2rem 0;border-radius:10px;padding:.15rem .6rem}
+@keyframes pop{from{transform:scale(.6)}to{transform:none}}
+.seats span.in{animation:pop .3s ease}
+@media (prefers-reduced-motion:reduce){.o .bar{transition:none}.seats span.in{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><h1 id="h1">🧭 友善校園情境挑戰</h1>
+    <div class="r"><button type="button" class="pillbtn" id="bMap">📋 完整劇本</button><button type="button" class="pillbtn" id="bTeach">老師說明</button><button type="button" class="pillbtn" id="bFs">全螢幕</button></div></div>
+
+  <section class="card" id="scrSetup">
+    <div class="seg gtabs" id="gtabs" role="group" aria-label="年級"><button type="button" data-g="low">低年級</button><button type="button" data-g="mid">中年級</button><button type="button" data-g="high">高年級</button></div>
+    <h2 id="pickH" style="margin-top:14px">選一個故事</h2>
+    <p class="note">每一關全班投票，<b>票數最多的做法</b>決定故事怎麼發展；平手時由老師決定。每個故事有 4 種結局，看看全班能不能走到 🌈 好結局！</p>
+    <div class="picks" id="picks"></div>
+    <div class="setgrid">
+      <fieldset><legend>每關作答時間（平板投票）</legend><div class="seg" data-k="secs"><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button><button type="button" data-v="45">45 秒</button><button type="button" data-v="0">不計時</button></div></fieldset>
+      <fieldset><legend>大螢幕唸情境</legend><div class="seg" data-k="tts"><button type="button" data-v="1">唸</button><button type="button" data-v="0">不唸</button></div></fieldset>
+      <fieldset style="grid-column:1/-1"><legend>班級（平板投票的作答統計會記在這個班）</legend><div class="seg" id="clsSeg"><span class="note" style="margin:0">老師登入後才會出現班級。</span></div></fieldset>
+    </div>
+    <div class="row"><button type="button" class="bigbtn" id="bCreate">📱 開房間（平板投票）</button><button type="button" class="sec" id="bLocal">✋ 不用平板，舉手計票</button><span class="note" id="setMsg" style="margin:0"></span></div>
+  </section>
+
+  <section class="card" id="scrLobby" hidden>
+    <div class="lobby">
+      <div class="qrbox"><b style="font-size:1.3rem">用平板掃描加入</b><div class="code" id="qr"></div><div>房號</div><div class="rc" id="roomCode"></div><div class="url" id="roomUrl"></div></div>
+      <div>
+        <h2 id="lobbyT"></h2>
+        <p class="note" id="lobbyNote"></p>
+        <div class="joined" id="joined" style="margin-top:12px">等待同學加入…</div>
+        <div class="seats" id="seatGrid"></div>
+        <div class="row"><button type="button" class="bigbtn" id="bStart" disabled>開始闖關</button><button type="button" class="sec" id="bCancel">取消</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="scrPlay" hidden>
+    <div class="play">
+      <div class="card">
+        <div class="meta"><span class="tag" id="pTag"></span><span id="pTitle"></span></div>
+        <div class="stext" id="pText"></div>
+        <div class="route" id="pRoute"></div>
+      </div>
+      <div class="card">
+        <p class="qt" id="pQ"></p>
+        <div class="opts" id="pOpts"></div>
+        <div class="status" id="pLive"><span class="clk" id="pClk"></span><span class="ans" id="pAns"></span><button type="button" class="sec" id="bSay">🔊 唸出來</button><button type="button" class="sec" id="bStop" style="margin-left:auto">提前公布</button></div>
+        <div class="row" id="pCtl"><button type="button" class="sec" id="bSay2">🔊 唸出來</button><button type="button" class="sec" id="bClr">清除票數</button><span class="count" id="pCount"></span></div>
+        <div class="row" id="pCtl2"><button type="button" class="bigbtn" id="bReveal">公布投票結果</button><button type="button" class="sec" id="bBack">↩ 回上一關</button></div>
+        <div id="pRes" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card end" id="scrEnd" hidden></section>
+</div>
+
+<div class="dlg" id="dMap" hidden role="dialog" aria-modal="true" aria-labelledby="mT"><div class="box">
+  <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center"><h2 id="mT">📋 完整劇本</h2><button type="button" class="sec close">關閉</button></div>
+  <p class="note">🌟 是最好的做法；「→」是全班選這個做法時會走到的下一頁或結局。</p>
+  <div class="map" id="mapBody"></div>
+</div></div>
+
+<div class="dlg" id="dTeach" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
+  <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center"><h2 id="tT">老師說明：友善校園情境挑戰</h2><button type="button" class="sec close">關閉</button></div>
+  <h3>這是什麼</h3>
+  <ul><li>「選擇你的路」的故事：每一關大螢幕出情境和「你會怎麼做？」，全班投票，<b>票數最多的做法</b>決定故事往哪裡走。每個故事有 4 種結局（🌈 好結局、🌤️ 還可以、🌧️ 再想想），結局畫面會列出全班走過的每一步，和每一關最好的做法。</li>
+  <li>低、中、高年級各 3 個故事，對應網站上的友善校園宣導教材（反霸凌、兒童權利、身體界線、網路安全、勇敢說不、反霸凌案例、上網的分寸、防制網路性剝削）。情境、選項與結局是新寫的，不是原簡報的內容。一個故事大約要選 2～5 次，約 10～15 分鐘。</li></ul>
+  <h3>兩種玩法</h3>
+  <ul><li><b>📱 平板投票</b>：要老師帳號。開房間後，學生用平板掃 QR Code（或打開 raid.html 輸入房號）、選座號加入；課堂房間進行中，平板會自動跟過來。每關全班都選好或時間到就自動公布，也可以按「提前公布」。學生平板會看到自己選的做法的結果和最好的做法。學生用 QR 掃描、選座號後，結果會傳到老師後台（「🎮 遊戲作答統計」，記成「友善校園情境挑戰」，「選到最好的做法」算答對）。</li>
+  <li><b>✋ 舉手計票</b>：不用平板、不用登入。老師請同學舉手，用每個選項旁的 ＋／− 記票數，再按「公布投票結果」。適合低年級或沒有平板的時候；這種玩法不記錄作答統計。</li></ul>
+  <h3>上課建議</h3>
+  <ul><li>公布後，如果最多人選的不是最好的做法，請選那個做法的同學說說理由，再照多數票走，讓全班看到結果。走到 🌧️ 結局時，可以按「回到最後一次選擇」重選，或從頭再玩，看能不能走到 🌈 好結局。</li>
+  <li>「🔊 唸出來」會唸情境、問題和選項（低年級建議開「大螢幕唸情境」）。</li>
+  <li>「📋 完整劇本」列出目前年級的所有頁面、選項通往哪裡，課前可以先看。</li>
+  <li>每台電腦會記得哪些結局看過了（故事卡片上的「結局收集」）。</li>
+  <li>身體界線與網路性剝削的故事都是假設情境。不要求學生分享個人經驗；若學生透露疑似受害情形，請依學校通報流程處理。</li></ul>
+  <h3>求助專線</h3>
+  <ul><li>1953 教育部反霸凌專線（24 小時）；113 保護專線（24 小時、免付費）。</li></ul>
+</div></div>
+
+<script src="data/fc-low-story.js"></script>
+<script src="data/fc-mid-story.js"></script>
+<script src="data/fc-high-story.js"></script>
+<script src="../assets/vendor/qrcode.js"></script>
+<script>
+(function(){
+var ALL=window.FC_STORY||{}, L=['A','B','C','D'];
+var KIND={good:'🌈 好結局',ok:'🌤️ 還可以的結局',bad:'🌧️ 再想想的結局'};
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function load(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var got=load('fcStoryGot',{}), SET=Object.assign({secs:30,tts:1,story:{}},load('fcStorySet',{}));
+if([20,30,45,0].indexOf(SET.secs)<0)SET.secs=30;if([0,1].indexOf(SET.tts)<0)SET.tts=1;
+var gq=(location.search.match(/[?&]g=(low|mid|high)/)||[])[1], GR=gq||load('fcStoryG','low');if(!ALL[GR])GR='low';
+var D=ALL[GR], G=null, busy=false;
+function api(path,body){return window.CLS.api(path,{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});return r.text().then(function(t){return t?JSON.parse(t):null})})}
+function rpc(fn,a){return api('rest/v1/rpc/'+fn,a)}
+function show(id){['scrSetup','scrLobby','scrPlay','scrEnd'].forEach(function(k){$(k).hidden=k!==id});window.scrollTo(0,0)}
+var SAY=(function(){var ok=('speechSynthesis' in window),voice=null;
+  function pick(){try{var vs=speechSynthesis.getVoices();voice=vs.filter(function(v){return /zh[-_]TW/i.test(v.lang)})[0]||vs.filter(function(v){return /^(zh|cmn)/i.test(v.lang)})[0]||null}catch(e){}}
+  if(ok){pick();try{speechSynthesis.addEventListener('voiceschanged',pick)}catch(e){}}
+  return function(t){if(!ok)return;try{speechSynthesis.cancel();if(!t)return;var u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:'zh-TW';if(voice)u.voice=voice;u.rate=.9;speechSynthesis.speak(u)}catch(e){}}})();
+function nodeText(nd){return nd.s+'。'+nd.q+'。'+nd.o.map(function(t,i){return L[i]+'，'+t}).join('。')}
+
+/* ---------- 選故事、設定 ---------- */
+function storyOf(){var id=SET.story[GR],l=D.list;for(var i=0;i<l.length;i++)if(l[i].id===id)return l[i];return l[0]}
+function dots(sp){var ks=Object.keys(sp.ends),g=got[sp.id]||[];
+  return '<span>結局收集：</span>'+ks.map(function(k){return g.indexOf(k)>=0?'<i title="'+esc(sp.ends[k].title)+'">'+sp.ends[k].icon+'</i>':'<i>？</i>'}).join('')+'<span>'+g.length+' / '+ks.length+'</span>'}
+function paintSetup(){
+  D=ALL[GR];save('fcStoryG',GR);
+  [].forEach.call($('gtabs').children,function(b){b.setAttribute('aria-pressed',String(b.dataset.g===GR))});
+  $('pickH').textContent='選一個故事・'+D.label;
+  var cur=storyOf();
+  $('picks').innerHTML=D.list.map(function(sp){return '<button type="button" class="pick" data-id="'+sp.id+'" aria-pressed="'+(sp===cur)+'"><span class="ic" aria-hidden="true">'+sp.icon+'</span><b>'+esc(sp.title)+'</b><small>'+esc(sp.intro)+'</small><small>對應教材：'+esc(sp.from)+'</small><span class="dots">'+dots(sp)+'</span></button>'}).join('');
+  [].forEach.call(document.querySelectorAll('.seg[data-k]'),function(seg){[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[seg.dataset.k]))})});
+  $('h1').textContent='🧭 友善校園情境挑戰';document.title='友善校園情境挑戰';
+}
+$('gtabs').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b)return;GR=b.dataset.g;paintSetup()});
+$('picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;SET.story[GR]=b.dataset.id;save('fcStorySet',SET);paintSetup()});
+[].forEach.call(document.querySelectorAll('.seg[data-k]'),function(seg){seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SET[seg.dataset.k]=+b.dataset.v;save('fcStorySet',SET);paintSetup()})});
+paintSetup();
+
+/* 班級（和書櫃共用 clsClass） */
+var CLASS=load('clsClass','');
+function loadCls(){
+  window.CLS.api('rest/v1/class_list?select=name&order=sort.asc,name.asc').then(function(r){return r.json()}).then(function(list){
+    list=list||[];if(CLASS&&!list.some(function(c){return c.name===CLASS}))CLASS='';
+    var box=$('clsSeg');box.innerHTML='';
+    [{name:''}].concat(list).forEach(function(c){var b=document.createElement('button');b.type='button';b.textContent=c.name||'不指定';b.setAttribute('aria-pressed',String(c.name===CLASS));
+      b.addEventListener('click',function(){CLASS=c.name;save('clsClass',CLASS);[].forEach.call(box.children,function(x){x.setAttribute('aria-pressed',String(x===b))})});box.appendChild(b)});
+  }).catch(function(){$('clsSeg').innerHTML='<span class="note" style="margin:0">班級讀取失敗，會記成「不指定」。</span>'});
+}
+var authN=0;(function chk(){if(window.CLS&&window.CLS.isTeacher){loadCls();return}if(authN++<20)setTimeout(chk,500)})();
+window.addEventListener('cls-status',function(){if(window.CLS&&window.CLS.isTeacher)loadCls()});
+
+/* ---------- 開房間（平板投票） ---------- */
+$('bCreate').addEventListener('click',function(){
+  if(!(window.CLS&&window.CLS.isTeacher)){$('setMsg').textContent='平板投票要老師帳號：請先到書櫃首頁按「老師登入」。也可以用「舉手計票」。';return}
+  var b=this,sp=storyOf();b.disabled=true;$('setMsg').textContent='建立中…';
+  api('rest/v1/raid_rooms',{game:'fc-'+GR,rounds:40,mode:'story',class_name:CLASS||null,teams:0,opt_counter:false,opt_revenge:false,story:sp.id}).then(function(d){
+    var room=d[0];b.disabled=false;$('setMsg').textContent='';
+    G={room:room.id,sp:sp,path:[],node:sp.start,seats:[],phase:'lobby'};
+    var url=new URL('../raid.html?r='+room.id,location.href).href;
+    $('roomCode').textContent=room.id;$('roomUrl').textContent=url;
+    try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
+    $('lobbyT').textContent=sp.icon+' '+sp.title;
+    $('lobbyNote').textContent=D.label+'・對應教材：'+sp.from+'。開始後還沒加入的同學也可以掃描加入，從目前這一關開始投票。';
+    if(window.CLS_LIVE&&window.CLS_LIVE.push&&window.CLS_LIVE.id)window.CLS_LIVE.push('raid.html?r='+room.id,document.title);
+    show('scrLobby');startPoll();
+  }).catch(function(){b.disabled=false;$('setMsg').textContent='建立失敗，請確認網路與老師帳號後再試一次。'});
+});
+$('bCancel').addEventListener('click',function(){if(G&&G.room)rpc('raid_finish',{p_room:G.room,p_result:'cancel'}).catch(function(){});stopPoll();G=null;paintSetup();show('scrSetup')});
+function startPoll(){stopPoll();G.poll=setInterval(tick,1000);tick()}
+function stopPoll(){if(G&&G.poll){clearInterval(G.poll);G.poll=null}}
+function tick(){
+  if(!G||!G.room||busy)return;
+  rpc('raid_host',{p_room:G.room}).then(function(h){
+    if(!G||!h)return;G.seats=h.seats||[];
+    if(G.phase==='lobby')drawLobby();
+    else if(G.phase==='question'){
+      drawLive(h.answered,h.left);
+      if((G.seats.length>0&&h.answered>=G.seats.length)||(SET.secs>0&&h.left===0))reveal();
+    }
+  }).catch(function(){});
+}
+function drawLobby(){
+  var n=G.seats.length,max=Math.max(25,n?G.seats[n-1]:0),h='';
+  $('joined').textContent=n?('已加入 '+n+' 位同學'):'等待同學加入…';
+  for(var i=1;i<=max;i++)h+='<span class="'+(G.seats.indexOf(i)>=0?'in':'')+'">'+i+'</span>';
+  $('seatGrid').innerHTML=h;$('bStart').disabled=!n;
+}
+$('bStart').addEventListener('click',function(){enter()});
+
+/* ---------- 舉手計票 ---------- */
+$('bLocal').addEventListener('click',function(){var sp=storyOf();G={room:null,sp:sp,path:[],node:sp.start};enter()});
+
+/* ---------- 每一關 ---------- */
+function enter(){
+  var sp=G.sp,nd=sp.nodes[G.node],k=G.path.length+1;
+  G.votes=nd.o.map(function(){return 0});G.rev=false;
+  $('h1').textContent=sp.icon+' '+sp.title;
+  $('pTag').textContent='第 '+k+' 次選擇';$('pTitle').textContent='友善校園情境挑戰・'+D.label+(G.room?'・房號 '+G.room:'・舉手計票');
+  $('pText').innerHTML=(k===1?'<span class="ico" aria-hidden="true">'+sp.icon+'</span><span class="intro">'+esc(sp.intro)+'</span>':'')+esc(nd.s);
+  $('pRoute').innerHTML=G.path.map(function(p,i){return '<span>第 '+(i+1)+' 次：'+L[p.pick]+'</span>'}).join('');
+  $('pQ').textContent=nd.q;
+  $('pOpts').className='opts'+(G.room?' live':'');
+  $('pOpts').innerHTML=nd.o.map(function(t,i){return '<div class="o c'+i+'" data-i="'+i+'"><span class="bar"></span><span class="l">'+L[i]+'</span><span class="t">'+esc(t)+'</span><span class="tally"><button type="button" data-d="-1" aria-label="'+L[i]+' 減一票">−</button><span class="n">0</span><button type="button" data-d="1" aria-label="'+L[i]+' 加一票">＋</button></span><span class="badge"></span><span class="fb">'+esc(nd.f[i])+'</span></div>'}).join('');
+  $('pRes').hidden=true;$('bBack').disabled=!G.path.length;
+  $('pLive').hidden=!G.room;$('pCtl').hidden=!!G.room;$('pCtl2').hidden=!!G.room;
+  paintVotes();show('scrPlay');
+  if(SET.tts)SAY(nodeText(nd));
+  if(G.room){
+    busy=true;G.phase='sending';$('pAns').textContent='出題中…';$('pClk').textContent='';
+    var payload={q:nd.q,o:nd.o,s:nd.s,t:sp.title,icon:sp.icon,i:k,br:1,intro:k===1?sp.intro:''};
+    rpc('raid_next',{p_room:G.room,p_question:payload,p_answer:{a:nd.best,e:nd.f[nd.best],f:nd.f},p_seconds:SET.secs,p_hp_per:1}).then(function(h){
+      busy=false;if(!h)throw new Error('next');G.phase='question';G.seats=h.seats||G.seats;drawLive(0,h.left);
+    }).catch(function(){busy=false;G.phase='err';$('pAns').innerHTML='出題失敗，請確認網路。';$('pRes').className='res';$('pRes').hidden=false;$('pRes').innerHTML='<button type="button" class="bigbtn" id="bRetry">再試一次</button>'});
+  }
+}
+function drawLive(n,left){
+  var tot=G.seats.length;$('pAns').textContent='已作答 '+(n||0)+' / '+tot+' 人';
+  $('pClk').textContent=SET.secs>0&&left!=null?'⏱ '+left+' 秒':'';
+}
+function paintVotes(){
+  var tot=G.votes.reduce(function(a,b){return a+b},0);
+  [].forEach.call($('pOpts').children,function(el,i){el.querySelector('.n').textContent=G.votes[i]+(G.room&&G.rev?' 人':'');el.querySelector('.bar').style.width=(G.rev&&tot?G.votes[i]/tot*100:0)+'%'});
+  $('pCount').textContent='共 '+tot+' 票';
+}
+$('pOpts').addEventListener('click',function(e){var b=e.target.closest('button[data-d]');if(!b||G.rev||G.room)return;
+  var i=+b.closest('.o').dataset.i;G.votes[i]=Math.max(0,G.votes[i]+(+b.dataset.d));paintVotes()});
+$('bClr').addEventListener('click',function(){G.votes=G.votes.map(function(){return 0});paintVotes()});
+function sayNow(){if(G)SAY(nodeText(G.sp.nodes[G.node]))}
+$('bSay').addEventListener('click',sayNow);$('bSay2').addEventListener('click',sayNow);
+$('bStop').addEventListener('click',function(){reveal()});
+$('bReveal').addEventListener('click',function(){showResult()});
+function reveal(){
+  if(!G||G.phase!=='question'||busy)return;busy=true;G.phase='revealing';
+  rpc('raid_reveal',{p_room:G.room}).then(function(r){busy=false;if(!r){G.phase='question';return}
+    var dist=r.dist||{};G.votes=G.votes.map(function(_,i){return dist[String(i)]||0});G.phase='reveal';showResult();
+  }).catch(function(){busy=false;G.phase='question'});
+}
+function showResult(){
+  var nd=G.sp.nodes[G.node],tot=G.votes.reduce(function(a,b){return a+b},0);
+  G.rev=true;$('pOpts').classList.add('rev');$('pLive').hidden=true;$('pCtl').hidden=true;$('pCtl2').hidden=true;paintVotes();
+  var mx=Math.max.apply(null,G.votes),top=[];G.votes.forEach(function(v,i){if(v===mx)top.push(i)});
+  [].forEach.call($('pOpts').children,function(el,i){var b=[];if(i===nd.best){el.classList.add('best');b.push('🌟 最好的做法')}
+    if(tot&&top.length===1&&i===top[0]){el.classList.add('win');b.push('👑 票數最多，故事往這裡走')}
+    el.querySelector('.badge').textContent=b.join('　')});
+  var h,choices=tot?top:nd.o.map(function(_,i){return i});
+  if(!tot)h='<b>沒有人投票。</b>請老師決定這一次要走哪一條路：';
+  else if(top.length>1)h='<b>平手！</b>'+top.map(function(i){return L[i]}).join('、')+' 都是 '+mx+' 票。可以請選這幾個做法的同學說說理由，再由老師決定走哪一條路：';
+  else{var w=top[0];h='<b>'+L[w]+' 得到最多票（'+mx+' / '+tot+' 票）。</b>'+(w===nd.best?'全班選到了最好的做法！請一位同學說說看：為什麼這樣做比較好？':'不過最好的做法是 '+L[nd.best]+'。請選 '+L[w]+' 的同學說說看為什麼這樣選，再看看故事會怎麼發展。')}
+  h+=choices.length>1?'<div class="tie">'+choices.map(function(i){return '<button type="button" class="sec" data-go="'+i+'">走 '+L[i]+' →</button>'}).join('')+'</div><div class="row"><button type="button" class="sec" id="bRe">重新投票</button></div>'
+    :'<div class="row"><button type="button" class="bigbtn" data-go="'+choices[0]+'">照多數票走 →</button><button type="button" class="sec" id="bRe">重新投票</button></div>';
+  $('pRes').className='res';$('pRes').innerHTML=h;$('pRes').hidden=false;
+}
+$('pRes').addEventListener('click',function(e){
+  if(busy)return;
+  if(e.target.id==='bRe'||e.target.id==='bRetry')return enter();
+  var b=e.target.closest('[data-go]');if(!b)return;
+  var nd=G.sp.nodes[G.node],i=+b.dataset.go;
+  G.path.push({node:G.node,pick:i,votes:G.votes.slice(),tot:G.votes.reduce(function(a,c){return a+c},0)});
+  var nx=nd.go[i];if(G.sp.nodes[nx]){G.node=nx;enter()}else finish(nx);
+});
+$('bBack').addEventListener('click',function(){if(!G.path.length)return;G.node=G.path.pop().node;enter()});
+
+/* ---------- 結局 ---------- */
+function finish(eid){
+  var sp=G.sp,e=sp.ends[eid];SAY('');
+  var g=got[sp.id]||(got[sp.id]=[]);if(g.indexOf(eid)<0){g.push(eid);save('fcStoryGot',got)}
+  if(G.room){stopPoll();G.phase='end';rpc('raid_finish',{p_room:G.room,p_result:'win'}).catch(function(){})}
+  var left=Object.keys(sp.ends).length-g.length,hasGood=g.some(function(k){return sp.ends[k].type==='good'});
+  $('h1').textContent=sp.icon+' '+sp.title+'・結局';
+  $('scrEnd').innerHTML='<div class="big" aria-hidden="true">'+e.icon+'</div><span class="kind k-'+e.type+'">'+KIND[e.type]+'</span><h2>'+esc(e.title)+'</h2><p class="txt">'+esc(e.text)+'</p><div class="tip">💡 '+esc(e.tip)+'</div>'+
+    '<div class="dots">'+dots(sp)+'</div><p class="note">'+(left?'還有 '+left+' 個結局沒看過'+(hasGood?'。':'，再試一次，看能不能走到 🌈 好結局！'):'這個故事的結局全部看過了！')+'</p>'+
+    '<h3 style="margin:.4rem 0 0;color:var(--pur)">📖 這次全班走的路</h3><div class="sum">'+G.path.map(function(p,k){var nd=sp.nodes[p.node],ok=p.pick===nd.best;
+      return '<div class="it"><b>第 '+(k+1)+' 次</b>　'+esc(nd.q)+'（'+p.votes[p.pick]+' / '+p.tot+' 票）<br>全班選：'+(ok?'<span class="g">🌟 ':'<em>')+L[p.pick]+'. '+esc(nd.o[p.pick])+(ok?'</span>':'</em>')+(ok?'':'<br><span class="g">🌟 最好的做法：'+L[nd.best]+'. '+esc(nd.o[nd.best])+'</span>')+'</div>'}).join('')+'</div>'+
+    (G.room?'<p class="note">每位同學的作答已經記到老師後台的「🎮 遊戲作答統計」。</p>':'')+
+    '<div class="row" style="justify-content:center">'+(G.room?'':'<button type="button" class="sec" id="eBack">↩ 回到最後一次選擇</button>')+'<button type="button" class="bigbtn" id="eAgain">'+(G.room?'再開一場':'從頭再玩一次')+'</button><button type="button" class="sec" id="eHome">換一個故事</button></div>';
+  show('scrEnd');SAY(e.title+'。'+e.text);
+  if($('eBack'))$('eBack').onclick=function(){G.node=G.path.pop().node;enter()};
+  $('eAgain').onclick=function(){if(G.room){G=null;paintSetup();show('scrSetup');$('bCreate').click()}else{G={room:null,sp:sp,path:[],node:sp.start};enter()}};
+  $('eHome').onclick=function(){G=null;paintSetup();show('scrSetup')};
+}
+
+/* ---------- 視窗 ---------- */
+function paintMap(){
+  $('mT').textContent='📋 完整劇本・'+D.label;
+  $('mapBody').innerHTML=D.list.map(function(sp){
+    var ids=Object.keys(sp.nodes),name=function(id){return sp.nodes[id]?'第 '+(ids.indexOf(id)+1)+' 頁':sp.ends[id].icon+' '+sp.ends[id].title};
+    return '<h3>'+sp.icon+' '+esc(sp.title)+'（對應：'+esc(sp.from)+'）</h3><p class="note" style="margin:0">'+esc(sp.intro)+'</p>'+
+      ids.map(function(id,k){var nd=sp.nodes[id];return '<div class="nd"><p><b>第 '+(k+1)+' 頁</b>　'+esc(nd.s)+'</p><p><b>'+esc(nd.q)+'</b></p><ol type="A">'+nd.o.map(function(t,i){return '<li>'+(i===nd.best?'<span class="star">🌟 '+esc(t)+'</span>':esc(t))+'　<span class="go">→ '+esc(name(nd.go[i]))+'</span><br><small style="color:#4A5550">'+esc(nd.f[i])+'</small></li>'}).join('')+'</ol></div>'}).join('')+
+      '<p style="margin:.4rem 0">'+Object.keys(sp.ends).map(function(k){var e=sp.ends[k];return '<span class="ed k-'+e.type+'">'+e.icon+' '+esc(e.title)+'</span>'}).join('')+'</p>'}).join('');
+}
+function dialog(btn,id,before){var d=$(id),last=null;
+  function close(){d.hidden=true;if(last)last.focus()}
+  $(btn).addEventListener('click',function(){last=document.activeElement;if(before)before();d.hidden=false;d.querySelector('.close').focus()});
+  d.querySelector('.close').addEventListener('click',close);d.addEventListener('click',function(e){if(e.target===d)close()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!d.hidden)close()})}
+dialog('bMap','dMap',paintMap);dialog('bTeach','dTeach');
+$('bFs').addEventListener('click',function(){try{var d=document.documentElement;if(document.fullscreenElement)document.exitFullscreen();else d.requestFullscreen()}catch(e){}});
+})();
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
