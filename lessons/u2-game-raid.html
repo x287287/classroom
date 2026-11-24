@@ -14,15 +14,13 @@
                          連續「一次就答對」第 5、10…題多打 1 點；限時 10／15／20 分鐘，魔王血量＝人數 × 分鐘 × 強度（11／15／19），例如 25 人 20 分鐘普通＝7500；
                          大螢幕有即時戰力排行榜（座號，依 2 次內答對題數、同分比傷害）與正確率排行榜（第 1 次就答對的比率，作答滿 10 題才上榜，raid_host.acc）。
      題庫和另外兩個版本共用 lessons/data/u2-game-questions.js。
-     資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop、raid_finish，
+     資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop（目前沒有用到）、raid_finish，
      學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。
      各自搶攻另用 raid_free_start、raid_free_summary（老師）與 raid_free_q、raid_free_answer（學生）。
      2026-11-18 新增：
        分隊競賽（team）：raid_rooms.teams＝2～4，座號輪流分隊（raid_players.team＝(座號-1)%隊數+1），每隊魔王血量存在 team_hp／team_max（隊伍人數 × 分鐘 × 強度），
                          作答流程同各自搶攻；最先打倒自己魔王的隊伍獲勝（winner），時間到比剩下血量比例最少的隊伍。統計代號 u2-team／u3-team。
        情境闖關：2026-11-24 改成分支劇情，移到 fc-game-story.html?g=u2／u3（設定畫面的「🧭 情境闖關」卡片直接連過去；沿用 raid_rooms mode='story'，統計代號不變）。
-       （舊說明）情境闖關（story）：沿用同步作答的 raid_next／raid_answer／raid_reveal，
-                         answer＝{a:最好的選項,e,f:[每個選項的結果]}；raid_rooms.story 記劇本 id。統計代號 u2-story／u3-story（ok＝選到最好的做法）。
        魔王反擊（opt_counter，各自搶攻／分隊競賽可選）：每 3 分鐘（第 3、6、9…分鐘，剩不到 25 秒就不出）大螢幕呼叫 raid_counter_start 出一題（30 秒），學生用 raid_counter_answer，
                          raid_counter_end 結算：9 成以上答對擋下，5～9 成回 5% 血，不到 5 成回 10% 血（分隊時各隊分開算）。作答在 raid_counter_ans。
        錯題復仇戰（opt_revenge）：最後 3 分鐘 raid_free_q 改從這一場第 1 次答對率最低的題目出（cur_rev），答對傷害 ×2。

@@ -1,0 +1,97 @@
+/* 全班共戰學生平板頁（raid.html）的樣式。 2026-11-24 從頁面裡移出來，方便維護。 */
+:root{--ink:#1F2A27;--muted:#4A5550;--gold:#FFD54F;--ok:#1E8A5A;--no:#C8414B;--oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0;--oD:#0F766E;
+  --font:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;color:#fff;font:400 18px/1.6 var(--font);background:radial-gradient(900px 600px at 50% -10%,#4A2B5E 0%,#1E1630 60%,#0E0B18 100%) fixed}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 40px;display:grid;gap:14px}
+h1{margin:0;font-size:clamp(20px,5vw,28px);color:var(--gold)}
+.card{background:#fff;color:var(--ink);border-radius:22px;padding:16px;display:grid;gap:12px}
+.card h2{margin:0;font-size:22px;color:#7A2E8E}
+.muted{color:var(--muted);font-size:15px;margin:0}
+.code{display:flex;gap:8px}
+.code input{flex:1;font:inherit;font-size:28px;letter-spacing:.3rem;text-align:center;border:2px solid #CFC6DD;border-radius:14px;padding:8px;min-width:0}
+button{appearance:none;font:700 19px/1.2 var(--font);cursor:pointer;border-radius:999px;min-height:52px;padding:0 20px;border:0;background:#7A2E8E;color:#fff}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:10px}
+.seats button{min-height:62px;padding:0;font-size:24px;background:#F1EDF6;color:#4A2B5E}
+.me{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700}
+.me button{min-height:42px;font-size:15px;padding:0 14px;background:transparent;border:2px solid #8E7AAE;color:#fff}
+.hud{display:flex;align-items:center;gap:12px}
+.hud svg{width:76px;height:auto;flex:none}
+.hp{flex:1;height:22px;border-radius:99px;background:#130E20;border:2px solid #5B4A7C;overflow:hidden}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#FF8A5B,#E2463F 60%,#B3125A);transition:width .8s}
+.hpn{font-size:14px;color:#E6DDF3}
+.qt{font-size:clamp(20px,5.2vw,26px);line-height:1.5;font-weight:700}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:15px;color:var(--muted)}
+.left{font-weight:700;color:#7A2E8E}.left.hot{color:var(--no)}
+.opts{display:grid;gap:10px}
+.opts button{border-radius:18px;min-height:66px;text-align:left;padding:10px 14px 10px 58px;position:relative;font-size:clamp(18px,4.6vw,22px);line-height:1.4;font-weight:700}
+.opts button b{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:#fff3;display:grid;place-items:center}
+.opts button.c4,.ord .c4{background:#9D174D}.opts button.c0{background:var(--oA)}.opts button.c1{background:var(--oB)}.opts button.c2{background:var(--oC)}.opts button.c3{background:var(--oD)}
+.opts.ox{grid-template-columns:1fr 1fr}
+.opts.ox button{text-align:center;padding:10px;font-size:48px;min-height:110px}
+.opts.done button{opacity:.35}
+.opts.done button.pick{opacity:1;box-shadow:0 0 0 5px var(--gold)}
+.wait{text-align:center;font-size:20px;font-weight:700;padding:10px}
+.big{font-size:56px;line-height:1.1;text-align:center}
+.rv{border-radius:16px;padding:12px 14px;font-size:18px;line-height:1.65}
+.rv.ok{background:#E7F4EC;color:#14532D}.rv.no{background:#FDE4E6;color:#7A1520}.rv.na{background:#F1EDF6;color:#4A2B5E}
+.rv b{font-size:22px}
+.msg{font-weight:700;color:var(--no);min-height:1.2em}
+.fbar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.fbar .clk{font-size:22px;color:#7A2E8E}.fbar .clk.hot{color:var(--no)}
+.fbar .stk{color:#C2410C}
+.opts button.right{box-shadow:0 0 0 5px var(--gold);opacity:1}
+.opts.done2 button{opacity:.35}.opts.done2 button.right,.opts.done2 button.pick{opacity:1}
+.opts.done2 button.pick:not(.right){opacity:1;outline:4px dashed #fff;outline-offset:-8px}
+.opts.done2 button.pick:not(.right)::after{content:"✗ 你選的";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;background:#fff;color:var(--no);border-radius:999px;padding:2px 10px}
+.opts.done2 button.right::after{content:"✓ 答案";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;background:var(--gold);color:#3E2C00;border-radius:999px;padding:2px 10px}
+.opts.done2 button{padding-right:96px}
+.opts.ox.done2 button{padding-right:10px}
+.opts.ox.done2 button.right::after,.opts.ox.done2 button.pick:not(.right)::after{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap}
+.opts.ox.done2 button{padding-bottom:34px}
+.freeze{text-align:center;font-weight:700;color:#7A1520}
+.nextbtn{width:100%}
+.orow{display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:stretch}
+.opts .orow .say{padding:0;min-height:58px;width:58px;font-size:24px;background:#F1EDF6;color:#4A2B5E;text-align:center;border-radius:16px;opacity:1;box-shadow:none;outline:0}
+.opts .orow .say:focus-visible{outline:3px solid var(--gold)}
+.sayrow{display:flex;gap:8px;flex-wrap:wrap}
+.sayrow button{background:#F1EDF6;color:#4A2B5E;min-height:48px;font-size:17px;padding:0 16px}
+.sayrow button[aria-pressed="true"]{background:#7A2E8E;color:#fff}
+.opts button.tried{background:#6B6478;opacity:.6;padding-right:104px}
+.opts button.tried::after{content:"✗ 選過了";position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;background:#fff;color:var(--no);border-radius:999px;padding:2px 10px}
+.opts.ox button.tried{padding:10px 10px 34px}
+.opts.ox button.tried::after{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%);white-space:nowrap}
+.pot{border-radius:14px;padding:8px 12px;font-weight:700;font-size:17px;background:#FFF4D6;color:#6A4A00}
+.pot.p1{background:#EAF2FF;color:#163F80}.pot.p0{background:#F1EDF6;color:#4A2B5E}
+/* 分隊競賽、魔王反擊、錯題復仇戰、情境闖關 */
+.tbadge{display:inline-block;border-radius:999px;padding:0 12px;color:#fff;font-weight:700}
+.tc1{background:#C8414B}.tc2{background:#1D5FBF}.tc3{background:#17784E}.tc4{background:#A84A00}
+.revq{border-radius:14px;padding:8px 12px;font-weight:700;font-size:17px;background:linear-gradient(90deg,#7A1520,#B3125A);color:#fff;text-align:center}
+.ctr{border:5px solid #C8414B;box-shadow:0 0 30px #C8414B88}
+.ctr h2{color:#9B1C2A!important;font-size:26px!important;display:flex;justify-content:space-between;gap:8px}
+.scene{background:#F7F5FA;border-radius:16px;padding:12px 14px;font-size:clamp(18px,4.6vw,21px);line-height:1.7}
+.scene .intro{display:block;color:var(--muted);font-size:.9em;margin-bottom:6px}
+.opts.story button{min-height:60px}
+/* 先看題目 */
+.pvwait{text-align:center;font-weight:700;font-size:20px;color:#4A2B5E;background:#F1EDF6;border-radius:16px;padding:14px}
+.pvwait b{font-size:30px;color:#7A2E8E}
+/* 排序題 */
+.ord{display:grid;gap:12px}
+.ordsel{display:grid;gap:8px;background:#F7F5FA;border-radius:16px;padding:10px}
+.ordsel .slot{display:flex;align-items:center;gap:10px;min-height:54px;border:2px dashed #CFC6DD;border-radius:14px;padding:6px 10px;color:var(--muted);font-size:17px;text-align:left;background:#fff;width:100%}
+.ordsel .slot i{font-style:normal;flex:none;width:34px;height:34px;border-radius:50%;background:#E3DDEB;color:#4A2B5E;display:grid;place-items:center;font-weight:700}
+.ordsel button.slot{border:0;color:#fff;font-weight:700;font-size:clamp(17px,4.4vw,20px);line-height:1.35;border-radius:14px;padding:8px 12px}
+.ordsel button.slot i{background:#fff3;color:#fff}
+.ordsel button.slot span{margin-left:auto;background:#fff3;border-radius:999px;padding:0 10px;font-size:15px}
+.ordsel .c0{background:var(--oA)}.ordsel .c1{background:var(--oB)}.ordsel .c2{background:var(--oC)}.ordsel .c3{background:var(--oD)}
+.ordpool{display:grid;gap:8px}
+.ordpool button{border-radius:16px;min-height:58px;text-align:left;padding:8px 14px 8px 56px;position:relative;font-size:clamp(17px,4.4vw,21px);line-height:1.35}
+.ordpool button b{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:#fff3;display:grid;place-items:center}
+.ordsel .c4,.ordpool .c4{background:#9D174D}
+.ordpool .c0{background:var(--oA)}.ordpool .c1{background:var(--oB)}.ordpool .c2{background:var(--oC)}.ordpool .c3{background:var(--oD)}
+.ordbar{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.ordbar .ghost{background:#F1EDF6;color:#4A2B5E}
+.ordlist{margin:6px 0 0;padding-left:1.4em}
