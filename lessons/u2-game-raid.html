@@ -14,7 +14,7 @@
                          連續「一次就答對」第 5、10…題多打 1 點；限時 10／15／20 分鐘，魔王血量＝人數 × 分鐘 × 強度（11／15／19），例如 25 人 20 分鐘普通＝7500；
                          大螢幕有即時戰力排行榜（座號，依 2 次內答對題數、同分比傷害）與正確率排行榜（第 1 次就答對的比率，作答滿 10 題才上榜，raid_host.acc）。
      題庫和另外兩個版本共用 lessons/data/u2-game-questions.js。
-     資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_stop（目前沒有用到）、raid_finish，
+     資料表 raid_rooms／raid_players／raid_answers；老師用 RPC raid_next、raid_reveal、raid_host、raid_finish，
      學生用 raid_join、raid_state、raid_answer（答案存在 raid_rooms.answer = {a, e}，公布時才給學生）。
      各自搶攻另用 raid_free_start、raid_free_summary（老師）與 raid_free_q、raid_free_answer（學生）。
      2026-11-18 新增：
