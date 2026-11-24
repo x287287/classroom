@@ -311,7 +311,7 @@ var DM=[
       (FR&&st.opt_revenge?'<p class="muted" style="text-align:center">🔁 最後 3 分鐘是錯題復仇戰：出大家常錯的題目，答對傷害 ×2！</p>':'')+
       (st.mode==="story"?'<p class="muted" style="text-align:center">這一場是「🧭 情境闖關」：大螢幕會出一個生活故事，每一關選「你會怎麼做？」。沒有標準的快慢，想清楚再選！</p>':'')+'<p class="muted" style="text-align:center">目前有 '+st.players+' 位勇者</p>';return}
     if(st.status==="end"){
-      if(st.mode==="story"){var BR=/^fc-/.test(st.game||"");b.innerHTML='<div class="big">🧭</div><div class="wait">'+(st.result==="cancel"?"老師取消了這場闖關":BR?"故事結束了！<br>看大螢幕，全班走到哪一個結局？":"闖關完成！")+'</div>'+(seat&&st.result!=="cancel"?'<div class="rv na">你在 '+st.my_total+(BR?' 次選擇':' 關')+'裡，選到最好的做法 <b>'+st.my_right+'</b> '+(BR?'次':'關')+'。</div>':'');return}
+      if(st.mode==="story"){var SE=st.story_end;b.innerHTML='<div class="big">'+(SE&&SE.icon?esc(SE.icon):'🧭')+'</div><div class="wait">'+(st.result==="cancel"?"老師取消了這場闖關":SE&&SE.title?"故事結束了！全班走到的結局：<br><b>"+esc(SE.title)+"</b>":"故事結束了！<br>看大螢幕，全班走到哪一個結局？")+'</div>'+(seat&&st.result!=="cancel"?'<div class="rv na">你在 '+st.my_total+' 次選擇'+'裡，選到最好的做法 <b>'+st.my_right+'</b> '+'次'+'。</div>':'');return}
       if(st.mode==="team"&&st.result!=="cancel"&&st.winner){
         var mine=st.team===st.winner;
         b.innerHTML='<div class="big">'+(mine?"🏆":"💪")+'</div><div class="wait"><span class="tbadge tc'+st.winner+'">'+tname(st.winner)+'</span> 獲勝！'+(mine?"<br>恭喜你的隊伍！":"<br>你的隊伍也很努力，下次再拚！")+'</div>'+

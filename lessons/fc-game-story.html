@@ -8,14 +8,18 @@
 <link rel="stylesheet" href="../assets/fonts.css">
 <link rel="stylesheet" href="../assets/kit.css">
 <!-- 友善校園「情境挑戰」（大螢幕）：分支劇情，全班投票、多數決決定故事往哪裡走，每個故事 4 種結局。
-     ?g=low／mid／high 選年級（預設低年級，畫面上也能切換）。劇本在 data/fc-low-story.js、fc-mid-story.js、fc-high-story.js（window.FC_STORY，格式見 fc-low-story.js 檔頭）。
+     ?g=low／mid／high 選年級（預設低年級，畫面上也能切換）；?g=u2／u3 是第二、三單元的「情境闖關」（全班共戰的情境闖關模式也連到這裡）。
+     劇本在 data/fc-low-story.js、fc-mid-story.js、fc-high-story.js、u2-story.js、u3-story.js（window.FC_STORY.<g>，格式見 fc-low-story.js 檔頭）。
      兩種玩法：
        平板投票：老師帳號開房間（沿用全班共戰的 raid_rooms，game='fc-low'／'fc-mid'／'fc-high'，mode='story'，rounds=40），學生用平板開 raid.html?r=房號 選座號作答。
                  每一關呼叫 raid_next（question 多帶 br:1、i＝第幾次選擇；answer＝{a:最好的選項,e,f}），raid_host 輪詢作答人數，全部答完或時間到呼叫 raid_reveal 拿 dist（各選項人數），
                  票數最多的選項決定下一關，平手或沒人投票由老師決定；「重新投票」「回上一關」都是再呼叫一次 raid_next（新的一回合）。
                  到結局時 raid_finish(…,'win')，伺服器把每個座號的作答寫進 game_results（統計代號 fc-low-story／fc-mid-story／fc-high-story，ok＝選到最好的做法）。
        舉手計票：不用平板、不開房間，老師在大螢幕用 ＋／− 記錄舉手票數（不記錄作答統計）。
-     看過的結局記在 localStorage fcStoryGot（{故事id:[結局id]}），年級記在 fcStoryG，設定記在 fcStorySet。 -->
+     看過的結局記在 localStorage fcStoryGot（{故事id:[結局id]}），年級記在 fcStoryG，設定記在 fcStorySet，臨時班級記在 fcTmpCls（最近 6 個）。
+     2026-11-24：班級可選「其他班級」臨時輸入（到別班宣導用，不用加進班級名單）；可勾「這場不記錄作答」（平板投票用 raid_finish(…,'norec')）。
+     走到結局時記錄全班走到的結局 ending＝{id,sid,st,type,icon,title,path:[{q,pick,ok,n,tot}]}：平板投票用 raid_story_end 存進 raid_rooms.story_end（raid_finish 寫進每筆 game_results 的 data.ending，平板也會顯示結局）；
+     舉手計票在老師登入時直接寫一筆 game_results（seat 空白、session 'hand:時間'、data.mode='hand'）。老師後台「結局紀錄」依這些資料列出每一場。 -->
 <style>
 :root{color-scheme:light;--ink:#1F2A27;--mut:#4A5550;--gold:#FFD54F;--pur:#7A2E8E;--ok:#1E8A5A;--oA:#C2410C;--oB:#1D5FBF;--oC:#6B3FA0}
 *{box-sizing:border-box;min-width:0}
@@ -54,6 +58,8 @@ button{font:inherit}
 .bigbtn:disabled{background:#CFC8B0;box-shadow:none;cursor:default;color:#5E5640}
 .sec{appearance:none;border:2px solid var(--pur);background:#fff;color:var(--pur);border-radius:999px;min-height:3rem;padding:0 1.2rem;font-weight:700;cursor:pointer}
 .sec[disabled]{opacity:.4;cursor:default}
+#tmpCls{font:inherit;font-size:1.1rem;min-height:3rem;border:2px solid #CFC6DD;border-radius:12px;padding:0 .8rem;width:min(100%,16rem)}
+.nrec{display:flex;align-items:center;gap:.5rem;margin-top:10px;font-size:1.05rem;min-height:2.75rem;cursor:pointer}.nrec input{width:1.4rem;height:1.4rem}
 /* 等待加入 */
 .lobby{display:grid;grid-template-columns:minmax(0,18rem) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:800px){.lobby{grid-template-columns:minmax(0,1fr)}}
@@ -136,12 +142,14 @@ button{font:inherit}
   <section class="card" id="scrSetup">
     <div class="seg gtabs" id="gtabs" role="group" aria-label="年級"><button type="button" data-g="low">低年級</button><button type="button" data-g="mid">中年級</button><button type="button" data-g="high">高年級</button></div>
     <h2 id="pickH" style="margin-top:14px">選一個故事</h2>
-    <p class="note">每一關全班投票，<b>票數最多的做法</b>決定故事怎麼發展；平手時由老師決定。每個故事有 4 種結局，看看全班能不能走到 🌈 好結局！</p>
+    <p class="note">每一關全班投票，<b>票數最多的做法</b>決定故事怎麼發展；平手時由老師決定。每個故事有好幾種結局，看看全班能不能走到 🌈 好結局！</p>
     <div class="picks" id="picks"></div>
     <div class="setgrid">
       <fieldset><legend>每關作答時間（平板投票）</legend><div class="seg" data-k="secs"><button type="button" data-v="20">20 秒</button><button type="button" data-v="30">30 秒</button><button type="button" data-v="45">45 秒</button><button type="button" data-v="0">不計時</button></div></fieldset>
       <fieldset><legend>大螢幕唸情境</legend><div class="seg" data-k="tts"><button type="button" data-v="1">唸</button><button type="button" data-v="0">不唸</button></div></fieldset>
-      <fieldset style="grid-column:1/-1"><legend>班級（平板投票的作答統計會記在這個班）</legend><div class="seg" id="clsSeg"><span class="note" style="margin:0">老師登入後才會出現班級。</span></div></fieldset>
+      <fieldset style="grid-column:1/-1"><legend>班級（作答統計和結局會記在這個班）</legend><div class="seg" id="clsSeg"><span class="note" style="margin:0">老師登入後才會出現班級。</span></div>
+        <div class="row" id="tmpRow" hidden style="margin-top:8px"><input id="tmpCls" maxlength="20" placeholder="例如：二年愛班" aria-label="其他班級名稱"><button type="button" class="sec" id="tmpOk">用這個班級</button></div>
+        <label class="nrec"><input type="checkbox" id="noRec"> 這場不記錄作答（試玩、示範用）</label></fieldset>
     </div>
     <div class="row"><button type="button" class="bigbtn" id="bCreate">📱 開房間（平板投票）</button><button type="button" class="sec" id="bLocal">✋ 不用平板，舉手計票</button><span class="note" id="setMsg" style="margin:0"></span></div>
   </section>
@@ -189,11 +197,16 @@ button{font:inherit}
 <div class="dlg" id="dTeach" hidden role="dialog" aria-modal="true" aria-labelledby="tT"><div class="box">
   <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center"><h2 id="tT">老師說明：友善校園情境挑戰</h2><button type="button" class="sec close">關閉</button></div>
   <h3>這是什麼</h3>
-  <ul><li>「選擇你的路」的故事：每一關大螢幕出情境和「你會怎麼做？」，全班投票，<b>票數最多的做法</b>決定故事往哪裡走。每個故事有 4 種結局（🌈 好結局、🌤️ 還可以、🌧️ 再想想），結局畫面會列出全班走過的每一步，和每一關最好的做法。</li>
+  <ul><li>「選擇你的路」的故事：每一關大螢幕出情境和「你會怎麼做？」，全班投票，<b>票數最多的做法</b>決定故事往哪裡走。每個故事有 4～6 種結局（🌈 好結局、🌤️ 還可以、🌧️ 再想想），結局畫面會列出全班走過的每一步，和每一關最好的做法。</li>
+  <li>第二、三單元的「情境闖關」也用這一頁（全班共戰設定畫面的「🧭 情境闖關 →」，或網址 ?g=u2、?g=u3），各 4 個故事，內容依課本。</li>
   <li>低、中、高年級各 3 個故事，對應網站上的友善校園宣導教材（反霸凌、兒童權利、身體界線、網路安全、勇敢說不、反霸凌案例、上網的分寸、防制網路性剝削）。情境、選項與結局是新寫的，不是原簡報的內容。一個故事大約要選 2～5 次，約 10～15 分鐘。</li></ul>
   <h3>兩種玩法</h3>
   <ul><li><b>📱 平板投票</b>：要老師帳號。開房間後，學生用平板掃 QR Code（或打開 raid.html 輸入房號）、選座號加入；課堂房間進行中，平板會自動跟過來。每關全班都選好或時間到就自動公布，也可以按「提前公布」。學生平板會看到自己選的做法的結果和最好的做法。學生用 QR 掃描、選座號後，結果會傳到老師後台（「🎮 遊戲作答統計」，記成「友善校園情境挑戰」，「選到最好的做法」算答對）。</li>
   <li><b>✋ 舉手計票</b>：不用平板、不用登入。老師請同學舉手，用每個選項旁的 ＋／− 記票數，再按「公布投票結果」。適合低年級或沒有平板的時候；這種玩法不記錄作答統計。</li></ul>
+  <h3>班級與紀錄</h3>
+  <ul><li>到別班上課時，班級選「＋ 其他班級」輸入班名（例如二年愛班），不用加進班級名單；最近用過的會留在按鈕上。</li>
+  <li>試玩或示範時，勾「這場不記錄作答」，就不會記到後台。</li>
+  <li>走到結局時，全班走到哪個結局、每一次選了什麼，會記在老師後台「🎮 遊戲作答統計」的「🧭 結局紀錄」，可以比較不同班級的選擇。舉手計票要老師登入才會記錄（只記結局，沒有個人作答）。</li></ul>
   <h3>上課建議</h3>
   <ul><li>公布後，如果最多人選的不是最好的做法，請選那個做法的同學說說理由，再照多數票走，讓全班看到結果。走到 🌧️ 結局時，可以按「回到最後一次選擇」重選，或從頭再玩，看能不能走到 🌈 好結局。</li>
   <li>「🔊 唸出來」會唸情境、問題和選項（低年級建議開「大螢幕唸情境」）。</li>
@@ -207,6 +220,8 @@ button{font:inherit}
 <script src="data/fc-low-story.js"></script>
 <script src="data/fc-mid-story.js"></script>
 <script src="data/fc-high-story.js"></script>
+<script src="data/u2-story.js"></script>
+<script src="data/u3-story.js"></script>
 <script src="../assets/vendor/qrcode.js"></script>
 <script>
 (function(){
@@ -218,8 +233,10 @@ function load(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return 
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var got=load('fcStoryGot',{}), SET=Object.assign({secs:30,tts:1,story:{}},load('fcStorySet',{}));
 if([20,30,45,0].indexOf(SET.secs)<0)SET.secs=30;if([0,1].indexOf(SET.tts)<0)SET.tts=1;
-var gq=(location.search.match(/[?&]g=(low|mid|high)/)||[])[1], GR=gq||load('fcStoryG','low');if(!ALL[GR])GR='low';
+var gq=(location.search.match(/[?&]g=(low|mid|high|u2|u3)/)||[])[1], GR=gq||load('fcStoryG','low');if(!ALL[GR])GR='low';
+var UNIT=/^u\d/.test(GR); /* 第二、三單元：不顯示年級切換 */
 var D=ALL[GR], G=null, busy=false;
+function NAME(){return D.name||'友善校園情境挑戰'}
 function api(path,body){return window.CLS.api(path,{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)})
   .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||('HTTP '+r.status))});return r.text().then(function(t){return t?JSON.parse(t):null})})}
 function rpc(fn,a){return api('rest/v1/rpc/'+fn,a)}
@@ -235,13 +252,13 @@ function storyOf(){var id=SET.story[GR],l=D.list;for(var i=0;i<l.length;i++)if(l
 function dots(sp){var ks=Object.keys(sp.ends),g=got[sp.id]||[];
   return '<span>結局收集：</span>'+ks.map(function(k){return g.indexOf(k)>=0?'<i title="'+esc(sp.ends[k].title)+'">'+sp.ends[k].icon+'</i>':'<i>？</i>'}).join('')+'<span>'+g.length+' / '+ks.length+'</span>'}
 function paintSetup(){
-  D=ALL[GR];save('fcStoryG',GR);
+  D=ALL[GR];if(!UNIT)save('fcStoryG',GR);$('gtabs').hidden=UNIT;
   [].forEach.call($('gtabs').children,function(b){b.setAttribute('aria-pressed',String(b.dataset.g===GR))});
   $('pickH').textContent='選一個故事・'+D.label;
   var cur=storyOf();
-  $('picks').innerHTML=D.list.map(function(sp){return '<button type="button" class="pick" data-id="'+sp.id+'" aria-pressed="'+(sp===cur)+'"><span class="ic" aria-hidden="true">'+sp.icon+'</span><b>'+esc(sp.title)+'</b><small>'+esc(sp.intro)+'</small><small>對應教材：'+esc(sp.from)+'</small><span class="dots">'+dots(sp)+'</span></button>'}).join('');
+  $('picks').innerHTML=D.list.map(function(sp){return '<button type="button" class="pick" data-id="'+sp.id+'" aria-pressed="'+(sp===cur)+'"><span class="ic" aria-hidden="true">'+sp.icon+'</span><b>'+esc(sp.title)+'</b><small>'+esc(sp.intro)+'</small><small>'+(UNIT?'重點：':'對應教材：')+esc(sp.from)+'</small><span class="dots">'+dots(sp)+'</span></button>'}).join('');
   [].forEach.call(document.querySelectorAll('.seg[data-k]'),function(seg){[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[seg.dataset.k]))})});
-  $('h1').textContent='🧭 友善校園情境挑戰';document.title='友善校園情境挑戰';
+  $('h1').textContent='🧭 '+NAME()+(UNIT?'：'+D.short:'');document.title=NAME()+(UNIT?'：'+D.short:'');
 }
 $('gtabs').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b)return;GR=b.dataset.g;paintSetup()});
 $('picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;SET.story[GR]=b.dataset.id;save('fcStorySet',SET);paintSetup()});
@@ -249,30 +266,44 @@ $('picks').addEventListener('click',function(e){var b=e.target.closest('.pick');
 paintSetup();
 
 /* 班級（和書櫃共用 clsClass） */
-var CLASS=load('clsClass','');
+/* 班級：班級名單＋最近用過的「其他班級」（到別班宣導時臨時輸入，記在 fcTmpCls，不會加進班級名單） */
+var CLASS=load('clsClass',''), TMP=load('fcTmpCls',[]), CLIST=[];
+if(!Array.isArray(TMP))TMP=[];
+function drawCls(){
+  var box=$('clsSeg');box.innerHTML='';
+  var names=[''].concat(CLIST,TMP.filter(function(n){return CLIST.indexOf(n)<0}));
+  if(CLASS&&names.indexOf(CLASS)<0)CLASS='';
+  names.forEach(function(n){var b=document.createElement('button');b.type='button';b.textContent=n||'不指定';b.setAttribute('aria-pressed',String(n===CLASS));
+    if(n&&CLIST.indexOf(n)<0)b.title='其他班級';
+    b.addEventListener('click',function(){CLASS=n;if(CLIST.indexOf(n)>=0||!n)save('clsClass',n);$('tmpRow').hidden=true;drawCls()});box.appendChild(b)});
+  var o=document.createElement('button');o.type='button';o.textContent='＋ 其他班級';o.setAttribute('aria-pressed','false');
+  o.addEventListener('click',function(){$('tmpRow').hidden=false;$('tmpCls').focus()});box.appendChild(o);
+}
+function useTmp(){var n=$('tmpCls').value.trim().slice(0,20);if(!n)return;
+  TMP=[n].concat(TMP.filter(function(x){return x!==n})).slice(0,6);save('fcTmpCls',TMP);CLASS=n;$('tmpCls').value='';$('tmpRow').hidden=true;drawCls()}
+$('tmpOk').addEventListener('click',useTmp);
+$('tmpCls').addEventListener('keydown',function(e){if(e.key==='Enter')useTmp()});
 function loadCls(){
   window.CLS.api('rest/v1/class_list?select=name&order=sort.asc,name.asc').then(function(r){return r.json()}).then(function(list){
-    list=list||[];if(CLASS&&!list.some(function(c){return c.name===CLASS}))CLASS='';
-    var box=$('clsSeg');box.innerHTML='';
-    [{name:''}].concat(list).forEach(function(c){var b=document.createElement('button');b.type='button';b.textContent=c.name||'不指定';b.setAttribute('aria-pressed',String(c.name===CLASS));
-      b.addEventListener('click',function(){CLASS=c.name;save('clsClass',CLASS);[].forEach.call(box.children,function(x){x.setAttribute('aria-pressed',String(x===b))})});box.appendChild(b)});
-  }).catch(function(){$('clsSeg').innerHTML='<span class="note" style="margin:0">班級讀取失敗，會記成「不指定」。</span>'});
+    CLIST=(list||[]).map(function(c){return c.name});drawCls();
+  }).catch(function(){drawCls()});
 }
 var authN=0;(function chk(){if(window.CLS&&window.CLS.isTeacher){loadCls();return}if(authN++<20)setTimeout(chk,500)})();
+$('noRec').addEventListener('change',function(){$('setMsg').textContent=this.checked?'這場不會記錄作答與結局。':''});
 window.addEventListener('cls-status',function(){if(window.CLS&&window.CLS.isTeacher)loadCls()});
 
 /* ---------- 開房間（平板投票） ---------- */
 $('bCreate').addEventListener('click',function(){
   if(!(window.CLS&&window.CLS.isTeacher)){$('setMsg').textContent='平板投票要老師帳號：請先到書櫃首頁按「老師登入」。也可以用「舉手計票」。';return}
   var b=this,sp=storyOf();b.disabled=true;$('setMsg').textContent='建立中…';
-  api('rest/v1/raid_rooms',{game:'fc-'+GR,rounds:40,mode:'story',class_name:CLASS||null,teams:0,opt_counter:false,opt_revenge:false,story:sp.id}).then(function(d){
+  api('rest/v1/raid_rooms',{game:D.game||('fc-'+GR),rounds:40,mode:'story',class_name:CLASS||null,teams:0,opt_counter:false,opt_revenge:false,story:sp.id}).then(function(d){
     var room=d[0];b.disabled=false;$('setMsg').textContent='';
-    G={room:room.id,sp:sp,path:[],node:sp.start,seats:[],phase:'lobby'};
+    G={room:room.id,sp:sp,path:[],node:sp.start,seats:[],phase:'lobby',norec:$('noRec').checked,cls:CLASS};
     var url=new URL('../raid.html?r='+room.id,location.href).href;
     $('roomCode').textContent=room.id;$('roomUrl').textContent=url;
     try{var q=qrcode(0,'M');q.addData(url);q.make();$('qr').innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){$('qr').textContent='QR Code 產生失敗，請學生輸入網址。'}
     $('lobbyT').textContent=sp.icon+' '+sp.title;
-    $('lobbyNote').textContent=D.label+'・對應教材：'+sp.from+'。開始後還沒加入的同學也可以掃描加入，從目前這一關開始投票。';
+    $('lobbyNote').textContent=D.label+'・'+(UNIT?'重點：':'對應教材：')+sp.from+'。'+(G.norec?'這場不記錄作答。':'作答會記在「'+(CLASS||'不指定班級')+'」。')+'開始後還沒加入的同學也可以掃描加入，從目前這一關開始投票。';
     if(window.CLS_LIVE&&window.CLS_LIVE.push&&window.CLS_LIVE.id)window.CLS_LIVE.push('raid.html?r='+room.id,document.title);
     show('scrLobby');startPoll();
   }).catch(function(){b.disabled=false;$('setMsg').textContent='建立失敗，請確認網路與老師帳號後再試一次。'});
@@ -300,14 +331,14 @@ function drawLobby(){
 $('bStart').addEventListener('click',function(){enter()});
 
 /* ---------- 舉手計票 ---------- */
-$('bLocal').addEventListener('click',function(){var sp=storyOf();G={room:null,sp:sp,path:[],node:sp.start};enter()});
+$('bLocal').addEventListener('click',function(){var sp=storyOf();G={room:null,sp:sp,path:[],node:sp.start,norec:$('noRec').checked,cls:CLASS};enter()});
 
 /* ---------- 每一關 ---------- */
 function enter(){
   var sp=G.sp,nd=sp.nodes[G.node],k=G.path.length+1;
   G.votes=nd.o.map(function(){return 0});G.rev=false;
   $('h1').textContent=sp.icon+' '+sp.title;
-  $('pTag').textContent='第 '+k+' 次選擇';$('pTitle').textContent='友善校園情境挑戰・'+D.label+(G.room?'・房號 '+G.room:'・舉手計票');
+  $('pTag').textContent='第 '+k+' 次選擇';$('pTitle').textContent=NAME()+'・'+D.label+(G.room?'・房號 '+G.room:'・舉手計票');
   $('pText').innerHTML=(k===1?'<span class="ico" aria-hidden="true">'+sp.icon+'</span><span class="intro">'+esc(sp.intro)+'</span>':'')+esc(nd.s);
   $('pRoute').innerHTML=G.path.map(function(p,i){return '<span>第 '+(i+1)+' 次：'+L[p.pick]+'</span>'}).join('');
   $('pQ').textContent=nd.q;
@@ -376,18 +407,29 @@ $('bBack').addEventListener('click',function(){if(!G.path.length)return;G.node=G
 function finish(eid){
   var sp=G.sp,e=sp.ends[eid];SAY('');
   var g=got[sp.id]||(got[sp.id]=[]);if(g.indexOf(eid)<0){g.push(eid);save('fcStoryGot',got)}
-  if(G.room){stopPoll();G.phase='end';rpc('raid_finish',{p_room:G.room,p_result:'win'}).catch(function(){})}
+  var ending={id:eid,sid:sp.id,st:sp.title,type:e.type,icon:e.icon,title:e.title,path:G.path.map(function(p){var nd=sp.nodes[p.node];return {q:nd.q,pick:L[p.pick],ok:p.pick===nd.best,n:p.votes[p.pick],tot:p.tot}})};
+  var rec='';
+  if(G.room){stopPoll();G.phase='end';var rm=G.room;
+    (G.norec?Promise.resolve():rpc('raid_story_end',{p_room:rm,p_end:ending}).catch(function(){}))
+      .then(function(){return rpc('raid_finish',{p_room:rm,p_result:G.norec?'norec':'win'})}).catch(function(){});
+    rec=G.norec?'這場不記錄作答。':'每位同學的作答和全班走到的結局，已經記到老師後台的「🎮 遊戲作答統計」。';
+  }else if(!G.norec&&window.CLS&&window.CLS.isTeacher){
+    var ok=ending.path.filter(function(x){return x.ok}).length;
+    window.CLS.api('rest/v1/game_results',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({game:(D.game||('fc-'+GR))+'-story',title:NAME()+'（舉手計票）',class_name:G.cls||null,seat:null,session:'hand:'+Date.now(),
+      data:{mode:'hand',story:sp.id,ending:ending,right:ok,total:ending.path.length,items:ending.path.map(function(x){return {q:x.q,ok:x.ok}})}})}).catch(function(){});
+    rec='全班走到的結局已經記到老師後台的「結局紀錄」（舉手計票不記錄個人作答）。';
+  }
   var left=Object.keys(sp.ends).length-g.length,hasGood=g.some(function(k){return sp.ends[k].type==='good'});
   $('h1').textContent=sp.icon+' '+sp.title+'・結局';
   $('scrEnd').innerHTML='<div class="big" aria-hidden="true">'+e.icon+'</div><span class="kind k-'+e.type+'">'+KIND[e.type]+'</span><h2>'+esc(e.title)+'</h2><p class="txt">'+esc(e.text)+'</p><div class="tip">💡 '+esc(e.tip)+'</div>'+
     '<div class="dots">'+dots(sp)+'</div><p class="note">'+(left?'還有 '+left+' 個結局沒看過'+(hasGood?'。':'，再試一次，看能不能走到 🌈 好結局！'):'這個故事的結局全部看過了！')+'</p>'+
     '<h3 style="margin:.4rem 0 0;color:var(--pur)">📖 這次全班走的路</h3><div class="sum">'+G.path.map(function(p,k){var nd=sp.nodes[p.node],ok=p.pick===nd.best;
       return '<div class="it"><b>第 '+(k+1)+' 次</b>　'+esc(nd.q)+'（'+p.votes[p.pick]+' / '+p.tot+' 票）<br>全班選：'+(ok?'<span class="g">🌟 ':'<em>')+L[p.pick]+'. '+esc(nd.o[p.pick])+(ok?'</span>':'</em>')+(ok?'':'<br><span class="g">🌟 最好的做法：'+L[nd.best]+'. '+esc(nd.o[nd.best])+'</span>')+'</div>'}).join('')+'</div>'+
-    (G.room?'<p class="note">每位同學的作答已經記到老師後台的「🎮 遊戲作答統計」。</p>':'')+
+    (rec?'<p class="note">'+rec+'</p>':'')+
     '<div class="row" style="justify-content:center">'+(G.room?'':'<button type="button" class="sec" id="eBack">↩ 回到最後一次選擇</button>')+'<button type="button" class="bigbtn" id="eAgain">'+(G.room?'再開一場':'從頭再玩一次')+'</button><button type="button" class="sec" id="eHome">換一個故事</button></div>';
   show('scrEnd');SAY(e.title+'。'+e.text);
   if($('eBack'))$('eBack').onclick=function(){G.node=G.path.pop().node;enter()};
-  $('eAgain').onclick=function(){if(G.room){G=null;paintSetup();show('scrSetup');$('bCreate').click()}else{G={room:null,sp:sp,path:[],node:sp.start};enter()}};
+  $('eAgain').onclick=function(){if(G.room){G=null;paintSetup();show('scrSetup');$('bCreate').click()}else{G={room:null,sp:sp,path:[],node:sp.start,norec:G.norec,cls:G.cls};enter()}};
   $('eHome').onclick=function(){G=null;paintSetup();show('scrSetup')};
 }
 
@@ -396,7 +438,7 @@ function paintMap(){
   $('mT').textContent='📋 完整劇本・'+D.label;
   $('mapBody').innerHTML=D.list.map(function(sp){
     var ids=Object.keys(sp.nodes),name=function(id){return sp.nodes[id]?'第 '+(ids.indexOf(id)+1)+' 頁':sp.ends[id].icon+' '+sp.ends[id].title};
-    return '<h3>'+sp.icon+' '+esc(sp.title)+'（對應：'+esc(sp.from)+'）</h3><p class="note" style="margin:0">'+esc(sp.intro)+'</p>'+
+    return '<h3>'+sp.icon+' '+esc(sp.title)+'（'+(UNIT?'重點：':'對應：')+esc(sp.from)+'）</h3><p class="note" style="margin:0">'+esc(sp.intro)+'</p>'+
       ids.map(function(id,k){var nd=sp.nodes[id];return '<div class="nd"><p><b>第 '+(k+1)+' 頁</b>　'+esc(nd.s)+'</p><p><b>'+esc(nd.q)+'</b></p><ol type="A">'+nd.o.map(function(t,i){return '<li>'+(i===nd.best?'<span class="star">🌟 '+esc(t)+'</span>':esc(t))+'　<span class="go">→ '+esc(name(nd.go[i]))+'</span><br><small style="color:#4A5550">'+esc(nd.f[i])+'</small></li>'}).join('')+'</ol></div>'}).join('')+
       '<p style="margin:.4rem 0">'+Object.keys(sp.ends).map(function(k){var e=sp.ends[k];return '<span class="ed k-'+e.type+'">'+e.icon+' '+esc(e.title)+'</span>'}).join('')+'</p>'}).join('');
 }
