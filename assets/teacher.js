@@ -165,7 +165,7 @@ var $=function(id){return document.getElementById(id)};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function J(r){if(!r.ok)return r.text().then(function(t){var e=new Error(t||('HTTP '+r.status));e.status=r.status;throw e});return r.text().then(function(t){return t?JSON.parse(t):null})}
 var F={cls:'*',game:'',days:7,view:'stu'}, ROWS=[], CL=[], open={}, inited=false;
-var GNAME={'u2-solo':'趕走三惡魔：個人挑戰','u2-raid':'全班共戰：打倒大魔王','u2-demons':'趕走三惡魔（兩隊對戰）','u3-pig':'小豬消防隊','u3-raid':'全班共戰：打倒火災大魔王','u3-demons':'趕走火災三怪（兩隊對戰）','u2-team':'全班共戰：分隊競賽（第二單元）','u3-team':'全班共戰：分隊競賽（第三單元）','u2-story':'情境闖關（第二單元）','u3-story':'情境闖關（第三單元）','fc-low-story':'友善校園情境挑戰（低年級）','fc-mid-story':'友善校園情境挑戰（中年級）','fc-high-story':'友善校園情境挑戰（高年級）'};
+var GNAME={'u2-solo':'趕走三惡魔：個人挑戰','u2-raid':'全班共戰：打倒大魔王','u2-demons':'趕走三惡魔（兩隊對戰）','u3-pig':'小豬消防隊','u3-raid':'全班共戰：打倒火災大魔王','u3-demons':'趕走火災三怪（兩隊對戰）','u2-team':'全班共戰：分隊競賽（第二單元）','u3-team':'全班共戰：分隊競賽（第三單元）','u2-story':'情境闖關（第二單元）','u3-story':'情境闖關（第三單元）','fc-low-story':'友善校園情境挑戰（低年級）','fc-mid-story':'友善校園情境挑戰（中年級）','fc-high-story':'友善校園情境挑戰（高年級）','ge-low-story':'性別平等情境挑戰（低年級）','ge-mid-story':'性別平等情境挑戰（中年級）','ge-high-story':'性別平等情境挑戰（高年級）'};
 function pct(a,b){return b?Math.round(a/b*100):0}
 function bar(p){return '<span class="bar'+(p<70?' low':'')+'"><i style="width:'+p+'%"></i></span><span class="'+(p<70?'pct-low':'')+'">'+p+'%</span>'}
 function when(t){var d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}

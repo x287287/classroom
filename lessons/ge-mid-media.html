@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>廣告與卡通裡的性別</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<link rel="stylesheet" href="../assets/fc.css">
+<style>
+/* 性別平等・中年級（媒體識讀）：廣告偵探（點開分析）→ 三個問題檢核（分類）→ 我是導演（改寫廣告）→ 卡通的公主（投票）→ 挑戰 */
+.ad{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:start;margin-top:1rem}
+@media (max-width:860px){.ad{grid-template-columns:minmax(0,1fr)}}
+.screen{background:#1E1E2A;color:#fff;border-radius:20px;padding:1.1rem 1.2rem;min-height:12rem;display:flex;flex-direction:column;gap:.6rem}
+.screen .lab{font-size:.9rem;color:#FFD54F;font-weight:700}
+.screen .em{font-size:2.6rem;line-height:1.1}
+.screen p{margin:0;font-size:1.15rem;line-height:1.7}
+.screen .new{color:#9FE6C1}
+.pick{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+.checks{display:grid;gap:.5rem;margin-top:.8rem}
+.checks div{border-radius:12px;padding:.5rem .8rem;background:var(--good-soft);border:1px solid var(--good);font-size:1.02rem}
+.checks div.no{background:var(--bad-soft);border-color:var(--bad)}
+.q3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}
+@media (max-width:760px){.q3{grid-template-columns:minmax(0,1fr)}}
+.q3 .card .em{font-size:2.2rem}
+</style>
+</head>
+<body class="ge">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">性別平等｜中年級（三、四年級）・媒體識讀</div>
+    <h1>廣告與卡通裡的性別</h1>
+    <p class="k-lede">電視廣告、網路影片、卡通，每天都在告訴我們「男生應該怎樣、女生應該怎樣」。今天當一位媒體偵探，找出藏在廣告和卡通裡的刻板印象，再當一次導演，把它改得更公平。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#detect"><span class="no">第 1 站</span><b>廣告偵探</b><span>找出刻板印象</span></a>
+      <a href="#check"><span class="no">第 2 站</span><b>三個問題</b><span>檢查媒體</span></a>
+      <a href="#remake"><span class="no">第 3 站</span><b>我是導演</b><span>改寫廣告</span></a>
+      <a href="#cartoon"><span class="no">第 4 站</span><b>卡通的公主</b><span>全班投票</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="detect">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>廣告偵探：這些廣告有什麼問題？</h2></div>
+  <p class="big">下面是幾支<b>虛構</b>的廣告。先讀廣告內容，想一想，再點開偵探分析。</p>
+  <div id="detectBox"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="check">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>看媒體，先問三個問題</h2></div>
+  <div class="q3">
+    <div class="card"><div class="em" aria-hidden="true">👀</div><h3>① 誰在做什麼？</h3><p>做家事、照顧人、工作、運動的，分別是誰？</p></div>
+    <div class="card"><div class="em" aria-hidden="true">⚖️</div><h3>② 公平嗎？</h3><p>是不是只讓某一種性別做某件事、喜歡某種東西？</p></div>
+    <div class="card"><div class="em" aria-hidden="true">🔄</div><h3>③ 換一下可以嗎？</h3><p>把男生女生交換來演，看起來奇怪嗎？如果不奇怪，原本就不用分。</p></div>
+  </div>
+  <p class="big" style="margin-top:1.2rem">練習一下：這些內容有沒有性別刻板印象？</p>
+  <div id="sortBox"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="remake">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>我是導演：重新拍一支廣告</h2></div>
+  <div class="ad">
+    <div class="stack">
+      <div class="panel"><h3>① 選一支廣告</h3><div class="pick" id="adPick"></div></div>
+      <div class="panel"><h3>② 這次讓誰來演主角？</h3><div class="pick" id="castPick"></div></div>
+    </div>
+    <div class="stack">
+      <div class="screen" aria-live="polite"><span class="lab">原本的廣告</span><span class="em" id="adEm" aria-hidden="true"></span><p id="adOld"></p><span class="lab">你重拍的廣告</span><p class="new" id="adNew">先選主角。</p></div>
+      <div class="checks" id="adCheck"></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="cartoon">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>卡通的公主，一定要等王子來救嗎？</h2></div>
+  <p class="big">很多故事裡，公主被關在高塔，只能等王子來救。全班投票：公主一定要等別人來救嗎？</p>
+  <div id="voteBox"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>對應十二年國教性別平等教育議題：性E7「解讀各種媒體所傳遞的性別刻板印象」。國小階段的重點是能夠解讀媒介中的性別刻板印象。</li>
+      <li>第 1、3 站的廣告都是虛構的，沒有使用真實品牌。上課時可以另外播放學生熟悉的廣告或卡通片段，用第 2 站的三個問題一起檢查。</li>
+      <li>建議上課流程（約 40 分鐘）：第 1 站 10 分鐘（每支廣告先請學生猜，再點開分析）；第 2 站 8 分鐘；第 3 站 10 分鐘（可分組，每組選一支廣告、上台說明怎麼改）；第 4 站 7 分鐘；挑戰 5 分鐘。</li>
+      <li>討論時重點放在「媒體常常只呈現一種樣子」，不是批評喜歡公主或機器人的學生；喜歡什麼都可以，只是不應該被規定。</li>
+      <li>本份的廣告、題目與改寫練習為新寫，沒有對應的原簡報。配套的「性別平等情境挑戰（中年級）」故事〈我們來拍廣告〉可接在本份之後玩。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>媒體偵探考考你</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>新竹縣教育研究發展暨網路中心《從 1 到 12：跨學習階段的性別平等教育教材手冊》：性E7「解讀各種媒體所傳遞的性別刻板印象」。https://hcfdt.hc.edu.tw/uploads/1775541298722diNEsau7.pdf</li>
+    <li>彰化縣李怡穎講師〈12年國教性平實質內涵解析〉：學習主題「科技、資訊與媒體的性別識讀」，國小階段能夠解讀媒介的性別刻板印象。https://eii.ncue.edu.tw/Novice_Apply/File/EIA004/1864/李怡穎講師課程資料.pdf</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script src="../assets/fc.js"></script>
+<script>
+FC.reveal(document.getElementById('detectBox'),[
+  {q:'🧴 洗衣精廣告：媽媽一個人洗全家的衣服，累得滿頭大汗。爸爸和小孩坐在沙發上，等著穿香香的衣服。最後旁白說：「好媽媽的選擇！」',
+   a:'只有媽媽在做家事，好像洗衣服是「媽媽的工作」。其實全家人都可以一起洗、一起晾。'},
+  {q:'🤖 玩具廣告：男生拿著機器人大喊「出發戰鬥！」，背景是藍色；女生坐在粉紅色的化妝台前說：「我要變漂亮！」',
+   a:'玩具和顏色被分成男生的、女生的。其實男生也可以玩扮家家酒，女生也可以玩機器人。'},
+  {q:'⚽ 運動飲料廣告：一群男生在球場踢球、流汗、得分。女生站在場邊拿著毛巾和飲料，幫他們加油。',
+   a:'好像運動是男生的事，女生只能在旁邊加油。女生也可以上場踢球、流汗、得分。'},
+  {q:'👨‍💼 補習班廣告：「讓你的兒子成為工程師、讓你的女兒成為好老師！」',
+   a:'把工作分成男生的、女生的。選擇工作應該看興趣和能力，不是看性別。'}
+],{btn:'偵探分析'});
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'s',t:'有性別刻板印象',d:'只讓某種性別做某件事'},{id:'f',t:'沒有刻板印象',d:'男生女生都可以'}],
+  items:[
+    {t:'卡通裡，男生當科學家，女生只當助手',bin:'s',e:'女生也可以當科學家，男生也可以當助手。'},
+    {t:'廣告裡，爸爸和女兒一起煮晚餐',bin:'f',e:'爸爸做菜、和孩子一起，很自然。'},
+    {t:'童書裡，勇敢的女孩自己打敗了怪獸',bin:'f',e:'勇敢不分男女。'},
+    {t:'廣告說：「男生不要哭，要勇敢！」',bin:'s',e:'難過時哭很正常，男生女生都可以表達心情。'},
+    {t:'玩具店把積木放在「男孩區」，娃娃放在「女孩區」',bin:'s',e:'玩具不用分男女，大家都可以選自己喜歡的。'},
+    {t:'影片裡，男護理師細心地照顧病人',bin:'f',e:'工作不分男女。'}
+  ],
+  hint:'先點一張卡片，再點它屬於哪一邊。',
+  start:'選一張卡片，用三個問題檢查看看。',
+  done:'檢查完成！以後看廣告、看卡通，都可以用這三個問題想一想。'
+});
+(function(){
+  var ADS=[
+    {k:'洗衣精',em:'🧴',old:'媽媽一個人洗全家的衣服，爸爸和小孩坐著等。旁白：「好媽媽的選擇！」',act:'洗衣服、晾衣服',line:'「全家一起洗，衣服香香、大家都輕鬆！」'},
+    {k:'玩具',em:'🤖',old:'男生玩機器人、背景是藍色；女生玩化妝台、背景是粉紅色。',act:'組機器人、比賽誰組得快',line:'「想像力不分男女，一起來玩！」'},
+    {k:'運動飲料',em:'⚽',old:'男生踢球流汗，女生在場邊拿毛巾加油。',act:'在球場上踢球、得分',line:'「上場就是你，流汗最帥氣！」'}
+  ];
+  var CAST=['爸爸','媽媽','哥哥','姊姊','全家人一起'];
+  var cur=0,cast=null;
+  var aP=document.getElementById('adPick'),cP=document.getElementById('castPick');
+  function chips(box,list,sel,fn){box.innerHTML='';list.forEach(function(t,i){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;b.setAttribute('aria-pressed',String(i===sel));b.addEventListener('click',function(){fn(i)});box.appendChild(b)})}
+  function draw(){
+    var a=ADS[cur];
+    chips(aP,ADS.map(function(x){return x.em+' '+x.k}),cur,function(i){cur=i;cast=null;draw()});
+    chips(cP,CAST,cast,function(i){cast=i;draw()});
+    document.getElementById('adEm').textContent=a.em;
+    document.getElementById('adOld').textContent=a.old;
+    var n=document.getElementById('adNew'),c=document.getElementById('adCheck');
+    if(cast==null){n.textContent='先選主角。';c.innerHTML='';return}
+    var who=CAST[cast];
+    n.textContent=who+'開心地'+a.act+'。旁白：'+a.line;
+    c.innerHTML='<div>① 誰在做什麼？由「'+who+'」來'+a.act+'。</div><div>② 公平嗎？沒有規定只有某一種性別可以做。</div><div>③ 換一下可以嗎？換成別人來演也一樣自然，代表這件事本來就<b>不用分男女</b>。</div>';
+  }
+  draw();
+})();
+FC.vote(document.getElementById('voteBox'),{
+  opts:['一定要等王子來救','不一定，公主也可以自己想辦法'],
+  analysis:'<b>不一定！</b>故事可以有很多種樣子：公主自己想辦法逃出高塔、公主救了王子、兩個人一起合作打敗壞人。勇敢、聰明、溫柔，<b>每一種性別都可以有</b>。下次看卡通，可以想一想：如果把角色的性別換過來，故事會怎樣？'
+});
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'廣告裡只有媽媽在做家事，這是什麼？',o:['性別刻板印象','很公平','新聞'],a:0,e:'以為家事是「媽媽的工作」，就是一種刻板印象。'},
+  {q:'看媒體時，可以問哪三個問題？',o:['誰在做什麼？公平嗎？換一下可以嗎？','好不好看？貴不貴？誰最紅？','幾點播？幾集？誰主演？'],a:0,e:'用這三個問題，就能找出藏起來的刻板印象。'},
+  {q:'玩具店的「男孩區」「女孩區」，你覺得呢？',o:['一定要分','玩具不用分男女，喜歡就可以選','女生只能去女孩區'],a:1,e:'玩具沒有性別，喜歡什麼都可以。'},
+  {q:'故事裡的女生可以當英雄嗎？',o:['可以','不可以'],a:0,e:'勇敢不分男女，女生、男生都可以當英雄。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

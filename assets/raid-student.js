@@ -28,7 +28,7 @@ var DM=[
   }
   function setTitle(){
     var m=st&&st.mode;
-    var t=m==="story"?(/^fc-/.test(st&&st.game||"")?"🧭 友善校園情境挑戰":"🧭 情境闖關"):m==="team"?"👥 分隊競賽：打倒"+bossName:"⚔️ 全班共戰：打倒"+bossName;
+    var t=m==="story"?(/^fc-/.test(st&&st.game||"")?"🧭 友善校園情境挑戰":/^ge-/.test(st&&st.game||"")?"🧭 性別平等情境挑戰":"🧭 情境闖關"):m==="team"?"👥 分隊競賽：打倒"+bossName:"⚔️ 全班共戰：打倒"+bossName;
     if($("h1").textContent!==t){$("h1").textContent=t;document.title=t.replace(/^\S+\s/,"")}
     var hud=document.querySelector(".hud");if(hud)hud.hidden=m==="story";
   }

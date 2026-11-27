@@ -8,7 +8,9 @@ function load(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return 
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var got=load('fcStoryGot',{}), SET=Object.assign({secs:30,tts:1,story:{}},load('fcStorySet',{}));
 if([20,30,45,0].indexOf(SET.secs)<0)SET.secs=30;if([0,1].indexOf(SET.tts)<0)SET.tts=1;
-var gq=(location.search.match(/[?&]g=(low|mid|high|u2|u3)/)||[])[1], GR=gq||load('fcStoryG','low');if(!ALL[GR])GR='low';
+var gq=(location.search.match(/[?&]g=(ge-low|ge-mid|ge-high|low|mid|high|u2|u3)(?:&|$)/)||[])[1];
+/* 劇本家族：友善校園（low／mid／high）與性別平等（ge-low／ge-mid／ge-high）各有低中高年級切換；第二、三單元（u2／u3）沒有切換 */
+var FAM=gq&&/^ge-/.test(gq)?'ge-':'', GKEY=FAM?'geStoryG':'fcStoryG', GR=gq||load(GKEY,FAM+'low');if(!ALL[GR])GR=FAM+'low';if(!ALL[GR])GR='low';
 var UNIT=/^u\d/.test(GR); /* 第二、三單元：不顯示年級切換 */
 var D=ALL[GR], G=null, busy=false;
 function NAME(){return D.name||'友善校園情境挑戰'}
@@ -27,15 +29,15 @@ function storyOf(){var id=SET.story[GR],l=D.list;for(var i=0;i<l.length;i++)if(l
 function dots(sp){var ks=Object.keys(sp.ends),g=got[sp.id]||[];
   return '<span>結局收集：</span>'+ks.map(function(k){return g.indexOf(k)>=0?'<i title="'+esc(sp.ends[k].title)+'">'+sp.ends[k].icon+'</i>':'<i>？</i>'}).join('')+'<span>'+g.length+' / '+ks.length+'</span>'}
 function paintSetup(){
-  D=ALL[GR];if(!UNIT)save('fcStoryG',GR);$('gtabs').hidden=UNIT;
-  [].forEach.call($('gtabs').children,function(b){b.setAttribute('aria-pressed',String(b.dataset.g===GR))});
+  D=ALL[GR];if(!UNIT)save(GKEY,GR);$('gtabs').hidden=UNIT;
+  [].forEach.call($('gtabs').children,function(b){b.setAttribute('aria-pressed',String(FAM+b.dataset.g===GR))});
   $('pickH').textContent='選一個故事・'+D.label;
   var cur=storyOf();
   $('picks').innerHTML=D.list.map(function(sp){return '<button type="button" class="pick" data-id="'+sp.id+'" aria-pressed="'+(sp===cur)+'"><span class="ic" aria-hidden="true">'+sp.icon+'</span><b>'+esc(sp.title)+'</b><small>'+esc(sp.intro)+'</small><small>'+(UNIT?'重點：':'對應教材：')+esc(sp.from)+'</small><span class="dots">'+dots(sp)+'</span></button>'}).join('');
   [].forEach.call(document.querySelectorAll('.seg[data-k]'),function(seg){[].forEach.call(seg.children,function(b){b.setAttribute('aria-pressed',String(+b.dataset.v===SET[seg.dataset.k]))})});
   $('h1').textContent='🧭 '+NAME()+(UNIT?'：'+D.short:'');document.title=NAME()+(UNIT?'：'+D.short:'');
 }
-$('gtabs').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b)return;GR=b.dataset.g;paintSetup()});
+$('gtabs').addEventListener('click',function(e){var b=e.target.closest('[data-g]');if(!b||!ALL[FAM+b.dataset.g])return;GR=FAM+b.dataset.g;paintSetup()});
 $('picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;SET.story[GR]=b.dataset.id;save('fcStorySet',SET);paintSetup()});
 [].forEach.call(document.querySelectorAll('.seg[data-k]'),function(seg){seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SET[seg.dataset.k]=+b.dataset.v;save('fcStorySet',SET);paintSetup()})});
 paintSetup();

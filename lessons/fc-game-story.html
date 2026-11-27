@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../assets/fonts.css">
 <link rel="stylesheet" href="../assets/kit.css">
 <!-- 友善校園「情境挑戰」（大螢幕）：分支劇情，全班投票、多數決決定故事往哪裡走，每個故事 4 種結局。
-     ?g=low／mid／high 選年級（預設低年級，畫面上也能切換）；?g=u2／u3 是第二、三單元的「情境闖關」（全班共戰的情境闖關模式也連到這裡）。
+     ?g=low／mid／high 選年級（預設低年級，畫面上也能切換）；?g=ge-low／ge-mid／ge-high 是「性別平等情境挑戰」（同樣可以切換年級）；?g=u2／u3 是第二、三單元的「情境闖關」（全班共戰的情境闖關模式也連到這裡）。
      劇本在 data/fc-low-story.js、fc-mid-story.js、fc-high-story.js、u2-story.js、u3-story.js（window.FC_STORY.<g>，格式見 fc-low-story.js 檔頭）。
      兩種玩法：
        平板投票：老師帳號開房間（沿用全班共戰的 raid_rooms，game='fc-low'／'fc-mid'／'fc-high'，mode='story'，rounds=40），學生用平板開 raid.html?r=房號 選座號作答。
@@ -86,6 +86,7 @@
   <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center"><h2 id="tT">老師說明：友善校園情境挑戰</h2><button type="button" class="sec close">關閉</button></div>
   <h3>這是什麼</h3>
   <ul><li>「選擇你的路」的故事：每一關大螢幕出情境和「你會怎麼做？」，全班投票，<b>票數最多的做法</b>決定故事往哪裡走。每個故事有 4～6 種結局（🌈 好結局、🌤️ 還可以、🌧️ 再想想），結局畫面會列出全班走過的每一步，和每一關最好的做法。</li>
+  <li>「性別平等情境挑戰」（網址 ?g=ge-low、ge-mid、ge-high）也用這一頁：低中高年級各 2 個故事，對應網站上的性別平等互動教材（刻板印象、家事分工、性別霸凌、媒體識讀、性騷擾、起鬨與尊重）。</li>
   <li>第二、三單元的「情境闖關」也用這一頁（全班共戰設定畫面的「🧭 情境闖關 →」，或網址 ?g=u2、?g=u3），各 4 個故事，內容依課本。</li>
   <li>低、中、高年級各 3 個故事，對應網站上的友善校園宣導教材（反霸凌、兒童權利、身體界線、網路安全、勇敢說不、反霸凌案例、上網的分寸、防制網路性剝削）。情境、選項與結局是新寫的，不是原簡報的內容。一個故事大約要選 2～5 次，約 10～15 分鐘。</li></ul>
   <h3>兩種玩法</h3>
@@ -110,6 +111,9 @@
 <script src="data/fc-high-story.js"></script>
 <script src="data/u2-story.js"></script>
 <script src="data/u3-story.js"></script>
+<script src="data/ge-low-story.js"></script>
+<script src="data/ge-mid-story.js"></script>
+<script src="data/ge-high-story.js"></script>
 <script src="../assets/vendor/qrcode.js"></script>
 <script src="../assets/story-game.js"></script>
 <script src="../assets/home-fab.js"></script>

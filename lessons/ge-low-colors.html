@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>顏色、玩具、工作，不分男生女生</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<link rel="stylesheet" href="../assets/fc.css">
+<style>
+/* 性別平等・低年級：顏色投票 → 玩具 O／X → 工作翻翻卡 → 我喜歡的我（打勾）→ 挑戰 */
+.swatch{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}
+.swatch span{flex:1 1 6rem;min-height:4.2rem;border-radius:16px;display:grid;place-items:center;font-family:var(--font-display);font-size:1.2rem;color:#fff;text-shadow:0 1px 2px #0006}
+</style>
+</head>
+<body class="ge">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">性別平等｜低年級（一、二年級）・性別刻板印象</div>
+    <h1>顏色、玩具、工作，不分男生女生</h1>
+    <p class="k-lede">粉紅色只能給女生嗎？男生可以玩娃娃嗎？女生可以當消防員嗎？每個人都可以喜歡自己喜歡的東西，長大做自己想做的工作。我們一起來想一想。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#color"><span class="no">第 1 站</span><b>顏色是誰的？</b><span>全班舉手投票</span></a>
+      <a href="#toys"><span class="no">第 2 站</span><b>玩具大家玩</b><span>O 還是 X</span></a>
+      <a href="#jobs"><span class="no">第 3 站</span><b>長大做什麼</b><span>工作翻翻卡</span></a>
+      <a href="#me"><span class="no">第 4 站</span><b>我喜歡的我</b><span>點一下打勾</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="color">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>粉紅色、藍色，是誰的顏色？</h2></div>
+  <div class="swatch" aria-hidden="true"><span style="background:#D6457E">粉紅色</span><span style="background:#2B63B5">藍色</span><span style="background:#2E8B57">綠色</span><span style="background:#7A4FB0">紫色</span></div>
+  <p class="big" style="margin-top:1rem">老師問：「<b>粉紅色</b>是誰可以喜歡的顏色？」請舉手投票。</p>
+  <div id="voteBox"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="toys">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>玩具大家玩：O 還是 X？</h2></div>
+  <p class="big">聽老師唸，想一想這句話對不對。</p>
+  <div id="oxBox"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="jobs">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>長大做什麼？工作不分男生女生</h2></div>
+  <p class="big">翻開卡片看看：這些工作，男生、女生都可以做嗎？</p>
+  <div id="jobBox"></div>
+  <div class="think"><b>想一想：</b>你長大想做什麼工作？選工作要看什麼？<br>答案：看<b>自己喜歡什麼、擅長什麼</b>，不是看自己是男生還是女生。</div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="me">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>我喜歡的我</h2></div>
+  <p class="big">每個人都不一樣，都很好。點一下，把你做得到的打勾。</p>
+  <div id="pledgeBox"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>對應十二年國教性別平等教育議題：性E3「覺察性別角色的刻板印象，了解家庭、學校與職業的分工，不應受性別的限制」；性E1「認識生理性別、性傾向、性別特質與性別認同的多元面貌」。</li>
+      <li>建議上課流程（約 30 分鐘）：第 1 站投票 5 分鐘（先投票、再請不同選項的同學說理由，最後看分析）；第 2 站 8 分鐘；第 3 站 8 分鐘（可請學生先猜，再翻卡）；第 4 站 4 分鐘；挑戰 5 分鐘。</li>
+      <li>投票時不批評任何答案。學生說出「粉紅色是女生的」時，可以反問：「你有沒有看過男生穿粉紅色？他看起來怎麼樣？」讓學生自己發現顏色和性別沒有關係。</li>
+      <li>工作卡片用「男護理師、女消防員」等例子，重點是「選工作看興趣和能力」，不要變成「男生應該做女生的工作」的新規定。</li>
+      <li>本份的情境、題目與卡片內容為新寫，沒有對應的原簡報。配套的「性別平等情境挑戰（低年級）」故事〈粉紅色的書包〉可接在本份之後玩。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>考考你</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>新竹縣教育研究發展暨網路中心《從 1 到 12：跨學習階段的性別平等教育教材手冊》：性別平等教育議題學習主題與實質內涵（108 課綱）性E3、性E7。https://hcfdt.hc.edu.tw/uploads/1775541298722diNEsau7.pdf</li>
+    <li>國立臺中教育大學附設實驗國民小學「性別平等教育」課程架構表：性E1 實質內涵。https://www.ntctcps.tc.edu.tw/wp-content/uploads/sites/100/2025/09/性別平等教育課程架構表.pdf</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script src="../assets/fc.js"></script>
+<script>
+FC.vote(document.getElementById('voteBox'),{
+  opts:['只有女生','只有男生','大家都可以'],
+  analysis:'<b>大家都可以！</b>顏色沒有分男生女生。有的男生喜歡粉紅色，有的女生喜歡藍色，都很好。<br>「粉紅色是女生的」這種想法，叫做<b>刻板印象</b>：以為某一種性別「一定」要喜歡或做某些事。'
+});
+KIT.ox(document.getElementById('oxBox'),[
+  {s:'男生不可以玩扮家家酒。',a:false,e:'男生也可以玩扮家家酒，學會照顧別人、煮飯、整理家裡。'},
+  {s:'女生也可以玩機器人和組合積木。',a:true,e:'玩具沒有分男女，喜歡就可以玩。'},
+  {s:'看到男生拿娃娃，就笑他「像女生」。',a:false,e:'取笑別人喜歡的東西，會讓人很難過。每個人都可以喜歡自己喜歡的玩具。'},
+  {s:'下課玩球，男生女生都可以一起玩。',a:true,e:'運動和遊戲，大家都可以參加。'},
+  {s:'女生一定要穿裙子才漂亮。',a:false,e:'穿裙子、穿褲子都可以，舒服、適合就好。'},
+  {s:'邀請想玩的同學一起加入，不管他是男生還是女生。',a:true,e:'一起玩更開心，這就是尊重。'}
+]);
+FC.flips(document.getElementById('jobBox'),[
+  {em:'🏥',t:'護理師',back:'男生、女生都可以當護理師，照顧生病的人。醫院裡也有很多男護理師。'},
+  {em:'🚒',t:'消防員',back:'女生、男生都可以當消防員，保護大家的安全。'},
+  {em:'🍳',t:'廚師',back:'會煮好吃的菜，跟是男生還是女生沒有關係。'},
+  {em:'✈️',t:'飛機駕駛',back:'女生、男生都可以學開飛機，載大家去很遠的地方。'},
+  {em:'🏫',t:'幼兒園老師',back:'男生、女生都可以當幼兒園老師，陪小朋友學習和遊戲。'},
+  {em:'🔧',t:'修理工程師',back:'修電器、修機器，女生、男生都可以做得很好。'}
+],{cols:3,hint:'男生女生都可以做嗎？點我翻面'});
+FC.pledge(document.getElementById('pledgeBox'),[
+  '我可以喜歡自己喜歡的顏色。',
+  '我不取笑別人喜歡的玩具。',
+  '下課玩遊戲，邀大家一起來。',
+  '長大做我喜歡、我擅長的工作。'
+]);
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'粉紅色是誰可以喜歡的顏色？',o:['只有女生','大家都可以','只有大人'],a:1,e:'顏色沒有分男生女生，大家都可以喜歡。'},
+  {q:'小明是男生，他喜歡玩娃娃。你會怎麼想？',o:['好奇怪，笑他','他喜歡就好，可以一起玩','叫他不要玩'],a:1,e:'喜歡什麼玩具都可以，我們不取笑別人。'},
+  {q:'女生可以當消防員嗎？',o:['可以','不可以'],a:0,e:'工作不分男女，看的是興趣和能力。'},
+  {q:'選工作的時候，最重要的是什麼？',o:['自己是男生還是女生','自己喜歡什麼、擅長什麼','別人怎麼說'],a:1,e:'找自己喜歡、擅長的工作，才會做得開心。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

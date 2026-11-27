@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>青春期的我</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<link rel="stylesheet" href="../assets/fc.css">
+<style>
+/* 性別平等・高年級：身體的變化（分類）→ 每個人的時間不一樣（時間軸）→ 尊重發育差異（O／X）→ 喜歡自己的身體（點開答案）→ 有問題問誰 → 挑戰 */
+.tl{margin-top:1rem;display:grid;gap:.9rem}
+.tl .row{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:.8rem;align-items:center}
+.tl .who{font-family:var(--font-display);font-size:1.15rem;color:var(--accent)}
+.tl .bar{position:relative;height:2.6rem;border-radius:999px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.tl .bar i{position:absolute;top:0;bottom:0;border-radius:999px;background:var(--accent);opacity:.85}
+.tl .bar b{position:absolute;top:50%;transform:translateY(-50%);font-size:.95rem;color:var(--accent-ink);white-space:nowrap}
+.tl .axis{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:.8rem}
+.tl .axis div{display:flex;justify-content:space-between;font-size:.9rem;color:var(--muted)}
+.call{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}
+.call .card{flex:1 1 13rem}
+.call .em{font-size:2.2rem}
+</style>
+</head>
+<body class="ge">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">性別平等｜高年級（五、六年級）・青春期與身體意象</div>
+    <h1>青春期的我：變化、尊重、喜歡自己</h1>
+    <p class="k-lede">長高變快、聲音改變、身體開始出現新的變化……青春期是從兒童長成大人的階段。每個人開始的時間、變化的速度都不一樣。認識這些變化，也學會尊重自己和別人的身體。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#change"><span class="no">第 1 站</span><b>身體的變化</b><span>分一分</span></a>
+      <a href="#time"><span class="no">第 2 站</span><b>不一樣的時間</b><span>早一點、晚一點都正常</span></a>
+      <a href="#respect"><span class="no">第 3 站</span><b>尊重差異</b><span>O 還是 X</span></a>
+      <a href="#image"><span class="no">第 4 站</span><b>喜歡自己</b><span>身體意象</span></a>
+      <a href="#ask"><span class="no">第 5 站</span><b>有問題問誰</b><span>可以求助的人</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="change">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>青春期，身體會有哪些變化？</h2></div>
+  <p class="big">青春期時，身體分泌的激素會讓身體慢慢改變，出現<b>第二性徵</b>。有些變化男生女生都會有，有些比較常出現在其中一種性別。分一分看。</p>
+  <div id="sortBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="time">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>每個人開始的時間都不一樣</h2></div>
+  <p class="big">醫師說，第二性徵開始發育的年紀，女生大約在 <b>8～13 歲</b>，男生大約在 <b>9～14 歲</b>。所以班上同學有人已經開始變化、有人還沒有，都很正常。</p>
+  <div class="tl" aria-label="第二性徵開始發育的年紀">
+    <div class="row"><span class="who">女生</span><div class="bar"><i style="left:12.5%;right:25%"></i><b style="left:15%">大約 8～13 歲開始</b></div></div>
+    <div class="row"><span class="who">男生</span><div class="bar"><i style="left:25%;right:12.5%"></i><b style="left:27%">大約 9～14 歲開始</b></div></div>
+    <div class="axis"><span></span><div><span>7 歲</span><span>9</span><span>11</span><span>13</span><span>15 歲</span></div></div>
+  </div>
+  <div class="think"><b>小提醒：</b>女生的第一次月經（初經），大約在 11～12 歲左右來。長得比別人早或晚都不用擔心；如果覺得很不一樣、有疑問，可以請爸媽帶你去看醫生。</div>
+ </div>
+</section>
+
+<section class="k-sec" id="respect">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>尊重彼此的身體變化：O 還是 X？</h2></div>
+  <div id="oxBox"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="image">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>喜歡自己的身體</h2></div>
+  <p class="big">「我太胖了」「我太矮了」「我的皮膚不夠白」……我們怎麼看待自己的身體，叫做<b>身體意象</b>。身體意象會影響心情，也會影響健康。每個人的身體都不一樣，健康最重要，不用跟別人比。</p>
+  <div id="revealBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="ask">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 5 站</span><h2>有問題，可以問誰？</h2></div>
+  <p class="big">身體的變化有疑問、被同學取笑發育，或心裡不舒服，都可以找下面的人。問問題不丟臉。</p>
+  <div class="call">
+    <div class="card"><div class="em" aria-hidden="true">🏥</div><h3>健康中心護理師</h3><p>身體不舒服、月經來了需要衛生棉，都可以到健康中心。</p></div>
+    <div class="card"><div class="em" aria-hidden="true">👪</div><h3>爸爸媽媽、家人</h3><p>可以一起準備內衣、衛生棉，或討論身體的變化。</p></div>
+    <div class="card"><div class="em" aria-hidden="true">🏫</div><h3>導師、輔導老師</h3><p>被取笑、被評論身材，或心情低落時，都可以找老師談。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>對應十二年國教性別平等教育議題：性E1「認識生理性別、性傾向、性別特質與性別認同的多元面貌」、性E2「覺知身體意象對身心的影響」、性E4「認識身體界限與尊重他人的身體自主權」。</li>
+      <li>第 2 站的年齡依臺大醫院小兒內分泌科說明：第二性徵發育的年紀女生為 8 到 13 歲、男生為 9 到 14 歲；初經大約在 11 到 12 歲左右（臺大醫院婦產部）。國健署的資料寫女性青春期大約自 10～14 歲、男性 12～17 歲開始，不同資料的說法有差異，課堂上請強調「每個人時間不一樣」。</li>
+      <li>若家長發現女孩的乳房發育早於 8 歲，或過了 15 到 16 歲還沒有初經，臺大醫院建議考慮就醫檢查；學生若有疑慮，請轉介健康中心或建議家長諮詢醫師。</li>
+      <li>康軒四下健康與體育第一單元〈迎向青春期〉已教過第二性徵與月經，本份著重在「尊重差異」與「身體意象」，可當作複習與延伸。</li>
+      <li>建議上課流程（約 40 分鐘）：第 1 站 8 分鐘；第 2 站 5 分鐘；第 3 站 10 分鐘；第 4 站 8 分鐘；第 5 站 3 分鐘；挑戰 6 分鐘。男女生可以一起上，不需要分開。</li>
+      <li>第 3 站的「拉肩帶」「評論身材」等行為可能構成性騷擾，可以銜接下一份〈是玩笑還是性騷擾？〉。本份的題目與情境為新寫，沒有對應的原簡報。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>考考你</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>臺大醫院健康電子報，李正婷醫師〈關心孩子身體的變化：談孩童之青春期發育與性早熟〉：第二性徵發育的年紀女生 8～13 歲、男生 9～14 歲。https://epaper.ntuh.gov.tw/health/201407/pdf/關心孩子身體的變化：談孩童之青春期發育與性早熟.pdf</li>
+    <li>臺大醫院健康電子報，楊乙真醫師〈好朋友來拜訪～淺談青少女生理期的健康照顧〉（2025 年 5 月）：初經大約在 11～12 歲左右。https://epaper.ntuh.gov.tw/health/202505/PDF/淺談青少女生理期的健康照顧.pdf</li>
+    <li>衛生福利部國民健康署資料（國立勤益科大衛生保健宣導專欄轉載）：青春期女性大約自 10～14 歲、男性 12～17 歲開始，出現第二性徵。https://osca.ncut.edu.tw/var/file/10/1010/img/561/771812571.pdf</li>
+    <li>南投縣大成國小課程計畫：性E2「覺知身體意象對身心的影響」、性E4 實質內涵。https://dchps.ntct.edu.tw/var/file/119/1119/img/5538/148657613.pdf</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script src="../assets/fc.js"></script>
+<script>
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'both',t:'男生女生都會有',d:'大家都會經歷'},{id:'f',t:'比較常出現在女生',d:'女生的第二性徵'},{id:'m',t:'比較常出現在男生',d:'男生的第二性徵'}],
+  items:[
+    {t:'身高、體重增加得很快',bin:'both',e:'青春期是長得最快的時期之一，男生女生都會。'},
+    {t:'長出腋毛、陰毛',bin:'both',e:'男生女生都會長，是正常的變化。'},
+    {t:'容易流汗、長青春痘',bin:'both',e:'皮膚出油變多，要記得洗臉、洗澡、換衣服。'},
+    {t:'乳房開始發育',bin:'f',e:'女生的第二性徵通常從乳房發育開始，有時只有一邊先長，也很正常。'},
+    {t:'月經來了',bin:'f',e:'月經是子宮內膜剝落排出，代表身體慢慢成熟，不是生病。'},
+    {t:'長喉結、聲音變低沉',bin:'m',e:'男生變聲時聲音可能會沙沙、忽高忽低，過一陣子就會穩定。'},
+    {t:'長鬍子',bin:'m',e:'男生的第二性徵之一，長的時間和多少因人而異。'},
+    {t:'心情起伏變大',bin:'both',e:'激素改變也會影響心情，男生女生都可能，找人聊聊會有幫助。'}
+  ],
+  hint:'先點一張卡片，再點它屬於哪一邊。',
+  start:'選一張卡片：這個變化會出現在誰身上？',
+  done:'分好了！這些都是正常的成長變化。每個人開始的時間和速度都不一樣。'
+});
+KIT.ox(document.getElementById('oxBox'),[
+  {s:'同學變聲了，大家學他沙沙的聲音取笑他。',a:false,e:'變聲是正常的成長，取笑會讓人不敢說話。'},
+  {s:'女生同學月經來了需要衛生棉，借她不用覺得丟臉。',a:true,e:'月經是正常的生理現象，互相幫忙很好。'},
+  {s:'看到同學的內衣肩帶，伸手拉一下開玩笑。',a:false,e:'沒經過同意碰別人的身體、拿內衣開玩笑，會讓人很不舒服，還可能是性騷擾。'},
+  {s:'用「飛機場」「大胸部」這種綽號叫同學。',a:false,e:'拿身體特徵取綽號是在貶低別人，可能是性霸凌。'},
+  {s:'青春期長得比較早或比較晚，都是正常的。',a:true,e:'每個人的時間都不一樣，不需要比較。'},
+  {s:'男生也需要學會照顧青春期的身體，例如勤洗澡、換衣服。',a:true,e:'照顧身體是每個人的事。'}
+]);
+FC.reveal(document.getElementById('revealBox'),[
+  {q:'有同學說：「我好胖，我不要吃晚餐了。」你可以怎麼回應？',a:'「青春期身體需要營養才能長高、長壯。不吃飯對身體不好，我們可以一起多運動。」如果他一直很在意，可以建議他找爸媽、護理師或老師聊聊。'},
+  {q:'網路上的明星照片，常常修圖修得很瘦、皮膚很完美。看到這些照片，要提醒自己什麼？',a:'照片可能修過圖，不是真實的樣子。每個人的身材都不一樣，健康比「看起來」更重要。'},
+  {q:'寫下一個你喜歡自己身體的地方（例如：我的腿讓我跑得很快）。',a:'身體不是用來被比較的，是陪我們跑、跳、學習的好夥伴。說說看，你的身體幫你做到了什麼？'}
+],{btn:'看看參考想法'});
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'下面哪一個是男生女生青春期都會有的變化？',o:['長鬍子','長腋毛、流汗變多','月經'],a:1,e:'長腋毛、容易流汗、長青春痘，男生女生都會。'},
+  {q:'小美 10 歲胸部開始發育，同學小華 12 歲還沒有，誰不正常？',o:['小美','小華','兩個都正常'],a:2,e:'每個人開始的時間不一樣，都是正常的。'},
+  {q:'同學變聲了，你會怎麼做？',o:['學他的聲音','不取笑，照常和他聊天','叫大家一起笑'],a:1,e:'變聲是正常的，不取笑就是尊重。'},
+  {q:'「身體意象」是什麼意思？',o:['照鏡子的次數','我們怎麼看待自己的身體','身高和體重'],a:1,e:'身體意象會影響心情和健康，喜歡自己、照顧好身體最重要。'},
+  {q:'在學校月經突然來了，可以找誰幫忙？',o:['健康中心護理師','誰都不要說','忍到放學'],a:0,e:'健康中心可以幫忙，也可以找信任的老師或同學。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>是玩笑還是性騷擾？</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<link rel="stylesheet" href="../assets/fc.css">
+<style>
+/* 性別平等・高年級：什麼是性騷擾（三個重點）→ 判斷看看（逐案檢核）→ 遇到了怎麼辦（排序）→ 旁觀者（O／X）→ 求助管道 → 挑戰 */
+.judge{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.2rem;align-items:start;margin-top:1rem}
+@media (max-width:880px){.judge{grid-template-columns:minmax(0,1fr)}}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:1rem 1.2rem}
+.case .lab{font-family:var(--font-display);color:var(--accent);font-size:1.05rem}
+.case p{margin:.4rem 0 0;font-size:1.2rem;line-height:1.75}
+.keys{display:grid;gap:.6rem}
+.keys button{appearance:none;text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:.6rem .9rem;min-height:3.2rem;font-size:1.05rem;cursor:pointer}
+.keys button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+.keys button b{color:var(--accent)}
+.verdict{margin-top:.8rem;border-radius:14px;padding:.8rem 1rem;font-size:1.08rem;line-height:1.7}
+.verdict.y{background:var(--bad-soft);border:1px solid var(--bad)}
+.verdict.n{background:var(--good-soft);border:1px solid var(--good)}
+.call{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}
+.call .card{flex:1 1 13rem}
+.call .num{font-family:var(--font-display);font-size:2rem;color:var(--accent);line-height:1.1}
+</style>
+</head>
+<body class="ge">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">性別平等｜高年級（五、六年級）・性騷擾防治</div>
+    <h1>是玩笑還是性騷擾？</h1>
+    <p class="k-lede">掀裙子、拉肩帶、評論別人的身材、傳讓人不舒服的圖片……有人說「只是開玩笑」，可是被這樣對待的人一點都笑不出來。學會分辨，也學會保護自己、幫助別人。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#what"><span class="no">第 1 站</span><b>什麼是性騷擾</b><span>三個重點</span></a>
+      <a href="#judge"><span class="no">第 2 站</span><b>判斷看看</b><span>六個情境</span></a>
+      <a href="#react"><span class="no">第 3 站</span><b>遇到了怎麼辦</b><span>四個步驟</span></a>
+      <a href="#bystander"><span class="no">第 4 站</span><b>我不當幫兇</b><span>O 還是 X</span></a>
+      <a href="#help"><span class="no">第 5 站</span><b>求助管道</b><span>信任的大人與專線</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="what">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>什麼是性騷擾？記住三個重點</h2></div>
+  <div class="cards" style="margin-top:0">
+    <div class="card"><h3>① 對方不喜歡、不同意</h3><p>對方沒有同意，或已經表示不要、不舒服。</p></div>
+    <div class="card"><h3>② 和「性」或「性別」有關</h3><p>例如：碰觸身體隱私的地方、評論身材或發育、說黃色笑話、傳性意味的圖片。</p></div>
+    <div class="card warn"><h3>③ 讓人受到傷害</h3><p>讓對方覺得被羞辱、害怕、不想上學，影響學習或心情。</p></div>
+  </div>
+  <div class="think"><b>關鍵：</b>是不是性騷擾，看的是<b>對方的感受和意願</b>，不是做的人說「我只是開玩笑」。每個人都有權利決定別人能不能碰自己、談論自己的身體。</div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="judge">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>判斷看看：這是性騷擾嗎？</h2></div>
+  <p class="big">讀一個情境，用三個重點檢查：符合的點一下打勾，再看分析。</p>
+  <div class="judge">
+    <div class="stack">
+      <div class="seg" id="caseTabs" role="tablist" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
+      <div class="case" aria-live="polite"><span class="lab" id="caseLab"></span><p id="caseText"></p></div>
+    </div>
+    <div class="stack">
+      <div class="keys" id="caseKeys"></div>
+      <div class="btnrow"><button type="button" class="btn fill" id="caseShow">看分析</button><button type="button" class="btn" id="caseNext">下一個情境 →</button></div>
+      <div class="verdict" id="caseVerdict" hidden></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<section class="k-sec" id="react">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>遇到了怎麼辦？四個步驟保護自己</h2></div>
+  <div id="orderBox"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="bystander">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>我看到了：O 還是 X？</h2></div>
+  <div id="oxBox"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="help">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 5 站</span><h2>求助管道：你不是一個人</h2></div>
+  <p class="big">被性騷擾<b>不是你的錯</b>。說出來、求助，學校和大人會依照規定保護你，也會保密。</p>
+  <div class="call">
+    <div class="card"><div class="num" style="font-size:1.45rem">導師・輔導老師</div><p>可以當面說、寫紙條或請家長聯絡老師。學校有性別平等教育委員會負責處理。</p></div>
+    <div class="card"><div class="num" style="font-size:1.45rem">爸爸媽媽</div><p>告訴家人，請他們陪你一起和學校聯絡。</p></div>
+    <div class="card"><div class="num">113</div><p><b>保護專線</b>：24 小時、免付費。覺得自己不安全，可以打給專人。</p></div>
+    <div class="card"><div class="num">1953</div><p><b>教育部反霸凌專線</b>：24 小時，性霸凌也可以反映。</p></div>
+  </div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>對應十二年國教性別平等教育議題：性E4「認識身體界限與尊重他人的身體自主權」、性E5「認識性騷擾、性侵害、性霸凌的概念及其求助管道」。</li>
+      <li>《性別平等教育法》（112 年 8 月 16 日修正）第 3 條：性騷擾指未達性侵害程度，且「以明示或暗示之方式，從事不受歡迎且與性或性別有關之言詞或行為，致影響他人之人格尊嚴、學習、或工作之機會或表現者」，或「以性或性別有關之行為，作為自己或他人獲得、喪失或減損其學習或工作有關權益之條件者」。性霸凌指透過語言、肢體或其他暴力，對他人之性別特徵、性別特質、性傾向或性別認同進行貶抑、攻擊或威脅之行為，且非屬性騷擾者。第 1 站的三個重點是為高年級改寫的白話說明。</li>
+      <li>施行細則第 3 條：性騷擾或性霸凌的認定，要就個案審酌事件發生的背景、環境、當事人的關係、行為人的言詞行為及相對人的認知等具體事實。所以第 2 站的分析用「很可能是」，最後仍由學校性平會調查認定。</li>
+      <li>第 3 站的「察覺、辨識、反應、求助」四個步驟，取自教育部體育署《校園性騷擾、性侵害及性霸凌防治手冊》。</li>
+      <li>課堂上不要求學生分享自己的經驗。若學生透露疑似遭受性騷擾，請保持冷靜、不責備、不要求細節，並依學校程序通報與轉介（學務處、輔導室、性平會）。</li>
+      <li>建議上課流程（約 40 分鐘）：第 1 站 6 分鐘；第 2 站 14 分鐘（分組各判斷一個情境再分享）；第 3 站 6 分鐘；第 4 站 6 分鐘；第 5 站 3 分鐘；挑戰 5 分鐘。本份的情境與題目為新寫，沒有對應的原簡報；配套的「性別平等情境挑戰（高年級）」可接在本份之後玩。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec alt" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>考考你</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>《性別平等教育法》第 3 條（112 年 8 月 16 日修正）性騷擾、性霸凌定義；臺中市政府教育局〈性別平等教育法及校園性侵害性騷擾或性霸凌防治準則對行政程序之規範一覽表〉（吳志光教授）。https://tc.edu.tw/cms-file/656429d0ebc45e62884a6d73.pdf</li>
+    <li>《性別平等教育法施行細則》第 3 條（113 年 2 月 15 日修正）：性騷擾或性霸凌之認定應就個案審酌具體事實。https://www.tpy.moj.gov.tw/media/20598328/性別平等教育法施行細則.pdf</li>
+    <li>教育部體育署《校園性騷擾、性侵害及性霸凌防治手冊——學生體育活動參與中學篇》：察覺、辨識、反應及求助四項步驟。https://www.smps.hc.edu.tw/uploads/16044706191828Z6gG2hp.pdf</li>
+    <li>南投縣大成國小課程計畫：性E4、性E5 實質內涵。https://dchps.ntct.edu.tw/var/file/119/1119/img/5538/148657613.pdf</li>
+    <li>衛生福利部：113 保護專線為 24 小時免付費專線。https://www.mohw.gov.tw/cp-2641-21001-1.html</li>
+    <li>台灣英文新聞（2022/8/30）：教育部反霸凌專線改為 1953。https://www.taiwannews.com.tw/zh/news/4641966</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script src="../assets/fc.js"></script>
+<script>
+(function(){
+  var K=['① 對方不喜歡、不同意','② 和「性」或「性別」有關','③ 讓人受到傷害、影響學習或心情'];
+  var C=[
+    {t:'下課時，阿杰趁小琪不注意掀她的裙子，大家都在笑。小琪生氣地說：「不要這樣！」',k:[1,1,1],v:'y',a:'三個重點都符合，<b>很可能是性騷擾</b>。掀裙子和身體隱私有關，小琪明確說了不要。旁邊的同學跟著笑，也會讓她更難受。'},
+    {t:'體育課換衣服時，小傑一直盯著同學的身體看，還大聲評論：「你的胸部好大！」',k:[1,1,1],v:'y',a:'評論別人的身體、發育，讓人感到羞辱和害怕，<b>很可能是性騷擾</b>。'},
+    {t:'小宇在班級群組傳了一張有性意味的圖片，還說：「大家快看！」有同學說看了很不舒服。',k:[1,1,1],v:'y',a:'傳送性意味的圖片、影片給不想看的人，<b>也可能是性騷擾</b>。網路上一樣算。截圖存證，告訴老師。'},
+    {t:'同學們一直起鬨，把小安和阿明配成一對，在黑板上畫愛心寫他們的名字。兩個人都說不喜歡，大家還是每天鬧。',k:[1,1,1],v:'y',a:'對方說了不喜歡，起鬨的內容和感情、性別有關，又讓他們困擾，<b>可能是性騷擾或霸凌</b>。尊重別人的感受，說不要就停。'},
+    {t:'小華跌倒了，同學扶著他的手臂，帶他去健康中心。',k:[0,0,0],v:'n',a:'這是在幫忙，碰觸也和「性」無關，<b>不是性騷擾</b>。不過幫忙前先問一聲「我扶你好嗎？」會更好。'},
+    {t:'阿美和好朋友小如都喜歡同一個偶像，兩人開心地討論偶像的新歌。',k:[0,0,0],v:'n',a:'雙方都開心、自願聊天，沒有人受傷，<b>不是性騷擾</b>。'}
+  ];
+  var cur=0,sel=[0,0,0];
+  var tabs=document.getElementById('caseTabs'),keys=document.getElementById('caseKeys'),ver=document.getElementById('caseVerdict');
+  C.forEach(function(c,i){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent='情境 '+(i+1);b.setAttribute('role','tab');b.addEventListener('click',function(){show(i)});tabs.appendChild(b)});
+  K.forEach(function(t,i){var b=document.createElement('button');b.type='button';b.innerHTML='<b>☐</b> '+t;b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',function(){sel[i]=sel[i]?0:1;b.setAttribute('aria-pressed',String(!!sel[i]));b.querySelector('b').textContent=sel[i]?'☑':'☐'});keys.appendChild(b)});
+  function show(i){
+    cur=i;sel=[0,0,0];ver.hidden=true;
+    [].forEach.call(tabs.children,function(b,k){b.setAttribute('aria-selected',String(k===i))});
+    [].forEach.call(keys.children,function(b){b.setAttribute('aria-pressed','false');b.querySelector('b').textContent='☐'});
+    document.getElementById('caseLab').textContent='情境 '+(i+1)+' ／ '+C.length;
+    document.getElementById('caseText').textContent=C[i].t;
+  }
+  document.getElementById('caseShow').addEventListener('click',function(){
+    var c=C[cur],same=c.k.every(function(v,i){return v===sel[i]});
+    ver.className='verdict '+c.v;ver.hidden=false;
+    ver.innerHTML=(same?'你的檢查和分析一樣！<br>':'')+c.a+'<br><small>符合的重點：'+(c.k.some(Boolean)?c.k.map(function(v,i){return v?K[i].slice(0,1):''}).join(' '):'都不符合')+'</small>';
+  });
+  document.getElementById('caseNext').addEventListener('click',function(){show((cur+1)%C.length)});
+  show(0);
+})();
+KIT.order(document.getElementById('orderBox'),{
+  steps:[
+    {t:'察覺',d:'注意自己的感覺：覺得怪怪的、不舒服、害怕，就要認真看待。'},
+    {t:'辨識',d:'想一想：這件事和性或性別有關嗎？我同意嗎？我不喜歡嗎？'},
+    {t:'反應',d:'清楚說「不要！請你停止！」，然後離開現場，到有大人、人多的地方。'},
+    {t:'求助',d:'告訴導師、輔導老師或家人，記下時間、地點、發生什麼事；網路上的要截圖。'}
+  ],
+  hint:'依照正確順序，點下面的卡片。',
+  start:'遇到讓你不舒服的事，第一步要做什麼？',
+  done:'察覺 → 辨識 → 反應 → 求助！你沒有錯，說出來大人才能幫你。'
+});
+KIT.ox(document.getElementById('oxBox'),[
+  {s:'看到同學被掀裙子，跟著大家一起笑。',a:false,e:'跟著笑會讓被欺負的人更難受，也讓做的人以為沒關係。'},
+  {s:'被騷擾的同學不想說，我可以陪他一起去找信任的老師。',a:true,e:'陪伴和協助求助，是旁觀者最有力量的幫忙。'},
+  {s:'有人傳性意味的圖片，我再轉傳給別人看。',a:false,e:'轉傳會讓傷害擴大，也可能違法。截圖存證、告訴大人就好。'},
+  {s:'對做的人說：「他說不要了，你停下來。」',a:true,e:'溫和又堅定地制止，在安全的情況下可以這樣做。'},
+  {s:'被性騷擾的人一定是自己做錯了什麼。',a:false,e:'被騷擾不是受害者的錯，錯的是做出騷擾行為的人。'},
+  {s:'網路上的騷擾，也可以截圖存證、請學校處理。',a:true,e:'網路上的言詞和圖片一樣會傷人，也可以求助。'}
+]);
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'判斷是不是性騷擾，最重要的是看什麼？',o:['做的人是不是在開玩笑','對方的感受和意願','有沒有很多人看到'],a:1,e:'對方不喜歡、不同意，就不能用「開玩笑」當藉口。'},
+  {q:'下面哪一個很可能是性騷擾？',o:['扶跌倒的同學去健康中心','一直評論同學的身材和發育','和朋友聊偶像'],a:1,e:'評論身材、發育，和性有關又讓人不舒服。'},
+  {q:'遇到讓你不舒服的碰觸，第一個反應最好是？',o:['大聲說「不要！」並離開','忍耐不說','自己打回去'],a:0,e:'清楚拒絕、離開現場，再找大人求助。'},
+  {q:'被性騷擾時，下面哪一個是可以求助的管道？',o:['113 保護專線','只能自己處理','發文罵對方'],a:0,e:'113 是 24 小時免付費保護專線，也可以找導師、輔導老師、家人。'},
+  {q:'同學一直起鬨「你們是一對！」，兩個人都說不喜歡，大家應該？',o:['繼續鬧比較好玩','停下來，尊重他們的感受','鬧得更大聲'],a:1,e:'說不要就停，尊重別人的感受。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>

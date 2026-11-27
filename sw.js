@@ -8,7 +8,7 @@ const CORE = [
   "assets/fonts.css", "assets/kit.css", "assets/kit.js", "assets/home-fab.js", "assets/class-tools.js", "assets/sync.js", "assets/submit.js", "assets/stats.js", "assets/live.js", "assets/seatlock.js", "lessons/view.html", "lessons/slides.html", "assets/fc.css", "assets/fc.js", "assets/feedback.js", "fb.html", "raid.html",
   "assets/vendor/qrcode.js", "join.html", "assets/avatar.js", "assets/raid3d.js", "assets/raid-host.js", "assets/raid-host.css", "assets/raid-student.js", "assets/raid-student.css", "assets/shelf.js", "assets/shelf.css", "assets/deck.js", "assets/deck.css", "assets/story-game.js", "assets/story-game.css", "assets/boss3d.js", "assets/avatar/parts.json", "assets/avatar/parts.glb",
   "assets/vendor/three/three.min.js", "assets/vendor/three/GLTFLoader.js", "assets/vendor/three/OrbitControls.js", "assets/vendor/three/SkeletonUtils.js",
-  "lessons/data/u2-game-questions.js", "lessons/data/u3-game-questions.js", "lessons/data/u3-game-levels.js", "lessons/data/u2-story.js", "lessons/data/u3-story.js", "lessons/data/fc-low-story.js", "lessons/data/fc-mid-story.js", "lessons/data/fc-high-story.js"
+  "lessons/data/u2-game-questions.js", "lessons/data/u3-game-questions.js", "lessons/data/u3-game-levels.js", "lessons/data/u2-story.js", "lessons/data/u3-story.js", "lessons/data/fc-low-story.js", "lessons/data/fc-mid-story.js", "lessons/data/fc-high-story.js", "lessons/data/ge-low-story.js", "lessons/data/ge-mid-story.js", "lessons/data/ge-high-story.js"
 ];
 const TIMEOUT = 4000;
 

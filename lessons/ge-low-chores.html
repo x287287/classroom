@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>家事大家一起做</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<link rel="stylesheet" href="../assets/fc.css">
+<style>
+/* 性別平等・低年級：家事翻翻卡 → 小故事討論 → 我能做的家事（分類）→ 家事承諾（打勾）→ 挑戰 */
+.tale{display:grid;gap:.8rem;margin-top:1rem}
+.tale p{margin:0;font-size:1.2rem;line-height:1.8;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:.8rem 1.1rem}
+.tale .em{font-size:1.8rem;margin-right:.4rem}
+</style>
+</head>
+<body class="ge">
+
+<header class="k-head">
+  <div class="wrap">
+    <div class="k-kicker">性別平等｜低年級（一、二年級）・家庭分工</div>
+    <h1>家事大家一起做</h1>
+    <p class="k-lede">家是全家人一起住的地方。煮飯、洗碗、洗衣服、倒垃圾，不是「媽媽的工作」或「爸爸的工作」，而是每個人都可以一起分擔的事。</p>
+    <nav class="k-nav" aria-label="章節">
+      <a href="#chores"><span class="no">第 1 站</span><b>家裡的家事</b><span>翻翻卡</span></a>
+      <a href="#story"><span class="no">第 2 站</span><b>好累的週末</b><span>聽故事、想一想</span></a>
+      <a href="#can"><span class="no">第 3 站</span><b>我能做什麼</b><span>分一分</span></a>
+      <a href="#promise"><span class="no">第 4 站</span><b>家事小幫手</b><span>我的承諾</span></a>
+    </nav>
+  </div>
+</header>
+
+<section class="k-sec" id="chores">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 1 站</span><h2>家裡有哪些家事？誰可以做？</h2></div>
+  <p class="big">翻開卡片看看：這些家事，是誰的工作？</p>
+  <div id="flipBox"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="story">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 2 站</span><h2>小故事：好累的週末</h2></div>
+  <div class="tale">
+    <p><span class="em" aria-hidden="true">🏠</span>星期天，小安的家裡好忙。媽媽一早起來煮早餐、洗衣服，又去買菜、煮午餐。</p>
+    <p><span class="em" aria-hidden="true">📺</span>爸爸和哥哥坐在沙發上看電視，小安在旁邊玩積木。哥哥說：「洗碗是媽媽和妹妹的事啦！」</p>
+    <p><span class="em" aria-hidden="true">😓</span>吃完午餐，媽媽一邊洗碗一邊揉肩膀，小聲說：「好累喔……」</p>
+  </div>
+  <div id="revealBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec" id="can">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 3 站</span><h2>我能做的家事：分一分</h2></div>
+  <p class="big">有些家事我們現在就能做；有些危險的事，要請大人做，或大人陪著做。這跟是男生還是女生沒有關係，跟<b>安不安全</b>有關係。</p>
+  <div id="sortBox" style="margin-top:1rem"></div>
+ </div>
+</section>
+
+<section class="k-sec alt" id="promise">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">第 4 站</span><h2>我是家事小幫手</h2></div>
+  <p class="big">這個星期，我願意做哪些家事？點一下打勾，回家做做看。</p>
+  <div id="pledgeBox"></div>
+  <details class="teacher"><summary>老師補充資料（點開）</summary><div class="inner">
+    <ul>
+      <li>對應十二年國教性別平等教育議題：性E3「覺察性別角色的刻板印象，了解家庭、學校與職業的分工，不應受性別的限制」。</li>
+      <li>建議上課流程（約 30 分鐘）：第 1 站 6 分鐘；第 2 站故事與討論 8 分鐘；第 3 站分類 8 分鐘；第 4 站 3 分鐘；挑戰 5 分鐘。</li>
+      <li>學生的家庭型態不同（單親、隔代教養、有外籍看護等），請避免「你家誰煮飯？」這類舉手調查，也不要評論學生家裡的分工；把重點放在「我可以幫忙做什麼」。</li>
+      <li>第 3 站以安全為分類標準（刀具、熱水、瓦斯請大人處理），可順便連結第三單元的燙傷預防。</li>
+      <li>本份的故事、題目與卡片內容為新寫，沒有對應的原簡報。配套的「性別平等情境挑戰（低年級）」故事〈誰來洗碗？〉可接在本份之後玩。</li>
+    </ul>
+  </div></details>
+ </div>
+</section>
+
+<section class="k-sec" id="quiz">
+ <div class="wrap">
+  <div class="k-sec-head"><span class="no">挑戰</span><h2>考考你</h2></div>
+  <div id="quizBox"></div>
+ </div>
+</section>
+
+<footer class="k-foot wrap">
+  <b>資料來源</b>
+  <ol>
+    <li>新竹縣教育研究發展暨網路中心《從 1 到 12：跨學習階段的性別平等教育教材手冊》：性E3 實質內涵（108 課綱）。https://hcfdt.hc.edu.tw/uploads/1775541298722diNEsau7.pdf</li>
+  </ol>
+</footer>
+
+<script src="../assets/kit.js"></script>
+<script src="../assets/fc.js"></script>
+<script>
+FC.flips(document.getElementById('flipBox'),[
+  {em:'🍚',t:'煮飯',back:'爸爸、媽媽、阿公、阿嬤都可以煮飯；小朋友可以幫忙洗菜、擺碗筷。'},
+  {em:'👕',t:'洗衣服、晾衣服',back:'不是媽媽一個人的事。我可以幫忙晾衣服、摺衣服。'},
+  {em:'🗑️',t:'倒垃圾',back:'全家人都會製造垃圾，大家都可以一起拿去倒、做分類。'},
+  {em:'🏠',t:'掃地、拖地',back:'家裡大家一起住，地板大家一起整理。'},
+  {em:'🍽️',t:'洗碗',back:'吃飯的人都可以幫忙：收碗、擦桌子、洗自己的碗。'},
+  {em:'🌱',t:'澆花',back:'男生、女生都可以照顧植物，只要記得每天澆水。'}
+],{cols:3,hint:'這是誰的工作？點我翻面'});
+FC.reveal(document.getElementById('revealBox'),[
+  {q:'媽媽為什麼覺得好累？',a:'家事都是媽媽一個人做，做了一整天都沒有休息。'},
+  {q:'哥哥說「洗碗是媽媽和妹妹的事」，你同意嗎？為什麼？',a:'不同意。家事不分男生女生，全家人都可以一起做。'},
+  {q:'如果你是小安，你可以怎麼做？',a:'可以幫忙收碗、擦桌子，也可以邀爸爸和哥哥：「我們一起來幫忙！」'}
+]);
+KIT.sort(document.getElementById('sortBox'),{
+  bins:[{id:'me',t:'我現在就能做',d:'簡單又安全'},{id:'adult',t:'請大人做或陪我做',d:'會用到刀、火、熱水'}],
+  items:[
+    {t:'擺碗筷',bin:'me',e:'吃飯前幫忙擺好碗筷，大家都可以做。'},
+    {t:'收玩具',bin:'me',e:'自己玩的玩具，自己收好。'},
+    {t:'摺衣服',bin:'me',e:'摺自己的衣服，是很好的練習。'},
+    {t:'倒垃圾、資源回收',bin:'me',e:'可以幫忙分類、拿去倒。'},
+    {t:'用菜刀切菜',bin:'adult',e:'菜刀很利，請大人做，或大人陪著練習。'},
+    {t:'用瓦斯爐煮湯',bin:'adult',e:'火和熱湯很危險，要請大人處理。'},
+    {t:'倒熱水泡麵',bin:'adult',e:'熱水會燙傷，請大人幫忙倒。'},
+    {t:'澆花',bin:'me',e:'每天澆水，植物會長得很好。'}
+  ],
+  hint:'先點一張卡片，再點它屬於哪一邊。',
+  start:'選一張卡片：這件家事，我現在就能做嗎？',
+  done:'分好了！能做的家事，不管是男生女生都可以做；危險的事，請大人幫忙。'
+});
+FC.pledge(document.getElementById('pledgeBox'),[
+  '吃完飯，我會收自己的碗。',
+  '我會幫忙擺碗筷、擦桌子。',
+  '我會摺好自己的衣服。',
+  '我會收好自己的玩具。',
+  '我會幫忙倒垃圾、做資源回收。'
+]);
+KIT.quiz(document.getElementById('quizBox'),[
+  {q:'洗碗是誰的工作？',o:['只有媽媽','只有女生','全家人都可以一起做'],a:2,e:'家事不分男生女生，全家人一起分擔。'},
+  {q:'哥哥說「男生不用做家事」，對嗎？',o:['對','不對'],a:1,e:'家是大家一起住的，男生女生都可以做家事。'},
+  {q:'下面哪一件家事，要請大人做？',o:['擺碗筷','用瓦斯爐煮湯','收玩具'],a:1,e:'火和熱湯很危險，要請大人處理。'},
+  {q:'媽媽做家事做得很累，你可以怎麼做？',o:['繼續看電視','說「那是媽媽的事」','說「我來幫忙！」一起做'],a:2,e:'主動幫忙，家人會很開心，也會比較輕鬆。'}
+]);
+</script>
+<script src="../assets/home-fab.js"></script>
+</body>
+</html>
